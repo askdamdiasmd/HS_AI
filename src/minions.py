@@ -23,3 +23,4 @@ class Minion:
     if self.hp <= 0:
       self.engine.send_message( Msg_Dying(self) )
 
+
