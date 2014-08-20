@@ -20,6 +20,9 @@ class Board:
   def list_enemy_minions(self, foe):
     return self.minions1 if foe is not self.hero1 else self.minions2
 
+  def get_friendly_hero(self, foe):
+    return self.hero1 if foe is self.hero1 else self.hero2
+
   def get_enemy_hero(self, foe):
     return self.hero1 if foe is not self.hero1 else self.hero2
 

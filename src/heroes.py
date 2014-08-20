@@ -1,5 +1,5 @@
 from messages import *
-
+from cards import fake_deck
 
 ### ------- Heroes -------------
 
@@ -20,7 +20,7 @@ class Hero:
     if self.turn==0:
       self.cards = self.deck.draw_cards_init(self.begin)
     else:
-      self.cards 6= self.deck.draw_one_card()
+      self.cards = self.deck.draw_one_card()
     
     self.turn += 1
     # set mana
@@ -41,8 +41,7 @@ class Hero:
     # then, weapon's attack (if any)
     if self.weapon:
       res += self.weapon.list_actions()
-    else:
-    
+
     # then, all card's actions
     for card in self.cards:
       res += card.list_actions()
@@ -54,7 +53,7 @@ class Hero:
 
 class Mage (Hero):
   def __init__(self):
-    Hero.__init__(self, 'Valeera' )
+    Hero.__init__(self, 'Janna', fake_deck() )
 
   def hero_power(self):
     return Act_Damage( 1 )
