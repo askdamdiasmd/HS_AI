@@ -55,26 +55,32 @@ class Spell_Damage (SpellCard):
       return Act_Damage( self.board.list_targetables() )
 
 
+class SpellCard:
+  def __init__(self, name, mana, cls=None, desc='', name_fr='', img='' ):
+    pass
+
+class Spell_Damage:
+  pass
 
 
 
 ### -------- Heathstone cardbook collection --------------
 
-
-cardbook = []
-
-carbook.append( MinionCard('River Crocolisk',2,2,3,'beast',name_fr='Crocilisque des rivieres') )
-carbook.append( MinionCard('Chillwind Yeti',4,4,5,name_fr='Yeti Noroit') )
+def get_cardbook():
+  cardbook = []
+  cardbook.append( MinionCard('Wisp',0,1,1,name_fr='Feu follet') )
+  cardbook.append( MinionCard('River Crocolisk',2,2,3,name_fr='Crocilisque des rivieres') )
+  cardbook.append( MinionCard('Chillwind Yeti',4,4,5,name_fr='Yeti Noroit') )
 
 # add fake creatures
-for i in range(1,10):
-  carbook.append( MinionCard('Fake Creature %d'%i,i,i,i+1) )
-
+  for i in range(1,10):
+    cardbook.append( MinionCard('Fake Creature %d'%i,i,i,i+1) )
+  
 # add fake spells
-for i in range(1,10):
-  carbook.append( DamageSpell('Fake Wrath %d'%i,i,i) )
+  """ for i in range(1,10):
+      cardbook.append( DamageSpell('Fake Wrath %d'%i,i,i) )"""
 
-
+  return cardbook
 
 def fake_deck():
   
