@@ -32,7 +32,8 @@ class HSEngine:
     hero = self.board.heroes[self.turn%2]
     self.exec_message( Msg_StartTurn(hero) )
     
-    while True:
+    action = None
+    while type(action)!=Msg_EndTurn:
       actions = hero.list_actions() 
       action = self.choose_actions(actions)  # action can be Msg_EndTurn
       self.exec_message(action)

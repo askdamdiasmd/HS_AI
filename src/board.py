@@ -5,9 +5,8 @@ from effects import *
 class Board:
   ''' Contains everything on the board: the 2 heroes, and their minions
   '''
-  def __init__(self, hero1, deck1, hero2, deck2 ):
+  def __init__(self, hero1, hero2 ):
     self.heroes = [hero1, hero2]
-    self.decks = [deck1, deck2]
     self.minions = []
 
   def __hash__(self):
@@ -46,13 +45,6 @@ class Board:
       return taunts
     else:
       return enemies + [self.get_enemy_hero(hero)]
-
-
-
-
-
-
-
 
 
 
