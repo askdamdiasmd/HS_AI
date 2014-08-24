@@ -7,54 +7,74 @@ from messages import *
 
 
 class HSEngine:
-  def __init__(self, hero1, hero2, deck1, deck2 ):
-    self.board = Board(hero1, deck1, hero2, deck2)
+  def __init__(self, player1, player2 ):
+    self.players = [player1, player2]
+    self.board = Board(player1.hero, player2.hero)
     self.turn = 0
+    self.stack = []
     self.msg_readers = [] # messages readers
+    self.executing = False
 
-  def exec_message(self, messages ):
+  def send_message(self, messages ):
     if type(messages)!=list:
-      messages = [messages]
+      self.stack.append(messages)
+    else:
+      self.stack += messages
+    
+    self.exec_messages()
+
+  def exec_messages(self):
+    if self.executing:  return # alredy doing it !
+    self.executing = True
     
     while messages:
       msg = messages.pop(0)
       
-      # let minions react
+      # let minions react first
       for reader in self.msg_readers:
-        m = reader.react( msg )
+        msg, m = reader.react( msg )
         if m: messages.append(m)
     
       # then execute the message
-      msg.execute()
+      m = msg.execute()
+      if m: messages.append(m)
+    
+    self.executing = False
 
   def play_hero(self):
     self.turn += 1
-    hero = self.board.heroes[self.turn%2]
+    player = self.player[self.turn%2]
+    hero = player.hero
     self.exec_message( Msg_StartTurn(hero) )
     
     action = None
     while type(action)!=Msg_EndTurn:
       actions = hero.list_actions() 
-      action = self.choose_actions(actions)  # action can be Msg_EndTurn
+      action = player.choose_actions(actions)  # action can be Msg_EndTurn
       self.exec_message(action)
 
   def is_game_ended(self):
     return self.board.is_game_ended()
 
-  def choose_actions(self, actions):
-      assert 0, "must be overloaded"
 
+
+
+# test of a human VS random game
 
 
 if __name__=='__main__':
   
   deck1 = fake_deck()
-  hero1 = Mage('jerome')
+  hero1 = Mage()
+  player1 = HumanPlayer('jerome', hero1)
+  player1.set_deck(deck1)
   
   deck2 = fake_deck()
   hero2 = Mage('matttis')
+  player2 = RandomPlayer('IA')
+  player2.set_deck(deck2)
   
-  engine = HSEngine( hero1, deck1, hero2, deck2 )
+  engine = HSEngine( player1, player2 )
   
   # initialize global variables
   Minion.set_engine(engine)

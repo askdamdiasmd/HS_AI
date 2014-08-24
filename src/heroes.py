@@ -1,5 +1,5 @@
 from messages import *
-from cards import fake_deck
+
 
 ### ------- Heroes -------------
 
@@ -30,8 +30,13 @@ class Hero:
     
     if self.max_mana<10:
       self.max_mana += 1
-    # set mana
+    
+    # reset mana
     self.mana = self.max_mana
+    
+    # execute minion's start turn
+    for m in self.engine.board.get_friendly_minions():
+        m.start_turn()
 
   def end_turn(self):
     self.engine.send_message( Msg_EndTurn() )
@@ -69,6 +74,7 @@ class Priest (Hero):
 
   def hero_power(self):
     return Act_Heal(self, self.board.list_characters(), 1)
+
 
 
 
