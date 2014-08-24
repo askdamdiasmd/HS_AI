@@ -14,3 +14,6 @@ class Msg_Dying (Message):
   pass
 
 
+class Msg_StartTurn (Message):
+    def execute(self):
+      self.sender.start_turn()

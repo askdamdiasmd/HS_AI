@@ -10,11 +10,12 @@ The rest of their abilities is coded here.
 class Minion:
   def __init__(self, card ):
     self.name = card.name
-    self.hp = card.hp
+    self.hp = self.max_hp = card.hp
     self.att = card.att
     
     # what is below is what can be silenced
     self.effects = []
+    # usage of Action filter : given an action, return the filtered action 
     self.action_filter = lambda x: x
 
   @classmethod
@@ -39,5 +40,14 @@ class AncientWatcher (Minion):
   def __init__(self, card):
     Minion.__init__(self, card)
     self.effects.append( Eff_NoAttack() )
+
+
+class FeericDragon (Minion):
+     def __init__(self, card):
+       Minion.__init__(self, card)
+       self.action_filters = AcF_NoTargetable()
+
+
+
 
 

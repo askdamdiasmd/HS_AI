@@ -1,7 +1,8 @@
 '''
 all HS cards
 '''
-
+from minions import *
+from actions import *
 
 ### ------- Cards -------------
 
@@ -14,17 +15,17 @@ class Card:
       self.name_fr = name_fr
       self.img = img
 
+    def get_cost(self):
+      return self.cost + self.board.filter_card_cost(self)
+    
     def list_actions(self, owner, available_mana):
       if available_mana >= self.get_cost():
         return self._list_actions_ok() 
       else:
         return None
-
+    
     def _list_actions(self, owner):
       assert 0, "must be overloaded"
-
-    def get_cost(self):
-      return self.cost + self.board.filter_card_cost(self)
 
 
 
@@ -52,7 +53,7 @@ class Spell_Damage (SpellCard):
       SpellCard.__init__(self, name, cost, cls, desc, name_fr, img )
 
     def _list_actions(self, owner):
-      return Act_Damage( self.board.list_targetables() )
+      return Act_Damage( self.board.list_characters() )
 
 
 class SpellCard:
@@ -83,7 +84,7 @@ def get_cardbook():
   return cardbook
 
 def fake_deck():
-  
+  pass
 
 
 

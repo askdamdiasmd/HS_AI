@@ -8,15 +8,15 @@ An action includes
 # ------------ Targets ---------------
 
 class Target:
-  def __init__(self, foe=None ):
-    # foe = friends or enemy: 
+  def __init__(self, hero=None ):
+    # hero = friends or enemy: 
     #   None = whichever
     #   hero = belonging to this hero
-    self.foe = foe
+    self.hero = hero
 
-  def filter_foe(self, targets):
-    if self.foe!=None:
-      return [t for t in targets if t.hero == self.foe]
+  def filter_hero(self, targets):
+    if self.hero!=None:
+      return [t for t in targets if t.hero == self.hero]
     else:
       return targets
 
@@ -25,7 +25,7 @@ class Target:
 
   def get_targets(self):
     targets = self.board.everybody()
-    targets = self.filter_foe( targets )
+    targets = self.filter_hero( targets )
     return self.filter_targets( targets )
 
 #---
@@ -36,7 +36,7 @@ class Tar_All (Target):
 class Tar_Minions (Target):
   def get_targets(self):
     targets = self.board.minions()
-    targets = self.filter_foe( targets )
+    targets = self.filter_hero( targets )
     return self.filter_targets( targets )
 
 
@@ -45,15 +45,17 @@ class Tar_Minions (Target):
 
 
 class Action:
-  def __init__(self, target=None ):
+  def __init__(self, origin, target=None ):
+    self.origin = origin  # entity (hero/card) which initiated the action
     self.target = target or Tar_All()
-
 
 
 class Act_Damage (Action):
   def __init__(self, damage, target=None ):
     Action.__init__(self, target)
     self.damage = damage
+
+
 
 
 

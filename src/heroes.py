@@ -8,25 +8,30 @@ class Hero:
   def set_engine(cls, engine):
     cls.engine = engine
 
-  def __init__(self, name, deck, hp=30, turn=0 ):
+  def __init__(self, name, hp=30, turn=0 ):
     self.name = name
-    self.hp = hp
-    self.deck = deck
+    self.hp = self.max_hp = hp
+    self.armor = 0
+    self.secrets = []
     self.weapon = None
-    self.mana = self.turn = 0
+    self.mana = self.max_mana = 0
+    self.deck = self.cards = None # initial cards
+
+  def set_deck(self, deck, begin=True):
+     self.deck = deck
+     if begin:
+       self.cards = deck.draw_init_cards(3)
+     else:
+       self.cards = deck.draw_init_cards(4) + [Card_Coin()]
 
   def start_turn(self):
     # draw cards
-    if self.turn==0:
-      self.cards = self.deck.draw_cards_init(self.begin)
-    else:
-      self.cards = self.deck.draw_one_card()
+    self.card.append( self.deck.draw_card() )
     
-    self.turn += 1
+    if self.max_mana<10:
+      self.max_mana += 1
     # set mana
-    self.mana = min(10, self.turn)
-    
-    self.engine.send_message( Msg_StartTurn() )
+    self.mana = self.max_mana
 
   def end_turn(self):
     self.engine.send_message( Msg_EndTurn() )
@@ -50,13 +55,20 @@ class Hero:
 
 
 
-
 class Mage (Hero):
   def __init__(self):
-    Hero.__init__(self, 'Janna', fake_deck() )
+    Hero.__init__(self, 'Janna' )
 
   def hero_power(self):
-    return Act_Damage( 1 )
+    return Act_Damage(self, self.board.list_characters(), 1)
+
+
+class Priest (Hero):
+  def __init__(self):
+    Hero.__init__(self, 'Anduin' )
+
+  def hero_power(self):
+    return Act_Heal(self, self.board.list_characters(), 1)
 
 
 

@@ -1,3 +1,4 @@
+from effects import *
 
 ### ------- Board -------------
 
@@ -20,25 +21,39 @@ class Board:
   def load_sate(self):
     return
 
-  def list_friendly_minions(self, foe):
-    return [m for m in self.minions if m.owner==foe]
+  def is_game_ended(self):
+    return any([h for h in self.heroes if h.hp<=0])
 
-  def list_enemy_minions(self, foe):
-    return [m for m in self.minions if m.owner!=foe]
+  def list_friendly_minions(self, hero):
+    return [m for m in self.minions if m.owner==hero]
 
-  def get_friendly_hero(self, foe):
-    return self.hero1 if foe is self.hero1 else self.hero2
+  def list_enemy_minions(self, hero):
+    return [m for m in self.minions if m.owner!=hero]
 
-  def get_enemy_hero(self, foe):
-    return self.heroes[0] if foe is not self.heroes[0] else self.heroes[1]
+  def get_friendly_hero(self, hero):
+    return self.hero1 if hero is self.hero1 else self.hero2
 
-  def list_attackable_characters(self, foe):
-    enemies = self.list_enemy_minions(foe)
+  def get_enemy_hero(self, hero):
+    return self.heroes[0] if hero is not self.heroes[0] else self.heroes[1]
+
+  def list_characters(self):
+    return self.heroes + self.minions
+
+  def list_attackable_characters(self, hero):
+    enemies = self.list_enemy_minions(hero)
     taunts = [e for e in enemies if e.is_taunt()]
     if taunts:
       return taunts
     else:
-      return enemies + [get_enemy_hero(foe)]
+      return enemies + [self.get_enemy_hero(hero)]
 
-  def list_targetables(self):
-    return self.heroes + [m for m in self.minions if m.action_filter!=Eff_Untargetable()]
+
+
+
+
+
+
+
+
+
+
