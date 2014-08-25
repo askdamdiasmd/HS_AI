@@ -12,7 +12,8 @@ class Minion:
     self.name = card.name
     self.hp = self.max_hp = card.hp
     self.att = card.att
-    
+    self.card = card
+
     # some status
     self.dead = False
     self.frozen = False

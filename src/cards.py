@@ -70,8 +70,8 @@ class Spell_Damage:
 def get_cardbook():
   cardbook = []
   cardbook.append( MinionCard('Wisp',0,1,1,name_fr='Feu follet') )
-  cardbook.append( MinionCard('River Crocolisk',2,2,3,name_fr='Crocilisque des rivieres') )
-  cardbook.append( MinionCard('Chillwind Yeti',4,4,5,name_fr='Yeti Noroit') )
+  cardbook.append( MinionCard('River Crocolisk',2,3,2,name_fr='Crocilisque des rivieres') )
+  cardbook.append( MinionCard('Chillwind Yeti',4,5,4,name_fr='Yeti Noroit') )
 
 # add fake creatures
   for i in range(1,10):

@@ -5,12 +5,12 @@ def creature_string(c):
     return c.name+"(%d/%d)\t"%(c.att,c.hp)
 
 def hand_card_string(c):
-    return c.name + "(%d)"%c.cost
+    return c.name + "(%d)"%c.card.cost
 
 #Draws board and cards 
 def draw_board(board, cards1, cards2, foe=None):
     if foe is None:
-        foe = board.hero2
+        foe = board.heroes[1]
 
     print "-"*50
     print "="*50
@@ -53,27 +53,47 @@ def draw_board(board, cards1, cards2, foe=None):
     print "-"*50
 
 def fake_settings():
-    cardbook = get_cardbook()
-    wisp = cardbook[0]
-    croco = cardbook[1]
-    yeti = cardbook[2]
+    import copy
+    from minions import Minion
 
-    board = Board(Mage(), Mage())
-    board.minions1.append(wisp)
-    board.minions1.append(croco)
-    board.minions1.append(yeti)
-    board.minions1.append(croco)
-    board.minions2.append(croco)
-    board.minions2.append(yeti)
+    cardbook = get_cardbook()
+    wisp1 = Minion(copy.copy(cardbook[0]))
+    croco1 = Minion(copy.copy(cardbook[1]))
+    yeti1 = Minion(copy.copy(cardbook[2]))
+
+    wisp2 = Minion(copy.copy(cardbook[0]))
+    croco2 = Minion(copy.copy(cardbook[1]))
+    yeti2 = Minion(copy.copy(cardbook[2]))
+
+
+    hero1 = Mage()
+    hero2 = Mage()
+
+    wisp1.owner=hero1
+    croco1.owner=hero1
+    yeti1.owner=hero1
+
+    wisp2.owner=hero2
+    croco2.owner=hero2
+    yeti2.owner=hero2
+
+
+    board = Board(hero1, hero2)
+    board.minions.append(wisp1)
+    board.minions.append(croco1)
+    board.minions.append(yeti1)
+    board.minions.append(croco2)
+    board.minions.append(croco2)
+    board.minions.append(yeti2)
     
     hand1 = []
     hand2 = []
 
-    hand1.append(yeti)
-    hand1.append(croco)
-    hand2.append(wisp)
-    hand2.append(croco)
-    hand2.append(yeti)
+    hand1.append(yeti1)
+    hand1.append(croco1)
+    hand2.append(wisp2)
+    hand2.append(croco2)
+    hand2.append(yeti2)
 
     return board, hand1, hand2
 

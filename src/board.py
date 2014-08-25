@@ -30,7 +30,7 @@ class Board:
     return [m for m in self.minions if m.owner!=hero]
 
   def get_friendly_hero(self, hero):
-    return self.hero1 if hero is self.hero1 else self.hero2
+    return self.heroes[0] if hero is self.heroes[0] else self.heroes[1]
 
   def get_enemy_hero(self, hero):
     return self.heroes[0] if hero is not self.heroes[0] else self.heroes[1]
