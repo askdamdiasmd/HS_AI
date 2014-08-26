@@ -12,12 +12,14 @@ class HSEngine:
     self.board = Board(player1.hero, player2.hero)
     self.turn = 0
     self.stack = []
-    self.msg_readers = [] # messages readers
     self.executing = False
 
-  def send_message(self, messages ):
+  def send_message(self, message, priority=False ):
     if type(messages)!=list:
-      self.stack.append(messages)
+      if priority:
+        self.stack.insert(0, message)
+      else:
+        self.stack.append(message)
     else:
       self.stack += messages
     
@@ -29,15 +31,14 @@ class HSEngine:
     
     while messages:
       msg = messages.pop(0)
+      assert type(msg)==Message
       
       # let minions react first
-      for reader in self.msg_readers:
-        msg, m = reader.react( msg )
-        if m: messages.append(m)
+      for reader in self.board.listeners:
+        msg = reader.react( msg )
     
       # then execute the message
-      m = msg.execute()
-      if m: messages.append(m)
+      msg.execute()
     
     self.executing = False
 

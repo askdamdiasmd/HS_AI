@@ -8,9 +8,10 @@ class Board:
   def __init__(self, hero1, hero2 ):
     self.heroes = [hero1, hero2]
     self.minions = []
+    self.listeners = [] # heroes + weapons + minion
 
   def __hash__(self):
-    assert 0
+    assert 0, "hash(minions + heroes + weapons (everything but cards))"
     return 0
 
   def save_sate(self):
