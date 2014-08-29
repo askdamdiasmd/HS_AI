@@ -8,18 +8,15 @@ class Board:
   def __init__(self, hero1, hero2 ):
     self.heroes = [hero1, hero2]
     self.minions = []
-    self.listeners = [] # heroes + weapons + minion
+    self.everybody = [hero1,hero2] # heroes + weapons + minion, in order of creation
 
-  def __hash__(self):
-    assert 0, "hash(minions + heroes + weapons (everything but cards))"
-    return 0
+  def add_thing(self, m, pos):
+    m.owner.add_minion(m, pos)
+    self.everybody.append(m)
 
-  def save_sate(self):
-    # return current board + decks + heroes
-    return
-
-  def load_sate(self):
-    return
+  def remove_thing(self, m):
+    m.owner.remove_thing(m)
+    self.everybody.remove(m)
 
   def is_game_ended(self):
     return any([h for h in self.heroes if h.hp<=0])

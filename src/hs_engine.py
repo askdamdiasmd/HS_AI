@@ -1,8 +1,31 @@
 import sys, pdb
 
-from board import Board
-from messages import *
+#from board import Board
+#from messages import *
 
+
+
+def tree_go_up( level, stack ):
+    while not level: 
+        level = stack.pop() # go up one level
+        level.pop(0)  # remove first one which is an empty list
+    return level
+
+def tree_go_down( level, stack=[] ):
+    while type(level[0])==list:
+      stack.append(level) # remember from where we came
+      level = level[0]
+    return level
+
+
+# tree test
+#messages = [1,[2,3,[4,5],6],7]
+#level, stack = messages, []
+#while messages:
+#    level = tree_go_up(level, stack)
+#    level = tree_go_down( level, stack )
+#    msg = level.pop(0)
+#    print msg
 
 
 
@@ -11,34 +34,48 @@ class HSEngine:
     self.players = [player1, player2]
     self.board = Board(player1.hero, player2.hero)
     self.turn = 0
-    self.stack = []
+    self.messages = []
     self.executing = False
+    self.executed = []  # messages that were executed (for display purposes)
 
-  def send_message(self, message, priority=False ):
-    if type(messages)!=list:
-      if priority:
-        self.stack.insert(0, message)
-      else:
-        self.stack.append(message)
+  def send_message(self, messages, immediate=False ):
+    if type(messages)!=list:  
+      messages = [messages]
+    
+    deep_level = tree_go_down( self.messages )
+    
+    if immediate:
+      while messages:  
+        deep_level.insert(0,messages.pop())
     else:
-      self.stack += messages
+      deep_level += messages
     
     self.exec_messages()
 
   def exec_messages(self):
-    if self.executing:  return # alredy doing it !
+    if self.executing:  return # already doing it !
     self.executing = True
     
-    while messages:
-      msg = messages.pop(0)
-      assert type(msg)==Message
+    level, stack = self.messages, []
+    while self.messages:
+      # go up the tree if empty level
+      level = tree_go_up(level, stack)
+      # go down the tree if new level
+      level = tree_go_down( level, stack )
       
-      # let minions react first
+      msg = level.pop(0)
+      
+      # let minions modify first
       for reader in self.board.listeners:
-        msg = reader.react( msg )
-    
+        msg = reader.modify( msg )
+      
+      # let minions react 
+      for reader in self.board.listeners:
+        reader.react( msg )
+      
       # then execute the message
       msg.execute()
+      self.executed.append(msg)
     
     self.executing = False
 

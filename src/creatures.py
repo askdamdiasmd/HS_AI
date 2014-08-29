@@ -5,8 +5,10 @@ Generalistic classes
 ### ------------ generalistic thing (hero, weapon, minon) -------
 
 class Thing:
-    def __init__(self, name, att, action_filters, listeners ):
+    def __init__(self, card, owner ):
+      self.hp = self.max_hp = card.hp
       self.att = card.att
+      self.owner = owner
       
       # some status
       self.dead = False
@@ -14,11 +16,27 @@ class Thing:
       self.n_remaining_att = 0
       
       # what is below is what can be silenced
-      self.action_filter = action_filter  # usage of Action filter : given an action, return the filtered action 
-      self.listeners = listeners # reacting to events
+      self.action_filter = card.action_filter  # usage of Action filter : given an action, return the filtered action 
+      self.triggers = card.listeners # reacting to events, dictionary: {Msg_Class:event, ...}
+      
+      # temporary triggers and filtesr (reset at each Msg_EndTurn)
+      self.end_turn()
 
     def list_actions(self):
       assert 0, 'must be overloaded'
+
+    def start_turn(self):
+      pass
+
+    def end_turn(self):
+      self.temp_filter = None
+      self.temp_triggers = []
+
+    def modify(self, msg):
+      return msg  # do nothing
+
+    def react(self, msg):
+      pass  # do nothing
 
     def hurt(self, damage):
       self.hp -= damage
@@ -28,18 +46,25 @@ class Thing:
 
 
 
+
+
 ### ------------ Weapon ----------
 
 class Weapon (Thing):
     def __init__(self, card, hero ):
-      Thing.__init__(self, card.name, card.hp, card.att, 
-                        card.action_filters, card.listeners )
+      Thing.__init__(self, card )
       self.hero = hero
 
     def list_actions(self):
       res = Act_Attack(self, self.board.list_attackable_characters())
       return self.action_filter(res)
 
+    def hurt(self, damage):
+      self.hero.hurt(damage)
+      self.hp -= 1
+      if self.hp <= 0:
+        self.dead = True
+        self.engine.send_message( Msg_Dying(self) )
 
 
 
@@ -48,7 +73,6 @@ class Weapon (Thing):
 class Creature (Thing):
     def __init__(self, name, hp, att ):
       self.name = name
-      self.hp = self.max_hp = hp
       self.att = att
       
       self.temp_effects = []
@@ -66,13 +90,27 @@ class Creature (Thing):
         e.undo()
 
 
+
+
 ### ------------ Hero ----------
 
 class Hero (Creature):
-    def __init__(self, name, hp, att ):
-      Creature.__init__(self, name, hp, att )
+    def __init__(self, card ):
+      Creature.__init__(self, card )
       self.weapon = None
+      self.minions = []
 
+    def remove_thing(self, m, pos):
+      if issubclass(type(m), Weapon):
+        self.weapon = m
+      else:
+        self.minions.insert(pos, m)
+
+    def remove_thing(self, m):
+      if m==self.weapon:
+        self.weapon = None
+      else:
+        self.minions.remove(m)
 
 
 ### ------------ Minion ----------
