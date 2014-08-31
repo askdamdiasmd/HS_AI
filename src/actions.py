@@ -150,7 +150,7 @@ class Act_RandomSpellDamageCard (Act_PlaySpellCard):
         Act_PlaySpellCard.execute(self)
         self.engine.send_message([
           Msg_StartSpell(),
-          [Msg_RandomSpellDamage(self.caster,self.choices[0],self.damage)], 
+          [Msg_MultiRandomSpellDamage(self.caster,self.choices[0],self.damage)], 
           Msg_EndSpell(),
         ])
 
