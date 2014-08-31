@@ -1,8 +1,6 @@
 import sys, pdb
 
-#from board import Board
-#from messages import *
-
+from board import Board
 
 
 def tree_go_up( level, stack ):
@@ -16,16 +14,6 @@ def tree_go_down( level, stack=[] ):
       stack.append(level) # remember from where we came
       level = level[0]
     return level
-
-
-# tree test
-#messages = [1,[2,3,[4,5],6],7]
-#level, stack = messages, []
-#while messages:
-#    level = tree_go_up(level, stack)
-#    level = tree_go_down( level, stack )
-#    msg = level.pop(0)
-#    print msg
 
 
 

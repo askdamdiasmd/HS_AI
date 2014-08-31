@@ -18,21 +18,58 @@ from cards import *
 
 
 class Effect:
-    def __init__(self, parent):
-      self.parent = parent    # effect belongs to this minion
-
-
-### ----------- Action filters (are effects in broad sense) ---------------
-
-class AcF_NotTargetable (Effect):
-    """ not targetable by spells or hero power"""
+    def __init__(self, owner):
+        self.owner = owner    # effect belongs to this minion
+    def triggers(self):
+        return {}  # effect is triggered by this Action/Message class
     def filter(self, action):
-      ori = type(action.origin)
-      if issubclass(ori, Card_Spell) or issubclass(ori, Hero):
-        action.targets.remove(self.parent)
+        pass  # default does nothing
 
 
-### ---------- effects ----------------
+### ----------- Action filters (applies on Actions) ---------------
+
+
+class Acf_NotSpellTargetable (Effect):
+    """ not targetable by spells or hero power"""
+    def triggers(self):
+        return {Act_SingleSpellDamage}
+    def filter(self, action):
+        try:  # remove ourselves from potential targets
+          action.choices[0].remove(self.owner)
+        except ValueError:
+          pass
+        return action
+
+
+### ---------- effects (applies on Messages) ----------------
+
+class Acf_IncSpellDamage (Effect):
+    """ increase spelle damages """
+    def triggers(self):
+        return {Act_SpellDamageCard}
+    def filter(self, action):
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

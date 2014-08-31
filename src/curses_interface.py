@@ -2,6 +2,83 @@ import pdb
 from messages import *
 
 
+def show_Msg_StartTurn(self):
+    print "Start of turn for hero "+self.caster.show()
+
+def show_Msg_EndTurn(self):
+    print "End of turn for hero "+self.caster.show()
+
+def show_Msg_Nothing(self):
+    pass
+
+def show_Msg_AddMinion(self):
+    print "New minion '%s' appears for Hero %s" %(self.minion, self.caster)
+
+def show_Msg_Popup(self):
+    print "Minion '%s' pops up" %(self.caster)
+
+def show_Msg_Dying(self):
+    print "Death of "+str(self.caster)
+
+def show_Msg_StartAttack(self):
+    print "%s attacks %s !" % (self.caster, )
+
+def show_Msg_EndAttack(self):
+    pass
+
+def show_Msg_Damage (TargetedMessage):
+    def __init__(self, caster, target, damage):
+        Message.__init__(self, caster, target)
+        self.damage = damage
+    def execute(self):
+        self.target.hurt(self.damage)
+
+
+def show_Msg_SpellDamage (Msg_Damage):
+    ''' same but launched
+     by a spell'''
+    pass
+
+
+def show_Msg_Heal (TargetedMessage):
+    def __init__(self, caster, target, heal):
+        Message.__init__(self, caster, target)
+        self.heal = heal
+    def execute(self):
+        self.target.heal(self.heal)
+
+
+# card/spell messages
+
+def show_Msg_StartCard(self):
+    pass
+def show_Msg_EndCard(self):
+    pass
+
+def show_Msg_StartSpell (Msg_StartCard):
+    pass
+def show_Msg_EndSpell (Msg_EndCard):
+    pass
+
+# attach each show function to a message
+show_funcs = [key for key in globals() if key.startswith("show_")]
+for key in show_funcs:
+    if key[5:] in globals():
+      setattr(globals()[key[5:]], "show", globals()[key])
+
+pdb.set_trace()
+
+
+
+def weapon_string(weapon):
+    return weapon.name + " %d/%d"%(weapon.attack,weapon.durability)
+
+def creature_string(c):
+    return c.name+"(%d/%d)\t"%(c.att,c.hp)
+
+def hand_card_string(c):
+    return c.name + "(%d)"%c.card.cost
+
 #Draws board and cards 
 def draw_board(board, cards1, cards2, foe=None):
     if foe is None:
