@@ -1,7 +1,5 @@
 import sys, pdb
-
-from board import Board
-
+from messages import Message, Msg_StartTurn, Msg_EndTurn
 
 def tree_go_up( level, stack ):
     while not level: 
@@ -25,6 +23,19 @@ class HSEngine:
     self.messages = []
     self.executing = False
     self.executed = []  # messages that were executed (for display purposes)
+    
+    # init global variables : everyone can access board or send messages
+    from board import Board
+    Board.set_engine(self)
+    from creatures import Thing
+    Thing.set_engine(self)
+    from actions import Action
+    Action.set_engine(self)
+    from effects import Effect
+    Effect.set_engine(self)
+    from cards import Card
+    Card.set_engine(self)
+    Message.set_engine(self)
 
   def send_message(self, messages, immediate=False ):
     if type(messages)!=list:  
@@ -67,10 +78,12 @@ class HSEngine:
     
     self.executing = False
 
-  def play_hero(self):
-    self.turn += 1
+  def get_current_hero(self):
     player = self.player[self.turn%2]
-    hero = player.hero
+    return player.hero
+
+  def play_hero(self):
+    hero = self.get_current_hero()
     self.exec_message( Msg_StartTurn(hero) )
     
     action = None
@@ -78,6 +91,7 @@ class HSEngine:
       actions = hero.list_actions() 
       action = player.choose_actions(actions)  # action can be Msg_EndTurn
       self.exec_message(action)
+    self.turn += 1
 
   def is_game_ended(self):
     return self.board.is_game_ended()

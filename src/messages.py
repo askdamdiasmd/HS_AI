@@ -12,6 +12,9 @@ list of possible messages
 class Message:
     def __init__(self, caster):
         self.caster = caster
+    @classmethod
+    def set_engine(cls, engine):
+        cls.engine = engine
     def execute(self):
         pass
     def __str__(self):
@@ -95,12 +98,6 @@ class Msg_Damage (TargetedMessage):
     def __str__(self):
         return "%s takes %d damage from %s." % (self.target, self.damage, self.caster)
 
-class Msg_SpellDamage (Msg_Damage):
-    ''' same but launched
-     by a spell'''
-    def __str__(self):
-        return "%s takes %d damage." % (self.target, self.damage)
-
 
 class Msg_RandomDamage (Message):
     ''' deal damage to a random target'''
@@ -130,19 +127,6 @@ class Msg_MultiRandomDamage (Message):
     def __str__(self):
         return "%s throws %dx%d hit damages randomly." % (self.target, self.damage, self.each)
 
-class Msg_MultiRandomSpellDamage (Msg_MultiRandomDamage, Msg_SpellDamage):
-    ''' spell version - deal damage to a random target seveal times'''
-    pass
-
-
-class Msg_Heal (TargetedMessage):
-    def __init__(self, caster, target, heal):
-        Message.__init__(self, caster, target)
-        self.heal = heal
-    def execute(self):
-        self.target.heal(self.heal)
-    def __str__(self):
-        return "%s gets healed of %d hp." % (self.target, self.heal)
 
 # card/spell messages
 

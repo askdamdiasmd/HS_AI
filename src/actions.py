@@ -23,9 +23,20 @@ class Action:
   def __init__(self, caster, cost=0 ):
       self.caster = caster  # entity (minion/hero) which initiated the action
       self.cost = cost      # mana cost
+      self.choices = []
+
+  @classmethod
+  def set_engine(cls, engine):
+      cls.engine = engine
 
   def num_choices(self):
       return len(self.choices)
+
+  def cardinality(self):
+      res = 1
+      for ch in self.choices:
+        res *= len(ch)
+      return res
 
   def select(self, nums):
       assert len(nums)==self.num_choices()     
@@ -102,7 +113,7 @@ class Act_PlayWeaponCard (Act_PlayCard):
 ### ------------- Card Spells ------------------------
 
 class Act_PlaySpellCard (Act_PlayCard):
-    ''' hero plays a spell card '''
+    ''' hero plays a generic spell card, specified using "actions" '''
     def __init__(self, caster, targets, card, actions=None):
         Act_PlayCard.___init___(self, caster, targets, card)
         self.actions = actions  # execution is defined by card
@@ -160,10 +171,15 @@ class Act_RandomSpellDamageCard (Act_PlaySpellCard):
 
 class Act_HeroPower (Action):
     '''hero power applied to something'''
-    def __init__(self, target ):
-        Action.__init__(self,target)
-
-
+    def __init__(self, caster, targets, actions=None):
+        Act_PlayCard.___init___(self, caster, targets, card)
+        self.actions = actions  # execution is defined by card
+    def execute(self):
+        self.engine.send_message([
+          Msg_StartHeroPower(),
+          self.actions(self), 
+          Msg_EndHeroPower(),
+        ])
 
 
 

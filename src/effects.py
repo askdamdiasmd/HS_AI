@@ -20,6 +20,9 @@ from cards import *
 class Effect:
     def __init__(self, owner):
         self.owner = owner    # effect belongs to this minion
+    @classmethod
+    def set_engine(cls, engine):
+        cls.engine = engine
     def triggers(self):
         return {}  # effect is triggered by this Action/Message class
     def filter(self, action):

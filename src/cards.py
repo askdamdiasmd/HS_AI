@@ -15,8 +15,13 @@ class Card:
         self.desc = desc
         self.name_fr = name_fr
         self.img = img
+        self.owner = None # specified after assignging deck to hero
 
-    def list_actions(self, owner):
+    @classmethod
+    def set_engine(cls, engine):
+        cls.engine = engine
+
+    def list_actions(self):
         assert 0, "must be overloaded"
 
 
@@ -30,8 +35,9 @@ class Card_Minion (Card):
         self.att = att  # attack
         self.cat = cat  # category of minion = 'beast', ...
 
-    def list_actions(self, owner):
-        return Act_PlayMinionCard(owner, self.board.get_free_slots(owner), self)
+    def list_actions(self):
+        hero = self.owner
+        return Act_PlayMinionCard(self, self.board.get_free_slots(hero), self)
 
 
 
@@ -45,12 +51,13 @@ class Card_Wrath (Card_Spell):
     """ Druid : Wrath (2 choices) """
     def __init__(self):
         Card_Spell.__init__(self, "Wrath",2,cls="Druid",name_fr="Colere")
-    def list_actions(self, owner):
+    def list_actions(self):
         targets = self.board.list_characters()
-        first = Act_SingleSpellDamageCard(owner,targets,self,damage=3)
+        hero = self.owner
+        first = Act_SingleSpellDamageCard(self,targets,self,damage=3)
         actions = lambda self: [Msg_SpellDamage(self.caster,self.choices[0],self.damage), 
-                                Msg_DrawCard(owner)]
-        second = Act_PlayCardSpell(owner,targets,self,damage=1,actions=actions)
+                                Msg_DrawCard(hero)]
+        second = Act_PlayCardSpell(self,targets,self,damage=1,actions=actions)
         return [first,second]
 
 
@@ -59,9 +66,9 @@ class Card_FakeSpell (Card_Spell):
         Card_Spell.__init__(self, "Fake Damage Spell %d"%damage,damage-1,
                             name_fr="Faux Sort de dommage %d"%damage,
                             desc="Deal %d points of damage"%damage)
-    def list_actions(self, owner):
+    def list_actions(self):
         targets = self.board.list_characters()
-        return Act_SingleSpellDamageCard(owner,targets,self,damage=self.damage)
+        return Act_SingleSpellDamageCard(self,targets,self,damage=self.damage)
 
 
 
