@@ -22,6 +22,10 @@ class Thing:
       # temporary triggers and filtesr (reset at each Msg_EndTurn)
       self.end_turn()
 
+    @classmethod
+    def set_engine(cls, engine):
+        cls.engine = engine
+
     def list_actions(self):
       assert 0, 'must be overloaded'
 
@@ -89,28 +93,6 @@ class Creature (Thing):
         e = self.temp_effects.pop()
         e.undo()
 
-
-
-
-### ------------ Hero ----------
-
-class Hero (Creature):
-    def __init__(self, card ):
-      Creature.__init__(self, card )
-      self.weapon = None
-      self.minions = []
-
-    def remove_thing(self, m, pos):
-      if issubclass(type(m), Weapon):
-        self.weapon = m
-      else:
-        self.minions.insert(pos, m)
-
-    def remove_thing(self, m):
-      if m==self.weapon:
-        self.weapon = None
-      else:
-        self.minions.remove(m)
 
 
 ### ------------ Minion ----------

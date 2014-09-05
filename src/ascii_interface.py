@@ -1,17 +1,11 @@
-def weapon_string(weapon):
-    return weapon.name + " %d/%d"%(weapon.attack,weapon.durability)
+import pdb
+from hs_engine import HSEngine
+from heroes import Mage
+from cards import fake_deck
 
-def creature_string(c):
-    return c.name+"(%d/%d)\t"%(c.att,c.hp)
-
-def hand_card_string(c):
-    return c.name + "(%d)"%c.card.cost
 
 #Draws board and cards 
-def draw_board(board, cards1, cards2, foe=None):
-    if foe is None:
-        foe = board.heroes[1]
-
+def draw_board(board):
     print "-"*50
     print "="*50
     print " "*15 + "PLAYER 2 HAND" + " "*15
@@ -52,55 +46,43 @@ def draw_board(board, cards1, cards2, foe=None):
     print "="*50
     print "-"*50
 
-def fake_settings():
-    import copy
-    from minions import Minion
 
-    cardbook = get_cardbook()
-    wisp1 = Minion(copy.copy(cardbook[0]))
-    croco1 = Minion(copy.copy(cardbook[1]))
-    yeti1 = Minion(copy.copy(cardbook[2]))
-
-    wisp2 = Minion(copy.copy(cardbook[0]))
-    croco2 = Minion(copy.copy(cardbook[1]))
-    yeti2 = Minion(copy.copy(cardbook[2]))
-
-
-    hero1 = Mage()
-    hero2 = Mage()
-
-    wisp1.owner=hero1
-    croco1.owner=hero1
-    yeti1.owner=hero1
-
-    wisp2.owner=hero2
-    croco2.owner=hero2
-    yeti2.owner=hero2
-
-
-    board = Board(hero1, hero2)
-    board.minions.append(wisp1)
-    board.minions.append(croco1)
-    board.minions.append(yeti1)
-    board.minions.append(croco2)
-    board.minions.append(croco2)
-    board.minions.append(yeti2)
-    
-    hand1 = []
-    hand2 = []
-
-    hand1.append(yeti1)
-    hand1.append(croco1)
-    hand2.append(wisp2)
-    hand2.append(croco2)
-    hand2.append(yeti2)
-
-    return board, hand1, hand2
 
 if __name__=="__main__":
-    from board import Board
-    from heroes import Mage
-    from cards import MinionCard, get_cardbook
+    deck1 = fake_deck()
+    hero1 = Mage()
+    player1 = HumanPlayer('jerome', hero1)
+    player1.set_deck(deck1)
     
-    board, hand1, hand2 = fake_settings()
-    draw_board(board, hand1, hand2)
+    deck2 = fake_deck()
+    hero2 = Mage('matttis')
+    player2 = RandomPlayer('IA')
+    player2.set_deck(deck2)
+    
+    engine = HSEngine( player1, player2 )
+    
+    # initialize global variables
+    while not engine.is_game_ended():
+      draw_board(engine.board, engine.get_current_hero())
+      engine.play_hero()
+    
+    t = engine.turn
+    print 'end of game: player %d won after %d turn' % (t%2, (t+1)/2)
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
