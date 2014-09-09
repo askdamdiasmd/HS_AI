@@ -85,6 +85,8 @@ def next(n):
   top = my_panels[(num+n)%3]
   top_panel(top)
 
+BUTTON5_PRESSED = (1<<21) | REPORT_MOUSE_POSITION
+
 ch = -1
 while ( (ch != CCHAR('q')) and (ch != CCHAR('Q')) ):
     mvaddstr(22,0,"current panel = %d" % (1+panel_userptr(top)))
@@ -105,17 +107,17 @@ while ( (ch != CCHAR('q')) and (ch != CCHAR('Q')) ):
         id, x, y, z, bstate = mouse_state
         mvaddstr(19,0,"mouse position = %d,%d  state={%s}" % (x,y,''.join([(bstate&(1<<i)) and '%d,'%i or '' for i in range(32)])))
         
-        if bstate & BUTTON4_PRESSED:
+        if bstate & BUTTON5_PRESSED:
           next(1)
           continue
-        elif bstate & REPORT_MOUSE_POSITION:
+        elif bstate & BUTTON4_PRESSED:
           next(-1)
           continue
         
         cur = top #panel_below(None)
         n = len("panel stack = ")
         mvaddstr(21,0,"panel stack = ")
-        while cur!=None:
+        while cur:
           mvaddstr(21,n,"%1d," % (1+panel_userptr(cur)))
           n+=3
           win = panel_window(cur)
