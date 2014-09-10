@@ -1,69 +1,62 @@
 import pdb
-from hs_engine import HSEngine
-from heroes import Mage
-from cards import fake_deck
-
+from board import Board
 
 #Draws board and cards 
-def draw_board(board):
-    print "-"*50
-    print "="*50
-    print " "*15 + "PLAYER 2 HAND" + " "*15
-    for j,c in enumerate(cards2):
-        print hand_card_string(c)+"\t", 
-        
-    print
-    print 
-    print "="*50
-    hero2 = board.get_enemy_hero(foe)
-    print "\t Hero2: %s (%s)\t"%(hero2.name, "no weapon" if hero2.weapon is None else weapon_string(hero2.weapon))
-    print 
-
-    print "="*13+"  PLAYER 2 CREATURES    "+"="*13
-    for j,c in enumerate(board.list_enemy_minions(foe)):
-        print creature_string(c), 
-    print
-    print
+def draw_Board(self):
+    player = self.engine.get_current_player()
+    adv = self.engine.get_other_player()
     
-    print 
-    print "="*13+"  PLAYER 1 CREATURES    "+"="*13
-    for j,c in enumerate(board.list_friendly_minions(foe)):
-        print creature_string(c), 
-    print
-    print
-    print "="*50
-    hero1 = board.get_friendly_hero(foe)
-    print "\t Hero2: %s (%s)\t"%(hero1.name, "no weapon" if hero1.weapon is None else weapon_string(hero1.weapon))
-    print 
+    print ('='*36) + " Board " + ('='*37)
+    print " "*20 + "Enemy: %s" % str(adv.hero)
+    
+    text = 'Enemy minions: '
+    for i,c in enumerate(adv.hero.minions,1):
+        print (i==0 and text or ' '*len(text))+( ' %d] %s' %(i,str(c)))
+    print ' -'*40
+    
+    text = 'Your minions: '
+    for i,c in enumerate(adv.hero.minions,1):
+        print (i==0 and text or ' '*len(text))+(' %d] %s' %(i,str(c)))
+    
+    print (" "*20) + ("You: %s" % str(adv.hero))
+    
+    print ('='*36) + " Board " + ('='*37)
+    text = 'Your cards: '
+    for i,c in enumerate(player.cards,1):
+        print (i==0 and text or ' '*len(text))+(' %d] %s' %(i,str(c)))
 
-                         
-    print "="*50
-    print "          PLAYER 1 HAND             "
-    for j,c in enumerate(cards1):
-        print hand_card_string(c)+"\t", 
-    print
-    print 
-    print "="*50
-    print "-"*50
+
+# attach each show function to a message
+all_globs = globals().keys()
+draw_funcs = [key for key in all_globs if key.startswith("draw_")]
+for key in draw_funcs:
+    if key[5:] in all_globs:
+      setattr(globals()[key[5:]], "draw", globals()[key])
+
 
 
 
 if __name__=="__main__":
+    from players import HumanPlayer, RandomPlayer
+    from cards import fake_deck
+    from heroes import *
+    from hs_engine import HSEngine
+
     deck1 = fake_deck()
-    hero1 = Mage()
-    player1 = HumanPlayer('jerome', hero1)
-    player1.set_deck(deck1)
+    hero1 = Hero(Card_Mage())
+    player1 = HumanPlayer('jerome', hero1, deck1)
     
     deck2 = fake_deck()
-    hero2 = Mage('matttis')
-    player2 = RandomPlayer('IA')
-    player2.set_deck(deck2)
+    hero2 = Hero(Card_Priest())
+    player2 = RandomPlayer('IA', hero2, deck2)
     
     engine = HSEngine( player1, player2 )
-    
     # initialize global variables
+    
+    # start playing
+    engine.start_game()
     while not engine.is_game_ended():
-      draw_board(engine.board, engine.get_current_hero())
+      engine.board.draw()
       engine.play_hero()
     
     t = engine.turn

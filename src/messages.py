@@ -33,13 +33,13 @@ class Msg_StartTurn (Message):
     def execute(self):
         self.caster.start_turn()
     def __str__(self):
-        print "Start of turn for hero "+str(self.caster)
+        return "Start of turn for hero "+str(self.caster)
 
 class Msg_EndTurn (Message):
     def execute(self):
         self.caster.end_turn()
     def __str__(self):
-        print "End of turn for hero "+self.caster.show()
+        return "End of turn for hero "+self.caster.show()
 
 class Msg_Nothing (Message):
     pass
@@ -59,7 +59,7 @@ class Msg_AddMinion (Message):
         # inform everybody that it was created
         self.engine.send_message(Msg_Popup(self.minion))
     def __str__(self):
-        print "New minion '%s' on the board" %(self.minion, self.caster)
+        return "New minion '%s' on the board" %(self.minion, self.caster)
 
 class Msg_Popup (Message):
     def execute(self):

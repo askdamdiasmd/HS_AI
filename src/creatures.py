@@ -17,10 +17,10 @@ class Thing:
       
       # what is below is what can be silenced
       self.action_filter = card.action_filter  # usage of Action filter : given an action, return the filtered action 
-      self.triggers = card.listeners # reacting to events, dictionary: {Msg_Class:event, ...}
+      self.triggers = card.triggers # reacting to events, dictionary: {Msg_Class:event, ...}
       
-      # temporary triggers and filtesr (reset at each Msg_EndTurn)
-      self.end_turn()
+      # temporary triggers and filters (reset at each Msg_EndTurn)
+      Thing.end_turn(self)
 
     @classmethod
     def set_engine(cls, engine):
@@ -51,7 +51,6 @@ class Thing:
 
 
 
-
 ### ------------ Weapon ----------
 
 class Weapon (Thing):
@@ -71,14 +70,23 @@ class Weapon (Thing):
         self.engine.send_message( Msg_Dying(self) )
 
 
+### ------------ Secret ----------
+
+class Secret (Thing):
+    def __init__(self, card, hero ):
+      Thing.__init__(self, card )
+      self.hero = hero
+
+    def list_actions(self):
+      return None
+
+
 
 ### ------------ Creature (hero or minion) ----------
 
 class Creature (Thing):
-    def __init__(self, name, hp, att ):
-      self.name = name
-      self.att = att
-      
+    def __init__(self, card, owner ):
+      Thing.__init__(self, card, owner )
       self.temp_effects = []
 
     def heal(self, heal):
@@ -99,12 +107,7 @@ class Creature (Thing):
 
 class Minion (Creature):
     def __init__(self, card ):
-      Creature.__init__(self, card.name, card.hp, card.att, 
-                        card.action_filters, card.listeners )
-      self.card = card
-      
-      self.taunt = False
-      
+      Creature.__init__(self, card )
       self.effects = [] # buffs/debuffs : can be silenced
 
     @classmethod

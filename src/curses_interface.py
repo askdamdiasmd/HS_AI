@@ -1,7 +1,7 @@
 import pdb
 from messages import *
 
-
+"""
 def show_Msg_StartTurn(self):
     print "Start of turn for hero "+self.caster.show()
 
@@ -78,6 +78,8 @@ def creature_string(c):
 
 def hand_card_string(c):
     return c.name + "(%d)"%c.card.cost
+"""
+
 
 #Draws board and cards 
 def draw_board(board, cards1, cards2, foe=None):

@@ -16,6 +16,8 @@ class Card:
         self.name_fr = name_fr
         self.img = img
         self.owner = None # specified after assignging deck to hero
+        self.action_filter = None
+        self.triggers = None
 
     @classmethod
     def set_engine(cls, engine):

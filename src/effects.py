@@ -51,7 +51,7 @@ class Acf_IncSpellDamage (Effect):
     def triggers(self):
         return {Act_SpellDamageCard}
     def filter(self, action):
-        
+        pass
 
 
 
