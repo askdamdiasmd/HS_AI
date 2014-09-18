@@ -1,5 +1,9 @@
-import sys, pdb
-from messages import Message, Msg_StartTurn, Msg_EndTurn
+import pdb
+from creatures import Thing
+from messages import Message, Msg_StartTurn
+from actions import Action, Act_EndTurn
+from effects import Effect
+from cards import Card
 
 def tree_go_up( level, stack ):
     while not level: 
@@ -7,8 +11,8 @@ def tree_go_up( level, stack ):
         level.pop(0)  # remove first one which is an empty list
     return level
 
-def tree_go_down( level, stack=[] ):
-    while type(level[0])==list:
+def tree_go_down( level, stack=[] ):    
+    while level and type(level[0])==list:
       stack.append(level) # remember from where we came
       level = level[0]
     return level
@@ -27,27 +31,23 @@ class HSEngine:
     
     # init global variables : everyone can access board or send messages
     Board.set_engine(self)
-    from creatures import Thing
     Thing.set_engine(self)
-    from actions import Action
     Action.set_engine(self)
-    from effects import Effect
     Effect.set_engine(self)
-    from cards import Card
     Card.set_engine(self)
     Message.set_engine(self)
 
-  def send_message(self, messages, immediate=False ):
+  def send_message(self, messages ):
     if type(messages)!=list:  
       messages = [messages]
     
-    deep_level = tree_go_down( self.messages )
+    # let minions modify first
+    for i,msg in enumerate(messages):
+      for reader in self.board.everybody:
+        messages[i] = reader.modify_msg( msg )
     
-    if immediate:
-      while messages:  
-        deep_level.insert(0,messages.pop())
-    else:
-      deep_level += messages
+    deep_level = tree_go_down( self.messages )
+    deep_level += messages
     
     self.exec_messages()
 
@@ -64,19 +64,29 @@ class HSEngine:
       
       msg = level.pop(0)
       
-      # let minions modify first
-      for reader in self.board.listeners:
-        msg = reader.modify( msg )
-      
       # let minions react 
-      for reader in self.board.listeners:
-        reader.react( msg )
+      immediate = []
+      for reader in self.board.everybody:
+        res = reader.react_msg( msg )
+        if res: immediate.append(res)
       
       # then execute the message
-      msg.execute()
+      print "[%s] %s" %(type(msg).__name__,msg)
+      res = msg.execute()
       self.executed.append(msg)
+      
+      if res: immediate.append(res)
+      while immediate: # add immediate-effect messages
+        level.insert(0,immediate.pop())
     
     self.executing = False
+
+  def filter_actions(self, actions):
+    for i,a in enumerate(actions):
+      for o in self.board.everybody:
+        a = o.filter_action(a)
+      actions[i] = a
+    return actions
 
   def get_current_player(self):
     return self.players[self.turn%2]
@@ -93,10 +103,13 @@ class HSEngine:
     self.send_message( Msg_StartTurn(player) )
     
     action = None
-    while type(action)!=Msg_EndTurn:
+    while type(action)!=Act_EndTurn:
       actions = player.list_actions() 
+      # filter actions
+      actions = self.filter_actions(actions)
+      actions = [a for a in actions if a.cost<=player.mana]
       action = player.choose_actions(actions)  # action can be Msg_EndTurn
-      self.exec_message(action)
+      self.send_message(action)
     
     self.turn += 1
 

@@ -1,4 +1,5 @@
 from unicurses import *
+import threading, time
 
 def win_show(win, label, label_color):
     starty, startx = getbegyx(win)
@@ -38,13 +39,22 @@ def debug():
   import pdb
   pdb.set_trace()
 
+def launch_green(win):
+    def temp_green(win,wait=1):
+        mvwaddstr(win, 1, 1, "X", COLOR_PAIR(5))
+        update_panels()
+        doupdate()
+        time.sleep(wait)
+        mvwaddstr(win, 1, 1, " ")
+        update_panels()
+        doupdate()
+    threading.Thread(target=temp_green,args=(win,)).start()
 
-NLINES = 10
-NCOLS = 40
 my_wins = [0] * 3
 my_panels = [0] * 3
 
 stdscr = initscr()
+NROWS, NCOLS = getmaxyx(stdscr)
 start_color()
 cbreak()
 curs_set(0)
@@ -57,10 +67,12 @@ init_pair(1, COLOR_RED, COLOR_BLACK)
 init_pair(2, COLOR_GREEN, COLOR_BLACK)
 init_pair(3, COLOR_BLUE, COLOR_BLACK)
 init_pair(4, COLOR_CYAN, COLOR_BLACK)
+init_pair(5, COLOR_BLACK, COLOR_GREEN)
 
 mvaddstr(15, 15, "---------- This text is background text ---------")
 init_wins(my_wins, 3)
 
+#new_panel(stdscr)
 my_panels[0] = new_panel(my_wins[0])
 my_panels[1] = new_panel(my_wins[1])
 my_panels[2] = new_panel(my_wins[2])
@@ -82,30 +94,49 @@ top = my_panels[2]
 def next(n):
   global top
   num = panel_userptr(top)
-  top = my_panels[(num+n)%3]
+  num = (num+n)%3
+  top = my_panels[num]
   top_panel(top)
+  launch_green(panel_window(top))
 
 BUTTON5_PRESSED = (1<<21) | REPORT_MOUSE_POSITION
 
 ch = -1
 while ( (ch != CCHAR('q')) and (ch != CCHAR('Q')) ):
-    mvaddstr(22,0,"current panel = %d" % (1+panel_userptr(top)))
+    mvwaddstr(stdscr,22,0,"current panel = %d" % (1+panel_userptr(top)))
+    mvwaddstr(stdscr,16,20,"top panel = %d" % (1+panel_userptr(top)))
+    for i in range(3):
+      touchwin(my_wins[i])    
     update_panels()
     doupdate()
     ch = getch()
-    move(19,0);  clrtoeol()
-    move(20,0);  clrtoeol()
-    move(21,0);  clrtoeol()
+    for i in range(19,22):
+      wmove(stdscr,i,0)
+      mvwaddstr(stdscr,i,0," "*NCOLS)
     
     if ch == ord('\t'):
         next(1)
-        mvaddstr(16,20,"top panel = %d" % (1+panel_userptr(top)))
+    
+    elif ch == KEY_UP:
+        y,x = getbegyx(panel_window(top))
+        if y>0: move_panel(top,y-1,x)
+    elif ch == KEY_DOWN:
+        y,x = getbegyx(panel_window(top))
+        ty,tx = getmaxyx(panel_window(top))
+        if y+ty<NROWS: move_panel(top,y+1,x)
+    elif ch == KEY_LEFT:
+        y,x = getbegyx(panel_window(top))
+        if x>0: move_panel(top,y,x-1)
+    elif ch == KEY_RIGHT:
+        y,x = getbegyx(panel_window(top))
+        ty,tx = getmaxyx(panel_window(top))
+        if x+tx<NCOLS: move_panel(top,y,x+1)
     
     elif ch == KEY_MOUSE:
         mouse_state = getmouse()
         if mouse_state==ERR: continue
         id, x, y, z, bstate = mouse_state
-        mvaddstr(19,0,"mouse position = %d,%d  state={%s}" % (x,y,''.join([(bstate&(1<<i)) and '%d,'%i or '' for i in range(32)])))
+        mvwaddstr(stdscr,19,0,"mouse position = %d,%d  state={%s}" % (x,y,''.join([(bstate&(1<<i)) and '%d,'%i or '' for i in range(32)])))
         
         if bstate & BUTTON5_PRESSED:
           next(1)
@@ -116,9 +147,9 @@ while ( (ch != CCHAR('q')) and (ch != CCHAR('Q')) ):
         
         cur = top #panel_below(None)
         n = len("panel stack = ")
-        mvaddstr(21,0,"panel stack = ")
+        mvwaddstr(stdscr,21,0,"panel stack = ")
         while cur:
-          mvaddstr(21,n,"%1d," % (1+panel_userptr(cur)))
+          mvwaddstr(stdscr,21,n,"%1d," % (1+panel_userptr(cur)))
           n+=3
           win = panel_window(cur)
           wy,wx = getbegyx(win)
@@ -132,6 +163,7 @@ while ( (ch != CCHAR('q')) and (ch != CCHAR('Q')) ):
           if top!=cur:
             top_panel(cur)
             top=cur
+            launch_green(panel_window(top))
           else:
             if panel_hidden(cur):
               show_panel(cur)

@@ -4,7 +4,7 @@ a deck
 import random
 
 
-class Deck:
+class Deck (object):
     @classmethod
     def set_engine(cls,engine):
       cls.engine = engine
@@ -13,23 +13,28 @@ class Deck:
       self.cards = cards
       assert len(cards)==30
     
-    def draw_card(self):
-      r = random.randint(len(cards))
+    def set_owner(self, owner):
+      for card in self.cards:
+        card.owner = owner
+
+    def draw_one_card(self):
+      r = random.randint(0, len(self.cards)-1)
       card = self.cards.pop(r)
-      card.set_owner(self.hero)
       return card
     
     def draw_init_cards(self, nb, mulligan):
-      cards = [self.draw_card() for n in range(nb)]
-      keep, discard = mulligan(cards)
+      cards = [self.draw_one_card() for n in range(nb)]
+      discard = mulligan(cards)
       
       # put mulliganed card back in the deck
-      self.deck += discard
+      kept = [c for c in cards if c not in discard]
+      self.cards += discard
       
       # draw replacement cards
-      for c in range(len(discard)):
-        cards.append( self.draw_card() )
-
+      cards = kept
+      for c in discard:
+        cards.append( self.draw_one_card() )
+      return cards
 
 
 

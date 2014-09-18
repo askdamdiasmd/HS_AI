@@ -11,15 +11,15 @@ An action includes
   it is decomposed into atomic messages, which are 
   themselves executed.
 '''
-
+import pdb
 from messages import *
-
+from creatures import *
 
 
 ### ---------- Actions ---------------
 
 
-class Action:
+class Action (object):
   def __init__(self, caster, cost=0 ):
       self.caster = caster  # entity (minion/hero) which initiated the action
       self.cost = cost      # mana cost
@@ -38,11 +38,10 @@ class Action:
         res *= len(ch)
       return res
 
-  def select(self, nums):
-      assert len(nums)==self.num_choices()     
-      for i,n in enumerate(nums):
-        assert 0<=num<len(self.choices[i])
-        self.choices[i] = self.choices[i].pop(n)
+  def select(self, choices):
+      assert len(self.choices)==len(choices), pdb.set_trace()
+      self.choices = choices
+      return self
 
   def randomness(self):
       # number of possible outcomes
@@ -52,13 +51,25 @@ class Action:
       assert 0, "must be overloaded"
 
 
+class Act_EndTurn (Action):
+    def __init__(self, caster):
+        Action.__init__(self,caster)
+    def __str__(self):
+        return "End turn"
+    def execute(self):
+        self.engine.send_message(Msg_EndTurn(self.caster))
+
+
 class Act_PlayCard (Action):
     ''' hero plays a card '''
-    def ___init___(self, caster, card):
-        Action.__init__(self,caster,card.cost)
+    def ___init___(self, card):
+        Action.__init__(self,card.owner,card.cost)
         self.card = card
+    def __str__(self):
+        return "Card %s" % self.card
     def execute(self):
-        self.engine.send_message(Msg_BurnCard(self.caster,self.card))
+        self.engine.send_message([
+            Msg_PlayCard(self.caster,self.card, self.cost)] )
 
 
 
@@ -66,14 +77,14 @@ class Act_PlayCard (Action):
 
 class Act_PlayMinionCard (Act_PlayCard):
     ''' hero plays a minion card '''
-    def __init__(self, caster, card, pos):
-        Act_PlayCard.___init___(self,caster,card)
+    def __init__(self, card, pos):
+        Act_PlayCard.___init___(self,card)
         self.choices = [pos]
     def execute(self):
         pos = self.choices[0]
-        assert type(pos)==int
+        assert type(pos).__name__=='Slot', pdb.set_trace()
         Act_PlayCard.execute(self)
-        minion = Minion(self.card, self.caster)
+        minion = Minion(self.card)
         self.engine.send_message(Msg_AddMinion(self.caster, minion, pos))
 
 
@@ -82,16 +93,18 @@ class Act_Attack (Action):
     def __init__(self, caster, targets):
         Action.__init__(self, caster)
         self.choices = [targets]
+    def __str__(self):
+        return "Attack with %s" % self.caster
     def execute(self):
         target = self.choices[0]
         assert type(target)!=list
         self.caster.n_remaining_attack -= 1
         assert self.caster.n_remaining_attack>=0
         msgs = [Msg_StartAttack(self.caster),
-                [Msg_Damage(self.caster, target, self.caster.att),
-                Msg_Damage(target, self.caster, target.att)],
+                [Msg_Damage(self.caster, target, self.caster.atq),
+                Msg_Damage(target, self.caster, target.atq)],
                 Msg_EndAttack(self.caster) ]
-        if not target.att: msgs.pop(2) # remove useless message
+        if not target.atq: msgs.pop(2) # remove useless message
         self.engine.send_message(msgs)
 
 
@@ -114,55 +127,56 @@ class Act_PlayWeaponCard (Act_PlayCard):
 
 class Act_PlaySpellCard (Act_PlayCard):
     ''' hero plays a generic spell card, specified using "actions" '''
-    def __init__(self, caster, targets, card, actions=None):
-        Act_PlayCard.___init___(self, caster, targets, card)
+    def __init__(self, card, targets, actions=None):
+        Act_PlayCard.___init___(self, card)
+        self.choices = [targets]
         self.actions = actions  # execution is defined by card
     def execute(self):
-        Act_PlaySpellCard.execute(self)
+        Act_PlayCard.execute(self)
         self.engine.send_message([
-          Msg_StartSpell(),
+          Msg_StartSpell(self.owner,self.card),
           self.actions(self), 
-          Msg_EndSpell(),
+          Msg_EndSpell(self.owner),
         ])
 
 
 class Act_SingleSpellDamageCard (Act_PlaySpellCard):
     ''' inflict damage to a single target'''
-    def __init__(self, caster, target, card, damage ):
-        Act_PlaySpellCard.__init__(self, caster, target, card)
+    def __init__(self, card, target, damage ):
+        Act_PlaySpellCard.__init__(self, card, target)
         self.damage = damage
     def execute(self):
         Act_PlaySpellCard.execute(self)
         target = self.choices[0]
         assert type(target)!=list
         self.engine.send_message([
-          Msg_StartSpell(),
+          Msg_StartSpell(self.owner,self.card),
           [Msg_SpellDamage(self.caster,target,self.damage)], 
-          Msg_EndSpell(),
+          Msg_EndSpell(self.owner),
         ])
 
 class Act_MultiSpellDamageCard (Act_PlaySpellCard):
     ''' inflict damage to multiple targets'''
-    def __init__(self, caster, target, card, damage ):
-        Act_PlaySpellCard.__init__(self, caster, targets, card, damage=damage)
+    def __init__(self, target, card, damage ):
+        Act_PlaySpellCard.__init__(self, card, targets, damage=damage)
     def execute(self):
         Act_PlaySpellCard.execute(self)
         self.engine.send_message([
-          Msg_StartSpell(),
+          Msg_StartSpell(self.owner,self.card),
           [Msg_SpellDamage(self.caster,t,self.damage) for t in self.choices[0]], 
-          Msg_EndSpell(),
+          Msg_EndSpell(self.owner),
         ])
 
 class Act_RandomSpellDamageCard (Act_PlaySpellCard):
     ''' inflict damage to random targets'''
-    def __init__(self, caster, target, card, damage ):
-        Act_PlaySpellCard.__init__(self, caster, target, card, damage=damage)
+    def __init__(self, card, target, damage ):
+        Act_PlaySpellCard.__init__(self, card, target, damage=damage)
     def execute(self):
         Act_PlaySpellCard.execute(self)
         self.engine.send_message([
-          Msg_StartSpell(),
+          Msg_StartSpell(self.owner,self.card),
           [Msg_MultiRandomSpellDamage(self.caster,self.choices[0],self.damage)], 
-          Msg_EndSpell(),
+          Msg_EndSpell(self.owner),
         ])
 
 
@@ -171,14 +185,17 @@ class Act_RandomSpellDamageCard (Act_PlaySpellCard):
 
 class Act_HeroPower (Action):
     '''hero power applied to something'''
-    def __init__(self, caster, targets, actions=None):
-        Act_PlayCard.___init___(self, caster, targets, card)
+    def __init__(self, caster, cost, targets, actions):
+        Action.__init__(self, caster, cost )
+        self.choices = [targets]
         self.actions = actions  # execution is defined by card
+    def __str__(self):
+        return "Hero Power (%d): %s" % (self.cost, self.caster.hero.card.desc)
     def execute(self):
         self.engine.send_message([
-          Msg_StartHeroPower(),
+          Msg_StartHeroPower(self.caster),
           self.actions(self), 
-          Msg_EndHeroPower(),
+          Msg_EndHeroPower(self.caster),
         ])
 
 

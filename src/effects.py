@@ -17,7 +17,7 @@ Both are disabled (destroyed) by silence.
 from cards import *
 
 
-class Effect:
+class Effect (object):
     def __init__(self, owner):
         self.owner = owner    # effect belongs to this minion
     @classmethod

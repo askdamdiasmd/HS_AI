@@ -74,7 +74,7 @@ def weapon_string(weapon):
     return weapon.name + " %d/%d"%(weapon.attack,weapon.durability)
 
 def creature_string(c):
-    return c.name+"(%d/%d)\t"%(c.att,c.hp)
+    return c.name+"(%d/%d)\t"%(c.atq,c.hp)
 
 def hand_card_string(c):
     return c.name + "(%d)"%c.card.cost
