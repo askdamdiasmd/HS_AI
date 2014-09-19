@@ -15,12 +15,12 @@ def draw_Board(self):
     print " "*20 + "Enemy: %s" % str(adv)
     
     print 'Enemy minions: '
-    for i,c in enumerate(player.minions,1):
+    for i,c in enumerate(adv.minions,1):
         print (' %d] %s' %(i,str(c)))
     print ' -'*40
     
     print 'Your minions: '
-    for i,c in enumerate(adv.minions,1):
+    for i,c in enumerate(player.minions,1):
         print (' %d] %s' %(i,str(c)))
     
     print (" "*20) + ("You: %s" % str(player))

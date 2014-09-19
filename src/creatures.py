@@ -176,7 +176,7 @@ class Minion (Creature):
       if self.n_remaining_att<=0 or self.atq==0:
         return None
       else:
-        return Act_Attack(self, self.board.list_attackable_characters(self.owner))
+        return Act_Attack(self, self.engine.board.list_attackable_characters(self.owner))
 
   def popup(self):  # executed when created
       Creature.popup(self)
