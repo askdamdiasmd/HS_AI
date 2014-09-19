@@ -3,6 +3,7 @@ Generalistic classes
 '''
 import pdb
 from messages import *
+from actions import Act_Attack
 
 
 ### ------------ generalistic thing (hero, weapon, minon) -------
@@ -162,7 +163,6 @@ class Creature (Thing):
 
 
 ### ------------ Minion ----------
-from actions import Act_Attack
 
 
 class Minion (Creature):

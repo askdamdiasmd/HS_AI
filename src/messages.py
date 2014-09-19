@@ -59,8 +59,7 @@ class Msg_UseMana (Message):
         Message.__init__(self, caster)
         self.nb = nb
     def execute(self):
-        self.caster.mana -= nb
-        assert self.caster.mana>=0
+        self.caster.use_mana(self.nb)
     def __str__(self):
         return "Player %s loses %d mana crystal" % (self.caster,self.nb)
 

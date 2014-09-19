@@ -38,9 +38,14 @@ class Player (object):
       else:
         self.minions.remove(m)
 
-  def add_mana_crystal(self, nb):
+  def add_mana_crystal(self, nb, useit=False):
     self.mana = min(10,self.mana+nb)
     self.max_mana = min(10,self.max_mana+nb)
+    if useit: self.use_mana(nb)
+
+  def use_mana(self, nb):
+    self.mana -= nb
+    assert self.mana>=0
 
   def start_turn(self):    # activated by Msg_StartTurn(player)
     self.hero.start_turn()
