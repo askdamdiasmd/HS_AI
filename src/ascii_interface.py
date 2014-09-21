@@ -3,28 +3,28 @@ from board import Board
 from players import *
 from actions import *
 
-#Draws board and cards 
+#Draws board and cards
 def draw_Board(self):
-    # clear screen 
+    # clear screen
     os.system("cls" if os.name=='nt' else "clear")
-    
+
     player = self.engine.get_current_player()
     adv = self.engine.get_other_player()
-    
+
     print ('='*36) + " Board " + ('='*37)
-    print " "*20 + "Enemy: %s" % str(adv)
-    
+    print " "*20 + "Enemy: [%s]" % str(adv)
+
     print 'Enemy minions: '
     for i,c in enumerate(adv.minions,1):
         print (' %d] %s' %(i,str(c)))
     print ' -'*40
-    
+
     print 'Your minions: '
     for i,c in enumerate(player.minions,1):
         print (' %d] %s' %(i,str(c)))
-    
-    print (" "*20) + ("You: %s" % str(player))
-    
+
+    print (" "*20) + ("You: [%s]" % str(player))
+
     print ('='*36) + " Board " + ('='*37)
     text = 'Your cards:'
     for i,c in enumerate(player.cards,1):
@@ -47,14 +47,14 @@ class HumanPlayerAscii (HumanPlayer):
         try:
           inp = raw_input()
           inp = inp.split()
-          inp = [int(i) for i in inp] 
+          inp = [int(i) for i in inp]
           if len(set(inp) & set(allowed))==len(inp):
             if nb<0 or len(inp)==nb:
               return inp
         except ValueError:
           pass
         print "erroneous input, please try again:",
-        
+
   def mulligan(self, cards):
       print "available cards:"
       for i,card in enumerate(cards):
@@ -62,7 +62,7 @@ class HumanPlayerAscii (HumanPlayer):
       print "which one do you want to remove (ex: 1 3) ?",
       discard = self.read_int(allowed=range(len(cards)))
       return [cards[int(i)] for i in discard]
-     
+
   def choose_actions(self, actions):
       # split actions
       act_hero = []
@@ -78,7 +78,7 @@ class HumanPlayerAscii (HumanPlayer):
           act_atq.append(a)
         else:
           act_others.append(a)
-      
+
       print "Choose an action:",
       print "          Available mana %d/%d" %(self.mana,self.max_mana)
       n = 0
@@ -90,26 +90,26 @@ class HumanPlayerAscii (HumanPlayer):
         n += len(act_hero)
       else:
         n = 1
+      if act_atq:
+        print " %d] Attack with a minion" % n
+        mapping[n] = act_atq
+        n += 1
       if act_card:
         for i,a in enumerate(act_card,n):
           print " %d] %s" %(i, a)
           mapping[i] = a
         n += len(act_card)
-      if act_atq:
-        print " %d] Attack with a minion" % n
-        mapping[n] = act_atq
-        n += 1
       for i,a in enumerate(act_others,n):
         print " %d] %s" %(i,a)
         mapping[i] = a
-      
+
       choices = []
       while 1:
         print "Your choice ?",
         keys = mapping.keys() if type(mapping)==dict else range(len(mapping))
         c = self.read_int(keys,nb=1)[0]
         act = mapping[c]
-        
+
         if type(act)==list:
           mapping = act
         else:
@@ -117,13 +117,14 @@ class HumanPlayerAscii (HumanPlayer):
             action = act
           else:
             choices.append(act)
-          if len(choices)>=len(action.choices): 
+          if len(choices)>=len(action.choices):
             return action.select(choices)
           mapping = action.choices[len(choices)]
-        
+
         # print choices
         for i,a in enumerate(mapping,0):
-          print " %d] %s" %(i, a)
+          whom = lambda m: "Your " if m.owner is self else "His "
+          print " %d] %s%s" %(i, issubclass(type(a),Minion) and whom(a) or '', a)
 
 
 
@@ -136,24 +137,24 @@ if __name__=="__main__":
     deck1 = fake_deck()
     hero1 = Hero(Card_Mage())
     player1 = HumanPlayerAscii(hero1, 'jerome', deck1)
-    
+
     deck2 = fake_deck()
     hero2 = Hero(Card_Priest())
     player2 = RandomPlayer(hero2, 'IA', deck2)
-    
+
     engine = HSEngine( player1, player2 )
     # initialize global variables
-    
+
     # start playing
     engine.start_game()
     while not engine.is_game_ended():
       engine.board.draw()
       engine.play_turn()
       raw_input()
-    
+
     t = engine.turn
     print 'end of game: player %d won after %d turn' % (t%2, (t+1)/2)
-  
+
 
 
 

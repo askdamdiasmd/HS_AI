@@ -62,7 +62,7 @@ class Board:
       if taunts:
         return taunts
       else:
-        return enemies + [self.get_enemy_player(player)]
+        return [self.get_enemy_player(player).hero] + enemies
 
   def get_free_slots(self, player):
       return [Slot(player,i) for i in range(len(player.minions)+1)]

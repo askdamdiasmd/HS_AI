@@ -20,7 +20,7 @@ class Hero (Creature):
     pass
 
   def __str__(self):
-      return "[%s (%s) %dHP]" % (self.owner.name,self.card.name,self.hp)
+      return "%s (%s) %dHP" % (self.owner.name,self.card.name,self.hp)
 
 ### -------- instanciation of heroes --------------------
 
@@ -36,7 +36,7 @@ class Card_Hero (Card_Minion):
 
 class Card_Mage (Card_Hero):
     def __init__(self):
-        Card_Minion.__init__(self, "Janna", 0, 30, 0, cls="mage", name_fr='Jenna',
+        Card_Minion.__init__(self, "Jaina", 0, 30, 0, cls="mage", name_fr='Jenna',
                              desc="deals 1 damage to a character")
 
     def hero_power(self):

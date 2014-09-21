@@ -1,9 +1,9 @@
 '''
-list of possible messages 
-  
-  messages = atomic actions 
-  
-    (actions are decomposed into messages, 
+list of possible messages
+
+  messages = atomic actions
+
+    (actions are decomposed into messages,
     which are then executed one after one)
 '''
 import pdb
@@ -25,6 +25,10 @@ class TargetedMessage (Message):
         Message.__init__(self, caster)
         self.target = target
 
+class CardMessage (Message):
+    def __init__(self, caster, card):
+        Message.__init__(self, caster)
+        self.card = card
 
 
 # game messages
@@ -44,24 +48,64 @@ class Msg_EndTurn (Message):
 class Msg_Nothing (Message):
     pass
 
-class Msg_PlayCard (Message):
-    def __init__(self, caster, card, cost):
+
+# play card messages
+
+class Msg_ThrowCard (CardMessage):
+    def execute(self):
+        self.caster.throw_card(self.nb)
+    def __str__(self):
+        return "Player %s loses %s" % (self.caster,self.card)
+
+class Msg_UseMana (Message):
+    def __init__(self, caster, cost):
         Message.__init__(self, caster)
-        self.card = card
+        self.cost = cost
+    def execute(self):
+        self.caster.use_mana(self.cost)
+    def __str__(self):
+        return "Player %s loses %d mana crystal" % (self.caster,self.cost)
+
+class Msg_PlayCard (CardMessage):
+    def __init__(self, caster, card, cost):
+        CardMessage.__init__(self, caster, card)
         self.cost = cost
     def __str__(self):
         return "Card %s used by %s for %d mana" % (self.card, self.caster, self.cost)
     def execute(self):
-        self.caster.burn_card(self.card, self.cost)
+        self.caster.use_mana(self.cost)
+        self.caster.throw_card(self.card)
 
-class Msg_UseMana (Message):
-    def __init__(self, caster, nb):
-        Message.__init__(self, caster)
-        self.nb = nb
-    def execute(self):
-        self.caster.use_mana(self.nb)
+
+# start/end messages
+
+class Msg_StartAttack (TargetedMessage):
     def __str__(self):
-        return "Player %s loses %d mana crystal" % (self.caster,self.nb)
+        return "Minion %s attacks enemy %s" %(self.caster, self.target)
+class Msg_EndAttack (Message):
+    def __str__(self):
+        return "End of attack."
+
+class Msg_StartCard (CardMessage):
+    def __str__(self):
+        return "Player %s plays [%s]" % (self.caster, self.card)
+class Msg_EndCard (CardMessage):
+    def __str__(self):
+        return "[%s] finishes." % self.card
+
+class Msg_StartSpell (Msg_StartCard):
+    def __str__(self):
+        return "Player %s plays spell [%s]" % (self.caster, self.card)
+class Msg_EndSpell (Msg_EndCard):
+    def __str__(self):
+        return "End of spell."
+
+class Msg_StartHeroPower (Message):
+    def __str__(self):
+        return "[%s] uses its hero power" % self.caster
+class Msg_EndHeroPower (Message):
+    def __str__(self):
+        return "End of hero power effect"
 
 
 # minion messages
@@ -94,7 +138,7 @@ class Msg_CheckDead (Message):
         res = []  # messages of those who died
         for i in self.engine.board.everybody:
           if i.dead:
-            res.append(Msg_dead(i))
+            res.append(Msg_Dead(i))
         return res
     def __str__(self):
         return "%s asks for dead cleaning." % self.caster
@@ -117,17 +161,8 @@ class Msg_HeroDying (Msg_Dead):
     pass
 
 
+
 # attack / heal
-
-class Msg_StartAttack (TargetedMessage):
-    def __str__(self):
-        return "Minion %s attacks enemy %s" %(self.caster, self.target)
-    def execute(self):
-        self.caster.attacks()
-
-class Msg_EndAttack (Message):
-    def __str__(self):
-        return "End of attack."
 
 class Msg_Damage (TargetedMessage):
     def __init__(self, caster, target, damage):
@@ -140,6 +175,10 @@ class Msg_Damage (TargetedMessage):
 
 class Msg_HeroDamage (Msg_Damage):
     """ damage from hero power """
+    pass
+
+class Msg_SpellDamage (Msg_Damage):
+    """ damage from a spell """
     pass
 
 class Msg_RandomDamage (Message):
@@ -169,31 +208,21 @@ class Msg_MultiRandomDamage (Message):
         return "%s throws %dx%d hit damages randomly." % (self.target, self.damage, self.each)
 
 
-# card/spell messages
+# Heal messages
 
-class Msg_StartCard (Message):
-    def __init__(self, caster, card):
-        Message.__init__(self,caster)
-        self.card = card
+class Msg_Heal (TargetedMessage):
+    def __init__(self, caster, target, heal):
+        TargetedMessage.__init__(self, caster, target)
+        self.heal = heal
+    def execute(self):
+        self.target.heal(self.heal)
     def __str__(self):
-        return "Player %s plays card %s" % (self.caster, self.card)
-class Msg_EndCard (Message):
-    def __str__(self):
-        return "Card %s finishes." % self.target
+        return "%s heals %s by %dHP." % (self.target, self.caster, self.heal)
 
-class Msg_StartSpell (Msg_StartCard):
-    def __str__(self):
-        return "Player %s plays spell %s" % (self.caster, self.card)
-class Msg_EndSpell (Msg_EndCard):
-    def __str__(self):
-        return "End of spell %s" % (self.target)
+class Msg_HeroHeal (Msg_Heal):
+    pass
 
-class Msg_StartHeroPower (Message):
-    def __str__(self):
-        return "Player %s uses its hero power" % self.caster
-class Msg_EndHeroPower (Message):
-    def __str__(self):
-        return "End of hero power effect"
+
 
 
 

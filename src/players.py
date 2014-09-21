@@ -11,15 +11,19 @@ class Player (object):
     self.hero = hero
     self.name = name
     self.deck = deck
-    self.cards = None
+    self.cards = []
     self.minions = []
     self.mana = self.max_mana = 0
     self.weapon = None
     self.secrets = []
-    
+
     # init ownership
     self.hero.set_owner(self)
     self.deck.set_owner(self)
+
+  @classmethod
+  def set_engine(cls, engine):
+    cls.engine = engine
 
   def __str__(self):
       return str(self.hero)
@@ -35,8 +39,12 @@ class Player (object):
   def remove_thing(self, m):
       if m is self.weapon:
         self.weapon = None
-      else:
+      elif issubclass(type(m), Secret):
+        self.secrets.remove(m)
+      elif issubclass(type(m), Minion):
         self.minions.remove(m)
+      elif issubclass(type(m), Hero):
+        print "Hero %s died !"
 
   def add_mana_crystal(self, nb, useit=False):
     self.mana = min(10,self.mana+nb)
@@ -51,10 +59,10 @@ class Player (object):
     self.hero.start_turn()
     for m in self.minions:
       m.start_turn()
-    
+
     self.cards.append(self.deck.draw_one_card())
     self.mana = self.max_mana
-    self.add_mana_crystal(1)    
+    self.add_mana_crystal(1)
 
   def end_turn(self):
     self.hero.end_turn()
@@ -76,11 +84,13 @@ class Player (object):
       act = m.list_actions()
       if act: res += act if type(act)==list else [act]
     return res
-  
-  def burn_card(self, card, cost):
+
+  def throw_card(self, card):
+#      if type(card)==int:
+#        for i in range(card):
+#          self.cards.pop(random.randint(0,len(self.cards)-1))
+#      else:
       self.cards.remove(card)
-      self.mana -= cost
-      assert self.mana>=0
 
   def mulligan(self, cards):
       assert 0, "must be overloaded"
@@ -93,7 +103,7 @@ class Player (object):
       assert 0, "must be overloaded"
 
 
-# instanciation of players 
+# instanciation of players
 
 ### ----------- Manual (human) player -----------
 
@@ -101,7 +111,7 @@ def get_choice(range):
   while True:
     try:
       n = int(raw_input())
-      if n in range:  
+      if n in range:
         return n
     except ValueError:
       pass
@@ -110,7 +120,7 @@ class HumanPlayer (Player):
   ''' human player : ask the player what to do'''
   def mulligan(self, cards):
       assert 0, "to be implemented by user interface"
-     
+
   def choose_actions(self, actions):
       assert 0, "to be implemented by user interface"
 
@@ -135,7 +145,7 @@ class RandomPlayer (Player):
 ### ------ attempter simple IA based on heuristics without forecasting ------------
 
 class SimpleIA (Player):
-  ''' todo 
+  ''' todo
   attempter simple IA based on heuristics without forecasting'''
   pass
 

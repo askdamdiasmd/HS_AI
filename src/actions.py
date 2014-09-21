@@ -1,14 +1,14 @@
 '''
 list of all possible actions.
 
-An action includes 
- - a set of possible targets and 
+An action includes
+ - a set of possible targets and
  - an effect (eg. to inflict damages)
 
   Actions are potential choices for the player.
-  
-  When an action is selected, it is executed, i.e., 
-  it is decomposed into atomic messages, which are 
+
+  When an action is selected, it is executed, i.e.,
+  it is decomposed into atomic messages, which are
   themselves executed.
 '''
 import pdb
@@ -97,15 +97,7 @@ class Act_Attack (Action):
     def execute(self):
         target = self.choices[0]
         assert type(target)!=list
-        self.caster.n_remaining_attack -= 1
-        assert self.caster.n_remaining_attack>=0
-        msgs = [Msg_StartAttack(self.caster),
-                [Msg_Damage(self.caster, target, self.caster.atq),
-                Msg_Damage(target, self.caster, target.atq)],
-                Msg_EndAttack(self.caster) ]
-        if not target.atq: msgs.pop(2) # remove useless message
-        self.engine.send_message(msgs)
-
+        self.caster.attacks(target)
 
 class Act_MinionAttack (Act_Attack):
     ''' when one minion attacks something'''
@@ -134,8 +126,8 @@ class Act_PlaySpellCard (Act_PlayCard):
         Act_PlayCard.execute(self)
         self.engine.send_message([
           Msg_StartSpell(self.caster,self.card),
-          self.actions(self), 
-          Msg_EndSpell(self.caster)])
+          self.actions(self),
+          Msg_EndSpell(self.caster,self.card)])
 
 
 class Act_SingleSpellDamageCard (Act_PlaySpellCard):
@@ -156,8 +148,8 @@ class Act_MultiSpellDamageCard (Act_PlaySpellCard):
         Act_PlayCard.execute(self)
         self.engine.send_message([
           Msg_StartSpell(self.caster,self.card),
-          [Msg_SpellDamage(self.caster,t,self.damage) for t in self.choices[0]], 
-          Msg_EndSpell(self.caster),
+          [Msg_SpellDamage(self.caster,t,self.damage) for t in self.choices[0]],
+          Msg_EndSpell(self.caster,self.card),
         ])
 
 class Act_RandomSpellDamageCard (Act_PlaySpellCard):
@@ -168,8 +160,8 @@ class Act_RandomSpellDamageCard (Act_PlaySpellCard):
         Act_PlaySpellCard.execute(self)
         self.engine.send_message([
           Msg_StartSpell(self.caster,self.card),
-          [Msg_MultiRandomSpellDamage(self.caster,self.choices[0],self.damage)], 
-          Msg_EndSpell(self.caster),
+          [Msg_MultiRandomSpellDamage(self.caster,self.choices[0],self.damage)],
+          Msg_EndSpell(self.caster,self.card),
         ])
 
 
@@ -188,7 +180,7 @@ class Act_HeroPower (Action):
         self.engine.send_message([
           Msg_UseMana(self.caster,self.cost),
           Msg_StartHeroPower(self.caster),
-          self.actions(self), 
+          self.actions(self),
           Msg_EndHeroPower(self.caster),
         ])
 
@@ -224,7 +216,7 @@ class Act_HeroPower (Action):
 
 class Target:
   def __init__(self, hero=None ):
-    # hero = friends or enemy: 
+    # hero = friends or enemy:
     #   None = whichever
     #   hero = belonging to this hero
     self.hero = hero

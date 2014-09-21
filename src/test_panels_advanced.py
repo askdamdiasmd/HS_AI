@@ -106,45 +106,43 @@ while ( (ch != CCHAR('q')) and (ch != CCHAR('Q')) ):
     mvwaddstr(stdscr,22,0,"current panel = %d" % (1+panel_userptr(top)))
     mvwaddstr(stdscr,16,20,"top panel = %d" % (1+panel_userptr(top)))
     for i in range(3):
-      touchwin(my_wins[i])    
+      touchwin(my_wins[i])
     update_panels()
     doupdate()
     ch = getch()
     for i in range(19,22):
       wmove(stdscr,i,0)
       mvwaddstr(stdscr,i,0," "*NCOLS)
-    
+
     if ch == ord('\t'):
         next(1)
-    
+
     elif ch == KEY_UP:
         y,x = getbegyx(panel_window(top))
-        if y>0: move_panel(top,y-1,x)
+        move_panel(top,y-1,x)
     elif ch == KEY_DOWN:
         y,x = getbegyx(panel_window(top))
-        ty,tx = getmaxyx(panel_window(top))
-        if y+ty<NROWS: move_panel(top,y+1,x)
+        move_panel(top,y+1,x)
     elif ch == KEY_LEFT:
         y,x = getbegyx(panel_window(top))
-        if x>0: move_panel(top,y,x-1)
+        move_panel(top,y,x-1)
     elif ch == KEY_RIGHT:
         y,x = getbegyx(panel_window(top))
-        ty,tx = getmaxyx(panel_window(top))
-        if x+tx<NCOLS: move_panel(top,y,x+1)
-    
+        move_panel(top,y,x+1)
+
     elif ch == KEY_MOUSE:
         mouse_state = getmouse()
         if mouse_state==ERR: continue
         id, x, y, z, bstate = mouse_state
         mvwaddstr(stdscr,19,0,"mouse position = %d,%d  state={%s}" % (x,y,''.join([(bstate&(1<<i)) and '%d,'%i or '' for i in range(32)])))
-        
+
         if bstate & BUTTON5_PRESSED:
           next(1)
           continue
         elif bstate & BUTTON4_PRESSED:
           next(-1)
           continue
-        
+
         cur = top #panel_below(None)
         n = len("panel stack = ")
         mvwaddstr(stdscr,21,0,"panel stack = ")
@@ -158,7 +156,7 @@ while ( (ch != CCHAR('q')) and (ch != CCHAR('Q')) ):
             break
           cur = panel_below(cur)
         if not cur: continue
-        
+
         if bstate & BUTTON1_PRESSED:
           if top!=cur:
             top_panel(cur)

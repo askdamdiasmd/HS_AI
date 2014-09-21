@@ -1,5 +1,5 @@
 '''
-Generalistic classes 
+Generalistic classes
 '''
 import pdb
 from messages import *
@@ -14,10 +14,10 @@ class Thing (object):
       self.owner = card.owner
       self.hp = self.max_hp = card.hp
       self.atq = card.atq
-      
+
       # some status
       self.dead = False
-      
+
       # what is below is what can be silenced
       self.action_filters = card.action_filters  # reacting to actions before selection: [(Act_class, handler),...]
       self.modifiers = card.modifiers # reacting to event at emission time, list: [(Msg_Class, event),...]
@@ -46,7 +46,7 @@ class Thing (object):
 
 #    def check_trigger(self, trigger):
 #      for tr,event in self.triggers:
-#        if tr==trigger: 
+#        if tr==trigger:
 #          event.execute(self)
 
   def modify_msg(self, msg):
@@ -70,24 +70,21 @@ class Thing (object):
           t = t.__base__
       return res
 
+  def has_effect(self, effect):
+      return effect in self.effects
+
   def popup(self):  # executed when created
-      self.n_max_att = 2 if 'windfury' in self.effects else 1
+      self.n_max_att = 2 if self.has_effect('windfury') else 1
       self.n_remaining_att = 0
+      if self.has_effect('charge'):
+        self.n_remaining_att = self.n_max_att
       #self.check_trigger('battlecry')
-  
+
   def start_turn(self):
-      self.n_remaining_att = self.n_max_att
+      self.n_remaining_att = 0 if self.has_effect('frozen') else self.n_max_att
 
   def end_turn(self):
       pass
-
-  def attacks(self):
-      self.n_remaining_att -= 1
-      assert self.n_remaining_att>=0
-
-  def hurt(self, damage):
-      self.hp -= damage
-      self.check_dead()
 
   def silence(self):
         self.action_filter = []
@@ -96,42 +93,10 @@ class Thing (object):
         while self.effects:
           e = self.effects.pop()
           if type(e)!=str:  e.undo(self)
-    
-  def check_dead(self):
-        if self.hp <= 0:
-          self.dead = True
-          self.engine.send_message( Msg_CheckDead(self) )
 
   def death(self):
-        pos = self.engine.board.remove_thing(self)
-        for e in self.effects:
-          if e[0]=='deathrattle':
-            self.engine.send_message(Msg_DeathRattle(self,e[1],pos))
-        self.silence()
-
-### ------------ Weapon ----------
-
-class Weapon (Thing):
-  def __init__(self, card, hero ):
-      Thing.__init__(self, card )
-      self.hero = hero
-
-  def list_actions(self):
-      if self.n_remaining_att<=0:
-        return None
-      else:
-        return Act_Attack(self, self.board.list_attackable_characters(self.owner))
-
-  def popup(self):  # executed when created
-      Thing.popup(self)
-      self.n_remaining_att = 1  # has charge naturally
-   
-  def hurt(self, damage):
-      self.hero.hurt(damage)
-      self.hp -= 1
-      if self.hp <= 0:
-        self.dead = True
-        self.engine.send_message( Msg_CheckDead(self) )
+      self.silence()
+      self.engine.board.remove_thing(self)
 
 
 ### ------------ Secret ----------
@@ -153,13 +118,58 @@ class Creature (Thing):
   def __init__(self, card ):
       Thing.__init__(self, card )
 
-  def heal(self, heal):
-        self.hp = min(self.max_hp, self.hp+heal)
+  def hurt(self, damage):
+      self.hp -= damage
+      self.check_dead()
+
+  def heal(self, hp):
+      self.hp = min(self.max_hp, self.hp+hp)
 
   def change_hp(self, hp):
         self.hp += hp
         self.max_hp += hp
         self.cheack_dead()
+
+  def check_dead(self):
+        if self.hp <= 0:
+          self.dead = True
+          self.engine.send_message( Msg_CheckDead(self) )
+
+  def attacks(self, target):
+      self.n_remaining_att -= 1
+      assert self.n_remaining_att>=0
+      msgs = [Msg_Damage(self, target, self.atq)]
+      if target.atq: msgs.append(Msg_Damage(target, self, target.atq))
+      self.engine.send_message([Msg_StartAttack(self,target),
+                                msgs,
+                                Msg_EndAttack(self)])
+
+
+
+### ------------ Weapon ----------
+
+class Weapon (Creature):
+  def __init__(self, card ):
+      Creature.__init__(self, card )
+      self.hero = card.owner.hero
+
+  def list_actions(self):
+      if self.n_remaining_att<=0:
+        return None
+      else:
+        return Act_Attack(self, self.board.list_attackable_characters(self.owner))
+
+  def popup(self):  # executed when created
+      Thing.popup(self)
+      self.n_remaining_att = 1  # has charge naturally
+
+  def hurt(self, damage):
+      self.hero.hurt(damage)
+      self.hp -= 1
+      if self.hp <= 0:
+        self.dead = True
+        self.engine.send_message( Msg_CheckDead(self) )
+
 
 
 ### ------------ Minion ----------
@@ -177,11 +187,6 @@ class Minion (Creature):
         return None
       else:
         return Act_Attack(self, self.engine.board.list_attackable_characters(self.owner))
-
-  def popup(self):  # executed when created
-      Creature.popup(self)
-      if 'charge' in self.effects:
-        self.n_remaining_att = self.n_max_att
 
 
 

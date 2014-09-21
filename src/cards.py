@@ -9,12 +9,13 @@ from actions import *
 ### ------- Cards -------------
 
 class Card (object):
-    def __init__(self, name, cost, cls=None, desc='', name_fr='', img='' ):
+    def __init__(self, name, cost, cls=None, desc='', name_fr='', desc_fr='', img='' ):
       self.name = name
+      self.name_fr = name_fr
       self.cost = cost  # mana cost
       self.cls = cls  # card class = 'priest', ...
       self.desc = desc
-      self.name_fr = name_fr
+      self.desc_fr = desc_fr
       self.img = img
       self.owner = None # specified after assigning deck to hero
       self.action_filters = [] # reacting to actions before selection: [(Act_class, handler),...]
@@ -62,7 +63,7 @@ class Card_Wrath (Card_Spell):
         targets = self.engine.board.list_characters()
         hero = self.owner
         first = Act_SingleSpellDamageCard(self,targets,damage=3)
-        actions = lambda self: [Msg_SpellDamage(self.caster,self.choices[0],self.damage), 
+        actions = lambda self: [Msg_SpellDamage(self.caster,self.choices[0],self.damage),
                                 Msg_DrawCard(hero)]
         second = Act_PlayCardSpell(self,targets,damage=1,actions=actions)
         return [first,second]
@@ -87,18 +88,18 @@ def get_cardbook():
   cardbook.append( Card_Minion('Wisp',0,1,1,name_fr='Feu follet') )
   cardbook.append( Card_Minion('River Crocolisk',2,3,2,name_fr='Crocilisque des rivieres') )
   cardbook.append( Card_Minion('Chillwind Yeti',4,5,4,name_fr='Yeti Noroit') )
-  
+
   # add fake creatures
   for i in range(1,11):
     cardbook.append( Card_Minion('Fake Creature %d'%i,i,i,i+1,name_fr="Fausse creature %d"%i) )
-    
+
   # add fake spells
   for i in range(1,10):
     cardbook.append( Card_FakeSpell(i) )
-  
+
   # Druid cards
   cardbook.append( Card_Wrath() )
-  
+
   # transform into a Dictionary
   cardbook = {card.name:card for card in cardbook}
   return cardbook
@@ -106,17 +107,18 @@ def get_cardbook():
 
 
 def fake_deck():
+    from copy import copy
     cardbook = get_cardbook()
     deck = []
-    deck += [cardbook["Wisp"]]*4
-    deck += [cardbook["River Crocolisk"]]*4
-    deck += [cardbook["Chillwind Yeti"]]*4
+    deck += [copy(cardbook["Wisp"]) for i in range(4)]
+    deck += [copy(cardbook["River Crocolisk"]) for i in range(4)]
+    deck += [copy(cardbook["Chillwind Yeti"]) for i in range(4)]
     for i in range(1,11):
-      deck += [cardbook["Fake Creature %d"%i]]
+      deck += [copy(cardbook["Fake Creature %d"%i])]
     for i in range(1,9):
-      deck += [cardbook["Fake Damage Spell %d"%i]]
+      deck += [copy(cardbook["Fake Damage Spell %d"%i])]
 
-    from decks import Deck    
+    from decks import Deck
     return Deck(deck)
 
 
