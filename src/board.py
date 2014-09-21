@@ -13,6 +13,9 @@ class Slot (object):
   def __init__(self, owner, pos):
       self.owner = owner
       self.pos = pos
+  @classmethod
+  def set_engine(cls, engine):
+    cls.engine = engine  
   def __str__(self):
       return "Position %d" % self.pos
 
@@ -67,7 +70,8 @@ class Board:
   def get_free_slots(self, player):
       return [Slot(player,i) for i in range(len(player.minions)+1)]
 
-
+  def get_minion_pos(self, m):
+      return Slot(m.owner, m.owner.minions.index(m))
 
 
 

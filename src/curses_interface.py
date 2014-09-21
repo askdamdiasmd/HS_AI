@@ -237,19 +237,20 @@ class Button:
       uc.mvwaddstr(self.win,1,1,self.text)
       return self.win
 
-def get_minion_pos(self, pos):
+def get_minion_pos(self):
     """ return position, space """
     NR,NC = uc.getmaxyx(stdscr)
     n = len(self.owner.minions)
     sp = ([3]*5+[2,1,0])[n] # spacement between minions
-    return int(NC-3-(11+sp)*n)/2+(11+sp)*pos, sp
+    y = 14 if self.owner==self.engine.get_current_player() else 5
+    return y, int(NC-3-(11+sp)*n)/2+(11+sp)*self.pos, sp
 
 Slot.get_minion_pos = get_minion_pos
 
 def draw_Slot(self, highlight=0, bkgd=0, **kwargs):
     if not hasattr(self,"win"):
-      x, sp = self.get_minion_pos(self.pos)
-      win = self.win = uc.newwin(5,sp,14,x)
+      y, x, sp = self.get_minion_pos()
+      win = self.win = uc.newwin(5,sp,y,x-sp)
       self.panel = uc.new_panel(win)
       set_panel_userptr(self.panel, self)
     
@@ -260,6 +261,30 @@ def draw_Slot(self, highlight=0, bkgd=0, **kwargs):
       uc.del_panel(self.panel)
       del self.panel
       del self.win
+
+def draw_Minion(self, highlight=0, bkgd=0, **kwargs):
+    slot = self.engine.board.get_minion_pos(self)
+    y,x = slot.get_minion_pos()[:2]
+    
+    if not hasattr(self,"win"):
+      win = self.win = uc.newwin(5,11,y,x)
+      self.panel = uc.new_panel(win)
+      set_panel_userptr(self.panel, self)
+    else:
+      uc.move_panel(self.panel,y,x)
+    
+    win = self.win
+    ty, tx = uc.getmaxyx(win)
+    uc.wbkgd(win,bkgd)
+    
+    name = self.card.name_fr or self.card.name
+    
+    if highlight:  uc.wattron(win,highlight)
+    uc.box(win)
+    print_longtext(win,1,1,ty-1,tx-1,name,uc.magenta_on_black)
+    uc.mvwaddstr(win,ty-1,1,"%2d "%self.atq)
+    uc.mvwaddstr(win,ty-1,tx-4,"%2d "%self.hp)
+    if highlight:  uc.wattroff(win,highlight)
 
 
 #Draws board and cards
@@ -291,8 +316,8 @@ def draw_Board(self):
       uc.addch(9564)
 
     print_middle(stdscr, 0,0, NC, " Adversary has %d cards. "%len(adv.cards))
-    adv.hero.draw(pos=(1,(NC-12)/2))
-    player.hero.draw(pos=(20,(NC-12)/2))
+    adv.hero.draw(pos=(1,(NC-18)/2))
+    player.hero.draw(pos=(20,(NC-18)/2))
 
     # draw mana
     for i in [2,22]:
@@ -301,6 +326,12 @@ def draw_Board(self):
       uc.mvaddstr(i,NC-11-len(text), text, uc.black_on_cyan)
       uc.mvhline(i,NC-11,9826 | uc.cyan_on_black, p.max_mana)
       uc.mvhline(i,NC-11,9830 | uc.cyan_on_black, p.mana)
+
+    # draw minions
+    for m in player.minions:
+      m.draw()
+    for m in adv.minions:
+      m.draw()
 
     if not hasattr(self,"end_turn"):
       self.end_turn = Button(11,NC,"End turn",align='right')
@@ -519,6 +550,7 @@ class HumanPlayerAscii (HumanPlayer):
             else:
               choices.append(act)
             if len(choices)>=len(action.choices):
+              erase_elems(showlist)
               return action.select(choices)
             erase_elems(showlist)
             showlist = [(obj,obj,{}) for obj in action.choices[len(choices)]]

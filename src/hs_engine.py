@@ -22,7 +22,7 @@ def tree_go_down( level, stack=[] ):
 
 class HSEngine:
   def __init__(self, player1, player2 ):
-    from board import Board
+    from board import Board, Slot
     self.players = [player1, player2]
     self.board = Board(player1, player2)
     self.turn = 0
@@ -32,6 +32,7 @@ class HSEngine:
 
     # init global variables : everyone can access board or send messages
     Board.set_engine(self)
+    Slot.set_engine(self)
     Thing.set_engine(self)
     Action.set_engine(self)
     Effect.set_engine(self)
@@ -53,11 +54,11 @@ class HSEngine:
 
     self.exec_messages()
 
-  def send_status(self, messages):
-    """ status messages are only usefull for the UI """
-    if type(messages)!=list:
-      messages = [messages]
-    self.executed += messages
+#  def send_status(self, messages):
+#    """ status messages are only usefull for the UI """
+#    if type(messages)!=list:
+#      messages = [messages]
+#    self.executed += messages
 
   def exec_messages(self):
     if self.executing:  return # already doing it !
