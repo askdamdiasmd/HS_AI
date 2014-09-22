@@ -1,4 +1,4 @@
-import pdb
+import sys, os, pdb
 from board import Board, Slot
 from players import *
 from messages import *
@@ -88,6 +88,15 @@ def hand_card_string(c):
 
 def init_screen():
   stdscr = uc.initscr()
+  NR,NC = uc.getmaxyx(stdscr)
+  if NR<30: 
+    uc.endwin()
+    print >>sys.stderr, 'error: screen not high enough (min 30 lines)'
+    sys.exit()
+  if NC<80: 
+    uc.endwin()
+    print >>sys.stderr, 'error: screen not wide enough (min 80 columns)'
+    sys.exit()
   uc.start_color()
   uc.cbreak()
   uc.curs_set(0)
@@ -97,12 +106,12 @@ def init_screen():
   uc.mousemask(uc.ALL_MOUSE_EVENTS | uc.REPORT_MOUSE_POSITION)
   # init color pairs
   color_pairs = []
+  name={getattr(uc,name):name[6:].lower() for name in dir(uc) if name.startswith('COLOR_') and type(getattr(uc,name))==int}
   def create_color_pair( col_fg, col_bg ):
-    name={0:'black',1:'blue',2:'green',3:'cyan',4:'red',5:'magenta',6:'yellow',7:'white'}
     colname = '%s_on_%s' % (name[col_fg],name[col_bg])
     color_pairs.append((col_fg,col_bg))
     ncol = len(color_pairs)
-#    assert ncol<7, 'error: too many color pairs'
+    #assert ncol<7, 'error: too many color pairs'
     uc.init_pair(ncol, col_fg, col_bg)
     setattr(uc,colname,uc.COLOR_PAIR(ncol))
   create_color_pair(uc.COLOR_CYAN, uc.COLOR_BLACK)
@@ -113,15 +122,15 @@ def init_screen():
   create_color_pair(uc.COLOR_BLACK, uc.COLOR_GREEN)
   create_color_pair(uc.COLOR_BLACK, uc.COLOR_RED)
   create_color_pair(uc.COLOR_BLACK, uc.COLOR_CYAN)
-  create_color_pair(uc.COLOR_CYAN, uc.COLOR_BLACK)
+  create_color_pair(uc.COLOR_BLACK, uc.COLOR_BLUE)
   return stdscr
 
-def print_middle(win,y,x,width,text,attr=None):
+def print_middle(win,y,x,width,text,attr=0):
     if win==None: win = stdscr
     x = max(x, x+(width - len(text)) / 2)
     uc.mvwaddstr(win, y, x, text[:width], attr)
 
-def print_longtext(win,y,x,endy,endx,text,attr=None):
+def print_longtext(win,y,x,endy,endx,text,attr=0):
     if win==None: win = stdscr
     text = text.split()
     width = endx-x
@@ -132,6 +141,13 @@ def print_longtext(win,y,x,endy,endx,text,attr=None):
         line += ' '+text.pop(0)
       print_middle(win,y,x,width,line,attr)
       y += 1
+
+def top_panel():
+  ''' due to a bug in unicurses we recode it here '''
+  if os.name=='nt':
+    return uc.panel_below(None) # get top panel
+  else:
+    return uc.curses.panel.top_panel()
 
 def debug():
     uc.endwin()
@@ -344,7 +360,7 @@ def draw_Board(self):
     for i,card in enumerate(player.cards):
       x = startx + int(actual_NC*i/nc)
       card.draw(pos=(24,x), small=NR-24)
-
+    
     #uc.touchwin(self.end_turn.win)
     uc.update_panels()
     uc.doupdate()
@@ -370,6 +386,7 @@ def draw_Card(self, pos=None, highlight=0, cost=None, small=True, bkgd=0, **kwar
         uc.hide_panel(self.panel)
       if not hasattr(self,"small_win"):
         ty, tx = small, 15
+        if pos==None: debug()
         self.small_win = uc.newwin(ty,tx,pos[0],pos[1])
         self.small_panel = uc.new_panel(self.small_win)
         set_panel_userptr(self.small_panel, self)
@@ -412,11 +429,11 @@ def draw_Card(self, pos=None, highlight=0, cost=None, small=True, bkgd=0, **kwar
     if cost==None:
       cost=self.cost
     if cost==self.cost:
-      uc.mvwaddstr(win, 0,0, "(%d)"%cost, uc.black_on_cyan) #uc.col_white_blue)
+      uc.mvwaddstr(win, 0,0, "(%d)"%cost, uc.black_on_cyan)
     elif cost<self.cost:
-      uc.mvwaddstr(win, 0,0, "(%d)"%cost, uc.white_on_green) #uc.col_white_blue)
+      uc.mvwaddstr(win, 0,0, "(%d)"%cost, uc.white_on_green)
     else:
-      uc.mvwaddstr(win, 0,0, "(%d)"%cost, uc.white_on_red) #uc.col_white_blue)
+      uc.mvwaddstr(win, 0,0, "(%d)"%cost, uc.white_on_red)
     
   
 
@@ -439,11 +456,15 @@ class HumanPlayerAscii (HumanPlayer):
       engine.board.draw()
       NR,NC = uc.getmaxyx(stdscr)
       nc = len(cards)
+      end_button = Button(25,(NC-6)/2,'  OK  ')
+      showlist = [(end_button,dict(highlight=uc.black_on_blue))]
       for i,card in enumerate(cards):
-          card.draw(pos=(6,int(NC*(i+0.5)/nc-7)), small=False, highlight=uc.black_on_green)
-
+          showlist.append((card,dict(pos=(6,int((NC-6)*(i+0.5)/nc-7)), small=False, highlight=uc.black_on_green)))
+      
       discarded = []
       while True:
+        for card,kwargs in showlist:
+          card.draw(**kwargs)
         uc.update_panels()
         uc.doupdate()
         ch = uc.getch()
@@ -451,28 +472,43 @@ class HumanPlayerAscii (HumanPlayer):
           mouse_state = uc.getmouse()
           if mouse_state==uc.ERR: continue
           id, x, y, z, bstate = mouse_state
-          if not(bstate & uc.BUTTON1_PRESSED): continue
-
+          
           which = None
-          for i,card in enumerate(cards):
+          for card,kwargs in showlist:
             if mouse_in_win(card.win,y,x):
-              which = card
+              which = card,kwargs
               break
-          if not which: continue
-
-          if which in discarded:
-            uc.wbkgd(card.win,uc.COLOR_PAIR(0))
-            discarded.remove(which)
-          else:
-            uc.wbkgd(card.win,uc.black_on_red)
-            discarded.append(which)
+          
+          if bstate & uc.BUTTON1_PRESSED: 
+            if not which: continue
+            if card is end_button:
+              kwargs['bkgd'] = uc.black_on_blue
+            else:
+              if card in discarded:
+                kwargs['bkgd'] = 0
+                discarded.remove(card)
+              else:
+                kwargs['bkgd'] = uc.black_on_red
+                discarded.append(card)
+          
+          elif bstate & uc.BUTTON1_RELEASED: 
+            if card is end_button:
+              break
+            else:
+              # reset end button
+              kwargs = showlist[0][1]
+              kwargs['bkgd'] = 0
+        
         elif ch in (ord(' '), ord('\n')):
           break
-
+      
+      # clean up
+      uc.del_panel(end_button.panel)
       for card in cards:
-          uc.hide_panel(card.panel)
+        uc.hide_panel(card.panel)
       uc.update_panels()
       uc.doupdate()
+      
       return discarded
 
   def choose_actions(self, actions):
@@ -518,7 +554,7 @@ class HumanPlayerAscii (HumanPlayer):
           #uc.mvaddstr(5,0,"mouse %d %d %s"%(y,x,bin(bstate)))
 
           sel = None
-          cur = uc.panel_below(None) # get top panel
+          cur = top_panel()  
           while cur:
             obj = get_panel_userptr(cur)
             if issubclass(type(obj),Card) or obj in mapping:
@@ -563,6 +599,7 @@ class HumanPlayerAscii (HumanPlayer):
           erase_elems(showlist)
           showlist = init_showlist
         else:
+          uc.endwin()
           assert 0
 
 
@@ -589,6 +626,7 @@ if __name__=="__main__":
     while not engine.is_game_ended():
       engine.board.draw()
       engine.play_turn()
+      uc.endwin()
       assert 0
 
     uc.endwin()
