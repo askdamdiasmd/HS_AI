@@ -56,6 +56,11 @@ class Msg_DrawCard (CardMessage):
     def __str__(self):
         return '%s draw %s from the deck' % (self.caster, self.card)
 
+class Msg_DrawBurnCard (CardMessage):
+    '''a card was burned because hand is too full'''
+    def __str__(self):
+        return '%s draw %s from the deck' % (self.caster, self.card)
+
 class Msg_ThrowCard (CardMessage):
     def __str__(self):
         return "Player %s loses %s" % (self.caster,self.card)

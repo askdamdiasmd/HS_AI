@@ -88,8 +88,11 @@ class Player (object):
   def draw_card(self):
     card = self.deck.draw_one_card()
     if card:  
-      self.cards.append(card)
-      self.engine.display_msg(Msg_DrawCard(self,card))
+      if len(self.cards)<10:
+        self.cards.append(card)
+        self.engine.display_msg(Msg_DrawCard(self,card))
+      else:
+        self.engine.display_msg(Msg_DrawBurnCard(self,card))
 
   def throw_card(self, card):
 #      if type(card)==int:
