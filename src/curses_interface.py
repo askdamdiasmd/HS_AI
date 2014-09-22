@@ -225,15 +225,16 @@ def draw_Slot(self, highlight=0, bkgd=0, **kwargs):
 
 ### Minion -----------
 
-def draw_Minion(self, highlight=0, bkgd=0, y=0, **kwargs):
+def draw_Minion(self, highlight=0, bkgd=0, y=-1, **kwargs):
     slot = self.engine.board.get_minion_pos(self)
     x = slot.get_screen_pos()[0]
     
     if not hasattr(self,"win"):
+      assert y>=0
       win = self.win = uc.newwin(5,11,y,x)
       self.panel = uc.new_panel(win)
       set_panel_userptr(self.panel, self)
-    else:
+    elif y>=0:
       uc.move_panel(self.panel,y,x)
     
     win = self.win
@@ -250,14 +251,17 @@ def draw_Minion(self, highlight=0, bkgd=0, y=0, **kwargs):
     if highlight:  uc.wattroff(win,highlight)
 
 ### Card -----------
+card_size = 14,15
 
 def draw_Card(self, pos=None, highlight=0, cost=None, small=True, bkgd=0, **kwargs):
     name = self.name_fr or self.name
     desc = self.desc_fr or self.desc
 
     if not small:
-      ty,tx = 14,15
+      ty,tx = card_size
       if not pos and hasattr(self,"small_panel"):
+        self.ty = ty
+        self.tx = tx
         y,x = uc.getbegyx(self.small_win)
         NR,NC = uc.getmaxyx(stdscr)
         pos = NR-ty, x
@@ -266,18 +270,24 @@ def draw_Card(self, pos=None, highlight=0, cost=None, small=True, bkgd=0, **kwar
         self.panel = uc.new_panel(self.win)
         set_panel_userptr(self.panel, self)
       win, panel = self.win, self.panel
+      uc.top_panel(panel)
     else: # small card version
       if hasattr(self,"panel"):
         uc.hide_panel(self.panel)
       if not hasattr(self,"small_win"):
-        ty, tx = small, 15
+        ty, tx = small, card_size[1]
         if pos==None: debug()
         self.small_win = uc.newwin(ty,tx,pos[0],pos[1])
         self.small_panel = uc.new_panel(self.small_win)
         set_panel_userptr(self.small_panel, self)
       win, panel = self.small_win, self.small_panel
+      ty, tx = uc.getmaxyx(win)
+      if type(small)==int and small!=ty: # redo
+        uc.del_panel(panel)
+        del self.small_win
+        del self.small_panel
+        return self.draw(pos=pos, highlight=highlight, cost=cost, small=small, bkgd=bkgd)
     
-    uc.top_panel(panel)
     ty, tx = uc.getmaxyx(win)
     if pos and pos!=uc.getbegyx(win):
       uc.move_panel(panel,*pos)
@@ -293,12 +303,8 @@ def draw_Card(self, pos=None, highlight=0, cost=None, small=True, bkgd=0, **kwar
       uc.mvwaddstr(win,ty-1,1,' '*(tx-2))
 
     if issubclass(type(self),Card_Minion):
-      if small:
-        mid = ty
-        y,x,h,w = 1,2,ty-1,tx-4
-      else:
-        mid = ty/2
-        y,x,h,w = 1,2,mid-2,tx-4
+      mid = card_size[0]/2
+      y,x,h,w = 1,2,mid-2,tx-4
       manual_box(win,y,x,h,w)
       print_longtext(win,y+1,x+1,y+h-1,x+w-1,name,uc.magenta_on_black)
       uc.mvwaddstr(win,y+h-1,x+1,"%2d "%self.atq)
@@ -338,6 +344,24 @@ def draw_Msg_StartTurn(self):
     button.delete()
     self.engine.board.draw()
 
+def draw_Msg_DrawCard(self):
+    bottom_player = self.engine.board.get_top_bottom_players()[1]
+    if bottom_player==self.caster:
+      self.engine.board.draw('cards',which=self.caster,last_card=False)
+      card = self.card
+      NR,NC = uc.getmaxyx(stdscr)
+      ty,tx = card_size
+      sy,sx = 12, NC-tx
+      ey,ex = self.engine.board.get_card_pos(card)
+      for y in range(sy,ey+1):
+        x = int(0.5+sx+(ex-sx)*(y-sy)/float(ey-sy))
+        h = max(0,NR-y)
+        card.draw(highlight=uc.black_on_yellow,pos=(y,x),small=0 if h>=ty else h)
+        uc.update_panels()
+        uc.doupdate()
+        time.sleep(0.05 + 0.6*(y==sy))
+    self.engine.board.draw('cards',which=self.caster)
+
 def draw_Msg_EndTurn(self):
     for card in self.caster.cards:
       if hasattr('card','small_panel'):
@@ -360,6 +384,12 @@ def draw_Msg_ThrowCard(self):
 
 def draw_Msg_AddMinion(self):
     self.engine.board.draw('minions',which=self.caster)
+
+def draw_Msg_DeadMinion(self):
+    uc.del_panel(self.caster.panel)
+    del self.caster.panel
+    del self.caster.win
+    self.engine.board.draw('minions',which=self.caster.owner)
 
 
 """
@@ -410,15 +440,32 @@ def draw_Msg_EndSpell (Msg_EndCard):
 """
 
 ### Board --------
+def get_card_pos(self, card):
+  NR,NC = uc.getmaxyx(stdscr)
+  nc = len(card.owner.cards)
+  ty,tx = card_size
+  actual_NC = min(NC,tx*nc)
+  startx = (NC - actual_NC)/2
+  i = card.owner.cards.index(card)
+  return 24, startx + int((actual_NC-tx)*i/(nc-1))
 
-def draw_Board(self, what='bkgd decks hero cards mana minions', which=None):
+Board.get_card_pos = get_card_pos
+
+def get_top_bottom_players(self):
+  player = self.engine.get_current_player()
+  adv = self.engine.get_other_player()
+  if self.switch==False and self.engine.turn%2: 
+    player,adv = adv,player # prevent top/down switching
+  return adv, player
+
+Board.get_top_bottom_players = get_top_bottom_players
+
+
+def draw_Board(self, what='bkgd decks hero cards mana minions', which=None, last_card=True):
     NR,NC = uc.getmaxyx(stdscr)
     
     # clear screen
-    player = self.engine.get_current_player()
-    adv = self.engine.get_other_player()
-    if self.switch==False and self.engine.turn%2: 
-      player,adv = adv,player # prevent top/down switching
+    adv, player = self.get_top_bottom_players()
     which = {player,adv} if not which else {which}
     
     if 'bkgd' in what:
@@ -459,12 +506,9 @@ def draw_Board(self, what='bkgd decks hero cards mana minions', which=None):
       if adv in which:
         print_middle(stdscr, 0,0, NC, " Adversary has %d cards. "%len(adv.cards))
       if player in which:
-        nc = len(player.cards)
-        actual_NC = min(NC,15*nc)
-        startx = (NC - actual_NC)/2
-        for i,card in enumerate(player.cards):
-          x = startx + int(actual_NC*i/nc)
-          card.draw(pos=(24,x), small=NR-24)
+        cards = player.cards if last_card else player.cards[:-1]
+        for card in cards:
+          card.draw(pos=self.get_card_pos(card), small=NR-24)
     
     # draw mana
     if 'mana' in what:
@@ -575,7 +619,8 @@ class HumanPlayerAscii (HumanPlayer):
           pass #act_hero.append(a)
         elif issubclass(type(a),Act_PlayCard):
           showlist.append((a,a.card,{'small':True}))
-          remaining_cards.remove(a.card)
+          if a.card in remaining_cards: # choice_of_cards
+            remaining_cards.remove(a.card)
         elif issubclass(type(a),Act_Attack):
           pass  #act_atq.append(a)
         else:
@@ -583,7 +628,7 @@ class HumanPlayerAscii (HumanPlayer):
       # we can also inspect non-playable cards
       for card in remaining_cards:
         showlist.append((None,card,{'small':True}))
-
+      
       def erase_elems(showlist):
         for a,obj,kwargs in showlist:
           obj.draw(small=True)  # erase everything
@@ -598,9 +643,9 @@ class HumanPlayerAscii (HumanPlayer):
           obj.draw(highlight=highlight,**kwargs)
           mapping[obj] = (a,kwargs)
         
-        uc.mvaddstr(5,0,"%d choices"%(len(showlist)))
         uc.update_panels()
         uc.doupdate()
+        
         ch = uc.getch()
         
         if ch==uc.KEY_MOUSE:
@@ -631,8 +676,8 @@ class HumanPlayerAscii (HumanPlayer):
               kwargs['bkgd'] = uc.black_on_green if a else 0
               kwargs['small'] = False
               # put in last position = front
-              showlist.remove((a,sel,kwargs))
-              showlist.append((a,sel,kwargs))
+              #showlist.remove((a,sel,kwargs))
+              #showlist.append((a,sel,kwargs))
             last_sel = sel
           
           elif bstate & uc.BUTTON1_RELEASED:
@@ -661,7 +706,8 @@ class HumanPlayerAscii (HumanPlayer):
           showlist = init_showlist
         else:
           uc.endwin()
-          assert 0
+          print self.engine.log
+          sys.exit()
 
 
 
@@ -673,6 +719,7 @@ class CursesHSEngine (HSEngine):
   def __init__(self, *args ):
     HSEngine.__init__(self, *args)
     self.display = []
+    self.log = ''
 
   def display_msg(self, msg):
     self.display.append(msg)
@@ -680,6 +727,7 @@ class CursesHSEngine (HSEngine):
   def wait_for_display(self):
     while self.display:
       msg = self.display.pop(0)
+      self.log += '%s\n' % msg
       msg.draw()
 
 

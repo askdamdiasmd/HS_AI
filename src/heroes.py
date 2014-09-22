@@ -20,7 +20,12 @@ class Hero (Creature):
     pass
 
   def __str__(self):
-      return "%s (%s) %dHP" % (self.owner.name,self.card.name,self.hp)
+      return "[%s (%s) %dHP]" % (self.owner.name,self.card.name,self.hp)
+
+  def death(self):
+    Creature.death(self)
+    return Msg_DeadHero(self)
+
 
 ### -------- instanciation of heroes --------------------
 

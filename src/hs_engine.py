@@ -28,7 +28,6 @@ class HSEngine:
     self.turn = 0
     self.messages = []
     self.executing = False
-    self.executed = []  # messages that were executed (for display purposes)
 
     # init global variables : everyone can access board or send messages
     Board.set_engine(self)
@@ -81,10 +80,9 @@ class HSEngine:
         if res: immediate.append(res)
 
       # then execute the message
-      self.display_msg(msg)
-      self.executed.append(msg)
       res = msg.execute()
-
+      self.display_msg(msg)
+      
       if res: immediate.append(res)
       while immediate: # add immediate-effect messages
         level.insert(0,immediate.pop())

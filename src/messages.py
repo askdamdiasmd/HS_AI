@@ -35,7 +35,7 @@ class CardMessage (Message):
 
 class Msg_StartTurn (Message):
     def execute(self):
-        self.caster.start_turn()
+        return self.caster.start_turn()
     def __str__(self):
         return "Start of turn for %s " % self.caster
 
@@ -50,6 +50,11 @@ class Msg_Nothing (Message):
 
 
 # play card messages
+
+class Msg_DrawCard (CardMessage):
+    '''just to inform that caster drew a card'''
+    def __str__(self):
+        return '%s draw %s from the deck' % (self.caster, self.card)
 
 class Msg_ThrowCard (CardMessage):
     def __str__(self):
@@ -138,26 +143,23 @@ class Msg_CheckDead (Message):
         res = []  # messages of those who died
         for i in self.engine.board.everybody:
           if i.dead:
-            res.append(Msg_Dead(i))
+            res.append(i.death())
         return res
     def __str__(self):
         return "%s asks for dead cleaning." % self.caster
 
 
 class Msg_Dead (Message):
-    """ this thing effectively dies: execute deathrattle if any """
-    def execute(self):
-      self.caster.death()
+    """ this thing just died, just for information """
     def __str__(self):
-        return "%s dies" % self.caster
-
-class Msg_MinionDying (Msg_Dead):
+        return "%s dies." % self.caster
+class Msg_DeadMinion (Msg_Dead):
     pass
-class Msg_WeaponDying (Msg_Dead):
+class Msg_DeadWeapon (Msg_Dead):
     pass
-class Msg_SecretDying (Msg_Dead):
+class Msg_DeadSecret (Msg_Dead):
     pass
-class Msg_HeroDying (Msg_Dead):
+class Msg_DeadHero (Msg_Dead):
     pass
 
 

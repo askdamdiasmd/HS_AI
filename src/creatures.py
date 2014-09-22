@@ -110,6 +110,9 @@ class Secret (Thing):
   def list_actions(self):
       return None
 
+  def death(self):
+    Thing.death(self)
+    return Msg_DeadSecret(self)
 
 
 ### ------------ Creature (hero or minion) ----------
@@ -170,6 +173,9 @@ class Weapon (Creature):
         self.dead = True
         self.engine.send_message( Msg_CheckDead(self) )
 
+  def death(self):
+    Creature.death(self)
+    return Msg_DeadWeapon(self)
 
 
 ### ------------ Minion ----------
@@ -188,6 +194,9 @@ class Minion (Creature):
       else:
         return Act_Attack(self, self.engine.board.list_attackable_characters(self.owner))
 
+  def death(self):
+    Creature.death(self)
+    return Msg_DeadMinion(self)
 
 
 

@@ -59,10 +59,10 @@ class Player (object):
     self.hero.start_turn()
     for m in self.minions:
       m.start_turn()
-
-    self.cards.append(self.deck.draw_one_card())
+    
     self.mana = self.max_mana
     self.add_mana_crystal(1)
+    self.draw_card()
 
   def end_turn(self):
     self.hero.end_turn()
@@ -84,6 +84,12 @@ class Player (object):
       act = m.list_actions()
       if act: res += act if type(act)==list else [act]
     return res
+
+  def draw_card(self):
+    card = self.deck.draw_one_card()
+    if card:  
+      self.cards.append(card)
+      self.engine.display_msg(Msg_DrawCard(self,card))
 
   def throw_card(self, card):
 #      if type(card)==int:

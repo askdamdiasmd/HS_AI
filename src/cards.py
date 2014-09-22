@@ -110,14 +110,15 @@ def fake_deck():
     from copy import copy
     cardbook = get_cardbook()
     deck = []
-    deck += [copy(cardbook["Wisp"]) for i in range(15)]
-    deck += [copy(cardbook["Fake Creature 1"]) for i in range(15)]
-#    deck += [copy(cardbook["River Crocolisk"]) for i in range(4)]
-#    deck += [copy(cardbook["Chillwind Yeti"]) for i in range(4)]
-#    for i in range(1,11):
-#      deck += [copy(cardbook["Fake Creature %d"%i])]
-#    for i in range(1,9):
-#      deck += [copy(cardbook["Fake Damage Spell %d"%i])]
+#    deck += [copy(cardbook["Wisp"]) for i in range(15)]
+#    deck += [copy(cardbook["Fake Creature 1"]) for i in range(15)]
+    deck += [copy(cardbook["Wisp"]) for i in range(4)]
+    deck += [copy(cardbook["River Crocolisk"]) for i in range(4)]
+    deck += [copy(cardbook["Chillwind Yeti"]) for i in range(4)]
+    for i in range(1,11):
+      deck += [copy(cardbook["Fake Creature %d"%i])]
+    for i in range(1,9):
+      deck += [copy(cardbook["Fake Damage Spell %d"%i])]
 
     from decks import Deck
     return Deck(deck)
