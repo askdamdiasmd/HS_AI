@@ -80,8 +80,8 @@ class HSEngine:
         if res: immediate.append(res)
 
       # then execute the message
-      res = msg.execute()
       self.display_msg(msg)
+      res = msg.execute()
       
       if res: immediate.append(res)
       while immediate: # add immediate-effect messages

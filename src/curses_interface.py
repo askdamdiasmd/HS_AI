@@ -342,7 +342,7 @@ def draw_Msg_StartTurn(self):
     uc.doupdate()
     time.sleep(1)
     button.delete()
-    self.engine.board.draw()
+    self.engine.board.draw(last_card=False)
 
 def draw_Msg_DrawCard(self):
     bottom_player = self.engine.board.get_top_bottom_players()[1]
