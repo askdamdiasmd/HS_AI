@@ -106,7 +106,7 @@ class HSEngine:
     return self.players[(self.turn+1)%2]
 
   def start_game(self):
-    self.players[0].draw_init_cards(6)
+    self.players[0].draw_init_cards(3)
     self.players[1].draw_init_cards(4)
 
   def play_turn(self):
