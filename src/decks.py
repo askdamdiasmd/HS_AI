@@ -12,8 +12,11 @@ class Deck (object):
     def __init__(self, cards):
       self.cards = cards
       assert len(cards)==30
+      self.owner = None
+      self.fatigue = 0
 
     def set_owner(self, owner):
+      self.owner = owner
       for card in self.cards:
         card.owner = owner
 
@@ -21,9 +24,14 @@ class Deck (object):
       return len(self.cards)
 
     def draw_one_card(self):
-      r = random.randint(0, len(self.cards)-1)
-      card = self.cards.pop(r)
-      return card
+      if self.cards:
+        r = random.randint(0, len(self.cards)-1)
+        card = self.cards.pop(r)
+        return card
+      else:
+        self.fatigue += 1
+        self.engine.send_message(Msg_Fatigue(self.owner,self.fatigue))
+        return None
 
     def draw_init_cards(self, nb, mulligan):
       cards = [self.draw_one_card() for n in range(nb)]

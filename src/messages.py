@@ -52,10 +52,10 @@ class Msg_Nothing (Message):
 # play card messages
 
 class Msg_ThrowCard (CardMessage):
-    def execute(self):
-        self.caster.throw_card(self.nb)
     def __str__(self):
         return "Player %s loses %s" % (self.caster,self.card)
+    def execute(self):
+        self.caster.throw_card(self.card)
 
 class Msg_UseMana (Message):
     def __init__(self, caster, cost):
@@ -71,10 +71,10 @@ class Msg_PlayCard (CardMessage):
         CardMessage.__init__(self, caster, card)
         self.cost = cost
     def __str__(self):
-        return "Card %s used by %s for %d mana" % (self.card, self.caster, self.cost)
+        return "%s plays %s" % (self.caster, self.card)
     def execute(self):
-        self.caster.use_mana(self.cost)
-        self.caster.throw_card(self.card)
+        return [Msg_UseMana(self.caster,self.cost), 
+                Msg_ThrowCard(self.caster,self.card)]
 
 
 # start/end messages

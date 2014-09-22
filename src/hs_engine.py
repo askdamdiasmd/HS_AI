@@ -54,11 +54,12 @@ class HSEngine:
 
     self.exec_messages()
 
-#  def send_status(self, messages):
-#    """ status messages are only usefull for the UI """
-#    if type(messages)!=list:
-#      messages = [messages]
-#    self.executed += messages
+  def display_msg(self, msg):
+    """ default implementation """
+    print "[%s] %s" %(type(msg).__name__,msg)
+
+  def wait_for_display(self):
+    pass
 
   def exec_messages(self):
     if self.executing:  return # already doing it !
@@ -80,7 +81,7 @@ class HSEngine:
         if res: immediate.append(res)
 
       # then execute the message
-      #print "[%s] %s" %(type(msg).__name__,msg)
+      self.display_msg(msg)
       self.executed.append(msg)
       res = msg.execute()
 
@@ -88,6 +89,7 @@ class HSEngine:
       while immediate: # add immediate-effect messages
         level.insert(0,immediate.pop())
 
+    self.wait_for_display()
     self.executing = False
 
   def filter_actions(self, actions):
@@ -104,13 +106,13 @@ class HSEngine:
     return self.players[(self.turn+1)%2]
 
   def start_game(self):
-    self.players[0].draw_init_cards(3)
+    self.players[0].draw_init_cards(6)
     self.players[1].draw_init_cards(4)
 
   def play_turn(self):
     player = self.get_current_player()
     self.send_message( Msg_StartTurn(player) )
-
+    
     action = None
     while not self.is_game_ended() and type(action)!=Act_EndTurn:
       actions = player.list_actions()
