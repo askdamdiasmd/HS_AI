@@ -8,9 +8,24 @@ from cards import Card
 import unicurses as uc
 
 import locale
-locale.setlocale(locale.LC_ALL, '')
+locale.setlocale(locale.LC_ALL, '') #en_US.utf8') #UTF-8')
 code = locale.getpreferredencoding()
 os.environ['ESCDELAY'] = '25'
+pdb.set_trace()
+
+def addwch(ch,attr=0,win=None,y=None,x=None):
+  if win==None: win=stdscr
+  # display unicode character
+  if code=='UTF-8':
+    if x==None:
+      uc.waddstr(win,unichr(ch).encode(code),attr)
+    else:
+      uc.mvwaddstr(win,y,x,unichr(ch).encode(code),attr)
+  else:
+    if x==None:
+      uc.waddch(win,ch,attr)
+    else:
+      uc.mvwaddch(win,y,x,ch,attr)
 
 def init_screen():
   stdscr = uc.initscr()
@@ -103,10 +118,7 @@ def show_unicode():
     uc.clear()
     NR,NC = uc.getmaxyx(stdscr)
     for i in range(1,65536):
-      #uc.addch(i)
-      #for byte in unichr(i).encode(code):
-      #  uc.addch(byte)
-      uc.addstr(unichr(i).encode(code))
+      addwch(i)
       if (i+1)%(NR*NC)==0:
         uc.refresh()
         uc.getch()
@@ -486,13 +498,13 @@ def draw_Board(self, what='bkgd decks hero cards mana minions', which=None, last
         uc.mvvline(2,NC-1-i,uc.ACS_CKBOARD,20)
       for i in [5,15]:
         uc.mvaddch(i,NC-2,uc.ACS_HLINE)
-        uc.addstr(unichr(9558).encode(code))
+        addwch(9558)
         text = ' %2d'%len(i<12 and adv.deck or player.deck)
         for j,ch in enumerate(text):
           uc.mvaddch(i+1+j,NC-2,ord(ch))
-          uc.addstr(unichr(9553).encode(code))
+          addwch(9553)
         uc.mvaddch(i+4,NC-2,uc.ACS_HLINE)
-        uc.addstr(unichr(9564).encode(code))
+        addwch(9564)
     
     # draw heroes
     if 'hero' in what:
@@ -517,8 +529,10 @@ def draw_Board(self, what='bkgd decks hero cards mana minions', which=None, last
         p = i<12 and adv or player
         text = "%d/%d "%(p.mana,p.max_mana)
         uc.mvaddstr(i,NC-11-len(text), text, uc.black_on_cyan)
-        uc.mvaddstr(i,NC-11, (unichr(9826)*p.max_mana).encode(code), uc.cyan_on_black)
-        uc.mvaddstr(i,NC-11, (unichr(9830)*p.mana).encode(code), uc.cyan_on_black)
+        for i in range(p.mana):
+          addwch(9830, uc.cyan_on_black)
+        for i in range(p.max_mana-p.mana):
+          addwch(9826, uc.cyan_on_black)
     
     # draw minions
     if 'minions' in what:
