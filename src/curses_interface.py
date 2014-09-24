@@ -210,7 +210,7 @@ class VizHero (VizThing):
   def __init__(self, copy, *args ):
     VizThing.__init__(self,copy,*args)
     self.armor = copy.armor
-    
+
   def draw(self, **kwargs):
     VizThing.draw(**kwargs)
     print_middle(win,1,1,tx-2,self.owner.name)
@@ -224,12 +224,9 @@ class VizPlayer:
   def __init__(self, copy ):
     self.engine = copy.engine
     self.player = copy
-    self.hero = VizHero(copy.hero)
+    copy.hero.viz = VizHero(copy.hero)
     self.cards = list(copy.cards)
     self.minions = list(copy.minions)
-
-
-
 
 
 ### Button -----------
@@ -261,133 +258,129 @@ class Button:
 
 ### Slot -----------
 
-def get_screen_pos(self):
-    """ return position, space """
-    NR,NC = uc.getmaxyx(stdscr)
-    n = len(self.owner.minions)
-    sp = ([3]*5+[2,1,0])[n] # spacement between minions
-    return int(NC-3-(11+sp)*n)/2+(11+sp)*self.pos, sp
+class VizSlot (VizPanel):
+  def __init__(self, slot):
+    self.slot = slot
 
-Slot.get_screen_pos = get_screen_pos
+  def get_screen_pos(self):
+      """ return position, space """
+      NR,NC = uc.getmaxyx(stdscr)
+      n = len(self.slot.owner.minions)
+      sp = ([3]*5+[2,1,0])[n] # spacement between minions
+      return int(NC-3-(11+sp)*n)/2+(11+sp)*self.pos, sp
 
-def draw_Slot(self, highlight=0, bkgd=0, **kwargs):
-    if not hasattr(self,"win"):
-      x, sp = self.get_screen_pos()
-      win = self.win = uc.newwin(5,sp,14,x-sp)
-      self.panel = uc.new_panel(win)
-      set_panel_userptr(self.panel, self)
-    
-    if bkgd or highlight:
-      uc.top_panel(self.panel)
-      uc.wbkgd(self.win,bkgd or highlight)
-    else:
-      uc.del_panel(self.panel)
-      del self.panel
-      del self.win
+  def draw(self, highlight=0, bkgd=0, **kwargs):
+      if not hasattr(self,"win"):
+        x, sp = self.get_screen_pos()
+        win = self.win = uc.newwin(5,sp,14,x-sp)
+        self.panel = uc.new_panel(win)
+        set_panel_userptr(self.panel, self)
+      
+      if bkgd or highlight:
+        uc.top_panel(self.panel)
+        uc.wbkgd(self.win,bkgd or highlight)
+      else:
+        uc.del_panel(self.panel)
+        del self.panel
+        del self.win
 
 ### Minion -----------
 
-def draw_Minion(self, highlight=0, bkgd=0, y=-1, **kwargs):
-    slot = self.engine.board.get_minion_pos(self)
-    x = slot.get_screen_pos()[0]
-    
-    if not hasattr(self,"win"):
-      assert y>=0
-      win = self.win = uc.newwin(5,11,y,x)
-      self.panel = uc.new_panel(win)
-      set_panel_userptr(self.panel, self)
-    elif y>=0:
-      uc.move_panel(self.panel,y,x)
-    
-    win = self.win
-    ty, tx = uc.getmaxyx(win)
-    uc.wbkgd(win,bkgd)
-    
-    name = self.card.name_fr or self.card.name
-    
-    if highlight:  uc.wattron(win,highlight)
-    uc.box(win)
-    print_longtext(win,1,1,ty-1,tx-1,name,uc.magenta_on_black)
-    uc.mvwaddstr(win,ty-1,1,"%2d "%self.atq)
-    uc.mvwaddstr(win,ty-1,tx-4,"%2d "%self.hp)
-    if highlight:  uc.wattroff(win,highlight)
+class VizMinion (VizThing):
+  def __init__(self, minion, *args):
+      slot = minion.engine.board.viz.get_minion_pos(minion)
+      pos = slot.get_screen_pos()
+      VizThing.__init__(self,pos=pos,*args)
+      self.minion = minion
+
+  def draw(self, **kwargs):
+      obj = self.minion
+      VizThing.draw(**kwargs)
+      name = self.card.name_fr or self.card.name
+      print_longtext(win,1,1,ty-1,tx-1,name,uc.magenta_on_black)
+      uc.mvwaddstr(win,ty-1,1,"%2d "%self.atq)
+
 
 ### Card -----------
-card_size = 14,15
+class VizCard:
+  card_size = 14,15
+  def __init__(self, card):
+    ..
 
-def draw_Card(self, pos=None, highlight=0, cost=None, small=True, bkgd=0, **kwargs):
-    name = self.name_fr or self.name
-    desc = self.desc_fr or self.desc
+  def draw_Card(self, pos=None, highlight=0, cost=None, small=True, bkgd=0, **kwargs):
+      name = self.name_fr or self.name
+      desc = self.desc_fr or self.desc
 
-    if not small:
-      ty,tx = card_size
-      if not pos and hasattr(self,"small_panel"):
-        self.ty = ty
-        self.tx = tx
-        y,x = uc.getbegyx(self.small_win)
-        NR,NC = uc.getmaxyx(stdscr)
-        pos = NR-ty, x
-      if not hasattr(self,"win"):
-        self.win = uc.newwin(ty,tx,pos[0],pos[1])
-        self.panel = uc.new_panel(self.win)
-        set_panel_userptr(self.panel, self)
-      win, panel = self.win, self.panel
-      uc.top_panel(panel)
-    else: # small card version
-      if hasattr(self,"panel"):
-        uc.hide_panel(self.panel)
-      if not hasattr(self,"small_win"):
-        ty, tx = small, card_size[1]
-        if pos==None: debug()
-        self.small_win = uc.newwin(ty,tx,pos[0],pos[1])
-        self.small_panel = uc.new_panel(self.small_win)
-        set_panel_userptr(self.small_panel, self)
-      win, panel = self.small_win, self.small_panel
+      if not small:
+        ty,tx = card_size
+        if not pos and hasattr(self,"small_panel"):
+          self.ty = ty
+          self.tx = tx
+          y,x = uc.getbegyx(self.small_win)
+          NR,NC = uc.getmaxyx(stdscr)
+          pos = NR-ty, x
+        if not hasattr(self,"win"):
+          self.win = uc.newwin(ty,tx,pos[0],pos[1])
+          self.panel = uc.new_panel(self.win)
+          set_panel_userptr(self.panel, self)
+        win, panel = self.win, self.panel
+        uc.top_panel(panel)
+      else: # small card version
+        if hasattr(self,"panel"):
+          uc.hide_panel(self.panel)
+        if not hasattr(self,"small_win"):
+          ty, tx = small, card_size[1]
+          if pos==None: debug()
+          self.small_win = uc.newwin(ty,tx,pos[0],pos[1])
+          self.small_panel = uc.new_panel(self.small_win)
+          set_panel_userptr(self.small_panel, self)
+        win, panel = self.small_win, self.small_panel
+        ty, tx = uc.getmaxyx(win)
+        if type(small)==int and small!=ty: # redo
+          uc.del_panel(panel)
+          del self.small_win
+          del self.small_panel
+          return self.draw(pos=pos, highlight=highlight, cost=cost, small=small, bkgd=bkgd)
+      
       ty, tx = uc.getmaxyx(win)
-      if type(small)==int and small!=ty: # redo
-        uc.del_panel(panel)
-        del self.small_win
-        del self.small_panel
-        return self.draw(pos=pos, highlight=highlight, cost=cost, small=small, bkgd=bkgd)
-    
-    ty, tx = uc.getmaxyx(win)
-    if pos and pos!=uc.getbegyx(win):
-      uc.move_panel(panel,*pos)
+      if pos and pos!=uc.getbegyx(win):
+        uc.move_panel(panel,*pos)
 
-    uc.wbkgd(win,bkgd)
-    if highlight:  uc.wattron(win,highlight)
-    uc.box(win)
-    if small:
-      uc.mvwaddch(win,ty-1,0,uc.ACS_VLINE)
-      uc.mvwaddch(win,ty-1,tx-1,uc.ACS_VLINE)
-    if highlight:  uc.wattroff(win,highlight)
-    if small:
-      uc.mvwaddstr(win,ty-1,1,' '*(tx-2))
+      uc.wbkgd(win,bkgd)
+      if highlight:  uc.wattron(win,highlight)
+      uc.box(win)
+      if small:
+        uc.mvwaddch(win,ty-1,0,uc.ACS_VLINE)
+        uc.mvwaddch(win,ty-1,tx-1,uc.ACS_VLINE)
+      if highlight:  uc.wattroff(win,highlight)
+      if small:
+        uc.mvwaddstr(win,ty-1,1,' '*(tx-2))
 
-    if issubclass(type(self),Card_Minion):
-      mid = card_size[0]/2
-      y,x,h,w = 1,2,mid-2,tx-4
-      manual_box(win,y,x,h,w)
-      print_longtext(win,y+1,x+1,y+h-1,x+w-1,name,uc.magenta_on_black)
-      uc.mvwaddstr(win,y+h-1,x+1,"%2d "%self.atq)
-      uc.mvwaddstr(win,y+h-1,x+w-4,"%2d "%self.hp)
-      print_longtext(win,mid,2,ty-1,tx-2,desc)
-    else:
-      uc.mvwaddch(win, 3, 0, uc.ACS_LTEE, highlight)
-      uc.mvwhline(win, 3, 1, uc.ACS_HLINE, tx-2)
-      uc.mvwaddch(win, 3, tx-1, uc.ACS_RTEE, highlight)
-      print_longtext(win,1,1,3,tx-1,name,uc.yellow_on_black)
-      print_longtext(win,4,2,ty,tx-2,desc)
+      if issubclass(type(self),Card_Minion):
+        mid = card_size[0]/2
+        y,x,h,w = 1,2,mid-2,tx-4
+        manual_box(win,y,x,h,w)
+        print_longtext(win,y+1,x+1,y+h-1,x+w-1,name,uc.magenta_on_black)
+        uc.mvwaddstr(win,y+h-1,x+1,"%2d "%self.atq)
+        uc.mvwaddstr(win,y+h-1,x+w-4,"%2d "%self.hp)
+        print_longtext(win,mid,2,ty-1,tx-2,desc)
+      else:
+        uc.mvwaddch(win, 3, 0, uc.ACS_LTEE, highlight)
+        uc.mvwhline(win, 3, 1, uc.ACS_HLINE, tx-2)
+        uc.mvwaddch(win, 3, tx-1, uc.ACS_RTEE, highlight)
+        print_longtext(win,1,1,3,tx-1,name,uc.yellow_on_black)
+        print_longtext(win,4,2,ty,tx-2,desc)
 
-    # print cost
-    if cost==None:
-      cost=self.cost
-    if cost==self.cost:
-      uc.mvwaddstr(win, 0,0, "(%d)"%cost, uc.black_on_cyan)
-    elif cost<self.cost:
-      uc.mvwaddstr(win, 0,0, "(%d)"%cost, uc.white_on_green)
-    else:
-      uc.mvwaddstr(win, 0,0, "(%d)"%cost, uc.white_on_red)
+      # print cost
+      if cost==None:
+        cost=self.cost
+      if cost==self.cost:
+        uc.mvwaddstr(win, 0,0, "(%d)"%cost, uc.black_on_cyan)
+      elif cost<self.cost:
+        uc.mvwaddstr(win, 0,0, "(%d)"%cost, uc.white_on_green)
+      else:
+        uc.mvwaddstr(win, 0,0, "(%d)"%cost, uc.white_on_red)
+
 
 # Messages ---------
 
