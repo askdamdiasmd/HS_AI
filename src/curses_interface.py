@@ -146,18 +146,40 @@ def set_panel_userptr(panel, obj):
 def get_panel_userptr(panel):
     return panel_to_obj[uc.panel_userptr(panel)]
 
-### Hero -----------
 
-def draw_Hero(self, pos=None, bkgd=0, highlight=0, **kwargs):
-    #if not hasattr()
-    NR,NC = uc.getmaxyx(stdscr)
-    ty,tx = 4,12
-    if not hasattr(self,"win"):
-      self.win = uc.newwin(ty,tx,pos[0],pos[1])
-      self.panel = uc.new_panel(self.win)
-      set_panel_userptr(self.panel, self)
-    win, panel = self.win, self.panel
+# Viz classes = copy object specs
+
+
+### General thing (minion, weapon, hero...)------
+
+class VizThing:
+  def __init__(self, copy, size, pos ):
+    self.hp =     copy.hp
+    self.max_hp = copy.max_hp
+    self.armor =  copy.armor
+    self.atq =    copy.atq
     
+    # create panel
+    self.win = uc.newwin(size[0],size[1],pos[0],pos[1])
+    self.panel = uc.new_panel(self.win)
+    set_panel_userptr(self.panel, copy)
+    self.fake = Fake(self)
+
+  def delete(self):
+    if hasattr(self,'panel'):
+      uc.delete_panel(self.panel)
+
+  @staticmethod
+  def buff_color(val,max_val):
+    if val>max_val:
+      return uc.green_on_black
+    elif val==max_val:
+      return uc.white_on_black
+    else:
+      return uc.red_on_black
+
+  def draw(self, pos=None, bkgd=0, highlight=0, **kwargs):
+    win, panel = self.win, self.panel
     if pos and pos!=uc.getbegyx(win):
       uc.move_panel(panel,*pos)    
     
@@ -165,10 +187,38 @@ def draw_Hero(self, pos=None, bkgd=0, highlight=0, **kwargs):
     uc.wattron(win,highlight)
     uc.box(win)
     uc.wattroff(win,highlight)
+    
+    # show just HP
+    uc.mvwaddstr(win,ty-1,tx-3,"%d"%self.hp,self.buff_color(self.hp,self.max_hp))
+
+
+### Hero -----------
+
+class VizHero (VizThing):
+  def __init__(self, copy, *args ):
+    VizThing.__init__(self,copy,*args)
+    self.armor = copy.armor
+    
+  def draw(self, **kwargs):
+    VizThing.draw(**kwargs)
     print_middle(win,1,1,tx-2,self.owner.name)
     print_middle(win,2,1,tx-2,"(%s)"%self.card.name,uc.magenta_on_black)
-    uc.mvwaddstr(win,ty-1,tx-3,"%d"%self.hp)
-    uc.touchwin(win)
+    if self.armor:
+      uc.mvwaddstr(win,ty-2,tx-4,"[%d]"%self.armor)
+
+### Player -----------
+
+class VizPlayer:
+  def __init__(self, copy ):
+    self.engine = copy.engine
+    self.player = copy
+    self.hero = VizHero(copy.hero)
+    self.cards = list(copy.cards)
+    self.minions = list(copy.minions)
+
+
+
+
 
 ### Button -----------
 
@@ -440,97 +490,106 @@ def draw_Msg_EndSpell (Msg_EndCard):
 """
 
 ### Board --------
-def get_card_pos(self, card):
-  NR,NC = uc.getmaxyx(stdscr)
-  nc = len(card.owner.cards)
-  ty,tx = card_size
-  actual_NC = min(NC,tx*nc)
-  startx = (NC - actual_NC)/2
-  i = card.owner.cards.index(card)
-  return 24, startx + int((actual_NC-tx)*i/(nc-1))
 
-Board.get_card_pos = get_card_pos
+class BoardViz:
+  def __init__(self, board):
+      self.engine = engine = board.engine
+      for pl in engine.players:
+        pl.viz = VizPlayer(pl)
 
-def get_top_bottom_players(self):
-  player = self.engine.get_current_player()
-  adv = self.engine.get_other_player()
-  if self.switch==False and self.engine.turn%2: 
-    player,adv = adv,player # prevent top/down switching
-  return adv, player
+  def get_top_bottom_players(self):
+      player = self.engine.get_current_player()
+      adv = self.engine.get_other_player()
+      if self.switch==False and self.engine.turn%2: 
+        player,adv = adv,player # prevent top/down switching
+      return adv, player
 
-Board.get_top_bottom_players = get_top_bottom_players
+  def get_card_pos(self,card):
+      NR,NC = uc.getmaxyx(stdscr)
+      nc = len(card.owner.cards)
+      ty,tx = card_size
+      actual_NC = min(NC,tx*nc)
+      startx = (NC - actual_NC)/2
+      i = card.owner.cards.index(card)
+      return 24, startx + int((actual_NC-tx)*i/(nc-1))
 
+  def get_hero_pos(self,player):
+      NR,NC = uc.getmaxyx(stdscr)
+      top,bot = self.get_top_bottom_players()
+      if player==top: return (1,(NC-18)/2)
+      if player==bot: return (20,(NC-18)/2)
+      assert False
 
-def draw_Board(self, what='bkgd decks hero cards mana minions', which=None, last_card=True):
-    NR,NC = uc.getmaxyx(stdscr)
-    
-    # clear screen
-    adv, player = self.get_top_bottom_players()
-    which = {player,adv} if not which else {which}
-    
-    if 'bkgd' in what:
-      # background
-      uc.erase()
-      uc.mvhline(2,0,uc.ACS_CKBOARD,NC)
-      uc.mvhline(3,0,uc.ACS_CKBOARD,NC)
-      uc.mvhline(12,0,ord('-'),NC)
-      uc.mvhline(21,0,uc.ACS_CKBOARD,NC)
-      uc.mvhline(22,0,uc.ACS_CKBOARD,NC)
-      if not hasattr(self,"end_turn"):
-        self.end_turn = Button(11,NC,"End turn",align='right')
-      self.end_turn.draw()
-    
-    # draw decks on the right side
-    if 'decks' in what:
-      for i in range(3):
-        uc.mvvline(2,NC-1-i,uc.ACS_CKBOARD,20)
-      for i in [5,15]:
-        uc.mvaddch(i,NC-2,uc.ACS_HLINE)
-        uc.addstr(unichr(9558).encode(code))
-        text = ' %2d'%len(i<12 and adv.deck or player.deck)
-        for j,ch in enumerate(text):
-          uc.mvaddch(i+1+j,NC-2,ord(ch))
-          uc.addstr(unichr(9553).encode(code))
-        uc.mvaddch(i+4,NC-2,uc.ACS_HLINE)
-        uc.addstr(unichr(9564).encode(code))
-    
-    # draw heroes
-    if 'hero' in what:
-      if adv in which:
-        adv.hero.draw(pos=(1,(NC-18)/2))
-      if player in which:
-        player.hero.draw(pos=(20,(NC-18)/2))
-    
-    # draw cards
-    if 'cards' in what:
-      if adv in which:
-        print_middle(stdscr, 0,0, NC, " Adversary has %d cards. "%len(adv.cards))
-      if player in which:
-        cards = player.cards if last_card else player.cards[:-1]
-        for card in cards:
-          card.draw(pos=self.get_card_pos(card), small=NR-24)
-    
-    # draw mana
-    if 'mana' in what:
-      for who,i in [(adv,2),(player,22)]:
-        if who not in which:  continue
-        p = i<12 and adv or player
-        text = "%d/%d "%(p.mana,p.max_mana)
-        uc.mvaddstr(i,NC-11-len(text), text, uc.black_on_cyan)
-        uc.mvaddstr(i,NC-11, (unichr(9826)*p.max_mana).encode(code), uc.cyan_on_black)
-        uc.mvaddstr(i,NC-11, (unichr(9830)*p.mana).encode(code), uc.cyan_on_black)
-    
-    # draw minions
-    if 'minions' in what:
-      if player in which:
-        for m in player.minions:
-          m.draw(y=14)
-      if adv in which:
-        for m in adv.minions:
-          m.draw(y=5)
-    
-    uc.update_panels()
-    uc.doupdate()
+  def draw(self, what='bkgd decks hero cards mana minions', which=None):
+      NR,NC = uc.getmaxyx(stdscr)
+      
+      # clear screen
+      adv, player = self.get_top_bottom_players()
+      which = {player,adv} if not which else {which}
+      
+      if 'bkgd' in what:
+        # background
+        uc.erase()
+        uc.mvhline(2,0,uc.ACS_CKBOARD,NC)
+        uc.mvhline(3,0,uc.ACS_CKBOARD,NC)
+        uc.mvhline(12,0,ord('-'),NC)
+        uc.mvhline(21,0,uc.ACS_CKBOARD,NC)
+        uc.mvhline(22,0,uc.ACS_CKBOARD,NC)
+        if not hasattr(self,"end_turn"):
+          self.end_turn = Button(11,NC,"End turn",align='right')
+        self.end_turn.draw()
+      
+      # draw decks on the right side
+      if 'decks' in what:
+        for i in range(3):
+          uc.mvvline(2,NC-1-i,uc.ACS_CKBOARD,20)
+        for i in [5,15]:
+          uc.mvaddch(i,NC-2,uc.ACS_HLINE)
+          uc.addstr(unichr(9558).encode(code))
+          text = ' %2d'%len(i<12 and adv.deck or player.deck)
+          for j,ch in enumerate(text):
+            uc.mvaddch(i+1+j,NC-2,ord(ch))
+            uc.addstr(unichr(9553).encode(code))
+          uc.mvaddch(i+4,NC-2,uc.ACS_HLINE)
+          uc.addstr(unichr(9564).encode(code))
+      
+      # draw heroes
+      if 'hero' in what:
+        if adv in which:
+          adv.hero.draw()
+        if player in which:
+          player.hero.draw()
+      
+      # draw cards
+      if 'cards' in what:
+        if adv in which:
+          print_middle(stdscr, 0,0, NC, " Adversary has %d cards. "%len(adv.cards))
+        if player in which:
+          cards = player.cards if last_card else player.cards[:-1]
+          for card in cards:
+            card.draw(pos=self.get_card_pos(card), small=NR-24)
+      
+      # draw mana
+      if 'mana' in what:
+        for who,i in [(adv,2),(player,22)]:
+          if who not in which:  continue
+          p = i<12 and adv or player
+          text = "%d/%d "%(p.mana,p.max_mana)
+          uc.mvaddstr(i,NC-11-len(text), text, uc.black_on_cyan)
+          uc.mvaddstr(i,NC-11, (unichr(9826)*p.max_mana).encode(code), uc.cyan_on_black)
+          uc.mvaddstr(i,NC-11, (unichr(9830)*p.mana).encode(code), uc.cyan_on_black)
+      
+      # draw minions
+      if 'minions' in what:
+        if player in which:
+          for m in player.minions:
+            m.draw(y=14)
+        if adv in which:
+          for m in adv.minions:
+            m.draw(y=5)
+      
+      uc.update_panels()
+      uc.doupdate()
 
 
 # attach each show function to a message
@@ -543,6 +602,11 @@ for key in draw_funcs:
 
 # Overload human interface
 
+def init_viz(engine):
+  bz = engine.board.viz = BoardViz(engine.board)
+  
+
+
 class HumanPlayerAscii (HumanPlayer):
   ''' human player : ask the player what to do'''
   @staticmethod
@@ -552,7 +616,7 @@ class HumanPlayerAscii (HumanPlayer):
     return wx<=x<wx+width and wy<=y<wy+height
 
   def mulligan(self, cards):
-      engine.board.draw()
+      engine.board.viz.draw()
       NR,NC = uc.getmaxyx(stdscr)
       nc = len(cards)
       end_button = Button(25,(NC-6)/2,'  OK  ')
@@ -753,6 +817,7 @@ if __name__=="__main__":
     stdscr = init_screen()
     #show_ACS()
     #show_unicode()
+    engine.board.viz = VizBoard(engine.board)
     engine.start_game()
     while not engine.is_game_ended():
       engine.play_turn()
