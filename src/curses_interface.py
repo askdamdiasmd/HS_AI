@@ -8,9 +8,24 @@ from cards import Card
 import unicurses as uc
 
 import locale
-locale.setlocale(locale.LC_ALL, '')
+locale.setlocale(locale.LC_ALL, '') #en_US.utf8') #UTF-8')
 code = locale.getpreferredencoding()
 os.environ['ESCDELAY'] = '25'
+pdb.set_trace()
+
+def addwch(ch,attr=0,win=None,y=None,x=None):
+  if win==None: win=stdscr
+  # display unicode character
+  if code=='UTF-8':
+    if x==None:
+      uc.waddstr(win,unichr(ch).encode(code),attr)
+    else:
+      uc.mvwaddstr(win,y,x,unichr(ch).encode(code),attr)
+  else:
+    if x==None:
+      uc.waddch(win,ch,attr)
+    else:
+      uc.mvwaddch(win,y,x,ch,attr)
 
 def init_screen():
   stdscr = uc.initscr()
@@ -103,10 +118,7 @@ def show_unicode():
     uc.clear()
     NR,NC = uc.getmaxyx(stdscr)
     for i in range(1,65536):
-      #uc.addch(i)
-      #for byte in unichr(i).encode(code):
-      #  uc.addch(byte)
-      uc.addstr(unichr(i).encode(code))
+      addwch(i)
       if (i+1)%(NR*NC)==0:
         uc.refresh()
         uc.getch()
@@ -601,10 +613,6 @@ for key in draw_funcs:
 
 
 # Overload human interface
-
-def init_viz(engine):
-  bz = engine.board.viz = BoardViz(engine.board)
-  
 
 
 class HumanPlayerAscii (HumanPlayer):
