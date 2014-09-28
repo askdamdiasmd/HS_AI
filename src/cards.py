@@ -55,6 +55,16 @@ class Card_Spell (Card):
         return "%s (%d): %s" % (self.name_fr, self.cost, self.desc)
 
 
+class Card_Coin (Card_Spell):
+    def __init__(self, owner):
+        Card_Spell.__init__(self,"The coin",0,desc="Gain one mana crystal this turn only")
+        self.owner = owner
+    def list_actions(self):
+        player = self.owner
+        actions = lambda self: [Msg_GainMana(self.caster,1)]
+        return Act_PlaySpellCard(self,None,actions)
+
+
 class Card_Wrath (Card_Spell):
     """ Druid : Wrath (2 choices) """
     def __init__(self):
@@ -110,15 +120,18 @@ def fake_deck():
     from copy import copy
     cardbook = get_cardbook()
     deck = []
-#    deck += [copy(cardbook["Wisp"]) for i in range(15)]
-#    deck += [copy(cardbook["Fake Creature 1"]) for i in range(15)]
-    deck += [copy(cardbook["Wisp"]) for i in range(4)]
-    deck += [copy(cardbook["River Crocolisk"]) for i in range(4)]
-    deck += [copy(cardbook["Chillwind Yeti"]) for i in range(4)]
-    for i in range(1,11):
-      deck += [copy(cardbook["Fake Creature %d"%i])]
-    for i in range(1,9):
-      deck += [copy(cardbook["Fake Damage Spell %d"%i])]
+    if False:
+      deck += [copy(cardbook["Wisp"]) for i in range(15)]
+      deck += [copy(cardbook["Fake Damage Spell 1"]) for i in range(15)]
+#      deck += [copy(cardbook["Fake Creature 1"]) for i in range(15)]
+    else:
+      deck += [copy(cardbook["Wisp"]) for i in range(4)]
+      deck += [copy(cardbook["River Crocolisk"]) for i in range(4)]
+      deck += [copy(cardbook["Chillwind Yeti"]) for i in range(4)]
+      for i in range(1,11):
+        deck += [copy(cardbook["Fake Creature %d"%i])]
+      for i in range(1,9):
+        deck += [copy(cardbook["Fake Damage Spell %d"%i])]
 
     from decks import Deck
     return Deck(deck)

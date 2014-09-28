@@ -120,7 +120,7 @@ class Act_PlaySpellCard (Act_PlayCard):
     ''' hero plays a generic spell card, specified using "actions" '''
     def __init__(self, card, targets, actions):
         Act_PlayCard.___init___(self, card)
-        self.choices = [targets]
+        self.choices = [targets] if targets else []
         self.actions = actions  # execution is defined by card
     def execute(self):
         Act_PlayCard.execute(self)

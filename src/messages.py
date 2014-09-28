@@ -7,6 +7,7 @@ list of possible messages
     which are then executed one after one)
 '''
 import pdb
+from copy import copy
 
 
 class Message (object):
@@ -18,7 +19,7 @@ class Message (object):
     def execute(self):
         pass
     def __str__(self):
-        return ""
+        assert 0
 
 class TargetedMessage (Message):
     def __init__(self, caster, target):
@@ -49,6 +50,18 @@ class Msg_Nothing (Message):
     pass
 
 
+class Msg_Status (Message):
+    ''' just to tell the interface that something happened '''
+    def __init__(self, caster, attrs):
+      Message.__init__(self,caster)
+      self.attrs = attrs.split() if type(attrs)==str else attrs
+      for attr in self.attrs:
+        setattr(self,attr,copy(getattr(caster,attr)))
+    def __str__(self):
+        return "Change of status for %s: {%s}" % (self.caster,
+                ', '.join(['%s=%s'%(a,getattr(self,a)) for a in self.attrs]))
+
+
 # play card messages
 
 class Msg_DrawCard (CardMessage):
@@ -75,6 +88,15 @@ class Msg_UseMana (Message):
         self.caster.use_mana(self.cost)
     def __str__(self):
         return "Player %s loses %d mana crystal" % (self.caster,self.cost)
+
+class Msg_GainMana (Message):
+    def __init__(self, caster, gain):
+        Message.__init__(self, caster)
+        self.gain = gain
+    def execute(self):
+        self.caster.gain_mana(self.gain)
+    def __str__(self):
+        return "Player %s gain %d mana crystal" % (self.caster,self.gain)
 
 class Msg_PlayCard (CardMessage):
     def __init__(self, caster, card, cost):
@@ -111,6 +133,8 @@ class Msg_EndSpell (Msg_EndCard):
         return "End of spell."
 
 class Msg_StartHeroPower (Message):
+    def execute(self):
+        self.caster.use_hero_power()
     def __str__(self):
         return "[%s] uses its hero power" % self.caster
 class Msg_EndHeroPower (Message):

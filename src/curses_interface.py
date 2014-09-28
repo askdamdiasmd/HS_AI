@@ -1,5 +1,5 @@
 import sys, os, time, pdb
-from threading import Thread
+from threading import Thread, Lock
 from board import Board, Slot
 from players import *
 from messages import *
@@ -63,6 +63,7 @@ def init_screen():
   create_color_pair(uc.COLOR_WHITE, uc.COLOR_BLACK)
   create_color_pair(uc.COLOR_WHITE, uc.COLOR_RED)
   create_color_pair(uc.COLOR_WHITE, uc.COLOR_GREEN)
+  create_color_pair(uc.COLOR_BLACK, uc.COLOR_WHITE)
   create_color_pair(uc.COLOR_BLACK, uc.COLOR_GREEN)
   create_color_pair(uc.COLOR_BLACK, uc.COLOR_RED)
   create_color_pair(uc.COLOR_BLACK, uc.COLOR_CYAN)
@@ -103,8 +104,7 @@ def debug():
     global stdscr
     stdscr = init_screen()
     uc.touchwin(stdscr)
-    uc.update_panels()
-    uc.doupdate()
+    show_panels()
 
 def show_ACS():
     NR,NC = uc.getmaxyx(stdscr)
@@ -168,6 +168,13 @@ def get_panel_userptr(panel):
     return panel_to_obj[uc.panel_userptr(panel)]
 
 
+show_panel_lock = Lock()
+def show_panels():
+  show_panel_lock.acquire()
+  uc.update_panels()
+  uc.doupdate()
+  show_panel_lock.release()
+
 # Viz classes = copy object specs
 
 
@@ -182,7 +189,7 @@ class VizThing (object):
     self.max_atq =obj.max_atq
     self.effects = []
     obj.draw = self.draw
-    self.wait = False
+    self.wait = 0
     # create panel
     self.win = uc.newwin(size[0],size[1],pos[0],pos[1])
     self.panel = uc.new_panel(self.win)
@@ -223,22 +230,24 @@ class VizThing (object):
     
     uc.wbkgd(win,bkgd)
     uc.wattron(win,highlight)
-    uc.box(win)
+    uc.box(win)    
     uc.wattroff(win,highlight)
-    
     # show just HP
     ty,tx = uc.getmaxyx(win)
-    uc.mvwaddstr(win,ty-1,tx-4," %d "%self.hp,self.buff_color(self.hp,self.max_hp))
+    thp = " %d "%self.hp
+    uc.mvwaddstr(win,ty-1,tx-1-len(thp),thp,highlight|self.buff_color(self.hp,self.max_hp))
     return win
 
   def update_stats(self, msg):
+    anim = self.obj.engine.board.viz.animated
     for attr in msg.attrs:
       oldval = getattr(self,attr)
       newval = getattr(msg,attr)
       setattr(self,attr,newval)
-      if attr=='hp' and len(msg.attrs)==1:
+      if anim and attr=='hp' and len(msg.attrs)==1:
         diff = newval-oldval
-        temp_panel(self,"%d"%diff,self.buff_color(diff,0,highlight=1))
+        plus = diff>0 and '+' or '' 
+        temp_panel(self,"%s%d"%(plus,diff),self.buff_color(diff,0,highlight=1))
     self.draw()
 
 
@@ -255,15 +264,18 @@ class VizHero (VizThing):
 
   def draw(self, **kwargs):
     win = VizThing.draw(self,**kwargs)
+    highlight = kwargs.get('highlight',0)
     ty,tx = uc.getmaxyx(win)
     hero = self.obj
     print_middle(win,1,1,tx-2,hero.owner.name)
     print_middle(win,2,1,tx-2,"(%s)"%hero.card.name,uc.magenta_on_black)
     if self.armor:
-      uc.mvwaddstr(win,ty-2,tx-4,"[%d]"%self.armor)
+      tar = "[%d]"%self.armor
+      uc.mvwaddstr(win,ty-2,tx-1-len(tar),tar)
     pl = hero.owner.viz
     if pl.weapon:
-      uc.mvwaddstr(win,ty-3,1," %d "%self.buff_color(pl.weapon.atq,pl.weapon.max_atq))
+      atq = pl.weapon.atq
+      uc.mvwaddstr(win,ty-3,1," %d "%atq,highlight|self.buff_color(atq,pl.weapon.max_atq))
 
   def create_hero_power_button(self):
     card = self.obj.card
@@ -284,10 +296,12 @@ class VizMinion (VizThing):
       minion = self.obj
       if pos==None: pos = minion.engine.board.viz.get_minion_pos(minion)
       win = VizThing.draw(self,pos=pos,**kwargs)
+      highlight = kwargs.get('highlight',0)
       ty,tx = uc.getmaxyx(win)
       name = minion.card.name_fr or minion.card.name
       print_longtext(win,1,1,ty-1,tx-1,name,uc.magenta_on_black)
-      uc.mvwaddstr(win,ty-1,1," %d "%self.atq,self.buff_color(self.atq,self.max_atq))
+      uc.mvwaddstr(win,ty-1,1," %d "%self.atq,
+                   highlight|self.buff_color(self.atq,self.max_atq))
 
 
 ### Player -----------
@@ -353,7 +367,7 @@ class HeroPowerButton (Button):
 
 def temp_panel(viz,text,color,duration=2):
     assert issubclass(type(viz),VizThing), debug()
-    viz.wait = True
+    viz.wait += 1
     y,x = uc.getbegyx(viz.win)
     ty,tx = uc.getmaxyx(viz.win)
     button = Button(y+ty/2-1,x+tx/2,text)
@@ -363,14 +377,12 @@ def temp_panel(viz,text,color,duration=2):
       while t<duration:
         uc.touchwin(button.win)
         uc.top_panel(button.panel)  # remains at top
-        uc.update_panels()
-        uc.doupdate()
+        show_panels()
         time.sleep(0.1)
         t+=0.1
       button.delete()
-      uc.update_panels()
-      uc.doupdate()
-      viz.wait = False
+      show_panels()
+      viz.wait -= 1
     Thread(target=wait_delete,args=(duration,button,viz)).start()
     
     
@@ -496,8 +508,7 @@ def draw_Msg_StartTurn(self):
     player.viz.check()  # check consistency with real data
     button = Button(10,37," %s's turn! "%player.name,tx=20,ty=5)
     button.draw(highlight=uc.black_on_yellow)
-    uc.update_panels()
-    uc.doupdate()
+    show_panels()
     time.sleep(1 if self.engine.board.viz.animated else 0.1)
     button.delete()
     self.engine.board.draw()
@@ -516,8 +527,7 @@ def draw_Msg_DrawCard(self):
         x = int(0.5+sx+(ex-sx)*(y-sy)/float(ey-sy))
         h = max(0,NR-y)
         card.draw(highlight=uc.black_on_yellow,pos=(y,x),small=0 if h>=ty else h)
-        uc.update_panels()
-        uc.doupdate()
+        show_panels()
         time.sleep(0.05 + 0.6*(y==sy))
     self.engine.board.draw('cards',which=self.caster)
 
@@ -556,8 +566,7 @@ def draw_Msg_DeadMinion(self):
 
 def draw_Msg_Status(self):
     self.caster.viz.update_stats(self)
-    uc.update_panels()
-    uc.doupdate()
+    show_panels()
 
 
 
@@ -676,8 +685,7 @@ class VizBoard:
           for m in adv.viz.minions:
             m.draw(y=5)
       
-      uc.update_panels()
-      uc.doupdate()
+      show_panels()
 
 
 # attach each show function to a message
@@ -712,8 +720,7 @@ class HumanPlayerAscii (HumanPlayer):
       while True:
         for card,kwargs in showlist:
           card.draw(**kwargs)
-        uc.update_panels()
-        uc.doupdate()
+        show_panels()
         ch = uc.getch()
         if ch == uc.KEY_MOUSE:
           mouse_state = uc.getmouse()
@@ -753,8 +760,7 @@ class HumanPlayerAscii (HumanPlayer):
       end_button.delete()
       for card in cards:
         uc.hide_panel(card.panel)
-      uc.update_panels()
-      uc.doupdate()
+      show_panels()
       
       return discarded
 
@@ -784,15 +790,16 @@ class HumanPlayerAscii (HumanPlayer):
       init_showlist = showlist
       self.engine.board.draw()
       last_sel = None
+      active = None
       while True:
         mapping = {}  # obj -> action,draw_kwargs
         for a,obj,kwargs in showlist:
           highlight = uc.black_on_green if a else 0
           obj.draw(highlight=highlight,**kwargs)
           mapping[obj] = (a,kwargs)
-        
-        uc.update_panels()
-        uc.doupdate()
+        if active:
+          active.draw(bkgd=uc.black_on_white)
+        show_panels()
         
         ch = uc.getch()
         
@@ -831,11 +838,12 @@ class HumanPlayerAscii (HumanPlayer):
           elif bstate & uc.BUTTON1_RELEASED:
             if sel!=last_sel: continue 
             if sel not in mapping: continue
-            act = mapping[sel][0]
+            act,kwargs = mapping[sel]
             if not act: continue
             
             if issubclass(type(act), Action):
               action = act
+              active = sel
               choices = []  # reset choices
             else:
               choices.append(act)
@@ -848,10 +856,12 @@ class HumanPlayerAscii (HumanPlayer):
           else:
             erase_elems(showlist)
             showlist = init_showlist
+            active = None
         
         elif ch == 27: # escape
           erase_elems(showlist)
           showlist = init_showlist
+          active = None
         elif ch in (uc.CCHAR('d'), uc.CCHAR('p')):
           debug()
         else:
@@ -908,9 +918,10 @@ if __name__=="__main__":
       engine.play_turn()
 
     uc.endwin()
+    print '\n'*2
     t = engine.turn
     winner = engine.get_winner()
-    print 'end of game: player %s won after %d turn' % (winner.name, (t+1)/2)
+    print 'End of game: player %s won after %d turns' % (winner.name, (t+1)/2)
 
 
 

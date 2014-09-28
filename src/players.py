@@ -3,6 +3,7 @@ IA or manual players
 """
 import pdb, random
 from creatures import *
+from heroes import Hero
 #from messages import *
 from actions import Act_EndTurn
 
@@ -16,6 +17,7 @@ class Player (object):
     self.mana = self.max_mana = 0
     self.weapon = None
     self.secrets = []
+    self.n_remaining_power = 0
 
     # init ownership
     self.hero.set_owner(self)
@@ -44,7 +46,7 @@ class Player (object):
       elif issubclass(type(m), Minion):
         self.minions.remove(m)
       elif issubclass(type(m), Hero):
-        print "Hero %s died !"
+        pass #print "Hero %s died !"
 
   def add_mana_crystal(self, nb, useit=False):
     self.mana = min(10,self.mana+nb)
@@ -55,11 +57,18 @@ class Player (object):
     self.mana -= nb
     assert self.mana>=0
 
+  def gain_mana(self, nb):
+    self.mana += nb
+
+  def use_hero_power(self):
+    self.n_remaining_power -= 1
+    assert self.n_remaining_power>=0
+
   def start_turn(self):    # activated by Msg_StartTurn(player)
+    self.n_remaining_power = 1
     self.hero.start_turn()
     for m in self.minions:
       m.start_turn()
-    
     self.mana = self.max_mana
     self.add_mana_crystal(1)
     self.draw_card()
@@ -70,8 +79,10 @@ class Player (object):
       m.end_turn()
 
   def list_actions(self):
+    res = [Act_EndTurn(self)]
     # first, hero power
-    res = [Act_EndTurn(self), self.hero.hero_power()]
+    if self.n_remaining_power:
+      res.append(self.hero.hero_power())
     # then, all card's actions
     for card in self.cards:
       actions = card.list_actions()
@@ -105,8 +116,13 @@ class Player (object):
       assert 0, "must be overloaded"
       return discarded
 
-  def draw_init_cards(self, nb):
+  def draw_init_cards(self, nb, coin=False):
+      from cards import Card_Coin
       self.cards = self.deck.draw_init_cards(nb,self.mulligan)
+      if coin:  
+        self.cards.append(Card_Coin(self))
+      for c in self.cards:
+        self.engine.display_msg(Msg_DrawCard(self,c))
 
   def choose_actions(self, actions):
       assert 0, "must be overloaded"

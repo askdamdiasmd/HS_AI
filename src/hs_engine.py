@@ -105,7 +105,7 @@ class HSEngine:
 
   def start_game(self):
     self.players[0].draw_init_cards(3)
-    self.players[1].draw_init_cards(4)
+    self.players[1].draw_init_cards(4, coin=True)
 
   def play_turn(self):
     player = self.get_current_player()
@@ -125,6 +125,13 @@ class HSEngine:
   def is_game_ended(self):
     return self.board.is_game_ended()
 
-
+  def get_winner(self):
+    p1, p2 = self.players
+    if p1.hero.hp<=0 and p2.hero.hp>0:
+      return p2
+    if p1.hero.hp>0 and p2.hero.hp<=0:
+      return p1
+    return None
+    
 
 

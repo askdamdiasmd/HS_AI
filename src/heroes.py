@@ -43,10 +43,14 @@ class Card_Mage (Card_Hero):
     def __init__(self):
         Card_Minion.__init__(self, "Jaina", 0, 30, 0, cls="mage", name_fr='Jenna',
                              desc="deals 1 damage to a character")
+        self.power_text = "Fire blast"
+        self.power_subtext = "Deal 1 damage"
+        self.power_cost = 2
 
     def hero_power(self):
         actions = lambda self: [Msg_HeroDamage(self.caster,self.choices[0],1)]
-        return Act_HeroPower(self.owner, 2, self.engine.board.list_characters(), actions)
+        return Act_HeroPower(self.owner, self.power_cost, 
+                             self.engine.board.list_characters(), actions)
 
 ### - Priest -
 
@@ -54,10 +58,14 @@ class Card_Priest (Card_Hero):
     def __init__(self):
         Card_Minion.__init__(self, "Anduin", 0, 30, 0, cls="priest", name_fr='Anduin',
                              desc="heals a character by 2HP")
+        self.power_text = "Lesser heal"
+        self.power_subtext = "Restore 2 health"
+        self.power_cost = 2
 
     def hero_power(self):
-        actions = lambda self: [Msg_HeroHeal(self.caster,self.choices[0],1)]
-        return Act_HeroPower(self.owner, 2, self.engine.board.list_characters(), actions)
+        actions = lambda self: [Msg_HeroHeal(self.caster,self.choices[0],2)]
+        return Act_HeroPower(self.owner, self.power_cost, 
+                             self.engine.board.list_characters(), actions)
 
 
 

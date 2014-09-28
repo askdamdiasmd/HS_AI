@@ -13,7 +13,7 @@ class Thing (object):
       self.card = card
       self.owner = card.owner
       self.hp = self.max_hp = card.hp
-      self.atq = card.atq
+      self.atq = self.max_atq = card.atq
 
       # some status
       self.dead = False
@@ -35,39 +35,23 @@ class Thing (object):
       assert 0, 'must be overloaded'
 
   def filter_action(self,action):
-      t = type(action)
       for trigger,event in self.action_filters:
-        t = type(msg)
-        while t!=Action:
-          if issubclass(t,trigger):
-            action = event.execute(self,action)
-          t = t.__base__
+        if issubclass(type(msg),trigger):
+          action = event.execute(self,action)
       return action # default = do nothing
-
-#    def check_trigger(self, trigger):
-#      for tr,event in self.triggers:
-#        if tr==trigger:
-#          event.execute(self)
 
   def modify_msg(self, msg):
       for trigger,event in self.modifiers:
-        t = type(msg)
-        while t!=Message:
-          if issubclass(t,trigger):
-            msg = event.execute(self,msg)
-          t = t.__base__
+        if issubclass(type(msg),trigger):
+          msg = event.execute(self,msg)
       return msg
 
   def react_msg(self, msg):
-      t = type(msg)
       res = []
       for trigger,event in self.triggers:
-        t = type(msg)
-        while t!=Message:
-          if issubclass(t,trigger):
-            m = event.execute(self,msg)
-            if m: res.append(m)
-          t = t.__base__
+        if issubclass(type(msg),trigger):
+          m = event.execute(self,msg)
+          if m: res.append(m)
       return res
 
   def has_effect(self, effect):
@@ -87,12 +71,13 @@ class Thing (object):
       pass
 
   def silence(self):
-        self.action_filter = []
-        self.modifiers = []
-        self.triggers = []
-        while self.effects:
-          e = self.effects.pop()
-          if type(e)!=str:  e.undo(self)
+      self.action_filter = []
+      self.modifiers = []
+      self.triggers = []
+      while self.effects:
+        e = self.effects.pop()
+        if type(e)!=str:  e.undo(self)
+      self.engine.display_msg(Msg_Status(self,'effects'))
 
   def death(self):
       self.silence()
@@ -123,14 +108,17 @@ class Creature (Thing):
 
   def hurt(self, damage):
       self.hp -= damage
+      self.engine.display_msg(Msg_Status(self,'hp'))
       self.check_dead()
 
   def heal(self, hp):
       self.hp = min(self.max_hp, self.hp+hp)
+      self.engine.display_msg(Msg_Status(self,'hp'))
 
   def change_hp(self, hp):
         self.hp += hp
         self.max_hp += hp
+        self.engine.display_msg(Msg_Status(self,'hp max_hp'))
         self.cheack_dead()
 
   def check_dead(self):
