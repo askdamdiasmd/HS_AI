@@ -204,10 +204,11 @@ class VizThing (object):
 
   def delete(self):
     t = 0
-    while self.wait and t<3:
+    while self.wait and t<5:
       time.sleep(0.1)
       t+=0.1
-    if t>=3: debug()
+    self.wait = 0
+    if t>=5: debug()
     if hasattr(self,'panel'):
       uc.del_panel(self.panel)
       del self.panel
@@ -569,7 +570,7 @@ def draw_Msg_AddMinion(self):
         old_pos[m] = Slot(pl,i).get_screen_pos()[0]
     self.caster.viz.minions.insert(self.pos.pos,new_minion)
     new_minion.viz = VizMinion(new_minion)
-    if self.engine.board.viz.animated:# and old_pos:
+    if self.engine.board.viz.animated and old_pos:
       new_pos = {}
       for i,m in enumerate(pl.viz.minions):
         new_pos[m] = Slot(pl,i).get_screen_pos()[0]
@@ -618,15 +619,10 @@ def draw_Msg_StartAttack(self):
       ny,nx =   uc.getbegyx(self.target.viz.win)
       nty,ntx = uc.getmaxyx(self.target.viz.win)
       nx += (ntx-otx)/2
-      ny += (1+VizMinion.size[0])/2
       m = abs(oy-ny)
       t = 0.5/(m+2)
-      for i in range(1,m):
+      for i in range(1,m-(nty+1)/2)+range(m-(nty+1)/2,-1,-1):
         self.caster.draw(pos=(interp(i,m,oy,ny),interp(i,m,ox,nx)))
-        show_panels()
-        time.sleep(t)
-      for i in range(0,m):
-        self.caster.draw(pos=(interp(i,m,ny,oy),interp(i,m,nx,ox)))
         show_panels()
         time.sleep(t)
   
