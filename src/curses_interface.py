@@ -58,6 +58,7 @@ def init_screen():
   create_color_pair(uc.COLOR_CYAN, uc.COLOR_BLACK)
   create_color_pair(uc.COLOR_YELLOW, uc.COLOR_BLACK)
   create_color_pair(uc.COLOR_MAGENTA, uc.COLOR_BLACK)
+  create_color_pair(uc.COLOR_BLUE, uc.COLOR_BLACK)
   create_color_pair(uc.COLOR_RED, uc.COLOR_BLACK)
   create_color_pair(uc.COLOR_GREEN, uc.COLOR_BLACK)
   create_color_pair(uc.COLOR_WHITE, uc.COLOR_BLACK)
@@ -269,7 +270,7 @@ class VizHero (VizThing):
     ty,tx = uc.getmaxyx(win)
     hero = self.obj
     print_middle(win,1,1,tx-2,hero.owner.name)
-    print_middle(win,2,1,tx-2,"(%s)"%hero.card.name,uc.magenta_on_black)
+    print_middle(win,2,1,tx-2,"(%s)"%hero.card.name,uc.blue_on_black)
     if self.armor:
       tar = "[%d]"%self.armor
       uc.mvwaddstr(win,ty-2,tx-1-len(tar),tar)
@@ -300,7 +301,7 @@ class VizMinion (VizThing):
       highlight = kwargs.get('highlight',0)
       ty,tx = uc.getmaxyx(win)
       name = minion.card.name_fr or minion.card.name
-      print_longtext(win,1,1,ty-1,tx-1,name,uc.magenta_on_black)
+      print_longtext(win,1,1,ty-1,tx-1,name,uc.yellow_on_black)
       uc.mvwaddstr(win,ty-1,1," %d "%self.atq,
                    highlight|self.buff_color(self.atq,self.max_atq))
 
@@ -341,7 +342,8 @@ class Button:
 
   def delete(self):
       uc.del_panel(self.panel)
-      self.panel = self.win = None
+      del self.panel
+      del self.win
 
   def draw(self, highlight=0, bkgd=0, box=True, ytext=None, coltext=0, **kwargs):
       uc.wbkgd(self.win,bkgd)
@@ -376,12 +378,16 @@ def temp_panel(viz,text,color,duration=2):
     def wait_delete(duration,button,viz):
       t=0
       while t<duration:
+        show_panel_lock.acquire()
         uc.touchwin(button.win)
         uc.top_panel(button.panel)  # remains at top
+        show_panel_lock.release()
         show_panels()
         time.sleep(0.1)
         t+=0.1
+      show_panel_lock.acquire()
       button.delete()
+      show_panel_lock.release()
       show_panels()
       viz.wait -= 1
     Thread(target=wait_delete,args=(duration,button,viz)).start()
@@ -474,7 +480,7 @@ def draw_Card(self, pos=None, highlight=0, cost=None, small=True, bkgd=0, **kwar
       mid = card_size[0]/2
       y,x,h,w = 1,2,mid-2,tx-4
       manual_box(win,y,x,h,w)
-      print_longtext(win,y+1,x+1,y+h-1,x+w-1,name,uc.magenta_on_black)
+      print_longtext(win,y+1,x+1,y+h-1,x+w-1,name,uc.yellow_on_black)
       uc.mvwaddstr(win,y+h-1,x+1,"%2d "%self.atq)
       uc.mvwaddstr(win,y+h-1,x+w-4,"%2d "%self.hp)
       print_longtext(win,mid,2,ty-1,tx-2,desc)
@@ -482,7 +488,7 @@ def draw_Card(self, pos=None, highlight=0, cost=None, small=True, bkgd=0, **kwar
       uc.mvwaddch(win, 3, 0, uc.ACS_LTEE, highlight)
       uc.mvwhline(win, 3, 1, uc.ACS_HLINE, tx-2)
       uc.mvwaddch(win, 3, tx-1, uc.ACS_RTEE, highlight)
-      print_longtext(win,1,1,3,tx-1,name,uc.yellow_on_black)
+      print_longtext(win,1,1,3,tx-1,name,uc.magenta_on_black)
       print_longtext(win,4,2,ty,tx-2,desc)
 
     # print cost
@@ -612,7 +618,7 @@ def draw_Msg_Status(self):
     show_panels()
 
 def draw_Msg_StartAttack(self):
-    if True or self.engine.board.viz.animated:
+    if self.engine.board.viz.animated:
       oy,ox =   uc.getbegyx(self.caster.viz.win)
       oty,otx = uc.getmaxyx(self.caster.viz.win)
       uc.top_panel(self.caster.viz.panel) # set assailant as top panel
@@ -974,11 +980,13 @@ if __name__=="__main__":
     while not engine.is_game_ended():
       engine.play_turn()
     
-    uc.endwin()
-    print '\n'*2
     t = engine.turn
     winner = engine.get_winner()
-    print 'End of game: player %s won after %d turns' % (winner.name, (t+1)/2)
+    button = Button(10,37,' %s won after %d turns! ' % (winner.name, (t+1)/2),ty=5)
+    button.draw(highlight=uc.black_on_yellow)
+    show_panels()
+    uc.getch()    
+    uc.endwin()
 
 
 
