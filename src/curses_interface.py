@@ -562,14 +562,14 @@ def draw_Msg_ThrowCard(self):
 
 def draw_Msg_AddMinion(self):
     new_minion = self.thing
-    if True or self.engine.board.viz.animated:
+    if self.engine.board.viz.animated:
       pl = new_minion.owner
       old_pos = {}
       for i,m in enumerate(pl.viz.minions):
         old_pos[m] = Slot(pl,i).get_screen_pos()[0]
     self.caster.viz.minions.insert(self.pos.pos,new_minion)
     new_minion.viz = VizMinion(new_minion)
-    if old_pos and self.engine.board.viz.animated:
+    if self.engine.board.viz.animated:# and old_pos:
       new_pos = {}
       for i,m in enumerate(pl.viz.minions):
         new_pos[m] = Slot(pl,i).get_screen_pos()[0]
@@ -585,9 +585,26 @@ def draw_Msg_AddMinion(self):
     self.engine.board.draw('minions',which=self.caster)
 
 def draw_Msg_DeadMinion(self):
-    self.caster.viz.delete()
-    self.caster.owner.viz.minions.remove(self.caster)
-    self.engine.board.draw('minions',which=self.caster.owner)
+    dead_minion = self.caster
+    dead_minion.viz.delete()
+    if self.engine.board.viz.animated:
+      pl = dead_minion.owner
+      old_pos = {}
+      for i,m in enumerate(pl.viz.minions):
+        old_pos[m] = Slot(pl,i).get_screen_pos()[0]
+    dead_minion.owner.viz.minions.remove(dead_minion)
+    if self.engine.board.viz.animated:
+      new_pos = {}
+      for i,m in enumerate(pl.viz.minions):
+        new_pos[m] = Slot(pl,i).get_screen_pos()[0]
+      r = VizMinion.size[1]/2+1
+      for i in range(1,r):
+        for m, (ny,nx) in new_pos.items():
+          oy,ox = old_pos[m]
+          m.draw(pos=(interp(i,r,oy,ny),interp(i,r,ox,nx)))
+        show_panels()
+        time.sleep(0.1)
+    self.engine.board.draw('minions',which=dead_minion.owner)
 
 def draw_Msg_Status(self):
     self.caster.viz.update_stats(self)
@@ -941,7 +958,9 @@ if __name__=="__main__":
     engine.start_game()
     while not engine.is_game_ended():
       engine.play_turn()
-
+    
+    NR,NC = uc.getmaxyx(stdscr)
+    uc.move(NR-1,NC-1)
     uc.endwin()
     print '\n'*2
     t = engine.turn
