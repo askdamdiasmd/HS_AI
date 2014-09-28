@@ -495,7 +495,24 @@ def draw_Card(self, pos=None, highlight=0, cost=None, small=True, bkgd=0, **kwar
       uc.mvwaddstr(win, 0,0, "(%d)"%cost, uc.white_on_red)
 
 
+def card_delete(self):
+    if hasattr(self,'panel'):
+      uc.del_panel(self.panel)
+      del self.win
+      del self.panel
+    if hasattr(self,'small_panel'):
+      uc.del_panel(self.small_panel)
+      del self.small_win
+      del self.small_panel
+
+Card.delete = card_delete
+
 # Messages ---------
+
+def interp(i,max,start,end):
+  """ i varies in [0,m-1] """
+  assert 1<=i<max, debug()
+  return start + (end-start)*i/(max-1)
 
 def draw_Message(self):
     pass
@@ -533,9 +550,6 @@ def draw_Msg_DrawCard(self):
 
 def draw_Msg_EndTurn(self):
     pass
-#    for card in self.caster.cards:
-#      if hasattr('card','small_panel'):
-#        uc.hide_panel(card.small_panel)
 
 def draw_Msg_UseMana(self):
     self.engine.board.draw('mana',self.caster)
@@ -543,20 +557,31 @@ def draw_Msg_UseMana(self):
 def draw_Msg_ThrowCard(self):
     card = self.card
     card.owner.viz.cards.remove(card)
-    if hasattr(card,'panel'):
-      uc.del_panel(card.panel)
-      del card.win
-      del card.panel
-    if hasattr(card,'small_panel'):
-      uc.del_panel(card.small_panel)
-      del card.small_win
-      del card.small_panel
+    card.delete()
     self.engine.board.draw('cards',which=self.caster)
 
 def draw_Msg_AddMinion(self):
-    m = self.thing
-    self.caster.viz.minions.insert(self.pos.pos,m)
-    m.viz = VizMinion(m)
+    new_minion = self.thing
+    if True or self.engine.board.viz.animated:
+      pl = new_minion.owner
+      old_pos = {}
+      for i,m in enumerate(pl.viz.minions):
+        old_pos[m] = Slot(pl,i).get_screen_pos()[0]
+    self.caster.viz.minions.insert(self.pos.pos,new_minion)
+    new_minion.viz = VizMinion(new_minion)
+    if old_pos and self.engine.board.viz.animated:
+      new_pos = {}
+      for i,m in enumerate(pl.viz.minions):
+        new_pos[m] = Slot(pl,i).get_screen_pos()[0]
+      r = VizMinion.size[1]/2+1
+      uc.hide_panel(new_minion.viz.panel)
+      for i in range(1,r):
+        for m, (oy,ox) in old_pos.items():
+          ny,nx = new_pos[m]
+          m.draw(pos=(interp(i,r,oy,ny),interp(i,r,ox,nx)))
+        show_panels()
+        time.sleep(0.1)
+      uc.show_panel(new_minion.viz.panel)
     self.engine.board.draw('minions',which=self.caster)
 
 def draw_Msg_DeadMinion(self):
