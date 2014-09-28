@@ -1,4 +1,5 @@
 import sys, os, time, pdb
+from threading import Thread
 from board import Board, Slot
 from players import *
 from messages import *
@@ -11,7 +12,6 @@ import locale
 locale.setlocale(locale.LC_ALL, '') #en_US.utf8') #UTF-8')
 code = locale.getpreferredencoding()
 os.environ['ESCDELAY'] = '25'
-pdb.set_trace()
 
 def addwch(ch,attr=0,win=None,y=None,x=None):
   if win==None: win=stdscr
@@ -58,6 +58,9 @@ def init_screen():
   create_color_pair(uc.COLOR_CYAN, uc.COLOR_BLACK)
   create_color_pair(uc.COLOR_YELLOW, uc.COLOR_BLACK)
   create_color_pair(uc.COLOR_MAGENTA, uc.COLOR_BLACK)
+  create_color_pair(uc.COLOR_RED, uc.COLOR_BLACK)
+  create_color_pair(uc.COLOR_GREEN, uc.COLOR_BLACK)
+  create_color_pair(uc.COLOR_WHITE, uc.COLOR_BLACK)
   create_color_pair(uc.COLOR_WHITE, uc.COLOR_RED)
   create_color_pair(uc.COLOR_WHITE, uc.COLOR_GREEN)
   create_color_pair(uc.COLOR_BLACK, uc.COLOR_GREEN)
@@ -81,6 +84,9 @@ def print_longtext(win,y,x,endy,endx,text,attr=0):
       line = text.pop(0)
       while text and len(line+text[0])+1<width:
         line += ' '+text.pop(0)
+      if len(line)>width:
+          text.insert(0,'-'+line[width:])
+          line = line[:width]
       print_middle(win,y,x,width,line,attr)
       y += 1
 
@@ -96,6 +102,9 @@ def debug():
     pdb.set_trace()
     global stdscr
     stdscr = init_screen()
+    uc.touchwin(stdscr)
+    uc.update_panels()
+    uc.doupdate()
 
 def show_ACS():
     NR,NC = uc.getmaxyx(stdscr)
@@ -164,31 +173,48 @@ def get_panel_userptr(panel):
 
 ### General thing (minion, weapon, hero...)------
 
-class VizThing:
-  def __init__(self, copy, size, pos ):
-    self.hp =     copy.hp
-    self.max_hp = copy.max_hp
-    self.armor =  copy.armor
-    self.atq =    copy.atq
-    
+class VizThing (object):
+  def __init__(self, obj, size, pos ):
+    self.obj = obj
+    self.hp =     obj.hp
+    self.max_hp = obj.max_hp
+    self.atq =    obj.atq
+    self.max_atq =obj.max_atq
+    self.effects = []
+    obj.draw = self.draw
+    self.wait = False
     # create panel
     self.win = uc.newwin(size[0],size[1],pos[0],pos[1])
     self.panel = uc.new_panel(self.win)
-    set_panel_userptr(self.panel, copy)
-    self.fake = Fake(self)
+    set_panel_userptr(self.panel, obj)
+
+  def check(self):
+    obj = self.obj
+    assert self.hp == obj.hp, debug()
+    assert self.max_hp == obj.max_hp, debug()
+    assert self.atq == obj.atq, debug()
+    assert self.max_atq == obj.max_atq, debug()
 
   def delete(self):
+    t = 0
+    while self.wait and t<3:
+      time.sleep(0.1)
+      t+=0.1
+    if t>=3: debug()
     if hasattr(self,'panel'):
-      uc.delete_panel(self.panel)
+      uc.del_panel(self.panel)
+      del self.panel
+      del self.win
 
   @staticmethod
-  def buff_color(val,max_val):
+  def buff_color(val,max_val,highlight=False,standout=False):
     if val>max_val:
-      return uc.green_on_black
+      res = uc.white_on_green if highlight else uc.green_on_black
     elif val==max_val:
-      return uc.white_on_black
+      res = uc.white_on_black if highlight else 0
     else:
-      return uc.red_on_black
+      res = uc.white_on_red if highlight else uc.red_on_black
+    return res + (uc.A_STANDOUT if standout else 0)
 
   def draw(self, pos=None, bkgd=0, highlight=0, **kwargs):
     win, panel = self.win, self.panel
@@ -201,32 +227,88 @@ class VizThing:
     uc.wattroff(win,highlight)
     
     # show just HP
-    uc.mvwaddstr(win,ty-1,tx-3,"%d"%self.hp,self.buff_color(self.hp,self.max_hp))
+    ty,tx = uc.getmaxyx(win)
+    uc.mvwaddstr(win,ty-1,tx-4," %d "%self.hp,self.buff_color(self.hp,self.max_hp))
+    return win
+
+  def update_stats(self, msg):
+    for attr in msg.attrs:
+      oldval = getattr(self,attr)
+      newval = getattr(msg,attr)
+      setattr(self,attr,newval)
+      if attr=='hp' and len(msg.attrs)==1:
+        diff = newval-oldval
+        temp_panel(self,"%d"%diff,self.buff_color(diff,0,highlight=1))
+    self.draw()
 
 
 ### Hero -----------
 
 class VizHero (VizThing):
-  def __init__(self, copy, *args ):
-    VizThing.__init__(self,copy,*args)
-    self.armor = copy.armor
+  size = (4,13)
+  def __init__(self, hero, pos ):
+    VizThing.__init__(self,hero,self.size,pos)
+    self.armor = hero.armor
+
+  def check(self):
+    assert self.armor == obj.armor, debug()
 
   def draw(self, **kwargs):
-    VizThing.draw(**kwargs)
-    print_middle(win,1,1,tx-2,self.owner.name)
-    print_middle(win,2,1,tx-2,"(%s)"%self.card.name,uc.magenta_on_black)
+    win = VizThing.draw(self,**kwargs)
+    ty,tx = uc.getmaxyx(win)
+    hero = self.obj
+    print_middle(win,1,1,tx-2,hero.owner.name)
+    print_middle(win,2,1,tx-2,"(%s)"%hero.card.name,uc.magenta_on_black)
     if self.armor:
       uc.mvwaddstr(win,ty-2,tx-4,"[%d]"%self.armor)
+    pl = hero.owner.viz
+    if pl.weapon:
+      uc.mvwaddstr(win,ty-3,1," %d "%self.buff_color(pl.weapon.atq,pl.weapon.max_atq))
+
+  def create_hero_power_button(self):
+    card = self.obj.card
+    y,x = uc.getbegyx(self.win)
+    up, down = card.power_text.split()
+    return HeroPowerButton(y,x+24,up,down,card.power_cost,tx=9,ty=4)
+    
+
+### Minion -----------
+
+class VizMinion (VizThing):
+  size = 5,11
+  def __init__(self, minion):
+      pos = minion.engine.board.viz.get_minion_pos(minion)
+      VizThing.__init__(self,minion,pos=pos,size=self.size)
+
+  def draw(self, pos=None, **kwargs):
+      minion = self.obj
+      if pos==None: pos = minion.engine.board.viz.get_minion_pos(minion)
+      win = VizThing.draw(self,pos=pos,**kwargs)
+      ty,tx = uc.getmaxyx(win)
+      name = minion.card.name_fr or minion.card.name
+      print_longtext(win,1,1,ty-1,tx-1,name,uc.magenta_on_black)
+      uc.mvwaddstr(win,ty-1,1," %d "%self.atq,self.buff_color(self.atq,self.max_atq))
+
 
 ### Player -----------
 
 class VizPlayer:
-  def __init__(self, copy ):
-    self.engine = copy.engine
-    self.player = copy
-    copy.hero.viz = VizHero(copy.hero)
-    self.cards = list(copy.cards)
-    self.minions = list(copy.minions)
+  def __init__(self, player ):
+    self.player = player
+    self.cards = []
+    self.minions = []
+    self.weapon = None
+    self.secrets = []
+    
+  def check(self):
+    pl = self.player
+    for card in self.cards:
+      assert card in pl.cards, debug()
+    if pl.weapon or self.weapon: self.weapon.check()
+    assert len(self.secrets)==len(pl.secrets), debug()
+    assert len(self.minions)==len(pl.minions), debug()
+    for m in self.minions:
+      m.viz.check()
 
 
 ### Button -----------
@@ -246,140 +328,159 @@ class Button:
       uc.del_panel(self.panel)
       self.panel = self.win = None
 
-  def draw(self, highlight=0, bkgd=0, **kwargs):
+  def draw(self, highlight=0, bkgd=0, box=True, ytext=None, coltext=0, **kwargs):
       uc.wbkgd(self.win,bkgd)
-      
-      uc.wattron(self.win,highlight)
-      uc.box(self.win)
-      uc.wattroff(self.win,highlight)
-      
+      if box:
+        uc.wattron(self.win,highlight)
+        uc.box(self.win)
+        uc.wattroff(self.win,highlight)
       ty, tx = uc.getmaxyx(self.win)
-      print_middle(self.win,ty/2,1,tx-2,self.text)
+      print_middle(self.win,ytext or ty/2,1,tx-2,self.text,coltext)
+
+class HeroPowerButton (Button):
+  def __init__(self, y,x, text, subtext, cost=2, **kwargs):
+      Button.__init__(self,y,x,text,**kwargs)
+      self.subtext = subtext
+      self.cost = cost
+
+  def draw(self,**kwargs):
+      coltext = uc.yellow_on_black
+      Button.draw(self,ytext=1,coltext=coltext,**kwargs)
+      ty, tx = uc.getmaxyx(self.win)
+      uc.mvwaddstr(self.win,0,tx/2-1,"(%d)"%self.cost,uc.cyan_on_black)
+      print_longtext(self.win,2,1,ty-1,tx-1,self.subtext,coltext)
+      
+
+def temp_panel(viz,text,color,duration=2):
+    assert issubclass(type(viz),VizThing), debug()
+    viz.wait = True
+    y,x = uc.getbegyx(viz.win)
+    ty,tx = uc.getmaxyx(viz.win)
+    button = Button(y+ty/2-1,x+tx/2,text)
+    button.draw(box=False,bkgd=color)
+    def wait_delete(duration,button,viz):
+      t=0
+      while t<duration:
+        uc.touchwin(button.win)
+        uc.top_panel(button.panel)  # remains at top
+        uc.update_panels()
+        uc.doupdate()
+        time.sleep(0.1)
+        t+=0.1
+      button.delete()
+      uc.update_panels()
+      uc.doupdate()
+      viz.wait = False
+    Thread(target=wait_delete,args=(duration,button,viz)).start()
+    
+    
 
 ### Slot -----------
 
-class VizSlot (VizPanel):
-  def __init__(self, slot):
-    self.slot = slot
+def get_screen_pos(self):
+    """ return position, space """
+    NR,NC = uc.getmaxyx(stdscr)
+    n = len(self.owner.viz.minions)
+    top,bot = self.engine.board.viz.get_top_bottom_players()
+    y = 5 if self.owner is top else 14
+    sp = ([3]*5+[2,1,0])[n] # spacement between minions
+    return (y,int(NC-3-(11+sp)*n)/2+(11+sp)*self.pos), sp
 
-  def get_screen_pos(self):
-      """ return position, space """
-      NR,NC = uc.getmaxyx(stdscr)
-      n = len(self.slot.owner.minions)
-      sp = ([3]*5+[2,1,0])[n] # spacement between minions
-      return int(NC-3-(11+sp)*n)/2+(11+sp)*self.pos, sp
+Slot.get_screen_pos = get_screen_pos
 
-  def draw(self, highlight=0, bkgd=0, **kwargs):
-      if not hasattr(self,"win"):
-        x, sp = self.get_screen_pos()
-        win = self.win = uc.newwin(5,sp,14,x-sp)
-        self.panel = uc.new_panel(win)
-        set_panel_userptr(self.panel, self)
-      
-      if bkgd or highlight:
-        uc.top_panel(self.panel)
-        uc.wbkgd(self.win,bkgd or highlight)
-      else:
-        uc.del_panel(self.panel)
-        del self.panel
-        del self.win
+def draw_Slot(self, highlight=0, bkgd=0, **kwargs):
+    if not hasattr(self,"win"):
+      (y,x), sp = self.get_screen_pos()
+      win = self.win = uc.newwin(5,sp,y,x-sp)
+      self.panel = uc.new_panel(win)
+      set_panel_userptr(self.panel, self)
+    
+    if bkgd or highlight:
+      uc.top_panel(self.panel)
+      uc.wbkgd(self.win,bkgd or highlight)
+    else:
+      uc.del_panel(self.panel)
+      del self.panel
+      del self.win
 
-### Minion -----------
-
-class VizMinion (VizThing):
-  def __init__(self, minion, *args):
-      slot = minion.engine.board.viz.get_minion_pos(minion)
-      pos = slot.get_screen_pos()
-      VizThing.__init__(self,pos=pos,*args)
-      self.minion = minion
-
-  def draw(self, **kwargs):
-      obj = self.minion
-      VizThing.draw(**kwargs)
-      name = self.card.name_fr or self.card.name
-      print_longtext(win,1,1,ty-1,tx-1,name,uc.magenta_on_black)
-      uc.mvwaddstr(win,ty-1,1,"%2d "%self.atq)
 
 
 ### Card -----------
-class VizCard:
-  card_size = 14,15
-  def __init__(self, card):
-    ..
+card_size = (14,15)
 
-  def draw_Card(self, pos=None, highlight=0, cost=None, small=True, bkgd=0, **kwargs):
-      name = self.name_fr or self.name
-      desc = self.desc_fr or self.desc
+def draw_Card(self, pos=None, highlight=0, cost=None, small=True, bkgd=0, **kwargs):
+    name = self.name_fr or self.name
+    desc = self.desc_fr or self.desc
 
-      if not small:
-        ty,tx = card_size
-        if not pos and hasattr(self,"small_panel"):
-          self.ty = ty
-          self.tx = tx
-          y,x = uc.getbegyx(self.small_win)
-          NR,NC = uc.getmaxyx(stdscr)
-          pos = NR-ty, x
-        if not hasattr(self,"win"):
-          self.win = uc.newwin(ty,tx,pos[0],pos[1])
-          self.panel = uc.new_panel(self.win)
-          set_panel_userptr(self.panel, self)
-        win, panel = self.win, self.panel
-        uc.top_panel(panel)
-      else: # small card version
-        if hasattr(self,"panel"):
-          uc.hide_panel(self.panel)
-        if not hasattr(self,"small_win"):
-          ty, tx = small, card_size[1]
-          if pos==None: debug()
-          self.small_win = uc.newwin(ty,tx,pos[0],pos[1])
-          self.small_panel = uc.new_panel(self.small_win)
-          set_panel_userptr(self.small_panel, self)
-        win, panel = self.small_win, self.small_panel
-        ty, tx = uc.getmaxyx(win)
-        if type(small)==int and small!=ty: # redo
-          uc.del_panel(panel)
-          del self.small_win
-          del self.small_panel
-          return self.draw(pos=pos, highlight=highlight, cost=cost, small=small, bkgd=bkgd)
-      
+    if not small:
+      ty,tx = card_size
+      if not pos and hasattr(self,"small_panel"):
+        self.ty = ty
+        self.tx = tx
+        y,x = uc.getbegyx(self.small_win)
+        NR,NC = uc.getmaxyx(stdscr)
+        pos = NR-ty, x
+      if not hasattr(self,"win"):
+        self.win = uc.newwin(ty,tx,pos[0],pos[1])
+        self.panel = uc.new_panel(self.win)
+        set_panel_userptr(self.panel, self)
+      win, panel = self.win, self.panel
+      uc.top_panel(panel)
+    else: # small card version
+      if hasattr(self,"panel"):
+        uc.hide_panel(self.panel)
+      if not hasattr(self,"small_win"):
+        ty, tx = small, card_size[1]
+        if pos==None: debug()
+        self.small_win = uc.newwin(ty,tx,pos[0],pos[1])
+        self.small_panel = uc.new_panel(self.small_win)
+        set_panel_userptr(self.small_panel, self)
+      win, panel = self.small_win, self.small_panel
       ty, tx = uc.getmaxyx(win)
-      if pos and pos!=uc.getbegyx(win):
-        uc.move_panel(panel,*pos)
+      if type(small)==int and small!=ty: # redo
+        uc.del_panel(panel)
+        del self.small_win
+        del self.small_panel
+        return self.draw(pos=pos, highlight=highlight, cost=cost, small=small, bkgd=bkgd)
+    
+    ty, tx = uc.getmaxyx(win)
+    if pos and pos!=uc.getbegyx(win):
+      uc.move_panel(panel,*pos)
 
-      uc.wbkgd(win,bkgd)
-      if highlight:  uc.wattron(win,highlight)
-      uc.box(win)
-      if small:
-        uc.mvwaddch(win,ty-1,0,uc.ACS_VLINE)
-        uc.mvwaddch(win,ty-1,tx-1,uc.ACS_VLINE)
-      if highlight:  uc.wattroff(win,highlight)
-      if small:
-        uc.mvwaddstr(win,ty-1,1,' '*(tx-2))
+    uc.wbkgd(win,bkgd)
+    if highlight:  uc.wattron(win,highlight)
+    uc.box(win)
+    if small:
+      uc.mvwaddch(win,ty-1,0,uc.ACS_VLINE)
+      uc.mvwaddch(win,ty-1,tx-1,uc.ACS_VLINE)
+    if highlight:  uc.wattroff(win,highlight)
+    if small:
+      uc.mvwaddstr(win,ty-1,1,' '*(tx-2))
 
-      if issubclass(type(self),Card_Minion):
-        mid = card_size[0]/2
-        y,x,h,w = 1,2,mid-2,tx-4
-        manual_box(win,y,x,h,w)
-        print_longtext(win,y+1,x+1,y+h-1,x+w-1,name,uc.magenta_on_black)
-        uc.mvwaddstr(win,y+h-1,x+1,"%2d "%self.atq)
-        uc.mvwaddstr(win,y+h-1,x+w-4,"%2d "%self.hp)
-        print_longtext(win,mid,2,ty-1,tx-2,desc)
-      else:
-        uc.mvwaddch(win, 3, 0, uc.ACS_LTEE, highlight)
-        uc.mvwhline(win, 3, 1, uc.ACS_HLINE, tx-2)
-        uc.mvwaddch(win, 3, tx-1, uc.ACS_RTEE, highlight)
-        print_longtext(win,1,1,3,tx-1,name,uc.yellow_on_black)
-        print_longtext(win,4,2,ty,tx-2,desc)
+    if issubclass(type(self),Card_Minion):
+      mid = card_size[0]/2
+      y,x,h,w = 1,2,mid-2,tx-4
+      manual_box(win,y,x,h,w)
+      print_longtext(win,y+1,x+1,y+h-1,x+w-1,name,uc.magenta_on_black)
+      uc.mvwaddstr(win,y+h-1,x+1,"%2d "%self.atq)
+      uc.mvwaddstr(win,y+h-1,x+w-4,"%2d "%self.hp)
+      print_longtext(win,mid,2,ty-1,tx-2,desc)
+    else:
+      uc.mvwaddch(win, 3, 0, uc.ACS_LTEE, highlight)
+      uc.mvwhline(win, 3, 1, uc.ACS_HLINE, tx-2)
+      uc.mvwaddch(win, 3, tx-1, uc.ACS_RTEE, highlight)
+      print_longtext(win,1,1,3,tx-1,name,uc.yellow_on_black)
+      print_longtext(win,4,2,ty,tx-2,desc)
 
-      # print cost
-      if cost==None:
-        cost=self.cost
-      if cost==self.cost:
-        uc.mvwaddstr(win, 0,0, "(%d)"%cost, uc.black_on_cyan)
-      elif cost<self.cost:
-        uc.mvwaddstr(win, 0,0, "(%d)"%cost, uc.white_on_green)
-      else:
-        uc.mvwaddstr(win, 0,0, "(%d)"%cost, uc.white_on_red)
+    # print cost
+    if cost==None:
+      cost=self.cost
+    if cost==self.cost:
+      uc.mvwaddstr(win, 0,0, "(%d)"%cost, uc.black_on_cyan)
+    elif cost<self.cost:
+      uc.mvwaddstr(win, 0,0, "(%d)"%cost, uc.white_on_green)
+    else:
+      uc.mvwaddstr(win, 0,0, "(%d)"%cost, uc.white_on_red)
 
 
 # Messages ---------
@@ -391,23 +492,26 @@ def draw_Action(self):
     pass
 
 def draw_Msg_StartTurn(self):
-    button = Button(10,37," %s's turn! "%self.caster.name,tx=20,ty=5)
+    player = self.caster
+    player.viz.check()  # check consistency with real data
+    button = Button(10,37," %s's turn! "%player.name,tx=20,ty=5)
     button.draw(highlight=uc.black_on_yellow)
     uc.update_panels()
     uc.doupdate()
-    time.sleep(1)
+    time.sleep(1 if self.engine.board.viz.animated else 0.1)
     button.delete()
-    self.engine.board.draw(last_card=False)
+    self.engine.board.draw()
 
 def draw_Msg_DrawCard(self):
-    bottom_player = self.engine.board.get_top_bottom_players()[1]
-    if bottom_player==self.caster:
+    card = self.card
+    self.caster.viz.cards.append(card)
+    bottom_player = self.engine.board.viz.get_top_bottom_players()[1]
+    if self.engine.board.viz.animated and bottom_player==self.caster:
       self.engine.board.draw('cards',which=self.caster,last_card=False)
-      card = self.card
       NR,NC = uc.getmaxyx(stdscr)
       ty,tx = card_size
       sy,sx = 12, NC-tx
-      ey,ex = self.engine.board.get_card_pos(card)
+      ey,ex = self.engine.board.viz.get_card_pos(card)
       for y in range(sy,ey+1):
         x = int(0.5+sx+(ex-sx)*(y-sy)/float(ey-sy))
         h = max(0,NR-y)
@@ -418,15 +522,17 @@ def draw_Msg_DrawCard(self):
     self.engine.board.draw('cards',which=self.caster)
 
 def draw_Msg_EndTurn(self):
-    for card in self.caster.cards:
-      if hasattr('card','small_panel'):
-        uc.hide_panel(card.small_panel)
+    pass
+#    for card in self.caster.cards:
+#      if hasattr('card','small_panel'):
+#        uc.hide_panel(card.small_panel)
 
 def draw_Msg_UseMana(self):
     self.engine.board.draw('mana',self.caster)
 
 def draw_Msg_ThrowCard(self):
     card = self.card
+    card.owner.viz.cards.remove(card)
     if hasattr(card,'panel'):
       uc.del_panel(card.panel)
       del card.win
@@ -438,69 +544,39 @@ def draw_Msg_ThrowCard(self):
     self.engine.board.draw('cards',which=self.caster)
 
 def draw_Msg_AddMinion(self):
+    m = self.thing
+    self.caster.viz.minions.insert(self.pos.pos,m)
+    m.viz = VizMinion(m)
     self.engine.board.draw('minions',which=self.caster)
 
 def draw_Msg_DeadMinion(self):
-    uc.del_panel(self.caster.panel)
-    del self.caster.panel
-    del self.caster.win
+    self.caster.viz.delete()
+    self.caster.owner.viz.minions.remove(self.caster)
     self.engine.board.draw('minions',which=self.caster.owner)
 
-
-"""
-
-def draw_Msg_Popup(self):
-    print "Minion '%s' pops up" %(self.caster)
-
-def draw_Msg_Dying(self):
-    print "Death of "+str(self.caster)
-
-def draw_Msg_StartAttack(self):
-    print "%s attacks %s !" % (self.caster, )
-
-def draw_Msg_EndAttack(self):
-    pass
-
-def draw_Msg_Damage (TargetedMessage):
-    def __init__(self, caster, target, damage):
-        Message.__init__(self, caster, target)
-        self.damage = damage
-    def execute(self):
-        self.target.hurt(self.damage)
+def draw_Msg_Status(self):
+    self.caster.viz.update_stats(self)
+    uc.update_panels()
+    uc.doupdate()
 
 
-def draw_Msg_SpellDamage (Msg_Damage):
-    ''' same but launched
-     by a spell'''
-    pass
-
-def draw_Msg_Heal (TargetedMessage):
-    def __init__(self, caster, target, heal):
-        Message.__init__(self, caster, target)
-        self.heal = heal
-    def execute(self):
-        self.target.heal(self.heal)
-
-# card/spell messages
-
-def draw_Msg_StartCard(self):
-    pass
-def draw_Msg_EndCard(self):
-    pass
-
-def draw_Msg_StartSpell (Msg_StartCard):
-    pass
-def draw_Msg_EndSpell (Msg_EndCard):
-    pass
-"""
 
 ### Board --------
 
-class BoardViz:
-  def __init__(self, board):
-      self.engine = engine = board.engine
+class VizBoard:
+  def __init__(self, board, switch=False, animated=True):
+      self.board = board
+      self.engine = board.engine
+      board.draw = self.draw
+      self.switch = switch # switch heroes or not
+      self.animated = animated  # show animation or not
+      NR,NC = uc.getmaxyx(stdscr)
+      self.end_turn = Button(11,NC,"End turn",align='right')
+      self.hero_power_buttons = {}
       for pl in engine.players:
         pl.viz = VizPlayer(pl)
+        pl.hero.viz = VizHero(pl.hero, self.get_hero_pos(pl))
+        self.hero_power_buttons[pl] = pl.hero.viz.create_hero_power_button()
 
   def get_top_bottom_players(self):
       player = self.engine.get_current_player()
@@ -509,13 +585,17 @@ class BoardViz:
         player,adv = adv,player # prevent top/down switching
       return adv, player
 
+  def get_minion_pos(self, minion):
+      slot = Slot(minion.owner,minion.owner.viz.minions.index(minion))
+      return slot.get_screen_pos()[0]
+
   def get_card_pos(self,card):
       NR,NC = uc.getmaxyx(stdscr)
-      nc = len(card.owner.cards)
+      nc = len(card.owner.viz.cards)+1e-8
       ty,tx = card_size
       actual_NC = min(NC,tx*nc)
-      startx = (NC - actual_NC)/2
-      i = card.owner.cards.index(card)
+      startx = int((NC - actual_NC)/2)
+      i = card.owner.viz.cards.index(card)
       return 24, startx + int((actual_NC-tx)*i/(nc-1))
 
   def get_hero_pos(self,player):
@@ -525,7 +605,7 @@ class BoardViz:
       if player==bot: return (20,(NC-18)/2)
       assert False
 
-  def draw(self, what='bkgd decks hero cards mana minions', which=None):
+  def draw(self, what='bkgd decks hero cards mana minions', which=None, last_card=True):
       NR,NC = uc.getmaxyx(stdscr)
       
       # clear screen
@@ -540,9 +620,11 @@ class BoardViz:
         uc.mvhline(12,0,ord('-'),NC)
         uc.mvhline(21,0,uc.ACS_CKBOARD,NC)
         uc.mvhline(22,0,uc.ACS_CKBOARD,NC)
-        if not hasattr(self,"end_turn"):
-          self.end_turn = Button(11,NC,"End turn",align='right')
         self.end_turn.draw()
+        # draw hero power
+        for pl in which:
+          self.hero_power_buttons[pl].draw()
+      
       
       # draw decks on the right side
       if 'decks' in what:
@@ -550,13 +632,13 @@ class BoardViz:
           uc.mvvline(2,NC-1-i,uc.ACS_CKBOARD,20)
         for i in [5,15]:
           uc.mvaddch(i,NC-2,uc.ACS_HLINE)
-          uc.addstr(unichr(9558).encode(code))
+          addwch(9558)
           text = ' %2d'%len(i<12 and adv.deck or player.deck)
           for j,ch in enumerate(text):
             uc.mvaddch(i+1+j,NC-2,ord(ch))
-            uc.addstr(unichr(9553).encode(code))
+            addwch(9553)
           uc.mvaddch(i+4,NC-2,uc.ACS_HLINE)
-          uc.addstr(unichr(9564).encode(code))
+          addwch(9564)
       
       # draw heroes
       if 'hero' in what:
@@ -564,14 +646,13 @@ class BoardViz:
           adv.hero.draw()
         if player in which:
           player.hero.draw()
-      
+
       # draw cards
       if 'cards' in what:
         if adv in which:
           print_middle(stdscr, 0,0, NC, " Adversary has %d cards. "%len(adv.cards))
         if player in which:
-          cards = player.cards if last_card else player.cards[:-1]
-          for card in cards:
+          for card in player.viz.cards[:None if last_card else -1]:
             card.draw(pos=self.get_card_pos(card), small=NR-24)
       
       # draw mana
@@ -581,16 +662,18 @@ class BoardViz:
           p = i<12 and adv or player
           text = "%d/%d "%(p.mana,p.max_mana)
           uc.mvaddstr(i,NC-11-len(text), text, uc.black_on_cyan)
-          uc.mvaddstr(i,NC-11, (unichr(9826)*p.max_mana).encode(code), uc.cyan_on_black)
-          uc.mvaddstr(i,NC-11, (unichr(9830)*p.mana).encode(code), uc.cyan_on_black)
+          for i in range(p.mana):
+            addwch(9830, uc.cyan_on_black)
+          for i in range(p.max_mana-p.mana):
+            addwch(9826, uc.cyan_on_black)
       
       # draw minions
       if 'minions' in what:
         if player in which:
-          for m in player.minions:
+          for m in player.viz.minions:
             m.draw(y=14)
         if adv in which:
-          for m in adv.minions:
+          for m in adv.viz.minions:
             m.draw(y=5)
       
       uc.update_panels()
@@ -681,15 +764,15 @@ class HumanPlayerAscii (HumanPlayer):
       remaining_cards = set(self.cards)
       for a in actions:
         if issubclass(type(a),Act_HeroPower):
-          pass #act_hero.append(a)
+          showlist.append((a,self.engine.board.viz.hero_power_buttons[a.caster],{}))
         elif issubclass(type(a),Act_PlayCard):
           showlist.append((a,a.card,{'small':True}))
           if a.card in remaining_cards: # choice_of_cards
             remaining_cards.remove(a.card)
         elif issubclass(type(a),Act_Attack):
-          pass  #act_atq.append(a)
+          showlist.append((a,a.caster,{}))
         else:
-          showlist.append((a,self.engine.board.end_turn,{}))
+          showlist.append((a,self.engine.board.viz.end_turn,{}))
       # we can also inspect non-playable cards
       for card in remaining_cards:
         showlist.append((None,card,{'small':True}))
@@ -769,6 +852,8 @@ class HumanPlayerAscii (HumanPlayer):
         elif ch == 27: # escape
           erase_elems(showlist)
           showlist = init_showlist
+        elif ch in (uc.CCHAR('d'), uc.CCHAR('p')):
+          debug()
         else:
           uc.endwin()
           print self.engine.log
@@ -792,15 +877,16 @@ class CursesHSEngine (HSEngine):
   def wait_for_display(self):
     while self.display:
       msg = self.display.pop(0)
-      self.log += '%s\n' % msg
+      self.log += "[%s] %s\n" %(type(msg).__name__,msg)
       msg.draw()
 
 
 
 
 if __name__=="__main__":
+    args = sys.argv[1:]
+    anim = 'no_anim' not in args
     from cards import fake_deck
-    
 
     deck1 = fake_deck()
     hero1 = Hero(Card_Mage())
@@ -810,22 +896,21 @@ if __name__=="__main__":
     hero2 = Hero(Card_Priest())
     player2 = RandomPlayer(hero2, 'IA', deck2)
 
+    stdscr = init_screen()
     engine = CursesHSEngine( player1, player2 )
-    engine.board.switch = False
-    # initialize global variables
+    engine.board.viz = VizBoard(engine.board, switch=False, animated=anim)
 
     # start playing
-    stdscr = init_screen()
     #show_ACS()
     #show_unicode()
-    engine.board.viz = VizBoard(engine.board)
     engine.start_game()
     while not engine.is_game_ended():
       engine.play_turn()
 
     uc.endwin()
     t = engine.turn
-    print 'end of game: player %d won after %d turn' % (t%2, (t+1)/2)
+    winner = engine.get_winner()
+    print 'end of game: player %s won after %d turn' % (winner.name, (t+1)/2)
 
 
 
