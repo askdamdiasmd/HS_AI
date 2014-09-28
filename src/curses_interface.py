@@ -394,7 +394,7 @@ def get_screen_pos(self):
     NR,NC = uc.getmaxyx(stdscr)
     n = len(self.owner.viz.minions)
     top,bot = self.engine.board.viz.get_top_bottom_players()
-    y = 5 if self.owner is top else 14
+    y = 6 if self.owner is top else 14
     sp = ([3]*5+[2,1,0])[n] # spacement between minions
     return (y,int(NC-3-(11+sp)*n)/2+(11+sp)*self.pos), sp
 
@@ -511,7 +511,7 @@ Card.delete = card_delete
 
 def interp(i,max,start,end):
   """ i varies in [0,m-1] """
-  assert 1<=i<max, debug()
+  assert 0<=i<max, debug()
   return start + (end-start)*i/(max-1)
 
 def draw_Message(self):
@@ -610,7 +610,26 @@ def draw_Msg_Status(self):
     self.caster.viz.update_stats(self)
     show_panels()
 
-
+def draw_Msg_StartAttack(self):
+    if True or self.engine.board.viz.animated:
+      oy,ox =   uc.getbegyx(self.caster.viz.win)
+      oty,otx = uc.getmaxyx(self.caster.viz.win)
+      uc.top_panel(self.caster.viz.panel) # set assailant as top panel
+      ny,nx =   uc.getbegyx(self.target.viz.win)
+      nty,ntx = uc.getmaxyx(self.target.viz.win)
+      nx += (ntx-otx)/2
+      ny += (1+VizMinion.size[0])/2
+      m = abs(oy-ny)
+      t = 0.5/(m+2)
+      for i in range(1,m):
+        self.caster.draw(pos=(interp(i,m,oy,ny),interp(i,m,ox,nx)))
+        show_panels()
+        time.sleep(t)
+      for i in range(0,m):
+        self.caster.draw(pos=(interp(i,m,ny,oy),interp(i,m,nx,ox)))
+        show_panels()
+        time.sleep(t)
+  
 
 ### Board --------
 
@@ -959,8 +978,6 @@ if __name__=="__main__":
     while not engine.is_game_ended():
       engine.play_turn()
     
-    NR,NC = uc.getmaxyx(stdscr)
-    uc.move(NR-1,NC-1)
     uc.endwin()
     print '\n'*2
     t = engine.turn
