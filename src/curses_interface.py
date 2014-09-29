@@ -249,7 +249,7 @@ class VizThing (object):
       if anim and attr=='hp' and len(msg.attrs)==1:
         diff = newval-oldval
         plus = diff>0 and '+' or '' 
-        temp_panel(self,"%s%d"%(plus,diff),self.buff_color(diff,0,highlight=1))
+        temp_panel(self,"%s%d"%(plus,diff),self.buff_color(diff,0,highlight=1),duration=1.5)
     self.draw()
 
 
@@ -433,12 +433,14 @@ def draw_Card(self, pos=None, highlight=0, cost=None, small=True, bkgd=0, **kwar
 
     if not small:
       ty,tx = card_size
-      if not pos and hasattr(self,"small_panel"):
-        self.ty = ty
-        self.tx = tx
+      if hasattr(self,"small_panel"):
         y,x = uc.getbegyx(self.small_win)
-        NR,NC = uc.getmaxyx(stdscr)
-        pos = NR-ty, x
+        if not pos:
+          self.ty = ty
+          self.tx = tx
+          NR,NC = uc.getmaxyx(stdscr)
+          pos = NR-ty, x
+        if pos[0]>y:  pos = y,pos[1]  # cannot be below small panel
       if not hasattr(self,"win"):
         self.win = uc.newwin(ty,tx,pos[0],pos[1])
         self.panel = uc.new_panel(self.win)
@@ -446,11 +448,11 @@ def draw_Card(self, pos=None, highlight=0, cost=None, small=True, bkgd=0, **kwar
       win, panel = self.win, self.panel
       uc.top_panel(panel)
     else: # small card version
+      small = min(small,card_size[0])
       if hasattr(self,"panel"):
         uc.hide_panel(self.panel)
       if not hasattr(self,"small_win"):
         ty, tx = small, card_size[1]
-        if pos==None: debug()
         self.small_win = uc.newwin(ty,tx,pos[0],pos[1])
         self.small_panel = uc.new_panel(self.small_win)
         set_panel_userptr(self.small_panel, self)
@@ -461,6 +463,7 @@ def draw_Card(self, pos=None, highlight=0, cost=None, small=True, bkgd=0, **kwar
         del self.small_win
         del self.small_panel
         return self.draw(pos=pos, highlight=highlight, cost=cost, small=small, bkgd=bkgd)
+      small = uc.getmaxyx(win)[1]
     
     ty, tx = uc.getmaxyx(win)
     if pos and pos!=uc.getbegyx(win):
@@ -469,11 +472,11 @@ def draw_Card(self, pos=None, highlight=0, cost=None, small=True, bkgd=0, **kwar
     uc.wbkgd(win,bkgd)
     if highlight:  uc.wattron(win,highlight)
     uc.box(win)
-    if small:
+    if 0<small<card_size[0]:
       uc.mvwaddch(win,ty-1,0,uc.ACS_VLINE)
       uc.mvwaddch(win,ty-1,tx-1,uc.ACS_VLINE)
     if highlight:  uc.wattroff(win,highlight)
-    if small:
+    if 0<small<card_size[0]:
       uc.mvwaddstr(win,ty-1,1,' '*(tx-2))
 
     if issubclass(type(self),Card_Minion):
@@ -517,7 +520,7 @@ Card.delete = card_delete
 # Messages ---------
 
 def interp(i,max,start,end):
-  """ i varies in [0,m-1] """
+  """ func to interpolate, i varies in [0,m-1] """
   assert 0<=i<max, debug()
   return start + (end-start)*i/(max-1)
 
@@ -530,7 +533,8 @@ def draw_Action(self):
 def draw_Msg_StartTurn(self):
     player = self.caster
     player.viz.check()  # check consistency with real data
-    button = Button(10,37," %s's turn! "%player.name,tx=20,ty=5)
+    NC = uc.getmaxyx(stdscr)[1]
+    button = Button(10,NC/2-3," %s's turn! "%player.name,tx=20,ty=5)
     button.draw(highlight=uc.black_on_yellow)
     show_panels()
     time.sleep(1 if self.engine.board.viz.animated else 0.1)
@@ -893,9 +897,6 @@ class HumanPlayerAscii (HumanPlayer):
               a, kwargs = mapping[sel]
               kwargs['bkgd'] = uc.black_on_green if a else 0
               kwargs['small'] = False
-              # put in last position = front
-              #showlist.remove((a,sel,kwargs))
-              #showlist.append((a,sel,kwargs))
             last_sel = sel
           
           elif bstate & uc.BUTTON1_RELEASED:
@@ -982,7 +983,8 @@ if __name__=="__main__":
     
     t = engine.turn
     winner = engine.get_winner()
-    button = Button(10,37,'  %s wins after %d turns!  ' % (winner.name, (t+1)/2),ty=5)
+    NC = uc.getmaxyx(stdscr)[1]
+    button = Button(10,NC/2-3,'  %s wins after %d turns!  ' % (winner.name, (t+1)/2),ty=5)
     button.draw(highlight=uc.black_on_yellow)
     show_panels()
     uc.getch()    
