@@ -982,11 +982,30 @@ if __name__=="__main__":
     
     t = engine.turn
     winner = engine.get_winner()
-    button = Button(10,37,' %s won after %d turns! ' % (winner.name, (t+1)/2),ty=5)
+    button = Button(10,37,'  %s wins after %d turns!  ' % (winner.name, (t+1)/2),ty=5)
     button.draw(highlight=uc.black_on_yellow)
     show_panels()
     uc.getch()    
     uc.endwin()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
