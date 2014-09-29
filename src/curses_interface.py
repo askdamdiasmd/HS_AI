@@ -463,7 +463,7 @@ def draw_Card(self, pos=None, highlight=0, cost=None, small=True, bkgd=0, **kwar
         del self.small_win
         del self.small_panel
         return self.draw(pos=pos, highlight=highlight, cost=cost, small=small, bkgd=bkgd)
-      small = uc.getmaxyx(win)[1]
+      small = uc.getmaxyx(win)[0]
     
     ty, tx = uc.getmaxyx(win)
     if pos and pos!=uc.getbegyx(win):
