@@ -160,6 +160,19 @@ class Msg_AddThing (Message):
 class Msg_AddMinion (Msg_AddThing):
     pass
 
+class Msg_AddWeapon (Msg_AddThing):
+    def __init__(self, caster, thing):
+        Message.__init__(self, caster)
+        self.thing = thing
+        self.pos = None
+    def execute(self):
+        # self.target == thing
+        self.engine.board.add_thing(self.thing)
+        # inform everybody that it was created
+        self.engine.send_message(Msg_Popup(self.thing))
+    def __str__(self):
+        return "%s equipped a %s" %(self.caster, self.thing)
+
 class Msg_Popup (Message):
     def execute(self):
         self.caster.popup()

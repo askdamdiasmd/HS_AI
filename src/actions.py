@@ -112,6 +112,13 @@ class Act_WeaponAttack (Act_Attack):
 
 class Act_PlayWeaponCard (Act_PlayCard):
     ''' hero plays a weapon card '''
+    def __init__(self, card):
+        Act_PlayCard.___init___(self,card)
+        self.choices = []
+    def execute(self):
+        Act_PlayCard.execute(self)
+        from creatures import Weapon
+        self.engine.send_message(Msg_AddWeapon(self.caster, Weapon(self.card)))
 
 
 ### ------------- Card Spells ------------------------

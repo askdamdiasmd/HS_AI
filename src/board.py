@@ -32,11 +32,11 @@ class Board:
   def set_engine(cls, engine):
       cls.engine = engine
 
-  def add_thing(self, m, pos):
+  def add_thing(self, m, pos=None):
       m.owner.add_thing(m, pos)
       self.everybody.append(m)
 
-  def remove_thing(self, m):
+  def remove_thing(self, m=None):
       m.owner.remove_thing(m)
       self.everybody.remove(m)
 

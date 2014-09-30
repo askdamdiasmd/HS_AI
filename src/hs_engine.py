@@ -7,7 +7,8 @@ from cards import Card
 from players import Player
 
 def tree_go_up( level, stack ):
-    while not level:
+    while not level: # empty level
+        if not stack: return []
         level = stack.pop() # go up one level
         level.pop(0)  # remove first one which is an empty list
     return level
@@ -63,14 +64,19 @@ class HSEngine:
   def exec_messages(self):
     if self.executing:  return # already doing it !
     self.executing = True
-
+    
+#    from copy import copy
+#    old_messages = []
+    
     level, stack = self.messages, []
     while self.messages:
+#      old_messages.append(copy(self.messages))
       # go up the tree if empty level
       level = tree_go_up(level, stack)
       # go down the tree if new level
       level = tree_go_down( level, stack )
 
+      assert level, pdb.set_trace()
       msg = level.pop(0)
 
       # let minions react

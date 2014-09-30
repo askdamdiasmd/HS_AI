@@ -48,6 +48,25 @@ class Card_Minion (Card):
 
 
 
+
+### --------------- Weapon cards ----------------------
+
+class Card_Weapon (Card):
+    def __init__(self, name, cost, hp, atq, cat=None, cls=None, desc='', name_fr='', img='' ):
+        Card.__init__(self, name, cost, cls, desc, name_fr, img )
+        self.hp = hp    # health point = weapon durability
+        self.atq = atq  # attack
+        self.cat = cat  # category of minion = 'beast', ...
+
+    def __str__(self):
+        return "Weapon %s (%d): %d/%d %s" % (self.name_fr, self.cost, self.atq, self.hp, self.desc)
+
+    def list_actions(self):
+        return Act_PlayWeaponCard(self)
+
+
+
+
 ### ----------------- Spell cards -------------------------
 
 class Card_Spell (Card):
@@ -102,7 +121,11 @@ def get_cardbook():
   # add fake creatures
   for i in range(1,11):
     cardbook.append( Card_Minion('Fake Creature %d'%i,i,i,i+1,name_fr="Fausse creature %d"%i) )
-
+    
+  # add fake weapons
+  for i in range(1,5):
+    cardbook.append( Card_Weapon('Fake Weapon %d'%i,i,i+1,i))
+  
   # add fake spells
   for i in range(1,10):
     cardbook.append( Card_FakeSpell(i) )
@@ -120,10 +143,10 @@ def fake_deck():
     from copy import copy
     cardbook = get_cardbook()
     deck = []
-    if False:
+    if 1:
       deck += [copy(cardbook["Wisp"]) for i in range(15)]
-      deck += [copy(cardbook["Fake Damage Spell 1"]) for i in range(15)]
-#      deck += [copy(cardbook["Fake Creature 1"]) for i in range(15)]
+#      deck += [copy(cardbook["Fake Damage Spell 1"]) for i in range(15)]
+      deck += [copy(cardbook["Fake Weapon 1"]) for i in range(15)]
     else:
       deck += [copy(cardbook["Wisp"]) for i in range(4)]
       deck += [copy(cardbook["River Crocolisk"]) for i in range(4)]

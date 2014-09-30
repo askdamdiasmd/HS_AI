@@ -30,7 +30,7 @@ class Player (object):
   def __str__(self):
       return str(self.hero)
 
-  def add_thing(self, m, pos=0):
+  def add_thing(self, m, pos=None):
       if issubclass(type(m), Weapon):
         self.weapon = m
       elif issubclass(type(m), Secret):
@@ -38,7 +38,7 @@ class Player (object):
       else:
         self.minions.insert(pos.pos, m)
 
-  def remove_thing(self, m):
+  def remove_thing(self, m=None):
       if m is self.weapon:
         self.weapon = None
       elif issubclass(type(m), Secret):
@@ -69,6 +69,8 @@ class Player (object):
     self.hero.start_turn()
     for m in self.minions:
       m.start_turn()
+    if self.weapon:
+      self.weapon.start_turn()
     self.mana = self.max_mana
     self.add_mana_crystal(1)
     self.draw_card()
@@ -89,11 +91,10 @@ class Player (object):
       res += actions if type(actions)==list else [actions]
     # then, weapon's attack (if any)
     if self.weapon:
-      res.append(self.weapon.list_actions())
+      res += self.weapon.list_actions()
     # then, all minions actions
     for m in self.minions:
-      act = m.list_actions()
-      if act: res += act if type(act)==list else [act]
+      res += m.list_actions()
     return res
 
   def draw_card(self):

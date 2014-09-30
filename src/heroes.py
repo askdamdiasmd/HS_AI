@@ -8,16 +8,11 @@ class Hero (Creature):
       Creature.__init__(self, card )
       self.armor = 0
       self.hero_power = card.hero_power
+      self.popup()
 
   def set_owner(self, owner):
       self.owner = owner
       self.card.owner = owner
-
-  def start_turn(self):
-    pass
-
-  def end_turn(self):
-    pass
 
   def __str__(self):
       return "[%s (%s) %dHP]" % (self.owner.name,self.card.name,self.hp)

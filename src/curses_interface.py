@@ -5,7 +5,7 @@ from players import *
 from messages import *
 from actions import *
 from heroes import *
-from cards import Card
+from cards import Card, Card_Minion, Card_Weapon
 import unicurses as uc
 
 import locale
@@ -240,13 +240,13 @@ class VizThing (object):
     uc.mvwaddstr(win,ty-1,tx-1-len(thp),thp,highlight|self.buff_color(self.hp,self.max_hp))
     return win
 
-  def update_stats(self, msg):
+  def update_stats(self, msg, show_hp=True):
     anim = self.obj.engine.board.viz.animated
     for attr in msg.attrs:
       oldval = getattr(self,attr)
       newval = getattr(msg,attr)
       setattr(self,attr,newval)
-      if anim and attr=='hp' and len(msg.attrs)==1:
+      if anim and show_hp and msg.attrs==['hp']:
         diff = newval-oldval
         plus = diff>0 and '+' or '' 
         temp_panel(self,"%s%d"%(plus,diff),self.buff_color(diff,0,highlight=1),duration=1.5)
@@ -277,7 +277,7 @@ class VizHero (VizThing):
     pl = hero.owner.viz
     if pl.weapon:
       atq = pl.weapon.atq
-      uc.mvwaddstr(win,ty-3,1," %d "%atq,highlight|self.buff_color(atq,pl.weapon.max_atq))
+      uc.mvwaddstr(win,ty-1,1," %d "%atq,highlight|self.buff_color(atq,pl.weapon.max_atq))
 
   def create_hero_power_button(self):
     card = self.obj.card
@@ -306,6 +306,26 @@ class VizMinion (VizThing):
                    highlight|self.buff_color(self.atq,self.max_atq))
 
 
+class VizWeapon (VizThing):
+  size = 4,11
+  def __init__(self, weapon):
+      y,x = uc.getbegyx(weapon.hero.viz.win)
+      VizThing.__init__(self,weapon,pos=(y,x-18),size=self.size)
+
+  def draw(self, **kwargs):
+      weapon = self.obj
+      win = VizThing.draw(self,**kwargs)
+      highlight = kwargs.get('highlight',0)
+      ty,tx = uc.getmaxyx(win)
+      name = weapon.card.name_fr or weapon.card.name
+      print_longtext(win,1,1,ty-1,tx-1,name,uc.green_on_black)
+      uc.mvwaddstr(win,ty-1,1," %d "%self.atq,
+                   highlight|self.buff_color(self.atq,self.max_atq))
+  
+  def update_stats(self, msg):
+    VizThing.update_stats(self, msg, show_hp=False)
+
+
 ### Player -----------
 
 class VizPlayer:
@@ -320,12 +340,23 @@ class VizPlayer:
     pl = self.player
     for card in self.cards:
       assert card in pl.cards, debug()
-    if pl.weapon or self.weapon: self.weapon.check()
+    if pl.weapon or self.weapon: 
+      self.weapon.viz.check()
     assert len(self.secrets)==len(pl.secrets), debug()
     assert len(self.minions)==len(pl.minions), debug()
     for m in self.minions:
       m.viz.check()
 
+  def set_weapon(self, weapon):
+    self.unset_weapon(self.weapon)
+    weapon.viz = VizWeapon(weapon)
+    self.weapon = weapon
+
+  def unset_weapon(self, weapon):
+    assert weapon is self.weapon
+    if self.weapon:
+      self.weapon.viz.delete()
+      self.weapon = None
 
 ### Button -----------
 
@@ -488,11 +519,19 @@ def draw_Card(self, pos=None, highlight=0, cost=None, small=True, bkgd=0, **kwar
       uc.mvwaddstr(win,y+h-1,x+w-4,"%2d "%self.hp)
       print_longtext(win,mid,2,ty-1,tx-2,desc)
     else:
-      uc.mvwaddch(win, 3, 0, uc.ACS_LTEE, highlight)
-      uc.mvwhline(win, 3, 1, uc.ACS_HLINE, tx-2)
-      uc.mvwaddch(win, 3, tx-1, uc.ACS_RTEE, highlight)
-      print_longtext(win,1,1,3,tx-1,name,uc.magenta_on_black)
-      print_longtext(win,4,2,ty,tx-2,desc)
+      r = 4 if issubclass(type(self),Card_Weapon) else 3
+      uc.mvwaddch(win, r, 0, uc.ACS_LTEE, highlight)
+      uc.mvwhline(win, r, 1, uc.ACS_HLINE, tx-2)
+      uc.mvwaddch(win, r, tx-1, uc.ACS_RTEE, highlight)
+      if issubclass(type(self),Card_Weapon):
+        name_color = uc.green_on_black
+        uc.mvwaddstr(win,r,2, " %d "%self.atq)
+        hpt = " %d "%self.hp
+        uc.mvwaddstr(win,r,tx-2-len(hpt),hpt)
+      else:
+        name_color = uc.magenta_on_black
+      print_longtext(win,1,1,r,tx-1,name,name_color)
+      print_longtext(win,r+1,2,ty,tx-2,desc)
 
     # print cost
     if cost==None:
@@ -571,6 +610,23 @@ def draw_Msg_ThrowCard(self):
     card.delete()
     self.engine.board.draw('cards',which=self.caster)
 
+def draw_Msg_PlayCard(self):
+    top, bot = self.engine.board.viz.get_top_bottom_players()    
+    if self.caster is top:
+      sx = (uc.getmaxyx(stdscr)[1]-card_size[1])/2
+      kwargs = dict(small=False,cost=self.cost)
+      self.card.draw(pos=(0,sx),highlight=uc.black_on_yellow,**kwargs)
+      show_panels()
+      time.sleep(1)
+      if self.engine.board.viz.animated:
+        for i in range(sx-1,-1,-2):
+          self.card.draw(pos=(0,i),**kwargs)
+          show_panels()
+          time.sleep(0.05*(i)/sx)
+        time.sleep(0.2)
+      self.card.delete()
+      show_panels()
+
 def draw_Msg_AddMinion(self):
     new_minion = self.thing
     if self.engine.board.viz.animated:
@@ -595,6 +651,11 @@ def draw_Msg_AddMinion(self):
       uc.show_panel(new_minion.viz.panel)
     self.engine.board.draw('minions',which=self.caster)
 
+def draw_Msg_AddWeapon(self):
+    weapon = self.thing
+    self.caster.viz.set_weapon(weapon)
+    self.engine.board.draw('heroes',which=self.caster)
+
 def draw_Msg_DeadMinion(self):
     dead_minion = self.caster
     dead_minion.viz.delete()
@@ -617,22 +678,32 @@ def draw_Msg_DeadMinion(self):
         time.sleep(0.1)
     self.engine.board.draw('minions',which=dead_minion.owner)
 
+def draw_Msg_DeadWeapon(self):
+    dead_weapon = self.caster
+    dead_weapon.owner.viz.unset_weapon(dead_weapon)
+    dead_weapon.viz.delete()
+    self.engine.board.draw('heroes',which=dead_weapon.owner)
+
 def draw_Msg_Status(self):
     self.caster.viz.update_stats(self)
     show_panels()
 
 def draw_Msg_StartAttack(self):
     if self.engine.board.viz.animated:
-      oy,ox =   uc.getbegyx(self.caster.viz.win)
-      oty,otx = uc.getmaxyx(self.caster.viz.win)
-      uc.top_panel(self.caster.viz.panel) # set assailant as top panel
+      if issubclass(type(self.caster),Weapon):
+        caster = self.caster.hero
+      else:
+        caster = self.caster
+      oy,ox =   uc.getbegyx(caster.viz.win)
+      oty,otx = uc.getmaxyx(caster.viz.win)
+      uc.top_panel(caster.viz.panel) # set assailant as top panel
       ny,nx =   uc.getbegyx(self.target.viz.win)
       nty,ntx = uc.getmaxyx(self.target.viz.win)
       nx += (ntx-otx)/2
       m = abs(oy-ny)
       t = 0.5/(m+2)
       for i in range(1,m-(nty+1)/2)+range(m-(nty+1)/2,-1,-1):
-        self.caster.draw(pos=(interp(i,m,oy,ny),interp(i,m,ox,nx)))
+        caster.draw(pos=(interp(i,m,oy,ny),interp(i,m,ox,nx)))
         show_panels()
         time.sleep(t)
   
@@ -701,7 +772,6 @@ class VizBoard:
         for pl in which:
           self.hero_power_buttons[pl].draw()
       
-      
       # draw decks on the right side
       if 'decks' in what:
         for i in range(3):
@@ -718,10 +788,10 @@ class VizBoard:
       
       # draw heroes
       if 'hero' in what:
-        if adv in which:
-          adv.hero.draw()
-        if player in which:
-          player.hero.draw()
+        for pl in which:
+          pl.hero.draw()
+          if pl.viz.weapon:
+            pl.viz.weapon.draw()
 
       # draw cards
       if 'cards' in what:
@@ -842,8 +912,10 @@ class HumanPlayerAscii (HumanPlayer):
           showlist.append((a,a.card,{'small':True}))
           if a.card in remaining_cards: # choice_of_cards
             remaining_cards.remove(a.card)
-        elif issubclass(type(a),Act_Attack):
+        elif issubclass(type(a),Act_MinionAttack):
           showlist.append((a,a.caster,{}))
+        elif issubclass(type(a),Act_WeaponAttack):
+          showlist.append((a,a.caster.hero,{}))
         else:
           showlist.append((a,self.engine.board.viz.end_turn,{}))
       # we can also inspect non-playable cards
