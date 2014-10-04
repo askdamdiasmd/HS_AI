@@ -28,6 +28,9 @@ from cards import Card_Minion
 from actions import Act_HeroPower
 
 class Card_Hero (Card_Minion):
+    def __init__(self, *args, **kwargs):
+        Card_Minion.__init__(self,*args,**kwargs)
+        self.effects = ['charge'] # if weapon can attack immediately
     def hero_power(self):
         assert 0  # return an action
 
@@ -36,7 +39,7 @@ class Card_Hero (Card_Minion):
 
 class Card_Mage (Card_Hero):
     def __init__(self):
-        Card_Minion.__init__(self, "Jaina", 0, 30, 0, cls="mage", name_fr='Jenna',
+        Card_Hero.__init__(self, "Jaina", 0, 30, 0, cls="mage", name_fr='Jenna',
                              desc="deals 1 damage to a character")
         self.power_text = "Fire blast"
         self.power_subtext = "Deal 1 damage"
@@ -51,7 +54,7 @@ class Card_Mage (Card_Hero):
 
 class Card_Priest (Card_Hero):
     def __init__(self):
-        Card_Minion.__init__(self, "Anduin", 0, 30, 0, cls="priest", name_fr='Anduin',
+        Card_Hero.__init__(self, "Anduin", 0, 30, 0, cls="priest", name_fr='Anduin',
                              desc="heals a character by 2HP")
         self.power_text = "Lesser heal"
         self.power_subtext = "Restore 2 health"

@@ -344,7 +344,8 @@ class VizPlayer:
       self.weapon.viz.check()
     assert len(self.secrets)==len(pl.secrets), debug()
     assert len(self.minions)==len(pl.minions), debug()
-    for m in self.minions:
+    for i,m in enumerate(self.minions):
+      assert m is pl.minions[i], debug()
       m.viz.check()
 
   def set_weapon(self, weapon):
@@ -357,6 +358,7 @@ class VizPlayer:
     if self.weapon:
       self.weapon.viz.delete()
       self.weapon = None
+
 
 ### Button -----------
 
@@ -434,7 +436,7 @@ def get_screen_pos(self):
     top,bot = self.engine.board.viz.get_top_bottom_players()
     y = 6 if self.owner is top else 14
     sp = ([3]*5+[2,1,0])[n] # spacement between minions
-    return (y,int(NC-3-(11+sp)*n)/2+(11+sp)*self.pos), sp
+    return (y,int(NC-3-(11+sp)*n)/2+(11+sp)*self.index), sp
 
 Slot.get_screen_pos = get_screen_pos
 
@@ -627,19 +629,19 @@ def draw_Msg_PlayCard(self):
       self.card.delete()
       show_panels()
 
-def draw_Msg_AddMinion(self):
-    new_minion = self.thing
+def draw_Msg_MinionPopup(self):
+    new_minion = self.caster
+    owner = new_minion.owner
     if self.engine.board.viz.animated:
-      pl = new_minion.owner
       old_pos = {}
-      for i,m in enumerate(pl.viz.minions):
-        old_pos[m] = Slot(pl,i).get_screen_pos()[0]
-    self.caster.viz.minions.insert(self.pos.pos,new_minion)
+      for i,m in enumerate(owner.viz.minions):
+        old_pos[m] = Slot(owner,i).get_screen_pos()[0]
+    owner.viz.minions.insert(self.pos,new_minion)
     new_minion.viz = VizMinion(new_minion)
     if self.engine.board.viz.animated and old_pos:
       new_pos = {}
-      for i,m in enumerate(pl.viz.minions):
-        new_pos[m] = Slot(pl,i).get_screen_pos()[0]
+      for i,m in enumerate(owner.viz.minions):
+        new_pos[m] = Slot(owner,i).get_screen_pos()[0]
       r = VizMinion.size[1]/2+1
       uc.hide_panel(new_minion.viz.panel)
       for i in range(1,r):
@@ -649,12 +651,17 @@ def draw_Msg_AddMinion(self):
         show_panels()
         time.sleep(0.1)
       uc.show_panel(new_minion.viz.panel)
-    self.engine.board.draw('minions',which=self.caster)
+    self.engine.board.draw('minions',which=owner)
 
-def draw_Msg_AddWeapon(self):
-    weapon = self.thing
-    self.caster.viz.set_weapon(weapon)
-    self.engine.board.draw('heroes',which=self.caster)
+def draw_Msg_WeaponPopup(self):
+    weapon = self.caster
+    weapon.owner.viz.set_weapon(weapon)
+    self.engine.board.draw('heroes',which=weapon.owner)
+
+def draw_Msg_SecretPopup(self):
+    secret = self.caster
+    weapon.owner.viz.secrets.append(secret)
+    self.engine.board.draw('secrets',which=secret.owner)
 
 def draw_Msg_DeadMinion(self):
     dead_minion = self.caster
@@ -733,7 +740,7 @@ class VizBoard:
       return adv, player
 
   def get_minion_pos(self, minion):
-      slot = Slot(minion.owner,minion.owner.viz.minions.index(minion))
+      slot = Slot(minion.owner, minion.owner.viz.minions.index(minion), None)
       return slot.get_screen_pos()[0]
 
   def get_card_pos(self,card):
@@ -758,6 +765,7 @@ class VizBoard:
       # clear screen
       adv, player = self.get_top_bottom_players()
       which = {player,adv} if not which else {which}
+      assert all([issubclass(type(pl),Player) for pl in which]), debug()
       
       if 'bkgd' in what:
         # background

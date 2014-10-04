@@ -14,6 +14,7 @@ class Player (object):
     self.deck = deck
     self.cards = []
     self.minions = []
+    self.minions_pos = [0.0, 1000.0]
     self.mana = self.max_mana = 0
     self.weapon = None
     self.secrets = []
@@ -30,22 +31,34 @@ class Player (object):
   def __str__(self):
       return str(self.hero)
 
-  def add_thing(self, m, pos=None):
-      if issubclass(type(m), Weapon):
-        self.weapon = m
-      elif issubclass(type(m), Secret):
-        self.secrets.append(m)
+  def add_thing(self, thing, pos=None):
+      if issubclass(type(thing), Hero):
+        assert 0, "todo"
+      if issubclass(type(thing), Weapon):
+        self.weapon = thing
+        return Msg_WeaponPopup(thing)
+      elif issubclass(type(thing), Secret):
+        self.secrets.append(thing)
+        return Msg_SecretPopup(thing)
       else:
-        self.minions.insert(pos.pos, m)
+        from numpy import searchsorted
+        mp = self.minions_pos
+        i = searchsorted(mp,pos.fpos)
+        assert mp[i] != pos.fpos
+        mp.insert(i,pos.fpos)
+        self.minions.insert(i-1, thing)
+        return Msg_MinionPopup(thing,i-1)
 
-  def remove_thing(self, m=None):
-      if m is self.weapon:
+  def remove_thing(self, thing=None):
+      if thing is self.weapon:
         self.weapon = None
-      elif issubclass(type(m), Secret):
-        self.secrets.remove(m)
-      elif issubclass(type(m), Minion):
-        self.minions.remove(m)
-      elif issubclass(type(m), Hero):
+      elif issubclass(type(thing), Secret):
+        self.secrets.remove(thing)
+      elif issubclass(type(thing), Minion):
+        i = self.minions.index(thing)
+        self.minions_pos.pop(i+1)
+        self.minions.pop(i)
+      elif issubclass(type(thing), Hero):
         pass #print "Hero %s died !"
 
   def add_mana_crystal(self, nb, useit=False):

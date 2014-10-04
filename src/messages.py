@@ -145,39 +145,41 @@ class Msg_EndHeroPower (Message):
 # minion messages
 
 class Msg_AddThing (Message):
-    def __init__(self, caster, thing, pos):
+    def __init__(self, caster, thing, pos=None):
         Message.__init__(self, caster)
         self.thing = thing
         self.pos = pos
     def execute(self):
-        # self.target == thing
-        self.engine.board.add_thing(self.thing, self.pos)
-        # inform everybody that it was created
-        self.engine.send_message(Msg_Popup(self.thing))
+        return self.engine.board.add_thing(self.thing, self.pos)
     def __str__(self):
         return "New %s on the board for %s" %(self.thing, self.caster)
 
 class Msg_AddMinion (Msg_AddThing):
     pass
-
 class Msg_AddWeapon (Msg_AddThing):
-    def __init__(self, caster, thing):
-        Message.__init__(self, caster)
-        self.thing = thing
-        self.pos = None
-    def execute(self):
-        # self.target == thing
-        self.engine.board.add_thing(self.thing)
-        # inform everybody that it was created
-        self.engine.send_message(Msg_Popup(self.thing))
     def __str__(self):
         return "%s equipped a %s" %(self.caster, self.thing)
+class Msg_AddSecret (Msg_AddThing):
+    def __str__(self):
+        return "%s sets %s" %(self.caster, self.thing)
 
 class Msg_Popup (Message):
     def execute(self):
         self.caster.popup()
     def __str__(self):
         return "%s pops up" %(self.caster)
+
+class Msg_MinionPopup (Msg_Popup):
+  def __init__(self, caster, pos):
+    Msg_Popup.__init__(self,caster)
+    self.pos = pos
+class Msg_SecretPopup (Msg_Popup):
+  pass
+class Msg_WeaponPopup (Msg_Popup):
+  pass
+class Msg_HeroPopup (Msg_Popup):
+  pass
+
 
 class Msg_CheckDead (Message):
     """ as soon as a minion dies, it asks for its cleaning """

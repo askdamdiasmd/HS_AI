@@ -1,9 +1,11 @@
+# -*- coding: utf-8 -*-
 '''
 all HS cards
 '''
 import pdb
 from minions import *
 from actions import *
+from effects import *
 
 
 ### ------- Cards -------------
@@ -47,6 +49,18 @@ class Card_Minion (Card):
         return Act_PlayMinionCard(self, self.engine.board.get_free_slots(self.owner))
 
 
+
+class Card_DamagedGolem (Card_Minion):
+    def __init__(self):
+        Card_Minion.__init__(self,"Damaged Golem", 3, 3, 2, 
+                             name_fr=u"Golem endommagé")
+
+class Card_HarvestGolem (Card_Minion):
+    def __init__(self):
+        Card_Minion.__init__(self,"Harvest Golem", 3, 3, 2, 
+                             name_fr="Golem des moissons",
+                             desc_fr=u"Rale d'agonie: Invoque un golem endommagé 2/1")
+        effect_death_rattle_invoke(self, Card_DamagedGolem)
 
 
 ### --------------- Weapon cards ----------------------
@@ -124,7 +138,7 @@ def get_cardbook():
     
   # add fake weapons
   for i in range(1,5):
-    cardbook.append( Card_Weapon('Fake Weapon %d'%i,i,i+1,i))
+    cardbook.append( Card_Weapon('Fake Weapon %d'%i,i,2,i+1) )
   
   # add fake spells
   for i in range(1,10):
@@ -143,7 +157,7 @@ def fake_deck():
     from copy import copy
     cardbook = get_cardbook()
     deck = []
-    if 1:
+    if 0:
       deck += [copy(cardbook["Wisp"]) for i in range(15)]
 #      deck += [copy(cardbook["Fake Damage Spell 1"]) for i in range(15)]
       deck += [copy(cardbook["Fake Weapon 1"]) for i in range(15)]
@@ -151,9 +165,11 @@ def fake_deck():
       deck += [copy(cardbook["Wisp"]) for i in range(4)]
       deck += [copy(cardbook["River Crocolisk"]) for i in range(4)]
       deck += [copy(cardbook["Chillwind Yeti"]) for i in range(4)]
-      for i in range(1,11):
+      for i in range(1,5):
+        deck += [copy(cardbook["Fake Weapon %d"%i])]
+      for i in range(1,8):
         deck += [copy(cardbook["Fake Creature %d"%i])]
-      for i in range(1,9):
+      for i in range(1,8):
         deck += [copy(cardbook["Fake Damage Spell %d"%i])]
 
     from decks import Deck

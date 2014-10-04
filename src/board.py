@@ -10,9 +10,10 @@ from creatures import Creature
 
 class Slot (object):
   ''' position on the board (insertion index in players.minions[]) '''
-  def __init__(self, owner, pos):
+  def __init__(self, owner, index=None, fpos=None):
       self.owner = owner
-      self.pos = pos
+      self.index = index  # just index in [0,..6]
+      self.fpos = fpos   # floatting-point index
   @classmethod
   def set_engine(cls, engine):
     cls.engine = engine  
@@ -33,12 +34,12 @@ class Board:
       cls.engine = engine
 
   def add_thing(self, m, pos=None):
-      m.owner.add_thing(m, pos)
       self.everybody.append(m)
+      return m.owner.add_thing(m, pos)
 
   def remove_thing(self, m=None):
-      m.owner.remove_thing(m)
       self.everybody.remove(m)
+      return m.owner.remove_thing(m)
 
   def is_game_ended(self):
       for p in self.players:
@@ -68,10 +69,17 @@ class Board:
         return [self.get_enemy_player(player).hero] + enemies
 
   def get_free_slots(self, player):
-      return [Slot(player,i) for i in range(len(player.minions)+1)]
+      if len(player.minions)<7:
+        mp = player.minions_pos
+        return [Slot(player,i,(a+b)/2) for i,(a,b) in enumerate(zip(mp[:-1],mp[1:]))]
+      else:
+        return []
+
 
   def get_minion_pos(self, m):
-      return Slot(m.owner, m.owner.minions.index(m))
+      index = m.owner.minions.index(m)
+      rel_index = m.owner.minions_pos[index+1]
+      return Slot(m.owner, index, rel_index)
 
 
 

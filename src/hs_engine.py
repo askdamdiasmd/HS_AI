@@ -40,7 +40,7 @@ class HSEngine:
     Message.set_engine(self)
     Player.set_engine(self)
 
-  def send_message(self, messages ):
+  def send_message(self, messages, immediate=False ):
     if type(messages)!=list:
       messages = [messages]
 
@@ -50,7 +50,10 @@ class HSEngine:
         messages[i] = reader.modify_msg( msg )
 
     deep_level = tree_go_down( self.messages )
-    deep_level += messages
+    if immediate:
+      while messages: deep_level.insert(0,messages.pop(0))
+    else:
+      deep_level += messages
 
     self.exec_messages()
 

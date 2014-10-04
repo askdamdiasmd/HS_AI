@@ -57,14 +57,14 @@ class Thing (object):
       return effect in self.effects
 
   def popup(self):  # executed when created
-      self.n_max_att = 2 if self.has_effect('windfury') else 1
-      self.n_remaining_att = 0
+      self.n_max_atq = 2 if self.has_effect('windfury') else 1
       if self.has_effect('charge'):
-        self.n_remaining_att = self.n_max_att
-      #self.check_trigger('battlecry')
-
+        self.n_atq = self.n_max_atq
+      else:
+        self.n_atq = 0
+      
   def start_turn(self):
-      self.n_remaining_att = 0 if self.has_effect('frozen') else self.n_max_att
+      self.n_atq = 0 if self.has_effect('frozen') else self.n_max_atq
 
   def end_turn(self):
       pass
@@ -107,15 +107,15 @@ class Weapon (Thing):
       self.hero = card.owner.hero
 
   def list_actions(self):
-      if self.hero.n_remaining_att<=0:
+      if self.hero.n_atq<=0:
         return []
       else:
         from actions import Act_WeaponAttack
         return [Act_WeaponAttack(self, self.engine.board.list_attackable_characters(self.owner))]
 
   def attacks(self, target):
-      self.hero.n_remaining_att -= 1
-      assert self.hero.n_remaining_att>=0
+      self.hero.n_atq -= 1
+      assert self.hero.n_atq>=0
       msgs = [Msg_Damage(self, target, self.atq)]
       if target.atq: msgs.append(Msg_Damage(target, self.hero, target.atq))
       self.hp -= 1  # lose one durability
@@ -159,8 +159,8 @@ class Creature (Thing):
         self.engine.send_message( Msg_CheckDead(self) )
 
   def attacks(self, target):
-      self.n_remaining_att -= 1
-      assert self.n_remaining_att>=0
+      self.n_atq -= 1
+      assert self.n_atq>=0
       msgs = [Msg_Damage(self, target, self.atq)]
       if target.atq: msgs.append(Msg_Damage(target, self, target.atq))
       self.engine.send_message([Msg_StartAttack(self,target),
@@ -181,7 +181,7 @@ class Minion (Creature):
       return 'taunt' in self.effects
 
   def list_actions(self):
-      if self.n_remaining_att<=0 or self.atq==0:
+      if self.n_atq<=0 or self.atq==0:
         return []
       else:
         from actions import Act_MinionAttack
