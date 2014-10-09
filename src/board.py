@@ -3,7 +3,7 @@ Class for the game board = container with everything (players, heroes, minions..
  + convenient functions
 '''
 import pdb
-from creatures import Creature
+from creatures import Creature, Minion
 
 
 ### ------- Board -------------
@@ -34,8 +34,8 @@ class Board:
       cls.engine = engine
 
   def add_thing(self, m, pos=None):
-      self.everybody.append(m)
-      return m.owner.add_thing(m, pos)
+      if m.owner.add_thing(m, pos): 
+        self.everybody.append(m)
 
   def remove_thing(self, m=None):
       self.everybody.remove(m)
@@ -62,7 +62,7 @@ class Board:
 
   def list_attackable_characters(self, player):
       enemies = self.list_enemy_minions(player)
-      taunts = [e for e in enemies if e.is_taunt()]
+      taunts = [e for e in enemies if e.has_taunt()]
       if taunts:
         return taunts
       else:
@@ -75,12 +75,13 @@ class Board:
       else:
         return []
 
-
   def get_minion_pos(self, m):
-      index = m.owner.minions.index(m)
-      rel_index = m.owner.minions_pos[index+1]
-      return Slot(m.owner, index, rel_index)
-
+      if issubclass(type(m),Minion):
+        index = m.owner.minions.index(m)
+        rel_index = m.owner.minions_pos[index+1]
+        return Slot(m.owner, index, rel_index)
+      else:
+        return None
 
 
 

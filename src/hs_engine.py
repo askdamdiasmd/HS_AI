@@ -1,7 +1,7 @@
 import pdb
 from creatures import Thing
 from messages import Message, Msg_StartTurn
-from actions import Action, Act_EndTurn
+from actions import Action, Act_EndTurn, Act_PlayMinionCard
 from effects import Effect
 from cards import Card
 from players import Player
@@ -28,6 +28,7 @@ class HSEngine:
     self.board = Board(player1, player2)
     self.turn = 0
     self.messages = []
+    self.immediate = []
     self.executing = False
 
     # init global variables : everyone can access board or send messages
@@ -43,16 +44,16 @@ class HSEngine:
   def send_message(self, messages, immediate=False ):
     if type(messages)!=list:
       messages = [messages]
-
+    
     # let minions modify first
     for i,msg in enumerate(messages):
       for reader in self.board.everybody:
         messages[i] = reader.modify_msg( msg )
 
-    deep_level = tree_go_down( self.messages )
     if immediate:
-      while messages: deep_level.insert(0,messages.pop(0))
+      self.immediate += messages
     else:
+      deep_level = tree_go_down( self.messages )
       deep_level += messages
 
     self.exec_messages()
@@ -83,18 +84,17 @@ class HSEngine:
       msg = level.pop(0)
 
       # let minions react
-      immediate = []
       for reader in self.board.everybody:
         res = reader.react_msg( msg )
-        if res: immediate.append(res)
+        assert not res, pdb.set_trace()
 
       # then execute the message
       self.display_msg(msg)
       res = msg.execute()
+      assert not res, pdb.set_trace()
       
-      if res: immediate.append(res)
-      while immediate: # add immediate-effect messages
-        level.insert(0,immediate.pop())
+      while self.immediate: # add immediate-effect messages
+        level.insert(0,self.immediate.pop())
 
     self.wait_for_display()
     self.executing = False
@@ -126,6 +126,8 @@ class HSEngine:
       # filter actions
       actions = self.filter_actions(actions)
       actions = [a for a in actions if a.cost<=player.mana]
+      if len(player.minions)>=7:
+        actions = [a for a in actions if not issubclass(type(a),Act_PlayMinionCard)]        
       action = player.choose_actions(actions)  # action can be Msg_EndTurn
       self.send_message(action)
 

@@ -3,6 +3,7 @@ Generalistic classes
 '''
 import pdb
 from messages import *
+from copy import copy
 
 
 ### ------------ generalistic thing (hero, weapon, minon) -------
@@ -18,10 +19,10 @@ class Thing (object):
       self.dead = False
 
       # what is below is what can be silenced
-      self.action_filters = card.action_filters  # reacting to actions before selection: [(Act_class, handler),...]
-      self.modifiers = card.modifiers # reacting to event at emission time, list: [(Msg_Class, event),...]
-      self.effects = card.effects # list of effects without triggers: {'taunt','stealth',...}
-      self.triggers = card.triggers # reacting to events at execution time, list: [(Msg_Class, event),...]
+      self.action_filters = copy(card.action_filters)  # reacting to actions before selection: [(Act_class, handler),...]
+      self.modifiers = copy(card.modifiers) # reacting to event at emission time, list: [(Msg_Class, event),...]
+      self.effects = copy(card.effects) # list of effects without triggers: {'taunt','stealth',...}
+      self.triggers = copy(card.triggers) # reacting to events at execution time, list: [(Msg_Class, event),...]
 
   @classmethod
   def set_engine(cls, engine):
@@ -48,6 +49,7 @@ class Thing (object):
   def react_msg(self, msg):
       res = []
       for trigger,event in self.triggers:
+        if type(trigger)==str: continue
         if issubclass(type(msg),trigger):
           m = event.execute(self,msg)
           if m: res.append(m)
@@ -76,10 +78,16 @@ class Thing (object):
       while self.effects:
         e = self.effects.pop()
         if type(e)!=str:  e.undo(self)
+      self.effects = ['silence']  
       self.engine.display_msg(Msg_Status(self,'effects'))
 
   def death(self):
-      self.silence()
+      pos = self.engine.board.get_minion_pos(self)
+      if self.has_effect('death_rattle'):
+        for trigger,eff in self.triggers:
+          if trigger=='death_rattle':
+            eff.init(self.owner,pos)
+            self.engine.send_message(Msg_DeathRattle(self,eff), immediate=True)
       self.engine.board.remove_thing(self)
 
 
@@ -96,7 +104,7 @@ class Secret (Thing):
 
   def death(self):
     Thing.death(self)
-    return Msg_DeadSecret(self)
+    self.engine.send_message( Msg_DeadSecret(self), immediate=True)
 
 
 ### ------------ Weapon ----------
@@ -129,7 +137,7 @@ class Weapon (Thing):
 
   def death(self):
     Thing.death(self)
-    return Msg_DeadWeapon(self)
+    self.engine.send_message( Msg_DeadWeapon(self), immediate=True)
 
 
 ### ------------ Creature (hero or minion) ----------
@@ -177,7 +185,7 @@ class Minion (Creature):
   def __init__(self, card ):
       Creature.__init__(self, card )
 
-  def is_taunt(self):
+  def has_taunt(self):
       return 'taunt' in self.effects
 
   def list_actions(self):
@@ -189,7 +197,7 @@ class Minion (Creature):
 
   def death(self):
     Creature.death(self)
-    return Msg_DeadMinion(self)
+    self.engine.send_message( Msg_DeadMinion(self), immediate=True)
 
 
 

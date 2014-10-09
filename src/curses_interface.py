@@ -92,6 +92,11 @@ def print_longtext(win,y,x,endy,endx,text,attr=0):
       print_middle(win,y,x,width,line,attr)
       y += 1
 
+def del_panel(panel):
+  win = uc.panel_window(panel)
+  uc.del_panel(panel)  
+  uc.delwin(win)
+  
 def top_panel():
   ''' due to a bug in unicurses we recode it here '''
   if os.name=='nt':
@@ -188,7 +193,7 @@ class VizThing (object):
     self.max_hp = obj.max_hp
     self.atq =    obj.atq
     self.max_atq =obj.max_atq
-    self.effects = []
+    self.effects = copy(obj.card.effects)
     obj.draw = self.draw
     self.wait = 0
     # create panel
@@ -211,7 +216,7 @@ class VizThing (object):
     self.wait = 0
     if t>=5: debug()
     if hasattr(self,'panel'):
-      uc.del_panel(self.panel)
+      del_panel(self.panel)
       del self.panel
       del self.win
 
@@ -232,7 +237,10 @@ class VizThing (object):
     
     uc.wbkgd(win,bkgd)
     uc.wattron(win,highlight)
-    uc.box(win)    
+    if 'taunt' in self.effects:
+      strong_box(win)    
+    else:
+      uc.box(win)    
     uc.wattroff(win,highlight)
     # show just HP
     ty,tx = uc.getmaxyx(win)
@@ -304,6 +312,8 @@ class VizMinion (VizThing):
       print_longtext(win,1,1,ty-1,tx-1,name,uc.yellow_on_black)
       uc.mvwaddstr(win,ty-1,1," %d "%self.atq,
                    highlight|self.buff_color(self.atq,self.max_atq))
+      if 'death_rattle' in self.effects:
+        uc.mvwaddstr(win,ty-1,tx/2,'D',highlight)
 
 
 class VizWeapon (VizThing):
@@ -374,7 +384,7 @@ class Button:
       set_panel_userptr(self.panel, self)
 
   def delete(self):
-      uc.del_panel(self.panel)
+      del_panel(self.panel)
       del self.panel
       del self.win
 
@@ -451,7 +461,7 @@ def draw_Slot(self, highlight=0, bkgd=0, **kwargs):
       uc.top_panel(self.panel)
       uc.wbkgd(self.win,bkgd or highlight)
     else:
-      uc.del_panel(self.panel)
+      del_panel(self.panel)
       del self.panel
       del self.win
 
@@ -492,7 +502,7 @@ def draw_Card(self, pos=None, highlight=0, cost=None, small=True, bkgd=0, **kwar
       win, panel = self.small_win, self.small_panel
       ty, tx = uc.getmaxyx(win)
       if type(small)==int and small!=ty: # redo
-        uc.del_panel(panel)
+        del_panel(panel)
         del self.small_win
         del self.small_panel
         return self.draw(pos=pos, highlight=highlight, cost=cost, small=small, bkgd=bkgd)
@@ -548,11 +558,11 @@ def draw_Card(self, pos=None, highlight=0, cost=None, small=True, bkgd=0, **kwar
 
 def card_delete(self):
     if hasattr(self,'panel'):
-      uc.del_panel(self.panel)
+      del_panel(self.panel)
       del self.win
       del self.panel
     if hasattr(self,'small_panel'):
-      uc.del_panel(self.small_panel)
+      del_panel(self.small_panel)
       del self.small_win
       del self.small_panel
 
@@ -925,6 +935,7 @@ class HumanPlayerAscii (HumanPlayer):
         elif issubclass(type(a),Act_WeaponAttack):
           showlist.append((a,a.caster.hero,{}))
         else:
+          end_turn_action = a
           showlist.append((a,self.engine.board.viz.end_turn,{}))
       # we can also inspect non-playable cards
       for card in remaining_cards:
@@ -942,6 +953,7 @@ class HumanPlayerAscii (HumanPlayer):
         mapping = {}  # obj -> action,draw_kwargs
         for a,obj,kwargs in showlist:
           highlight = uc.black_on_green if a else 0
+          assert hasattr(obj,'draw'), debug()
           obj.draw(highlight=highlight,**kwargs)
           mapping[obj] = (a,kwargs)
         if active:
@@ -1002,6 +1014,10 @@ class HumanPlayerAscii (HumanPlayer):
             showlist = init_showlist
             active = None
         
+        elif ch == ord('\n'):
+          if active==None:
+            return end_turn_action.select([])
+        
         elif ch == 27: # escape
           erase_elems(showlist)
           showlist = init_showlist
@@ -1039,7 +1055,8 @@ class CursesHSEngine (HSEngine):
 
 if __name__=="__main__":
     args = sys.argv[1:]
-    anim = 'no_anim' not in args
+    mana = 10 if "mana" in args else 0
+    anim = 'anim' in args
     from cards import fake_deck
 
     deck1 = fake_deck()
@@ -1054,6 +1071,10 @@ if __name__=="__main__":
     engine = CursesHSEngine( player1, player2 )
     engine.board.viz = VizBoard(engine.board, switch=False, animated=anim)
 
+    if mana:
+      engine.players[0].add_mana_crystal(mana)
+      engine.players[1].add_mana_crystal(mana)  
+    
     # start playing
     #show_ACS()
     #show_unicode()

@@ -2,6 +2,7 @@
 IA or manual players
 """
 import pdb, random
+from numpy import searchsorted
 from creatures import *
 from heroes import Hero
 #from messages import *
@@ -34,20 +35,23 @@ class Player (object):
   def add_thing(self, thing, pos=None):
       if issubclass(type(thing), Hero):
         assert 0, "todo"
-      if issubclass(type(thing), Weapon):
+      elif issubclass(type(thing), Weapon):
         self.weapon = thing
-        return Msg_WeaponPopup(thing)
+        self.engine.send_message( Msg_WeaponPopup(thing), immediate=True)
       elif issubclass(type(thing), Secret):
         self.secrets.append(thing)
-        return Msg_SecretPopup(thing)
-      else:
-        from numpy import searchsorted
+        self.engine.send_message( Msg_SecretPopup(thing), immediate=True)
+      elif issubclass(type(thing), Minion) and len(self.minions)<7:
         mp = self.minions_pos
-        i = searchsorted(mp,pos.fpos)
-        assert mp[i] != pos.fpos
+        i = searchsorted(mp,pos.fpos,side='right')
+        if mp[i-1]==pos.fpos: # already exist, so create new number
+          pos.fpos = (pos.fpos+mp[i])/2
         mp.insert(i,pos.fpos)
         self.minions.insert(i-1, thing)
-        return Msg_MinionPopup(thing,i-1)
+        self.engine.send_message(Msg_MinionPopup(thing,i-1), immediate=True)
+      else:
+        return False
+      return True
 
   def remove_thing(self, thing=None):
       if thing is self.weapon:

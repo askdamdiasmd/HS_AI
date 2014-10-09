@@ -44,7 +44,6 @@ class Acf_NotSpellTargetable (Effect):
         return action
 
 
-### ---------- effects (applies on Messages) ----------------
 
 class Acf_IncSpellDamage (Effect):
     """ increase spelle damages """
@@ -53,6 +52,28 @@ class Acf_IncSpellDamage (Effect):
     def filter(self, action):
         pass
 
+
+### ---------- effects (applies on Messages) ----------------
+
+class Eff_InvokeCard (Effect):
+    def __init__(self, card):
+      Effect.__init__(self, None)
+      self.card = card
+    def __str__(self):
+      return "Invoke a %s" % str(self.card)
+    @staticmethod
+    def create_death_rattle(self, card):
+      self.effects.append('death_rattle')
+      self.triggers.append(('death_rattle',Eff_InvokeCard(card)))
+    def init(self, owner, pos):
+      self.owner = owner
+      self.card.owner = owner
+      self.pos = pos
+    def execute(self):
+      assert self.owner and self.pos
+      from creatures import Minion
+      minion = Minion(self.card)
+      self.engine.send_message(Msg_AddMinion(self.owner,minion,self.pos))
 
 
 

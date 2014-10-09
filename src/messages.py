@@ -105,8 +105,9 @@ class Msg_PlayCard (CardMessage):
     def __str__(self):
         return "%s plays %s" % (self.caster, self.card)
     def execute(self):
-        return [Msg_UseMana(self.caster,self.cost), 
-                Msg_ThrowCard(self.caster,self.card)]
+        self.engine.send_message(
+            [Msg_UseMana(self.caster,self.cost), 
+             Msg_ThrowCard(self.caster,self.card)], immediate=True)
 
 
 # start/end messages
@@ -150,7 +151,7 @@ class Msg_AddThing (Message):
         self.thing = thing
         self.pos = pos
     def execute(self):
-        return self.engine.board.add_thing(self.thing, self.pos)
+        self.engine.board.add_thing(self.thing, self.pos)
     def __str__(self):
         return "New %s on the board for %s" %(self.thing, self.caster)
 
@@ -184,11 +185,9 @@ class Msg_HeroPopup (Msg_Popup):
 class Msg_CheckDead (Message):
     """ as soon as a minion dies, it asks for its cleaning """
     def execute(self):
-        res = []  # messages of those who died
         for i in self.engine.board.everybody:
-          if i.dead:
-            res.append(i.death())
-        return res
+          if i.dead:  
+            i.death()
     def __str__(self):
         return "%s asks for dead cleaning." % self.caster
 
@@ -206,6 +205,13 @@ class Msg_DeadSecret (Msg_Dead):
 class Msg_DeadHero (Msg_Dead):
     pass
 
+
+
+class Msg_DeathRattle (TargetedMessage):
+    def __str__(self):
+      return "Death rattle casted by %s: %s" % (self.caster, self.target)
+    def execute(self):
+      self.target.execute()
 
 
 # attack / heal
@@ -236,7 +242,7 @@ class Msg_RandomDamage (Message):
         while True:
           r = random.randint(len(self.target))
           target = self.target[r]
-        return Msg_Damage(self.caster,target,self.damage)
+        self.engine.send_message( Msg_Damage(self.caster,target,self.damage), immediate=True)
     def __str__(self):
         return "%s takes %d damage." % (self.target, self.damage)
 
@@ -248,8 +254,10 @@ class Msg_MultiRandomDamage (Message):
         self.each = each  # amount of damage of each hit
     def execute(self):
         # breaks down into new messages as time passes by
-        return [Msg_RandomDamage(self.caster, self.target,self.each),
-                Msg_MultiRandomDamage(self.caster,self.target,self.damage-1,self.each)]
+        self.engine.send_message( 
+               [Msg_RandomDamage(self.caster, self.target,self.each),
+                Msg_MultiRandomDamage(self.caster,self.target,self.damage-1,self.each)],
+                immediate=True)
     def __str__(self):
         return "%s throws %dx%d hit damages randomly." % (self.target, self.damage, self.each)
 

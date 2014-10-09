@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 '''
 all HS cards
 '''
@@ -7,11 +6,13 @@ from minions import *
 from actions import *
 from effects import *
 
+eff_trad_fr = dict(taunt='Provocation')
+
 
 ### ------- Cards -------------
 
 class Card (object):
-    def __init__(self, name, cost, cls=None, desc='', name_fr='', desc_fr='', img='' ):
+    def __init__(self, name, cost, cls=None, desc='', name_fr='', desc_fr='', effects=None, img='' ):
       self.name = name
       self.name_fr = name_fr
       self.cost = cost  # mana cost
@@ -23,7 +24,12 @@ class Card (object):
       self.action_filters = [] # reacting to actions before selection: [(Act_class, handler),...]
       self.modifiers = [] # reacting to event at emission time, list: [(Msg_Class, event),...]
       self.triggers = [] # reacting to events at execution time, list: [(Msg_Class, event),...]
-      self.effects = [] # list of effects without triggers: {'taunt','stealth', or buffs that can be undone...}
+      if type(effects)==str:  effects = effects.split()
+      self.effects = effects or [] # list of effects without triggers: {'taunt','stealth', or buffs that can be undone...}
+      if desc=='':  
+        self.desc = '. '.join(['%s%s'%(e[0].upper(),e[1:]) for e in self.effects])
+      if desc_fr=='':  
+        self.desc_fr = '. '.join([eff_trad_fr[e] for e in self.effects])
 
     @classmethod
     def set_engine(cls, engine):
@@ -36,8 +42,8 @@ class Card (object):
 ### --------------- Minion cards ----------------------
 
 class Card_Minion (Card):
-    def __init__(self, name, cost, hp, atq, cat=None, cls=None, desc='', name_fr='', img='' ):
-        Card.__init__(self, name, cost, cls, desc, name_fr, img )
+    def __init__(self, name, cost, atq, hp, cat=None, **kwargs ):
+        Card.__init__(self, name, cost, **kwargs )
         self.hp = hp    # health point = life
         self.atq = atq  # attack
         self.cat = cat  # category of minion = 'beast', ...
@@ -49,25 +55,33 @@ class Card_Minion (Card):
         return Act_PlayMinionCard(self, self.engine.board.get_free_slots(self.owner))
 
 
-
-class Card_DamagedGolem (Card_Minion):
-    def __init__(self):
-        Card_Minion.__init__(self,"Damaged Golem", 3, 3, 2, 
-                             name_fr=u"Golem endommagé")
-
 class Card_HarvestGolem (Card_Minion):
     def __init__(self):
-        Card_Minion.__init__(self,"Harvest Golem", 3, 3, 2, 
+        Card_Minion.__init__(self,"Harvest Golem", 3, 2, 3,
                              name_fr="Golem des moissons",
-                             desc_fr=u"Rale d'agonie: Invoque un golem endommagé 2/1")
-        effect_death_rattle_invoke(self, Card_DamagedGolem)
+                             desc_fr="Rale d'agonie: Invoque 2 hyenes 2/2")
+        Eff_InvokeCard.create_death_rattle(self, 
+                             Card_Minion("Damaged Golem", 1, 2, 1, 
+                             name_fr="Golem endommage", cat='beast'))
+        
 
+class Card_SavannahHighmane (Card_Minion):
+    def __init__(self):
+        Card_Minion.__init__(self,"Savannah Highmane", 6, 6, 5, 
+                             name_fr="Grande Criniere des Savanes", cat='beast',
+                             desc_fr="Rale d'agonie: Invoque 2 hyenes 2/2")
+        Eff_InvokeCard.create_death_rattle(self, 
+                             Card_Minion("Hyena", 2, 2, 2, 
+                             name_fr="Hyene", cat='beast'))
+        Eff_InvokeCard.create_death_rattle(self, 
+                             Card_Minion("Hyena", 2, 2, 2, 
+                             name_fr="Hyene", cat='beast'))
 
 ### --------------- Weapon cards ----------------------
 
 class Card_Weapon (Card):
-    def __init__(self, name, cost, hp, atq, cat=None, cls=None, desc='', name_fr='', img='' ):
-        Card.__init__(self, name, cost, cls, desc, name_fr, img )
+    def __init__(self, name, cost, hp, atq, cat=None, **kwargs ):
+        Card.__init__(self, name, cost, **kwargs )
         self.hp = hp    # health point = weapon durability
         self.atq = atq  # attack
         self.cat = cat  # category of minion = 'beast', ...
@@ -129,16 +143,19 @@ class Card_FakeSpell (Card_Spell):
 def get_cardbook():
   cardbook = []
   cardbook.append( Card_Minion('Wisp',0,1,1,name_fr='Feu follet') )
-  cardbook.append( Card_Minion('River Crocolisk',2,3,2,name_fr='Crocilisque des rivieres') )
-  cardbook.append( Card_Minion('Chillwind Yeti',4,5,4,name_fr='Yeti Noroit') )
+  cardbook.append( Card_Minion('Goldshire Footman',1,1,2,name_fr='Soldat de Comte de l\'Or',effects='taunt') )
+  cardbook.append( Card_Minion('River Crocolisk',2,2,3,name_fr='Crocilisque des rivieres') )
+  cardbook.append( Card_HarvestGolem() )
+  cardbook.append( Card_SavannahHighmane() )
+  cardbook.append( Card_Minion('Chillwind Yeti',4,4,5,name_fr='Yeti Noroit') )
 
   # add fake creatures
   for i in range(1,11):
-    cardbook.append( Card_Minion('Fake Creature %d'%i,i,i,i+1,name_fr="Fausse creature %d"%i) )
+    cardbook.append( Card_Minion('Fake Creature %d'%i,i,i+1,i,name_fr="Fausse creature %d"%i) )
     
   # add fake weapons
   for i in range(1,5):
-    cardbook.append( Card_Weapon('Fake Weapon %d'%i,i,2,i+1) )
+    cardbook.append( Card_Weapon('Fake Weapon %d'%i,i,i+1,2) )
   
   # add fake spells
   for i in range(1,10):
@@ -157,10 +174,12 @@ def fake_deck():
     from copy import copy
     cardbook = get_cardbook()
     deck = []
-    if 0:
-      deck += [copy(cardbook["Wisp"]) for i in range(15)]
+    if 1:
+      deck += [copy(cardbook["Savannah Highmane"]) for i in range(30)]
+#      deck += [copy(cardbook["Goldshire Footman"]) for i in range(15)]
+#      deck += [copy(cardbook["Wisp"]) for i in range(15)]
 #      deck += [copy(cardbook["Fake Damage Spell 1"]) for i in range(15)]
-      deck += [copy(cardbook["Fake Weapon 1"]) for i in range(15)]
+#      deck += [copy(cardbook["Fake Weapon 1"]) for i in range(15)]
     else:
       deck += [copy(cardbook["Wisp"]) for i in range(4)]
       deck += [copy(cardbook["River Crocolisk"]) for i in range(4)]
