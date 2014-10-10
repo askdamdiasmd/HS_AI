@@ -19,7 +19,7 @@ class Hero (Creature):
 
   def death(self):
     Creature.death(self)
-    return Msg_DeadHero(self)
+    self.engine.send_message( Msg_DeadHero(self), immediate=True)
 
 
 ### -------- instanciation of heroes --------------------
