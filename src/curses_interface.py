@@ -13,19 +13,17 @@ locale.setlocale(locale.LC_ALL, '') #en_US.utf8') #UTF-8')
 code = locale.getpreferredencoding()
 os.environ['ESCDELAY'] = '25'
 
-def addwch(ch,attr=0,win=None,y=None,x=None):
+def addwch(ch,attr=0,win=None,y=None,x=None,nb=1):
   if win==None: win=stdscr
   # display unicode character
   if code=='UTF-8':
     if x==None:
-      uc.waddstr(win,unichr(ch).encode(code),attr)
+      uc.waddstr(win,unichr(ch).encode(code)*nb,attr)
     else:
-      uc.mvwaddstr(win,y,x,unichr(ch).encode(code),attr)
+      uc.mvwaddstr(win,y,x,unichr(ch).encode(code)*nb,attr)
   else:
-    if x==None:
-      uc.waddch(win,ch,attr)
-    else:
-      uc.mvwaddch(win,y,x,ch,attr)
+    if x!=None: uc.wmove(win,y,x)
+    uc.whline(win,ch|attr,nb)
 
 def init_screen():
   stdscr = uc.initscr()
@@ -146,12 +144,25 @@ def show_unicode():
 def rounded_box(win):
     ty,tx = uc.getmaxyx(win)
     uc.box(win)
-    uc.mvwaddch(win,0,0,ord(u'\u2320'))
-    uc.mvwaddch(win,ty-1,tx-1,ord(u'\u2321'))
+    addwch(2320,win=win,x=0,y=0)
+    addwch(2321,win=win,x=tx-1,y=0)
 
 def strong_box(win):
-    ty,tx = uc.getmaxyx(win)
-    uc.wborder(win,9553,9553,9552,9552,9556,9559,9562,9565)
+    h,w = uc.getmaxyx(win)
+    w -= 1
+    h -= 1
+    if code=='UTF-8':
+      addwch(9556,win=win,x=0,y=0)
+      addwch(9552,win=win,nb=w-1)
+      addwch(9559,win=win)
+      for i in range(1,h):
+        addwch(9553,win=win,x=0,y=i)
+        addwch(9553,win=win,x=w,y=i)
+      addwch(9562,win=win,x=0,y=h)
+      addwch(9552,win=win,nb=w-1)
+      addwch(9565,win=win)
+    else:
+      uc.wborder(win,9553,9552,9552,9556,9559,9562,9565)
 
 def manual_box(win,y,x,h,w):
     w -= 1

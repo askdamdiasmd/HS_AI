@@ -80,7 +80,7 @@ class Card_SavannahHighmane (Card_Minion):
 ### --------------- Weapon cards ----------------------
 
 class Card_Weapon (Card):
-    def __init__(self, name, cost, hp, atq, cat=None, **kwargs ):
+    def __init__(self, name, cost, atq, hp, cat=None, **kwargs ):
         Card.__init__(self, name, cost, **kwargs )
         self.hp = hp    # health point = weapon durability
         self.atq = atq  # attack
@@ -155,7 +155,7 @@ def get_cardbook():
     
   # add fake weapons
   for i in range(1,5):
-    cardbook.append( Card_Weapon('Fake Weapon %d'%i,i,i+1,2) )
+    cardbook.append( Card_Weapon('Fake Weapon %d'%i,i,i,2) )
   
   # add fake spells
   for i in range(1,10):
@@ -175,11 +175,12 @@ def fake_deck():
     cardbook = get_cardbook()
     deck = []
     if 1:
-      deck += [copy(cardbook["Savannah Highmane"]) for i in range(30)]
-#      deck += [copy(cardbook["Goldshire Footman"]) for i in range(15)]
+      deck += [copy(cardbook["Savannah Highmane"]) for i in range(6)]
+      deck += [copy(cardbook["Goldshire Footman"]) for i in range(6)]
 #      deck += [copy(cardbook["Wisp"]) for i in range(15)]
-#      deck += [copy(cardbook["Fake Damage Spell 1"]) for i in range(15)]
-#      deck += [copy(cardbook["Fake Weapon 1"]) for i in range(15)]
+      deck += [copy(cardbook["Fake Weapon 1"]) for i in range(6)]
+      deck += [copy(cardbook["Harvest Golem"]) for i in range(6)]
+      deck += [copy(cardbook["Fake Damage Spell 1"]) for i in range(6)]
     else:
       deck += [copy(cardbook["Wisp"]) for i in range(4)]
       deck += [copy(cardbook["River Crocolisk"]) for i in range(4)]
