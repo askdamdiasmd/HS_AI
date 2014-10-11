@@ -332,6 +332,7 @@ class VizMinion (VizThing):
       minion = self.obj
       if pos==None: pos = minion.engine.board.viz.get_minion_pos(minion)
       win = VizThing.draw(self,pos=pos,**kwargs)
+      if not win: return
       highlight = kwargs.get('highlight',0)
       ty,tx = uc.getmaxyx(win)
       name = minion.card.name_fr or minion.card.name
@@ -341,7 +342,10 @@ class VizMinion (VizThing):
       if 'death_rattle' in self.effects:
         uc.mvwaddstr(win,ty-1,tx/2,'D',highlight)
       if 'silence' in self.effects:
-        uc.mvwchgat(win,ty/2,1,tx-2,uc.black_on_red,12)
+        line = uc.derwin(win,1,tx,ty/2,0)
+        uc.wbkgd(line,0,uc.black_on_red)
+        uc.mvwchgat(line,0,1,tx-2,uc.black_on_red,0)        
+        uc.delwin(line)
 
 
 class VizWeapon (VizThing):
@@ -430,14 +434,16 @@ class HeroPowerButton (Button):
       Button.__init__(self,y,x,text,**kwargs)
       self.subtext = subtext
       self.cost = cost
+      self.used = False
 
   def draw(self,**kwargs):
       coltext = uc.yellow_on_black
+      if self.used: kwargs['bkgd'] = uc.black_on_yellow
       Button.draw(self,ytext=1,coltext=coltext,**kwargs)
       ty, tx = uc.getmaxyx(self.win)
       uc.mvwaddstr(self.win,0,tx/2-1,"(%d)"%self.cost,uc.cyan_on_black)
       print_longtext(self.win,2,1,ty-1,tx-1,self.subtext,coltext)
-      
+
 
 def temp_panel(viz,text,color,duration=2):
     assert issubclass(type(viz),VizThing), debug()
@@ -618,6 +624,7 @@ def draw_Msg_StartTurn(self):
     show_panels()
     time.sleep(1 if self.engine.board.viz.animated else 0.1)
     button.delete()
+    self.engine.board.viz.hero_power_buttons[player].used = False
     self.engine.board.draw()
 
 def draw_Msg_DrawCard(self):
@@ -751,7 +758,14 @@ def draw_Msg_StartAttack(self):
         caster.draw(pos=(interp(i,m,oy,ny),interp(i,m,ox,nx)))
         show_panels()
         time.sleep(t)
-  
+
+def draw_Msg_StartHeroPower(self):
+    player = self.caster
+    button = self.engine.board.viz.hero_power_buttons[player]
+    button.used = True
+    button.draw()
+    
+
 
 ### Board --------
 
