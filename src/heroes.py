@@ -48,7 +48,7 @@ class Card_Mage (Card_Hero):
     def hero_power(self):
         actions = lambda self: [Msg_HeroDamage(self.caster,self.choices[0],1)]
         return Act_HeroPower(self.owner, self.power_cost, 
-                             self.engine.board.list_characters(), actions)
+                             self.engine.board.get_characters(), actions)
 
 ### - Priest -
 
@@ -63,7 +63,7 @@ class Card_Priest (Card_Hero):
     def hero_power(self):
         actions = lambda self: [Msg_HeroHeal(self.caster,self.choices[0],2)]
         return Act_HeroPower(self.owner, self.power_cost, 
-                             self.engine.board.list_characters(), actions)
+                             self.engine.board.get_characters(), actions)
 
 
 

@@ -1,0 +1,48 @@
+[Msg_DrawCard] [jerome (Jaina) 30HP] draw Chouette bec-de-fer (2): 2/1  from the deck
+[Msg_DrawCard] [jerome (Jaina) 30HP] draw Sergent Grossier (1): 2/1  from the deck
+[Msg_DrawCard] [jerome (Jaina) 30HP] draw Sergent Grossier (1): 2/1  from the deck
+[Msg_DrawCard] [IA (Anduin) 30HP] draw Chouette bec-de-fer (2): 2/1  from the deck
+[Msg_DrawCard] [IA (Anduin) 30HP] draw Chouette bec-de-fer (2): 2/1  from the deck
+[Msg_DrawCard] [IA (Anduin) 30HP] draw Sergent Grossier (1): 2/1  from the deck
+[Msg_DrawCard] [IA (Anduin) 30HP] draw Chouette bec-de-fer (2): 2/1  from the deck
+[Msg_DrawCard] [IA (Anduin) 30HP] draw  (0): Gain one mana crystal this turn only from the deck
+[Msg_StartTurn] Start of turn for [jerome (Jaina) 30HP] 
+[Msg_DrawCard] [jerome (Jaina) 30HP] draw Sergent Grossier (1): 2/1  from the deck
+[Act_PlayMinionAndEffect] Card Chouette bec-de-fer (2): 2/1 
+[Msg_PlayCard] [jerome (Jaina) 30HP] plays Chouette bec-de-fer (2): 2/1 
+[Msg_UseMana] Player [jerome (Jaina) 30HP] loses 2 mana crystal
+[Msg_ThrowCard] Player [jerome (Jaina) 30HP] loses Chouette bec-de-fer (2): 2/1 
+[Msg_AddMinion] New Minion Ironbeak Owl 2/1 on the board for [jerome (Jaina) 30HP]
+[Msg_MinionPopup] Minion Ironbeak Owl 2/1 pops up
+[Act_PlayMinionAndEffect] Card Sergent Grossier (1): 2/1 
+[Msg_PlayCard] [jerome (Jaina) 30HP] plays Sergent Grossier (1): 2/1 
+[Msg_UseMana] Player [jerome (Jaina) 30HP] loses 1 mana crystal
+[Msg_ThrowCard] Player [jerome (Jaina) 30HP] loses Sergent Grossier (1): 2/1 
+[Msg_AddMinion] New Minion Abusive Sergeant 2/1 on the board for [jerome (Jaina) 30HP]
+[Msg_MinionPopup] Minion Abusive Sergeant 2/1 pops up
+[Msg_TargetedEffect] Minion Ironbeak Owl 4/1 receives an effect [buff +2/+0 (temporary)] from Minion Abusive Sergeant 2/1.
+[Msg_Status] Change of status for Minion Ironbeak Owl 4/1: {atq=4, max_atq=4}
+[Act_PlayMinionAndEffect] Card Sergent Grossier (1): 2/1 
+[Msg_PlayCard] [jerome (Jaina) 30HP] plays Sergent Grossier (1): 2/1 
+[Msg_UseMana] Player [jerome (Jaina) 30HP] loses 1 mana crystal
+[Msg_ThrowCard] Player [jerome (Jaina) 30HP] loses Sergent Grossier (1): 2/1 
+[Msg_AddMinion] New Minion Abusive Sergeant 2/1 on the board for [jerome (Jaina) 30HP]
+[Msg_MinionPopup] Minion Abusive Sergeant 2/1 pops up
+[Msg_TargetedEffect] Minion Ironbeak Owl 6/1 receives an effect [buff +2/+0 (temporary)] from Minion Abusive Sergeant 2/1.
+[Msg_Status] Change of status for Minion Ironbeak Owl 6/1: {atq=6, max_atq=6}
+[Act_EndTurn] End turn
+[Msg_Status] Change of status for Minion Ironbeak Owl 4/1: {atq=4, max_atq=4}
+[Msg_EndTurn] End of turn for [jerome (Jaina) 30HP]
+[Msg_StartTurn] Start of turn for [IA (Anduin) 30HP] 
+[Msg_DrawCard] [IA (Anduin) 30HP] draw Chouette bec-de-fer (2): 2/1  from the deck
+[Act_HeroPower] Hero Power (2): heals a character by 2HP
+[Msg_UseMana] Player [IA (Anduin) 30HP] loses 2 mana crystal
+[Msg_StartHeroPower] [[IA (Anduin) 30HP]] uses its hero power
+[Msg_HeroHeal] [IA (Anduin) 30HP] heals [jerome (Jaina) 30HP] by 2HP.
+[Msg_Status] Change of status for [jerome (Jaina) 30HP]: {hp=30}
+[Msg_EndHeroPower] End of hero power effect
+[Act_EndTurn] End turn
+[Msg_Status] Change of status for Minion Ironbeak Owl 2/1: {atq=2, max_atq=2}
+[Msg_EndTurn] End of turn for [IA (Anduin) 30HP]
+[Msg_StartTurn] Start of turn for [jerome (Jaina) 30HP] 
+[Msg_DrawCard] [jerome (Jaina) 30HP] draw Chouette bec-de-fer (2): 2/1  from the deck

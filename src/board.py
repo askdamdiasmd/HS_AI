@@ -51,17 +51,20 @@ class Board:
       p = self.players
       return p[0] if player is not p[0] else p[1]
 
-  def list_friendly_minions(self, player):
+  def get_friendly_minions(self, player):
       return player.minions
 
-  def list_enemy_minions(self, player):
+  def get_enemy_minions(self, player):
       return self.get_enemy_player(player).minions
 
-  def list_characters(self):
+  def get_minions(self):
+      return [v for v in self.everybody if issubclass(type(v),Minion)]
+  
+  def get_characters(self):
       return [v for v in self.everybody if issubclass(type(v),Creature)]
 
-  def list_attackable_characters(self, player):
-      enemies = self.list_enemy_minions(player)
+  def get_attackable_characters(self, player):
+      enemies = self.get_enemy_minions(player)
       taunts = [e for e in enemies if e.has_taunt()]
       if taunts:
         return taunts

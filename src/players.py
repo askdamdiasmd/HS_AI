@@ -181,7 +181,12 @@ class RandomPlayer (Player):
       r = random.randint(0,len(actions)-1)
       action = actions[r]
       # select one target for this action
-      choices = [ch[random.randint(0,len(ch)-1)] for ch in action.choices]
+      choices = []
+      for ch in action.choices:
+        if ch:
+          choices.append(ch[random.randint(0,len(ch)-1)])
+        else:
+          choices.append(None)
       return action.select(choices)
 
 

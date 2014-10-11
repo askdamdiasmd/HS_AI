@@ -37,23 +37,20 @@ class Thing (object):
   def filter_action(self,action):
       for trigger,event in self.action_filters:
         if issubclass(type(msg),trigger):
-          action = event.execute(self,action)
+          action = event.filter(action)
       return action # default = do nothing
 
   def modify_msg(self, msg):
       for trigger,event in self.modifiers:
         if issubclass(type(msg),trigger):
-          msg = event.execute(self,msg)
+          msg = event.modify(msg)
       return msg
 
   def react_msg(self, msg):
-      res = []
-      for trigger,event in self.triggers:
+      for trigger,event in list(self.triggers): #copy because modified online
         if type(trigger)==str: continue
         if issubclass(type(msg),trigger):
-          m = event.execute(self,msg)
-          if m: res.append(m)
-      return res
+          event.trigger(msg)
 
   def has_effect(self, effect):
       return effect in self.effects
@@ -77,17 +74,17 @@ class Thing (object):
       self.triggers = []
       while self.effects:
         e = self.effects.pop()
-        if type(e)!=str:  e.undo(self)
+        if type(e)!=str:  e.undo()
       self.effects = ['silence']  
-      self.engine.display_msg(Msg_Status(self,'effects'))
+      self.engine.display_msg(Msg_Status(self,'hp max_hp atq max_atq effects'))
 
   def death(self):
-      pos = self.engine.board.get_minion_pos(self)
       if self.has_effect('death_rattle'):
         for trigger,eff in self.triggers:
           if trigger=='death_rattle':
-            eff.init(self.owner,pos)
+            eff.init(self.owner)
             self.engine.send_message(Msg_DeathRattle(self,eff), immediate=True)
+      self.silence()
       self.engine.board.remove_thing(self)
 
 
@@ -119,7 +116,7 @@ class Weapon (Thing):
         return []
       else:
         from actions import Act_WeaponAttack
-        return [Act_WeaponAttack(self, self.engine.board.list_attackable_characters(self.owner))]
+        return [Act_WeaponAttack(self, self.engine.board.get_attackable_characters(self.owner))]
 
   def attacks(self, target):
       self.hero.n_atq -= 1
@@ -156,10 +153,17 @@ class Creature (Thing):
       self.engine.display_msg(Msg_Status(self,'hp'))
 
   def change_hp(self, hp):
-        self.hp += hp
         self.max_hp += hp
+        assert self.max_hp>=1, pdb.set_trace()
+        self.hp += max(0,hp)  # only add if positive
+        self.hp = min(self.hp, self.max_hp)
         self.engine.display_msg(Msg_Status(self,'hp max_hp'))
-        self.cheack_dead()
+        self.check_dead()
+
+  def change_atq(self, atq):
+        self.atq += atq
+        self.max_atq += atq
+        self.engine.display_msg(Msg_Status(self,'atq max_atq'))
 
   def check_dead(self):
       if self.hp <= 0:
@@ -193,7 +197,7 @@ class Minion (Creature):
         return []
       else:
         from actions import Act_MinionAttack
-        return [Act_MinionAttack(self, self.engine.board.list_attackable_characters(self.owner))]
+        return [Act_MinionAttack(self, self.engine.board.get_attackable_characters(self.owner))]
 
   def death(self):
     Creature.death(self)

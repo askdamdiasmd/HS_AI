@@ -77,6 +77,40 @@ class Card_SavannahHighmane (Card_Minion):
                              Card_Minion("Hyena", 2, 2, 2, 
                              name_fr="Hyene", cat='beast'))
 
+
+class Card_ShatteredSunCleric (Card_Minion):
+    def __init__(self):
+        Card_Minion.__init__(self,"Shattered Sun Cleric", 3, 3, 2, 
+                             name_fr="Clerc du Soleil brise",
+                             desc_fr="Cri de guerre: confere +1/+1 a un serviteur allie")
+    def list_actions(self):
+        return Act_PlayMinionAndEffect(self, self.engine.board.get_free_slots(self.owner),
+                                       Eff_BuffMinion(1,1,False),
+                                       self.engine.board.get_friendly_minions(self.owner))
+
+
+class Card_IronbeakOwl (Card_Minion):
+    def __init__(self):
+        Card_Minion.__init__(self,"Ironbeak Owl", 2, 2, 1, 
+                             name_fr="Chouette bec-de-fer",
+                             desc_fr="Cri de guerre: reduit au silence un autre serviteur")
+    def list_actions(self):
+        return Act_PlayMinionAndEffect(self, self.engine.board.get_free_slots(self.owner),
+                                       Eff_Silence(), self.engine.board.get_minions())
+
+
+class Card_AbusiveSergeant (Card_Minion):
+    def __init__(self):
+        Card_Minion.__init__(self,"Abusive Sergeant", 1, 2, 1, 
+                             name_fr="Sergent Grossier",
+                             desc_fr="Cri de guerre: confere +2 ATQ a un serviteur pendant ce tour")
+    def list_actions(self):
+        return Act_PlayMinionAndEffect(self, self.engine.board.get_free_slots(self.owner),
+                                       Eff_BuffMinion(2,0,True), self.engine.board.get_minions())
+
+
+
+
 ### --------------- Weapon cards ----------------------
 
 class Card_Weapon (Card):
@@ -117,7 +151,7 @@ class Card_Wrath (Card_Spell):
     def __init__(self):
         Card_Spell.__init__(self, "Wrath",2,cls="Druid",name_fr="Colere")
     def list_actions(self):
-        targets = self.engine.board.list_characters()
+        targets = self.engine.board.get_characters()
         hero = self.owner
         first = Act_SingleSpellDamageCard(self,targets,damage=3)
         actions = lambda self: [Msg_SpellDamage(self.caster,self.choices[0],self.damage),
@@ -133,7 +167,7 @@ class Card_FakeSpell (Card_Spell):
                             desc="Deal %d points of damage"%damage)
         self.damage = damage
     def list_actions(self):
-        targets = self.engine.board.list_characters()
+        targets = self.engine.board.get_characters()
         return Act_SingleSpellDamageCard(self,targets,damage=self.damage)
 
 
@@ -147,6 +181,9 @@ def get_cardbook():
   cardbook.append( Card_Minion('River Crocolisk',2,2,3,name_fr='Crocilisque des rivieres') )
   cardbook.append( Card_HarvestGolem() )
   cardbook.append( Card_SavannahHighmane() )
+  cardbook.append( Card_ShatteredSunCleric() )
+  cardbook.append( Card_IronbeakOwl() )
+  cardbook.append( Card_AbusiveSergeant() )
   cardbook.append( Card_Minion('Chillwind Yeti',4,4,5,name_fr='Yeti Noroit') )
 
   # add fake creatures
@@ -175,12 +212,14 @@ def fake_deck():
     cardbook = get_cardbook()
     deck = []
     if 1:
-      deck += [copy(cardbook["Savannah Highmane"]) for i in range(6)]
-      deck += [copy(cardbook["Goldshire Footman"]) for i in range(6)]
-#      deck += [copy(cardbook["Wisp"]) for i in range(15)]
-      deck += [copy(cardbook["Fake Weapon 1"]) for i in range(6)]
-      deck += [copy(cardbook["Harvest Golem"]) for i in range(6)]
-      deck += [copy(cardbook["Fake Damage Spell 1"]) for i in range(6)]
+      deck += [copy(cardbook["Abusive Sergeant"]) for i in range(15)]
+      deck += [copy(cardbook["Ironbeak Owl"]) for i in range(15)]
+#      deck += [copy(cardbook["Savannah Highmane"]) for i in range(6)]
+#      deck += [copy(cardbook["Goldshire Footman"]) for i in range(6)]
+##      deck += [copy(cardbook["Wisp"]) for i in range(15)]
+#      deck += [copy(cardbook["Fake Weapon 1"]) for i in range(6)]
+#      deck += [copy(cardbook["Harvest Golem"]) for i in range(6)]
+#      deck += [copy(cardbook["Fake Damage Spell 1"]) for i in range(6)]
     else:
       deck += [copy(cardbook["Wisp"]) for i in range(4)]
       deck += [copy(cardbook["River Crocolisk"]) for i in range(4)]

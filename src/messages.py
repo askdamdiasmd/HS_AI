@@ -259,7 +259,7 @@ class Msg_MultiRandomDamage (Message):
                 Msg_MultiRandomDamage(self.caster,self.target,self.damage-1,self.each)],
                 immediate=True)
     def __str__(self):
-        return "%s throws %dx%d hit damages randomly." % (self.target, self.damage, self.each)
+        return "%s throws %dx%d hit damages randomly." % (self.caster, self.damage, self.each)
 
 
 # Heal messages
@@ -271,7 +271,7 @@ class Msg_Heal (TargetedMessage):
     def execute(self):
         self.target.heal(self.heal)
     def __str__(self):
-        return "%s heals %s by %dHP." % (self.target, self.caster, self.heal)
+        return "%s heals %s by %dHP." % (self.caster, self.target, self.heal)
 
 class Msg_HeroHeal (Msg_Heal):
     pass
@@ -279,7 +279,26 @@ class Msg_HeroHeal (Msg_Heal):
 
 
 
+# Effect messages
 
+class Msg_Silence (TargetedMessage):
+    def __init__(self, caster, target):
+        TargetedMessage.__init__(self,caster,target)
+    def __str__(self):
+        return "%s gets silenced by %s." % (self.target, self.caster)
+    def execute(self):
+        self.target.silence()
+
+
+class Msg_TargetedEffect (TargetedMessage):
+    def __init__(self, caster, target, effect):
+        TargetedMessage.__init__(self,caster,target)
+        effect.init(target)
+        self.effect = effect
+    def __str__(self):
+        return "%s receives an effect [%s] from %s." % (self.target, self.effect, self.caster)
+    def execute(self):
+        self.effect.execute()
 
 
 

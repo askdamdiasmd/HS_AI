@@ -22,8 +22,12 @@ def addwch(ch,attr=0,win=None,y=None,x=None,nb=1):
     else:
       uc.mvwaddstr(win,y,x,unichr(ch).encode(code)*nb,attr)
   else:
-    if x!=None: uc.wmove(win,y,x)
+    if x!=None: 
+      uc.wmove(win,y,x)
+    else:
+      y,x = uc.getyx(win)
     uc.whline(win,ch|attr,nb)
+    uc.wmove(win,y,x+nb)
 
 def init_screen():
   stdscr = uc.initscr()
@@ -148,10 +152,10 @@ def rounded_box(win):
     addwch(2321,win=win,x=tx-1,y=0)
 
 def strong_box(win):
-    h,w = uc.getmaxyx(win)
-    w -= 1
-    h -= 1
     if code=='UTF-8':
+      h,w = uc.getmaxyx(win)
+      w -= 1
+      h -= 1
       addwch(9556,win=win,x=0,y=0)
       addwch(9552,win=win,nb=w-1)
       addwch(9559,win=win)
@@ -162,7 +166,7 @@ def strong_box(win):
       addwch(9552,win=win,nb=w-1)
       addwch(9565,win=win)
     else:
-      uc.wborder(win,9553,9552,9552,9556,9559,9562,9565)
+      uc.wborder(win,9553,9553,9552,9552,9556,9559,9562,9565)
 
 def manual_box(win,y,x,h,w):
     w -= 1
@@ -231,14 +235,23 @@ class VizThing (object):
       del self.panel
       del self.win
 
-  @staticmethod
-  def buff_color(val,max_val,highlight=False,standout=False):
-    if val>max_val:
-      res = uc.white_on_green if highlight else uc.green_on_black
-    elif val==max_val:
-      res = uc.white_on_black if highlight else 0
+  def buff_color(self,val,highlight=False,standout=False):
+    if type(val)==int:
+      if val>0:
+        res = uc.white_on_green if highlight else uc.green_on_black
+      elif val==0:
+        res = uc.white_on_black if highlight else 0
+      else:
+        res = uc.white_on_red if highlight else uc.red_on_black
+    elif type(val)==str:
+      if getattr(self,val)<getattr(self,'max_'+val):
+        res = uc.white_on_red if highlight else uc.red_on_black
+      elif getattr(self,val)>getattr(self.obj.card,val):
+        res = uc.white_on_green if highlight else uc.green_on_black
+      else:
+        res = uc.white_on_black if highlight else 0
     else:
-      res = uc.white_on_red if highlight else uc.red_on_black
+      assert False, debug()
     return res + (uc.A_STANDOUT if standout else 0)
 
   def draw(self, pos=None, bkgd=0, highlight=0, **kwargs):
@@ -256,7 +269,7 @@ class VizThing (object):
     # show just HP
     ty,tx = uc.getmaxyx(win)
     thp = " %d "%self.hp
-    uc.mvwaddstr(win,ty-1,tx-1-len(thp),thp,highlight|self.buff_color(self.hp,self.max_hp))
+    uc.mvwaddstr(win,ty-1,tx-1-len(thp),thp,highlight|self.buff_color('hp'))
     return win
 
   def update_stats(self, msg, show_hp=True):
@@ -267,8 +280,8 @@ class VizThing (object):
       setattr(self,attr,newval)
       if anim and show_hp and msg.attrs==['hp']:
         diff = newval-oldval
-        plus = diff>0 and '+' or '' 
-        temp_panel(self,"%s%d"%(plus,diff),self.buff_color(diff,0,highlight=1),duration=1.5)
+        if diff:
+          temp_panel(self,"%+d"%diff,self.buff_color(diff,highlight=1),duration=1.5)
     self.draw()
 
 
@@ -296,7 +309,7 @@ class VizHero (VizThing):
     pl = hero.owner.viz
     if pl.weapon:
       atq = pl.weapon.atq
-      uc.mvwaddstr(win,ty-1,1," %d "%atq,highlight|self.buff_color(atq,pl.weapon.max_atq))
+      uc.mvwaddstr(win,ty-1,1," %d "%atq,highlight|pl.weapon.viz.buff_color('atq'))
 
   def create_hero_power_button(self):
     card = self.obj.card
@@ -321,10 +334,12 @@ class VizMinion (VizThing):
       ty,tx = uc.getmaxyx(win)
       name = minion.card.name_fr or minion.card.name
       print_longtext(win,1,1,ty-1,tx-1,name,uc.yellow_on_black)
-      uc.mvwaddstr(win,ty-1,1," %d "%self.atq,
-                   highlight|self.buff_color(self.atq,self.max_atq))
+      ref_atq = min(self.obj.card.atq, self.max_atq)
+      uc.mvwaddstr(win,ty-1,1," %d "%self.atq, highlight|self.buff_color('atq'))
       if 'death_rattle' in self.effects:
         uc.mvwaddstr(win,ty-1,tx/2,'D',highlight)
+      if 'silence' in self.effects:
+        uc.mvwchgat(win,ty/2,1,tx-2,uc.black_on_red,12)
 
 
 class VizWeapon (VizThing):
@@ -340,8 +355,8 @@ class VizWeapon (VizThing):
       ty,tx = uc.getmaxyx(win)
       name = weapon.card.name_fr or weapon.card.name
       print_longtext(win,1,1,ty-1,tx-1,name,uc.green_on_black)
-      uc.mvwaddstr(win,ty-1,1," %d "%self.atq,
-                   highlight|self.buff_color(self.atq,self.max_atq))
+      ref_atq = min(self.obj.card.atq, self.max_atq)
+      uc.mvwaddstr(win,ty-1,1," %d "%self.atq, highlight|self.buff_color('atq'))
   
   def update_stats(self, msg):
     VizThing.update_stats(self, msg, show_hp=False)
@@ -837,10 +852,8 @@ class VizBoard:
           p = i<12 and adv or player
           text = "%d/%d "%(p.mana,p.max_mana)
           uc.mvaddstr(i,NC-11-len(text), text, uc.black_on_cyan)
-          for i in range(p.mana):
-            addwch(9830, uc.cyan_on_black)
-          for i in range(p.max_mana-p.mana):
-            addwch(9826, uc.cyan_on_black)
+          addwch(9830, uc.cyan_on_black, nb=p.mana)
+          addwch(9826, uc.cyan_on_black, nb=p.max_mana-p.mana)
       
       # draw minions
       if 'minions' in what:
@@ -1014,12 +1027,17 @@ class HumanPlayerAscii (HumanPlayer):
               choices = []  # reset choices
             else:
               choices.append(act)
-            if len(choices)>=len(action.choices):
-              erase_elems(showlist)
-              return action.select(choices)
             erase_elems(showlist)
-            showlist = [(obj,obj,{}) for obj in action.choices[len(choices)]]
-          
+            while True:
+              if len(choices)>=len(action.choices):
+                return action.select(choices)
+              elif not action.choices[len(choices)]:  # no choices!
+                choices.append(None)
+              else:
+                # propose new choices
+                showlist = [(obj,obj,{}) for obj in action.choices[len(choices)]]
+                break
+              
           else:
             erase_elems(showlist)
             showlist = init_showlist
@@ -1037,6 +1055,7 @@ class HumanPlayerAscii (HumanPlayer):
           debug()
         else:
           uc.endwin()
+          open('log.txt','w').write(self.engine.log)
           print self.engine.log
           sys.exit()
 

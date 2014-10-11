@@ -87,6 +87,26 @@ class Act_PlayMinionCard (Act_PlayCard):
         self.engine.send_message(Msg_AddMinion(self.caster, Minion(self.card), pos))
 
 
+class Act_PlayMinionAndEffect (Act_PlayCard):
+    ''' hero plays a minion card '''
+    def __init__(self, card, pos, effect, targets):
+        Act_PlayCard.___init___(self,card)
+        self.choices = [pos,targets]
+        self.effect = effect
+    def execute(self):
+        Act_PlayCard.execute(self)
+        pos = self.choices[0]
+        assert type(pos).__name__=='Slot', pdb.set_trace()
+        from creatures import Minion
+        minion = Minion(self.card)
+        actions = [Msg_AddMinion(self.caster, minion, pos)]
+        target = self.choices[1]
+        if target!=None:
+          assert type(target)==Minion, pdb.set_trace()
+          actions.append(Msg_TargetedEffect(minion, target, self.effect))
+        self.engine.send_message(actions)
+
+
 class Act_Attack (Action):
     ''' when something attacks something'''
     def __init__(self, caster, targets):
