@@ -75,7 +75,7 @@ class Player (object):
     assert self.mana>=0
 
   def gain_mana(self, nb):
-    self.mana += nb
+    self.mana = min(10,self.mana + nb)
 
   def use_hero_power(self):
     self.n_remaining_power -= 1
@@ -119,9 +119,9 @@ class Player (object):
     if card:  
       if len(self.cards)<10:
         self.cards.append(card)
-        self.engine.display_msg(Msg_DrawCard(self,card))
+        self.engine.send_message(Msg_DrawCard(self,card),immediate=True)
       else:
-        self.engine.display_msg(Msg_DrawBurnCard(self,card))
+        self.engine.send_message(Msg_DrawBurnCard(self,card),immediate=True)
 
   def throw_card(self, card):
 #      if type(card)==int:
@@ -140,7 +140,7 @@ class Player (object):
       if coin:  
         self.cards.append(Card_Coin(self))
       for c in self.cards:
-        self.engine.display_msg(Msg_DrawCard(self,c))
+        self.engine.send_message(Msg_DrawCard(self,c),immediate=True)
 
   def choose_actions(self, actions):
       assert 0, "must be overloaded"

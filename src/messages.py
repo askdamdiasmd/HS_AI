@@ -31,6 +31,13 @@ class CardMessage (Message):
         Message.__init__(self, caster)
         self.card = card
 
+class Msg_Debug (Message):
+    def __init__(self, caster, msg):
+        Message.__init__(self, caster)
+        self.msg = msg
+    def __str__(self):
+        return "from %s: %s" %(self.caster, self.msg)
+
 
 # game messages
 

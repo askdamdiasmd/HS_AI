@@ -255,6 +255,7 @@ class VizThing (object):
     return res + (uc.A_STANDOUT if standout else 0)
 
   def draw(self, pos=None, bkgd=0, highlight=0, **kwargs):
+    if not hasattr(self,'win'): return None # thing was already deleted
     win, panel = self.win, self.panel
     if pos and pos!=uc.getbegyx(win):
       uc.move_panel(panel,*pos)    
@@ -298,6 +299,7 @@ class VizHero (VizThing):
 
   def draw(self, **kwargs):
     win = VizThing.draw(self,**kwargs)
+    if not win: return
     highlight = kwargs.get('highlight',0)
     ty,tx = uc.getmaxyx(win)
     hero = self.obj
@@ -776,7 +778,11 @@ class VizBoard:
       return adv, player
 
   def get_minion_pos(self, minion):
-      slot = Slot(minion.owner, minion.owner.viz.minions.index(minion), None)
+      try:
+        index = minion.owner.viz.minions.index(minion)
+      except ValueError:
+        return None
+      slot = Slot(minion.owner, index, None)
       return slot.get_screen_pos()[0]
 
   def get_card_pos(self,card):
@@ -850,7 +856,7 @@ class VizBoard:
         for who,i in [(adv,2),(player,22)]:
           if who not in which:  continue
           p = i<12 and adv or player
-          text = "%d/%d "%(p.mana,p.max_mana)
+          text = "%2d/%d "%(p.mana,p.max_mana)
           uc.mvaddstr(i,NC-11-len(text), text, uc.black_on_cyan)
           addwch(9830, uc.cyan_on_black, nb=p.mana)
           addwch(9826, uc.cyan_on_black, nb=p.max_mana-p.mana)
@@ -1055,7 +1061,6 @@ class HumanPlayerAscii (HumanPlayer):
           debug()
         else:
           uc.endwin()
-          open('log.txt','w').write(self.engine.log)
           print self.engine.log
           sys.exit()
 
@@ -1070,6 +1075,7 @@ class CursesHSEngine (HSEngine):
     HSEngine.__init__(self, *args)
     self.display = []
     self.log = ''
+    self.logfile = open('log.txt','w')
 
   def display_msg(self, msg):
     self.display.append(msg)
@@ -1077,7 +1083,9 @@ class CursesHSEngine (HSEngine):
   def wait_for_display(self):
     while self.display:
       msg = self.display.pop(0)
-      self.log += "[%s] %s\n" %(type(msg).__name__,msg)
+      line = "[%s] %s\n" %(type(msg).__name__,msg)
+      self.logfile.write(line)
+      self.log += line
       msg.draw()
 
 

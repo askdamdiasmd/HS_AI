@@ -66,9 +66,9 @@ class Acf_IncSpellDamage (Effect):
 
 class Eff_InvokeCard (Effect):
     @staticmethod
-    def create_death_rattle(self, card):
-      self.effects.append('death_rattle')
-      self.triggers.append(('death_rattle',Eff_InvokeCard(card)))
+    def create_death_rattle(card, new_card):
+      card.effects.append('death_rattle')
+      card.triggers.append(('death_rattle',Eff_InvokeCard(new_card)))
     def __init__(self, card):
       Effect.__init__(self)
       self.card = card
@@ -116,6 +116,41 @@ class Eff_BuffMinion (Effect):
         if self.hp: self.owner.change_hp(-self.hp)
         if self.atq: self.owner.change_atq(-self.atq)
 
+
+class Eff_BuffLeftRight (Effect):
+    @classmethod
+    def create(cls, card, atq, hp):
+        effect = cls(atq,hp)
+        card.effects.append(effect)
+        card.triggers += [(Msg_Popup,effect), (Msg_Dead,effect)]
+    def __init__(self, atq, hp):
+        Effect.__init__(self)
+        self.atq = atq    # buff atq
+        self.hp = hp      # buff hp
+        self.targets = set()
+    def __str__(self):
+        return "buff neighbors by %+d/%+d" % (self.atq, self.hp)
+    def get_neighbors(self):
+        minion = self.owner
+        player = minion.owner
+        i = player.minions.index(minion)
+        targets = set(player.minions[max(0,i-1):i+2])
+        targets.remove(minion)
+        return targets
+    def execute(self):
+        for target in self.targets:
+          if self.hp:   target.change_hp(self.hp)
+          if self.atq:  target.change_atq(self.atq)
+    def trigger(self, msg):
+        ngh = self.get_neighbors()
+        if self.targets != ngh: # there has been change of neighbors
+          self.undo()
+          self.targets = ngh
+          self.execute()
+    def undo(self):
+        for target in self.targets:
+          if self.hp: target.change_hp(-self.hp)
+          if self.atq: target.change_atq(-self.atq)
 
 
 

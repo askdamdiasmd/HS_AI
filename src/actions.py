@@ -76,9 +76,9 @@ class Act_PlayCard (Action):
 
 class Act_PlayMinionCard (Act_PlayCard):
     ''' hero plays a minion card '''
-    def __init__(self, card, pos):
+    def __init__(self, card):
         Act_PlayCard.___init___(self,card)
-        self.choices = [pos]
+        self.choices = [self.engine.board.get_free_slots(card.owner)]
     def execute(self):
         Act_PlayCard.execute(self)
         pos = self.choices[0]
@@ -89,9 +89,9 @@ class Act_PlayMinionCard (Act_PlayCard):
 
 class Act_PlayMinionAndEffect (Act_PlayCard):
     ''' hero plays a minion card '''
-    def __init__(self, card, pos, effect, targets):
+    def __init__(self, card, effect, targets):
         Act_PlayCard.___init___(self,card)
-        self.choices = [pos,targets]
+        self.choices = [self.engine.board.get_free_slots(card.owner),targets]
         self.effect = effect
     def execute(self):
         Act_PlayCard.execute(self)

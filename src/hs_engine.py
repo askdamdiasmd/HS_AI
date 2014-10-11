@@ -69,12 +69,8 @@ class HSEngine:
     if self.executing:  return # already doing it !
     self.executing = True
     
-#    from copy import copy
-#    old_messages = []
-    
     level, stack = self.messages, []
     while self.messages:
-#      old_messages.append(copy(self.messages))
       # go up the tree if empty level
       level = tree_go_up(level, stack)
       # go down the tree if new level

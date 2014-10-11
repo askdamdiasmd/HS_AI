@@ -3,7 +3,7 @@ Generalistic classes
 '''
 import pdb
 from messages import *
-from copy import copy
+from copy import deepcopy as copy
 
 
 ### ------------ generalistic thing (hero, weapon, minon) -------
@@ -19,17 +19,21 @@ class Thing (object):
       self.dead = False
 
       # what is below is what can be silenced
-      self.action_filters = copy(card.action_filters)  # reacting to actions before selection: [(Act_class, handler),...]
-      self.modifiers = copy(card.modifiers) # reacting to event at emission time, list: [(Msg_Class, event),...]
-      self.effects = copy(card.effects) # list of effects without triggers: {'taunt','stealth',...}
-      self.triggers = copy(card.triggers) # reacting to events at execution time, list: [(Msg_Class, event),...]
+      acfs, mods, trigs, effs = copy((card.action_filters, card.modifiers, card.triggers, card.effects))
+      self.action_filters = acfs  # reacting to actions [(Act_class, handler),...]
+      self.modifiers = mods # modifying messages, list: [(Msg_Class, event),...]
+      self.triggers = trigs # reacting to messages, list: [(Msg_Class, event),...]
+      self.effects = effs # list of effects without triggers: ['taunt','stealth',...]
+      for e in self.effects:  # we have to initalize effects
+        if type(e)!=str:  
+          e.init(self)
 
   @classmethod
   def set_engine(cls, engine):
       cls.engine = engine
 
   def __str__(self):
-      return "%s %s %d/%d" %(type(self).__name__, self.card.name, self.atq, self.hp)
+      return "%s %s (%X) %d/%d" %(type(self).__name__, self.card.name, id(self), self.atq, self.hp)
 
   def list_actions(self):
       assert 0, 'must be overloaded'
@@ -76,7 +80,7 @@ class Thing (object):
         e = self.effects.pop()
         if type(e)!=str:  e.undo()
       self.effects = ['silence']  
-      self.engine.display_msg(Msg_Status(self,'hp max_hp atq max_atq effects'))
+      self.engine.send_message(Msg_Status(self,'hp max_hp atq max_atq effects'),immediate=True)
 
   def death(self):
       if self.has_effect('death_rattle'):
@@ -124,7 +128,7 @@ class Weapon (Thing):
       msgs = [Msg_Damage(self, target, self.atq)]
       if target.atq: msgs.append(Msg_Damage(target, self.hero, target.atq))
       self.hp -= 1  # lose one durability
-      self.engine.display_msg(Msg_Status(self,'hp'))
+      self.engine.send_message(Msg_Status(self,'hp'),immediate=True)
       if self.hp <= 0:
         self.dead = True
         msgs.append( Msg_CheckDead(self) )
@@ -145,25 +149,25 @@ class Creature (Thing):
 
   def hurt(self, damage):
       self.hp -= damage
-      self.engine.display_msg(Msg_Status(self,'hp'))
+      self.engine.send_message(Msg_Status(self,'hp'),immediate=True)
       self.check_dead()
 
   def heal(self, hp):
       self.hp = min(self.max_hp, self.hp+hp)
-      self.engine.display_msg(Msg_Status(self,'hp'))
+      self.engine.send_message(Msg_Status(self,'hp'),immediate=True)
 
   def change_hp(self, hp):
         self.max_hp += hp
         assert self.max_hp>=1, pdb.set_trace()
         self.hp += max(0,hp)  # only add if positive
         self.hp = min(self.hp, self.max_hp)
-        self.engine.display_msg(Msg_Status(self,'hp max_hp'))
+        self.engine.send_message(Msg_Status(self,'hp max_hp'),immediate=True)
         self.check_dead()
 
   def change_atq(self, atq):
         self.atq += atq
         self.max_atq += atq
-        self.engine.display_msg(Msg_Status(self,'atq max_atq'))
+        self.engine.send_message(Msg_Status(self,'atq max_atq'),immediate=True)
 
   def check_dead(self):
       if self.hp <= 0:

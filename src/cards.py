@@ -52,7 +52,7 @@ class Card_Minion (Card):
         return "%s (%d): %d/%d %s" % (self.name_fr, self.cost, self.atq, self.hp, self.desc)
 
     def list_actions(self):
-        return Act_PlayMinionCard(self, self.engine.board.get_free_slots(self.owner))
+        return Act_PlayMinionCard(self)
 
 
 class Card_HarvestGolem (Card_Minion):
@@ -84,8 +84,7 @@ class Card_ShatteredSunCleric (Card_Minion):
                              name_fr="Clerc du Soleil brise",
                              desc_fr="Cri de guerre: confere +1/+1 a un serviteur allie")
     def list_actions(self):
-        return Act_PlayMinionAndEffect(self, self.engine.board.get_free_slots(self.owner),
-                                       Eff_BuffMinion(1,1,False),
+        return Act_PlayMinionAndEffect(self, Eff_BuffMinion(1,1,False),
                                        self.engine.board.get_friendly_minions(self.owner))
 
 
@@ -95,8 +94,7 @@ class Card_IronbeakOwl (Card_Minion):
                              name_fr="Chouette bec-de-fer",
                              desc_fr="Cri de guerre: reduit au silence un autre serviteur")
     def list_actions(self):
-        return Act_PlayMinionAndEffect(self, self.engine.board.get_free_slots(self.owner),
-                                       Eff_Silence(), self.engine.board.get_minions())
+        return Act_PlayMinionAndEffect(self, Eff_Silence(), self.engine.board.get_minions())
 
 
 class Card_AbusiveSergeant (Card_Minion):
@@ -105,10 +103,16 @@ class Card_AbusiveSergeant (Card_Minion):
                              name_fr="Sergent Grossier",
                              desc_fr="Cri de guerre: confere +2 ATQ a un serviteur pendant ce tour")
     def list_actions(self):
-        return Act_PlayMinionAndEffect(self, self.engine.board.get_free_slots(self.owner),
-                                       Eff_BuffMinion(2,0,True), self.engine.board.get_minions())
+        return Act_PlayMinionAndEffect(self, Eff_BuffMinion(2,0,True), self.engine.board.get_minions())
 
-
+class Card_DireWolfAlpha (Card_Minion):
+    def __init__(self):
+        Card_Minion.__init__(self,"Dire Wolf Alpha", 2, 2, 2, 
+                             name_fr="Loup alpha redoutable",
+                             desc_fr="Les serviteurs adjacents ont +1 ATQ")
+        Eff_BuffLeftRight.create(self,1,0)
+    def list_actions(self):
+        return Act_PlayMinionCard(self)
 
 
 ### --------------- Weapon cards ----------------------
@@ -184,6 +188,7 @@ def get_cardbook():
   cardbook.append( Card_ShatteredSunCleric() )
   cardbook.append( Card_IronbeakOwl() )
   cardbook.append( Card_AbusiveSergeant() )
+  cardbook.append( Card_DireWolfAlpha() )
   cardbook.append( Card_Minion('Chillwind Yeti',4,4,5,name_fr='Yeti Noroit') )
 
   # add fake creatures
@@ -212,8 +217,9 @@ def fake_deck():
     cardbook = get_cardbook()
     deck = []
     if 1:
-      deck += [copy(cardbook["Abusive Sergeant"]) for i in range(15)]
-      deck += [copy(cardbook["Ironbeak Owl"]) for i in range(15)]
+      deck += [copy(cardbook["Abusive Sergeant"]) for i in range(10)]
+      deck += [copy(cardbook["Dire Wolf Alpha"]) for i in range(10)]
+      deck += [copy(cardbook["Ironbeak Owl"]) for i in range(10)]
 #      deck += [copy(cardbook["Savannah Highmane"]) for i in range(6)]
 #      deck += [copy(cardbook["Goldshire Footman"]) for i in range(6)]
 ##      deck += [copy(cardbook["Wisp"]) for i in range(15)]
