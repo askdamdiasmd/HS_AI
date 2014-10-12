@@ -87,12 +87,16 @@ class Act_PlayMinionCard (Act_PlayCard):
         self.engine.send_message(Msg_AddMinion(self.caster, Minion(self.card), pos))
 
 
-class Act_PlayMinionAndEffect (Act_PlayCard):
-    ''' hero plays a minion card '''
-    def __init__(self, card, effect, targets):
+class Act_PlayMinionCard_BC (Act_PlayCard):
+    ''' hero plays a minion card with battlecry '''
+    def __init__(self, card, battlecry, targets):
         Act_PlayCard.___init___(self,card)
         self.choices = [self.engine.board.get_free_slots(card.owner),targets]
-        self.effect = effect
+        self.battlecry = battlecry
+        self.special_targets = None
+        if type(targets)==str:  
+          self.special_targets = targets
+          self.choices[1]=[]  # remove choice
     def execute(self):
         Act_PlayCard.execute(self)
         pos = self.choices[0]
@@ -100,10 +104,15 @@ class Act_PlayMinionAndEffect (Act_PlayCard):
         from creatures import Minion
         minion = Minion(self.card)
         actions = [Msg_AddMinion(self.caster, minion, pos)]
-        target = self.choices[1]
-        if target!=None:
-          assert type(target)==Minion, pdb.set_trace()
-          actions.append(Msg_TargetedEffect(minion, target, self.effect))
+        if self.special_targets=='neighbors':
+          player = self.caster
+          for target in player.minions[pos.index-1:pos.index+1]:
+            actions.append(Msg_BindEffect(minion, target, self.battlecry))
+        else:
+          target = self.choices[1]
+          if target!=None:
+            assert type(target)==Minion, pdb.set_trace()
+            actions.append(Msg_BindEffect(minion, target, self.battlecry))
         self.engine.send_message(actions)
 
 

@@ -1,693 +1,265 @@
 [Msg_StartTurn] Start of turn for [jerome (Jaina) 30HP] 
-[Msg_DrawCard] [jerome (Jaina) 30HP] draw Sergent Grossier (1): 2/1  from the deck
-[Msg_DrawCard] [jerome (Jaina) 30HP] draw Chouette bec-de-fer (2): 2/1  from the deck
-[Msg_DrawCard] [jerome (Jaina) 30HP] draw Sergent Grossier (1): 2/1  from the deck
-[Msg_DrawCard] [IA (Anduin) 30HP] draw Sergent Grossier (1): 2/1  from the deck
-[Msg_DrawCard] [IA (Anduin) 30HP] draw Sergent Grossier (1): 2/1  from the deck
-[Msg_DrawCard] [IA (Anduin) 30HP] draw Loup alpha redoutable (2): 2/2  from the deck
-[Msg_DrawCard] [IA (Anduin) 30HP] draw Sergent Grossier (1): 2/1  from the deck
+[Msg_DrawCard] [jerome (Jaina) 30HP] draw Golem des moissons (3): 2/3  from the deck
+[Msg_DrawCard] [jerome (Jaina) 30HP] draw Feu follet (0): 1/1  from the deck
+[Msg_DrawCard] [jerome (Jaina) 30HP] draw Crache-vase (5): 3/5 Taunt from the deck
+[Msg_DrawCard] [IA (Anduin) 30HP] draw Weapon  (1): 1/2  from the deck
+[Msg_DrawCard] [IA (Anduin) 30HP] draw Faux Sort de dommage 2 (1): Deal 2 points of damage from the deck
+[Msg_DrawCard] [IA (Anduin) 30HP] draw Faux Sort de dommage 7 (6): Deal 7 points of damage from the deck
+[Msg_DrawCard] [IA (Anduin) 30HP] draw Protectrice Solfury (2): 2/3  from the deck
 [Msg_DrawCard] [IA (Anduin) 30HP] draw  (0): Gain one mana crystal this turn only from the deck
-[Msg_DrawCard] [jerome (Jaina) 30HP] draw Loup alpha redoutable (2): 2/2  from the deck
+[Msg_DrawCard] [jerome (Jaina) 30HP] draw  (6): 4/5  from the deck
+[Act_PlayMinionCard] Card Crache-vase (5): 3/5 Taunt
+[Msg_PlayCard] [jerome (Jaina) 30HP] plays Crache-vase (5): 3/5 Taunt
+[Msg_UseMana] Player [jerome (Jaina) 30HP] loses 5 mana crystal
+[Msg_ThrowCard] Player [jerome (Jaina) 30HP] loses Crache-vase (5): 3/5 Taunt
+[Msg_AddMinion] New Minion Sludge Belcher (2EB9B50) 3/5 on the board for [jerome (Jaina) 30HP]
+[Msg_MinionPopup] Minion Sludge Belcher (2EB9B50) 3/5 pops up
+[Act_PlayMinionCard] Card Golem des moissons (3): 2/3 
+[Msg_PlayCard] [jerome (Jaina) 30HP] plays Golem des moissons (3): 2/3 
+[Msg_UseMana] Player [jerome (Jaina) 30HP] loses 3 mana crystal
+[Msg_ThrowCard] Player [jerome (Jaina) 30HP] loses Golem des moissons (3): 2/3 
+[Msg_AddMinion] New Minion Harvest Golem (2EB9BD0) 2/3 on the board for [jerome (Jaina) 30HP]
+[Msg_MinionPopup] Minion Harvest Golem (2EB9BD0) 2/3 pops up
+[Act_PlayMinionCard] Card Feu follet (0): 1/1 
+[Msg_PlayCard] [jerome (Jaina) 30HP] plays Feu follet (0): 1/1 
+[Msg_UseMana] Player [jerome (Jaina) 30HP] loses 0 mana crystal
+[Msg_ThrowCard] Player [jerome (Jaina) 30HP] loses Feu follet (0): 1/1 
+[Msg_AddMinion] New Minion Wisp (2EB98D0) 1/1 on the board for [jerome (Jaina) 30HP]
+[Msg_MinionPopup] Minion Wisp (2EB98D0) 1/1 pops up
 [Act_HeroPower] Hero Power (2): deals 1 damage to a character
 [Msg_UseMana] Player [jerome (Jaina) 30HP] loses 2 mana crystal
 [Msg_StartHeroPower] [[jerome (Jaina) 30HP]] uses its hero power
 [Msg_HeroDamage] [IA (Anduin) 29HP] takes 1 damage from [jerome (Jaina) 30HP].
 [Msg_Status] Change of status for [IA (Anduin) 29HP]: {hp=29}
 [Msg_EndHeroPower] End of hero power effect
-[Act_PlayMinionAndEffect] Card Sergent Grossier (1): 2/1 
-[Msg_PlayCard] [jerome (Jaina) 30HP] plays Sergent Grossier (1): 2/1 
-[Msg_UseMana] Player [jerome (Jaina) 30HP] loses 1 mana crystal
-[Msg_ThrowCard] Player [jerome (Jaina) 30HP] loses Sergent Grossier (1): 2/1 
-[Msg_AddMinion] New Minion Abusive Sergeant (2FA0C30) 2/1 on the board for [jerome (Jaina) 30HP]
-[Msg_MinionPopup] Minion Abusive Sergeant (2FA0C30) 2/1 pops up
-[Act_PlayMinionAndEffect] Card Chouette bec-de-fer (2): 2/1 
-[Msg_PlayCard] [jerome (Jaina) 30HP] plays Chouette bec-de-fer (2): 2/1 
-[Msg_UseMana] Player [jerome (Jaina) 30HP] loses 2 mana crystal
-[Msg_ThrowCard] Player [jerome (Jaina) 30HP] loses Chouette bec-de-fer (2): 2/1 
-[Msg_AddMinion] New Minion Ironbeak Owl (2FA0C10) 2/1 on the board for [jerome (Jaina) 30HP]
-[Msg_MinionPopup] Minion Ironbeak Owl (2FA0C10) 2/1 pops up
-[Msg_TargetedEffect] Minion Abusive Sergeant (2FA0C30) 2/1 receives an effect [silence] from Minion Ironbeak Owl (2FA0C10) 2/1.
-[Msg_Status] Change of status for Minion Abusive Sergeant (2FA0C30) 2/1: {hp=1, max_hp=1, atq=2, max_atq=2, effects=['silence']}
-[Act_PlayMinionAndEffect] Card Sergent Grossier (1): 2/1 
-[Msg_PlayCard] [jerome (Jaina) 30HP] plays Sergent Grossier (1): 2/1 
-[Msg_UseMana] Player [jerome (Jaina) 30HP] loses 1 mana crystal
-[Msg_ThrowCard] Player [jerome (Jaina) 30HP] loses Sergent Grossier (1): 2/1 
-[Msg_AddMinion] New Minion Abusive Sergeant (2FA0CB0) 2/1 on the board for [jerome (Jaina) 30HP]
-[Msg_MinionPopup] Minion Abusive Sergeant (2FA0CB0) 2/1 pops up
-[Msg_TargetedEffect] Minion Abusive Sergeant (2FA0C30) 4/1 receives an effect [buff +2/+0 (temporary)] from Minion Abusive Sergeant (2FA0CB0) 2/1.
-[Msg_Status] Change of status for Minion Abusive Sergeant (2FA0C30) 4/1: {atq=4, max_atq=4}
-[Act_PlayMinionCard] Card Loup alpha redoutable (2): 2/2 
-[Msg_PlayCard] [jerome (Jaina) 30HP] plays Loup alpha redoutable (2): 2/2 
-[Msg_UseMana] Player [jerome (Jaina) 30HP] loses 2 mana crystal
-[Msg_ThrowCard] Player [jerome (Jaina) 30HP] loses Loup alpha redoutable (2): 2/2 
-[Msg_AddMinion] New Minion Dire Wolf Alpha (2FA09B0) 2/2 on the board for [jerome (Jaina) 30HP]
-[Msg_MinionPopup] Minion Dire Wolf Alpha (2FA09B0) 2/2 pops up
-[Msg_Status] Change of status for Minion Ironbeak Owl (2FA0C10) 3/1: {atq=3, max_atq=3}
-[Msg_Status] Change of status for Minion Abusive Sergeant (2FA0CB0) 3/1: {atq=3, max_atq=3}
 [Act_EndTurn] End turn
 [Msg_EndTurn] End of turn for [jerome (Jaina) 30HP]
-[Msg_Status] Change of status for Minion Abusive Sergeant (2FA0C30) 2/1: {atq=2, max_atq=2}
 [Msg_StartTurn] Start of turn for [IA (Anduin) 29HP] 
-[Msg_DrawCard] [IA (Anduin) 29HP] draw Chouette bec-de-fer (2): 2/1  from the deck
-[Act_PlayMinionAndEffect] Card Sergent Grossier (1): 2/1 
-[Msg_PlayCard] [IA (Anduin) 29HP] plays Sergent Grossier (1): 2/1 
-[Msg_UseMana] Player [IA (Anduin) 29HP] loses 1 mana crystal
-[Msg_ThrowCard] Player [IA (Anduin) 29HP] loses Sergent Grossier (1): 2/1 
-[Msg_AddMinion] New Minion Abusive Sergeant (2FA8970) 2/1 on the board for [IA (Anduin) 29HP]
-[Msg_MinionPopup] Minion Abusive Sergeant (2FA8970) 2/1 pops up
-[Msg_TargetedEffect] Minion Ironbeak Owl (2FA0C10) 5/1 receives an effect [buff +2/+0 (temporary)] from Minion Abusive Sergeant (2FA8970) 2/1.
-[Msg_Status] Change of status for Minion Ironbeak Owl (2FA0C10) 5/1: {atq=5, max_atq=5}
-[Act_PlayMinionCard] Card Loup alpha redoutable (2): 2/2 
-[Msg_PlayCard] [IA (Anduin) 29HP] plays Loup alpha redoutable (2): 2/2 
+[Msg_DrawCard] [IA (Anduin) 29HP] draw Sergent Grossier (1): 2/1  from the deck
+[Act_PlayMinionCard_BC] Card Protectrice Solfury (2): 2/3 
+[Msg_PlayCard] [IA (Anduin) 29HP] plays Protectrice Solfury (2): 2/3 
 [Msg_UseMana] Player [IA (Anduin) 29HP] loses 2 mana crystal
-[Msg_ThrowCard] Player [IA (Anduin) 29HP] loses Loup alpha redoutable (2): 2/2 
-[Msg_AddMinion] New Minion Dire Wolf Alpha (2FA0D50) 2/2 on the board for [IA (Anduin) 29HP]
-[Msg_MinionPopup] Minion Dire Wolf Alpha (2FA0D50) 2/2 pops up
-[Msg_Status] Change of status for Minion Abusive Sergeant (2FA8970) 3/1: {atq=3, max_atq=3}
-[Act_PlaySpellCard] Card  (0): Gain one mana crystal this turn only
-[Msg_PlayCard] [IA (Anduin) 29HP] plays  (0): Gain one mana crystal this turn only
-[Msg_UseMana] Player [IA (Anduin) 29HP] loses 0 mana crystal
-[Msg_ThrowCard] Player [IA (Anduin) 29HP] loses  (0): Gain one mana crystal this turn only
-[Msg_StartSpell] Player [IA (Anduin) 29HP] plays spell [ (0): Gain one mana crystal this turn only]
-[Msg_GainMana] Player [IA (Anduin) 29HP] gain 1 mana crystal
-[Msg_EndSpell] End of spell.
-[Act_PlayMinionAndEffect] Card Sergent Grossier (1): 2/1 
-[Msg_PlayCard] [IA (Anduin) 29HP] plays Sergent Grossier (1): 2/1 
+[Msg_ThrowCard] Player [IA (Anduin) 29HP] loses Protectrice Solfury (2): 2/3 
+[Msg_AddMinion] New Minion Sunfury Protector (2EB97B0) 2/3 on the board for [IA (Anduin) 29HP]
+[Msg_MinionPopup] Minion Sunfury Protector (2EB97B0) 2/3 pops up
+[Act_PlayWeaponCard] Card Weapon  (1): 1/2 
+[Msg_PlayCard] [IA (Anduin) 29HP] plays Weapon  (1): 1/2 
 [Msg_UseMana] Player [IA (Anduin) 29HP] loses 1 mana crystal
-[Msg_ThrowCard] Player [IA (Anduin) 29HP] loses Sergent Grossier (1): 2/1 
-[Msg_AddMinion] New Minion Abusive Sergeant (2FA0890) 3/1 on the board for [IA (Anduin) 29HP]
-[Msg_MinionPopup] Minion Abusive Sergeant (2FA0890) 3/1 pops up
-[Msg_Status] Change of status for Minion Abusive Sergeant (2FA8970) 2/1: {atq=2, max_atq=2}
-[Msg_Status] Change of status for Minion Abusive Sergeant (2FA0890) 3/1: {atq=3, max_atq=3}
-[Msg_TargetedEffect] Minion Abusive Sergeant (2FA0C30) 4/1 receives an effect [buff +2/+0 (temporary)] from Minion Abusive Sergeant (2FA0890) 3/1.
-[Msg_Status] Change of status for Minion Abusive Sergeant (2FA0C30) 4/1: {atq=4, max_atq=4}
-[Act_PlayMinionAndEffect] Card Sergent Grossier (1): 2/1 
-[Msg_PlayCard] [IA (Anduin) 29HP] plays Sergent Grossier (1): 2/1 
-[Msg_UseMana] Player [IA (Anduin) 29HP] loses 1 mana crystal
-[Msg_ThrowCard] Player [IA (Anduin) 29HP] loses Sergent Grossier (1): 2/1 
-[Msg_AddMinion] New Minion Abusive Sergeant (2FA8AD0) 3/1 on the board for [IA (Anduin) 29HP]
-[Msg_MinionPopup] Minion Abusive Sergeant (2FA8AD0) 3/1 pops up
-[Msg_Status] Change of status for Minion Abusive Sergeant (2FA0890) 2/1: {atq=2, max_atq=2}
-[Msg_Status] Change of status for Minion Abusive Sergeant (2FA8AD0) 3/1: {atq=3, max_atq=3}
-[Msg_TargetedEffect] Minion Ironbeak Owl (2FA0C10) 7/1 receives an effect [buff +2/+0 (temporary)] from Minion Abusive Sergeant (2FA8AD0) 3/1.
-[Msg_Status] Change of status for Minion Ironbeak Owl (2FA0C10) 7/1: {atq=7, max_atq=7}
+[Msg_ThrowCard] Player [IA (Anduin) 29HP] loses Weapon  (1): 1/2 
+[Msg_AddWeapon] [IA (Anduin) 29HP] equipped a Weapon Fake Weapon 1 (2EB99D0) 1/2
+[Msg_WeaponPopup] Weapon Fake Weapon 1 (2EB99D0) 1/2 pops up
 [Act_EndTurn] End turn
 [Msg_EndTurn] End of turn for [IA (Anduin) 29HP]
-[Msg_Status] Change of status for Minion Abusive Sergeant (2FA0C30) 2/1: {atq=2, max_atq=2}
-[Msg_Status] Change of status for Minion Ironbeak Owl (2FA0C10) 3/1: {atq=5, max_atq=5}
-[Msg_Status] Change of status for Minion Ironbeak Owl (2FA0C10) 3/1: {atq=3, max_atq=3}
 [Msg_StartTurn] Start of turn for [jerome (Jaina) 30HP] 
-[Msg_DrawCard] [jerome (Jaina) 30HP] draw Chouette bec-de-fer (2): 2/1  from the deck
-[Act_PlayMinionAndEffect] Card Chouette bec-de-fer (2): 2/1 
-[Msg_PlayCard] [jerome (Jaina) 30HP] plays Chouette bec-de-fer (2): 2/1 
-[Msg_UseMana] Player [jerome (Jaina) 30HP] loses 2 mana crystal
-[Msg_ThrowCard] Player [jerome (Jaina) 30HP] loses Chouette bec-de-fer (2): 2/1 
-[Msg_AddMinion] New Minion Ironbeak Owl (2FA8B70) 2/1 on the board for [jerome (Jaina) 30HP]
-[Msg_MinionPopup] Minion Ironbeak Owl (2FA8B70) 2/1 pops up
-[Msg_TargetedEffect] Minion Dire Wolf Alpha (2FA0D50) 2/2 receives an effect [silence] from Minion Ironbeak Owl (2FA8B70) 2/1.
-[Msg_Status] Change of status for Minion Abusive Sergeant (2FA8AD0) 2/1: {atq=2, max_atq=2}
-[Msg_Status] Change of status for Minion Dire Wolf Alpha (2FA0D50) 2/2: {hp=2, max_hp=2, atq=2, max_atq=2, effects=['silence']}
-[Act_MinionAttack] Attack with Minion Ironbeak Owl (2FA0C10) 3/1
-[Msg_StartAttack] Minion Minion Ironbeak Owl (2FA0C10) 3/1 attacks enemy [IA (Anduin) 26HP]
-[Msg_Damage] [IA (Anduin) 26HP] takes 3 damage from Minion Ironbeak Owl (2FA0C10) 3/1.
+[Msg_DrawCard] [jerome (Jaina) 30HP] draw Faux Sort de dommage 2 (1): Deal 2 points of damage from the deck
+[Act_MinionAttack] Attack with Minion Sludge Belcher (2EB9B50) 3/5
+[Msg_StartAttack] Minion Minion Sludge Belcher (2EB9B50) 3/5 attacks enemy [IA (Anduin) 26HP]
+[Msg_Damage] [IA (Anduin) 26HP] takes 3 damage from Minion Sludge Belcher (2EB9B50) 3/5.
 [Msg_Status] Change of status for [IA (Anduin) 26HP]: {hp=26}
 [Msg_EndAttack] End of attack.
-[Act_MinionAttack] Attack with Minion Dire Wolf Alpha (2FA09B0) 2/2
-[Msg_StartAttack] Minion Minion Dire Wolf Alpha (2FA09B0) 2/2 attacks enemy [IA (Anduin) 24HP]
-[Msg_Damage] [IA (Anduin) 24HP] takes 2 damage from Minion Dire Wolf Alpha (2FA09B0) 2/2.
+[Act_MinionAttack] Attack with Minion Harvest Golem (2EB9BD0) 2/3
+[Msg_StartAttack] Minion Minion Harvest Golem (2EB9BD0) 2/3 attacks enemy [IA (Anduin) 24HP]
+[Msg_Damage] [IA (Anduin) 24HP] takes 2 damage from Minion Harvest Golem (2EB9BD0) 2/3.
 [Msg_Status] Change of status for [IA (Anduin) 24HP]: {hp=24}
 [Msg_EndAttack] End of attack.
-[Act_MinionAttack] Attack with Minion Abusive Sergeant (2FA0CB0) 3/1
-[Msg_StartAttack] Minion Minion Abusive Sergeant (2FA0CB0) 3/1 attacks enemy [IA (Anduin) 21HP]
-[Msg_Damage] [IA (Anduin) 21HP] takes 3 damage from Minion Abusive Sergeant (2FA0CB0) 3/1.
+[Act_MinionAttack] Attack with Minion Wisp (2EB98D0) 1/1
+[Msg_StartAttack] Minion Minion Wisp (2EB98D0) 1/1 attacks enemy [IA (Anduin) 23HP]
+[Msg_Damage] [IA (Anduin) 23HP] takes 1 damage from Minion Wisp (2EB98D0) 1/1.
+[Msg_Status] Change of status for [IA (Anduin) 23HP]: {hp=23}
+[Msg_EndAttack] End of attack.
+[Act_PlayMinionCard] Card  (6): 4/5 
+[Msg_PlayCard] [jerome (Jaina) 30HP] plays  (6): 4/5 
+[Msg_UseMana] Player [jerome (Jaina) 30HP] loses 6 mana crystal
+[Msg_ThrowCard] Player [jerome (Jaina) 30HP] loses  (6): 4/5 
+[Msg_AddMinion] New Minion Cairne (2EB9C50) 4/5 on the board for [jerome (Jaina) 30HP]
+[Msg_MinionPopup] Minion Cairne (2EB9C50) 4/5 pops up
+[Act_SingleSpellDamageCard] Card Faux Sort de dommage 2 (1): Deal 2 points of damage
+[Msg_PlayCard] [jerome (Jaina) 30HP] plays Faux Sort de dommage 2 (1): Deal 2 points of damage
+[Msg_UseMana] Player [jerome (Jaina) 30HP] loses 1 mana crystal
+[Msg_ThrowCard] Player [jerome (Jaina) 30HP] loses Faux Sort de dommage 2 (1): Deal 2 points of damage
+[Msg_StartSpell] Player [jerome (Jaina) 30HP] plays spell [Faux Sort de dommage 2 (1): Deal 2 points of damage]
+[Msg_SpellDamage] [IA (Anduin) 21HP] takes 2 damage from [jerome (Jaina) 30HP].
 [Msg_Status] Change of status for [IA (Anduin) 21HP]: {hp=21}
-[Msg_EndAttack] End of attack.
-[Act_MinionAttack] Attack with Minion Abusive Sergeant (2FA0C30) 2/1
-[Msg_StartAttack] Minion Minion Abusive Sergeant (2FA0C30) 2/1 attacks enemy [IA (Anduin) 19HP]
-[Msg_Damage] [IA (Anduin) 19HP] takes 2 damage from Minion Abusive Sergeant (2FA0C30) 2/1.
-[Msg_Status] Change of status for [IA (Anduin) 19HP]: {hp=19}
-[Msg_EndAttack] End of attack.
+[Msg_EndSpell] End of spell.
 [Act_HeroPower] Hero Power (2): deals 1 damage to a character
 [Msg_UseMana] Player [jerome (Jaina) 30HP] loses 2 mana crystal
 [Msg_StartHeroPower] [[jerome (Jaina) 30HP]] uses its hero power
-[Msg_HeroDamage] Minion Abusive Sergeant (2FA8AD0) 2/0 takes 1 damage from [jerome (Jaina) 30HP].
-[Msg_Status] Change of status for Minion Abusive Sergeant (2FA8AD0) 2/0: {hp=0}
-[Msg_CheckDead] Minion Abusive Sergeant (2FA8AD0) 2/0 asks for dead cleaning.
-[Msg_Status] Change of status for Minion Abusive Sergeant (2FA8AD0) 2/0: {hp=0, max_hp=1, atq=2, max_atq=2, effects=['silence']}
-[Msg_DeadMinion] Minion Abusive Sergeant (2FA8AD0) 2/0 dies.
+[Msg_HeroDamage] [IA (Anduin) 20HP] takes 1 damage from [jerome (Jaina) 30HP].
+[Msg_Status] Change of status for [IA (Anduin) 20HP]: {hp=20}
 [Msg_EndHeroPower] End of hero power effect
 [Act_EndTurn] End turn
 [Msg_EndTurn] End of turn for [jerome (Jaina) 30HP]
-[Msg_StartTurn] Start of turn for [IA (Anduin) 19HP] 
-[Msg_DrawCard] [IA (Anduin) 19HP] draw Loup alpha redoutable (2): 2/2  from the deck
-[Act_PlayMinionAndEffect] Card Chouette bec-de-fer (2): 2/1 
-[Msg_PlayCard] [IA (Anduin) 19HP] plays Chouette bec-de-fer (2): 2/1 
-[Msg_UseMana] Player [IA (Anduin) 19HP] loses 2 mana crystal
-[Msg_ThrowCard] Player [IA (Anduin) 19HP] loses Chouette bec-de-fer (2): 2/1 
-[Msg_AddMinion] New Minion Ironbeak Owl (2FA8A50) 2/1 on the board for [IA (Anduin) 19HP]
-[Msg_MinionPopup] Minion Ironbeak Owl (2FA8A50) 2/1 pops up
-[Msg_TargetedEffect] Minion Ironbeak Owl (2FA8B70) 2/1 receives an effect [silence] from Minion Ironbeak Owl (2FA8A50) 2/1.
-[Msg_Status] Change of status for Minion Ironbeak Owl (2FA8B70) 2/1: {hp=1, max_hp=1, atq=2, max_atq=2, effects=['silence']}
-[Act_EndTurn] End turn
-[Msg_EndTurn] End of turn for [IA (Anduin) 19HP]
-[Msg_StartTurn] Start of turn for [jerome (Jaina) 30HP] 
-[Msg_DrawCard] [jerome (Jaina) 30HP] draw Loup alpha redoutable (2): 2/2  from the deck
-[Act_PlayMinionCard] Card Loup alpha redoutable (2): 2/2 
-[Msg_PlayCard] [jerome (Jaina) 30HP] plays Loup alpha redoutable (2): 2/2 
-[Msg_UseMana] Player [jerome (Jaina) 30HP] loses 2 mana crystal
-[Msg_ThrowCard] Player [jerome (Jaina) 30HP] loses Loup alpha redoutable (2): 2/2 
-[Msg_AddMinion] New Minion Dire Wolf Alpha (2FA8A10) 3/2 on the board for [jerome (Jaina) 30HP]
-[Msg_MinionPopup] Minion Dire Wolf Alpha (2FA8A10) 3/2 pops up
-[Msg_Status] Change of status for Minion Ironbeak Owl (2FA0C10) 3/1: {atq=2, max_atq=2}
-[Msg_Status] Change of status for Minion Abusive Sergeant (2FA0CB0) 3/1: {atq=2, max_atq=2}
-[Msg_Status] Change of status for Minion Dire Wolf Alpha (2FA8A10) 3/2: {atq=3, max_atq=3}
-[Msg_Status] Change of status for Minion Ironbeak Owl (2FA0C10) 3/1: {atq=3, max_atq=3}
-[Msg_Status] Change of status for Minion Abusive Sergeant (2FA0CB0) 3/1: {atq=3, max_atq=3}
-[Msg_Status] Change of status for Minion Dire Wolf Alpha (2FA09B0) 3/2: {atq=3, max_atq=3}
-[Act_MinionAttack] Attack with Minion Dire Wolf Alpha (2FA09B0) 3/2
-[Msg_StartAttack] Minion Minion Dire Wolf Alpha (2FA09B0) 3/2 attacks enemy [IA (Anduin) 16HP]
-[Msg_Damage] [IA (Anduin) 16HP] takes 3 damage from Minion Dire Wolf Alpha (2FA09B0) 3/2.
-[Msg_Status] Change of status for [IA (Anduin) 16HP]: {hp=16}
-[Msg_EndAttack] End of attack.
-[Act_MinionAttack] Attack with Minion Abusive Sergeant (2FA0CB0) 3/1
-[Msg_StartAttack] Minion Minion Abusive Sergeant (2FA0CB0) 3/1 attacks enemy [IA (Anduin) 13HP]
-[Msg_Damage] [IA (Anduin) 13HP] takes 3 damage from Minion Abusive Sergeant (2FA0CB0) 3/1.
-[Msg_Status] Change of status for [IA (Anduin) 13HP]: {hp=13}
-[Msg_EndAttack] End of attack.
-[Act_MinionAttack] Attack with Minion Abusive Sergeant (2FA0C30) 2/1
-[Msg_StartAttack] Minion Minion Abusive Sergeant (2FA0C30) 2/1 attacks enemy [IA (Anduin) 11HP]
-[Msg_Damage] [IA (Anduin) 11HP] takes 2 damage from Minion Abusive Sergeant (2FA0C30) 2/1.
-[Msg_Status] Change of status for [IA (Anduin) 11HP]: {hp=11}
-[Msg_EndAttack] End of attack.
-[Act_MinionAttack] Attack with Minion Ironbeak Owl (2FA0C10) 3/1
-[Msg_StartAttack] Minion Minion Ironbeak Owl (2FA0C10) 3/1 attacks enemy [IA (Anduin) 8HP]
-[Msg_Damage] [IA (Anduin) 8HP] takes 3 damage from Minion Ironbeak Owl (2FA0C10) 3/1.
-[Msg_Status] Change of status for [IA (Anduin) 8HP]: {hp=8}
-[Msg_EndAttack] End of attack.
-[Act_MinionAttack] Attack with Minion Ironbeak Owl (2FA8B70) 2/1
-[Msg_StartAttack] Minion Minion Ironbeak Owl (2FA8B70) 2/1 attacks enemy [IA (Anduin) 6HP]
-[Msg_Damage] [IA (Anduin) 6HP] takes 2 damage from Minion Ironbeak Owl (2FA8B70) 2/1.
-[Msg_Status] Change of status for [IA (Anduin) 6HP]: {hp=6}
-[Msg_EndAttack] End of attack.
-[Act_HeroPower] Hero Power (2): deals 1 damage to a character
-[Msg_UseMana] Player [jerome (Jaina) 30HP] loses 2 mana crystal
-[Msg_StartHeroPower] [[jerome (Jaina) 30HP]] uses its hero power
-[Msg_HeroDamage] Minion Ironbeak Owl (2FA8A50) 2/0 takes 1 damage from [jerome (Jaina) 30HP].
-[Msg_Status] Change of status for Minion Ironbeak Owl (2FA8A50) 2/0: {hp=0}
-[Msg_CheckDead] Minion Ironbeak Owl (2FA8A50) 2/0 asks for dead cleaning.
-[Msg_Status] Change of status for Minion Ironbeak Owl (2FA8A50) 2/0: {hp=0, max_hp=1, atq=2, max_atq=2, effects=['silence']}
-[Msg_DeadMinion] Minion Ironbeak Owl (2FA8A50) 2/0 dies.
-[Msg_EndHeroPower] End of hero power effect
-[Act_EndTurn] End turn
-[Msg_EndTurn] End of turn for [jerome (Jaina) 30HP]
-[Msg_StartTurn] Start of turn for [IA (Anduin) 6HP] 
-[Msg_DrawCard] [IA (Anduin) 6HP] draw Sergent Grossier (1): 2/1  from the deck
-[Act_EndTurn] End turn
-[Msg_EndTurn] End of turn for [IA (Anduin) 6HP]
-[Msg_StartTurn] Start of turn for [jerome (Jaina) 30HP] 
-[Msg_DrawCard] [jerome (Jaina) 30HP] draw Chouette bec-de-fer (2): 2/1  from the deck
-[Act_HeroPower] Hero Power (2): deals 1 damage to a character
-[Msg_UseMana] Player [jerome (Jaina) 30HP] loses 2 mana crystal
-[Msg_StartHeroPower] [[jerome (Jaina) 30HP]] uses its hero power
-[Msg_HeroDamage] Minion Abusive Sergeant (2FA0890) 2/0 takes 1 damage from [jerome (Jaina) 30HP].
-[Msg_Status] Change of status for Minion Abusive Sergeant (2FA0890) 2/0: {hp=0}
-[Msg_CheckDead] Minion Abusive Sergeant (2FA0890) 2/0 asks for dead cleaning.
-[Msg_Status] Change of status for Minion Abusive Sergeant (2FA0890) 2/0: {hp=0, max_hp=1, atq=2, max_atq=2, effects=['silence']}
-[Msg_DeadMinion] Minion Abusive Sergeant (2FA0890) 2/0 dies.
-[Msg_EndHeroPower] End of hero power effect
-[Act_MinionAttack] Attack with Minion Ironbeak Owl (2FA8B70) 2/-1
-[Msg_StartAttack] Minion Minion Ironbeak Owl (2FA8B70) 2/-1 attacks enemy Minion Dire Wolf Alpha (2FA0D50) 2/0
-[Msg_Damage] Minion Dire Wolf Alpha (2FA0D50) 2/0 takes 2 damage from Minion Ironbeak Owl (2FA8B70) 2/-1.
-[Msg_Status] Change of status for Minion Dire Wolf Alpha (2FA0D50) 2/0: {hp=0}
-[Msg_Damage] Minion Ironbeak Owl (2FA8B70) 2/-1 takes 2 damage from Minion Dire Wolf Alpha (2FA0D50) 2/0.
-[Msg_Status] Change of status for Minion Ironbeak Owl (2FA8B70) 2/-1: {hp=-1}
-[Msg_CheckDead] Minion Dire Wolf Alpha (2FA0D50) 2/0 asks for dead cleaning.
-[Msg_Status] Change of status for Minion Dire Wolf Alpha (2FA0D50) 2/0: {hp=0, max_hp=2, atq=2, max_atq=2, effects=['silence']}
-[Msg_DeadMinion] Minion Dire Wolf Alpha (2FA0D50) 2/0 dies.
-[Msg_CheckDead] Minion Ironbeak Owl (2FA8B70) 2/-1 asks for dead cleaning.
-[Msg_Status] Change of status for Minion Ironbeak Owl (2FA8B70) 2/-1: {hp=-1, max_hp=1, atq=2, max_atq=2, effects=['silence']}
-[Msg_DeadMinion] Minion Ironbeak Owl (2FA8B70) 2/-1 dies.
-[Msg_EndAttack] End of attack.
-[Act_MinionAttack] Attack with Minion Abusive Sergeant (2FA0C30) 2/-1
-[Msg_StartAttack] Minion Minion Abusive Sergeant (2FA0C30) 2/-1 attacks enemy Minion Abusive Sergeant (2FA8970) 2/-1
-[Msg_Damage] Minion Abusive Sergeant (2FA8970) 2/-1 takes 2 damage from Minion Abusive Sergeant (2FA0C30) 2/-1.
-[Msg_Status] Change of status for Minion Abusive Sergeant (2FA8970) 2/-1: {hp=-1}
-[Msg_Damage] Minion Abusive Sergeant (2FA0C30) 2/-1 takes 2 damage from Minion Abusive Sergeant (2FA8970) 2/-1.
-[Msg_Status] Change of status for Minion Abusive Sergeant (2FA0C30) 2/-1: {hp=-1}
-[Msg_CheckDead] Minion Abusive Sergeant (2FA8970) 2/-1 asks for dead cleaning.
-[Msg_Status] Change of status for Minion Abusive Sergeant (2FA0C30) 2/-1: {hp=-1, max_hp=1, atq=2, max_atq=2, effects=['silence']}
-[Msg_DeadMinion] Minion Abusive Sergeant (2FA0C30) 2/-1 dies.
-[Msg_Status] Change of status for Minion Abusive Sergeant (2FA8970) 2/-1: {hp=-1, max_hp=1, atq=2, max_atq=2, effects=['silence']}
-[Msg_DeadMinion] Minion Abusive Sergeant (2FA8970) 2/-1 dies.
-[Msg_CheckDead] Minion Abusive Sergeant (2FA0C30) 2/-1 asks for dead cleaning.
+[Msg_StartTurn] Start of turn for [IA (Anduin) 20HP] 
+[Msg_DrawCard] [IA (Anduin) 20HP] draw Faux Sort de dommage 4 (3): Deal 4 points of damage from the deck
+[Act_PlayMinionCard_BC] Card Sergent Grossier (1): 2/1 
+[Msg_PlayCard] [IA (Anduin) 20HP] plays Sergent Grossier (1): 2/1 
+[Msg_UseMana] Player [IA (Anduin) 20HP] loses 1 mana crystal
+[Msg_ThrowCard] Player [IA (Anduin) 20HP] loses Sergent Grossier (1): 2/1 
+[Msg_AddMinion] New Minion Abusive Sergeant (2EB9D90) 2/1 on the board for [IA (Anduin) 20HP]
+[Msg_MinionPopup] Minion Abusive Sergeant (2EB9D90) 2/1 pops up
+[Msg_BindEffect] Minion Abusive Sergeant (2EB9D90) 2/1 binds effect [buff +2/+0 (temporary)] to Minion Cairne (2EB9C50) 6/5.
+[Msg_Status] Change of status for Minion Cairne (2EB9C50) 6/5: {atq=6, max_atq=6}
+[Act_SingleSpellDamageCard] Card Faux Sort de dommage 4 (3): Deal 4 points of damage
+[Msg_PlayCard] [IA (Anduin) 20HP] plays Faux Sort de dommage 4 (3): Deal 4 points of damage
+[Msg_UseMana] Player [IA (Anduin) 20HP] loses 3 mana crystal
+[Msg_ThrowCard] Player [IA (Anduin) 20HP] loses Faux Sort de dommage 4 (3): Deal 4 points of damage
+[Msg_StartSpell] Player [IA (Anduin) 20HP] plays spell [Faux Sort de dommage 4 (3): Deal 4 points of damage]
+[Msg_SpellDamage] Minion Wisp (2EB98D0) 1/-3 takes 4 damage from [IA (Anduin) 20HP].
+[Msg_Status] Change of status for Minion Wisp (2EB98D0) 1/-3: {hp=-3}
+[Msg_CheckDead] Minion Wisp (2EB98D0) 1/-3 asks for dead cleaning.
+[Msg_Status] Change of status for Minion Wisp (2EB98D0) 1/-3: {hp=-3, max_hp=1, atq=1, max_atq=1, effects=['silence']}
+[Msg_DeadMinion] Minion Wisp (2EB98D0) 1/-3 dies.
+[Msg_EndSpell] End of spell.
+[Act_WeaponAttack] Attack with Weapon Fake Weapon 1 (2EB99D0) 1/1
+[Msg_Status] Change of status for Weapon Fake Weapon 1 (2EB99D0) 1/1: {hp=1}
+[Msg_StartAttack] Minion Weapon Fake Weapon 1 (2EB99D0) 1/1 attacks enemy Minion Sludge Belcher (2EB9B50) 3/4
+[Msg_Damage] Minion Sludge Belcher (2EB9B50) 3/4 takes 1 damage from Weapon Fake Weapon 1 (2EB99D0) 1/1.
+[Msg_Status] Change of status for Minion Sludge Belcher (2EB9B50) 3/4: {hp=4}
+[Msg_Damage] [IA (Anduin) 17HP] takes 3 damage from Minion Sludge Belcher (2EB9B50) 3/4.
+[Msg_Status] Change of status for [IA (Anduin) 17HP]: {hp=17}
 [Msg_EndAttack] End of attack.
 [Act_EndTurn] End turn
-[Msg_EndTurn] End of turn for [jerome (Jaina) 30HP]
-[Msg_StartTurn] Start of turn for [IA (Anduin) 6HP] 
-[Msg_DrawCard] [IA (Anduin) 6HP] draw Chouette bec-de-fer (2): 2/1  from the deck
-[Act_PlayMinionAndEffect] Card Sergent Grossier (1): 2/1 
-[Msg_PlayCard] [IA (Anduin) 6HP] plays Sergent Grossier (1): 2/1 
-[Msg_UseMana] Player [IA (Anduin) 6HP] loses 1 mana crystal
-[Msg_ThrowCard] Player [IA (Anduin) 6HP] loses Sergent Grossier (1): 2/1 
-[Msg_AddMinion] New Minion Abusive Sergeant (2FA8D50) 2/1 on the board for [IA (Anduin) 6HP]
-[Msg_MinionPopup] Minion Abusive Sergeant (2FA8D50) 2/1 pops up
-[Msg_TargetedEffect] Minion Dire Wolf Alpha (2FA8A10) 5/2 receives an effect [buff +2/+0 (temporary)] from Minion Abusive Sergeant (2FA8D50) 2/1.
-[Msg_Status] Change of status for Minion Dire Wolf Alpha (2FA8A10) 5/2: {atq=5, max_atq=5}
-[Act_PlayMinionCard] Card Loup alpha redoutable (2): 2/2 
-[Msg_PlayCard] [IA (Anduin) 6HP] plays Loup alpha redoutable (2): 2/2 
-[Msg_UseMana] Player [IA (Anduin) 6HP] loses 2 mana crystal
-[Msg_ThrowCard] Player [IA (Anduin) 6HP] loses Loup alpha redoutable (2): 2/2 
-[Msg_AddMinion] New Minion Dire Wolf Alpha (2FA8950) 2/2 on the board for [IA (Anduin) 6HP]
-[Msg_MinionPopup] Minion Dire Wolf Alpha (2FA8950) 2/2 pops up
-[Msg_Status] Change of status for Minion Abusive Sergeant (2FA8D50) 3/1: {atq=3, max_atq=3}
-[Act_EndTurn] End turn
-[Msg_EndTurn] End of turn for [IA (Anduin) 6HP]
-[Msg_Status] Change of status for Minion Dire Wolf Alpha (2FA8A10) 3/2: {atq=3, max_atq=3}
+[Msg_EndTurn] End of turn for [IA (Anduin) 17HP]
+[Msg_Status] Change of status for Minion Cairne (2EB9C50) 4/5: {atq=4, max_atq=4}
 [Msg_StartTurn] Start of turn for [jerome (Jaina) 30HP] 
 [Msg_DrawCard] [jerome (Jaina) 30HP] draw Sergent Grossier (1): 2/1  from the deck
-[Act_EndTurn] End turn
-[Msg_EndTurn] End of turn for [jerome (Jaina) 30HP]
-[Msg_StartTurn] Start of turn for [IA (Anduin) 6HP] 
-[Msg_DrawCard] [IA (Anduin) 6HP] draw Chouette bec-de-fer (2): 2/1  from the deck
-[Act_EndTurn] End turn
-[Msg_EndTurn] End of turn for [IA (Anduin) 6HP]
-[Msg_StartTurn] Start of turn for [jerome (Jaina) 30HP] 
-[Msg_DrawCard] [jerome (Jaina) 30HP] draw Chouette bec-de-fer (2): 2/1  from the deck
-[Act_EndTurn] End turn
-[Msg_EndTurn] End of turn for [jerome (Jaina) 30HP]
-[Msg_StartTurn] Start of turn for [IA (Anduin) 6HP] 
-[Msg_DrawCard] [IA (Anduin) 6HP] draw Chouette bec-de-fer (2): 2/1  from the deck
-[Act_PlayMinionAndEffect] Card Chouette bec-de-fer (2): 2/1 
-[Msg_PlayCard] [IA (Anduin) 6HP] plays Chouette bec-de-fer (2): 2/1 
-[Msg_UseMana] Player [IA (Anduin) 6HP] loses 2 mana crystal
-[Msg_ThrowCard] Player [IA (Anduin) 6HP] loses Chouette bec-de-fer (2): 2/1 
-[Msg_AddMinion] New Minion Ironbeak Owl (2FA87F0) 2/1 on the board for [IA (Anduin) 6HP]
-[Msg_MinionPopup] Minion Ironbeak Owl (2FA87F0) 2/1 pops up
-[Msg_TargetedEffect] Minion Abusive Sergeant (2FA0CB0) 3/1 receives an effect [silence] from Minion Ironbeak Owl (2FA87F0) 2/1.
-[Msg_Status] Change of status for Minion Abusive Sergeant (2FA0CB0) 3/1: {hp=1, max_hp=1, atq=3, max_atq=3, effects=['silence']}
-[Act_MinionAttack] Attack with Minion Abusive Sergeant (2FA8D50) 2/-2
-[Msg_StartAttack] Minion Minion Abusive Sergeant (2FA8D50) 2/-2 attacks enemy Minion Abusive Sergeant (2FA0CB0) 2/-2
-[Msg_Damage] Minion Abusive Sergeant (2FA0CB0) 2/-2 takes 3 damage from Minion Abusive Sergeant (2FA8D50) 2/-2.
-[Msg_Status] Change of status for Minion Abusive Sergeant (2FA0CB0) 2/-2: {hp=-2}
-[Msg_Damage] Minion Abusive Sergeant (2FA8D50) 2/-2 takes 3 damage from Minion Abusive Sergeant (2FA0CB0) 2/-2.
-[Msg_Status] Change of status for Minion Abusive Sergeant (2FA8D50) 2/-2: {hp=-2}
-[Msg_CheckDead] Minion Abusive Sergeant (2FA0CB0) 2/-2 asks for dead cleaning.
-[Msg_Status] Change of status for Minion Abusive Sergeant (2FA0CB0) 2/-2: {hp=-2, max_hp=1, atq=3, max_atq=3, effects=['silence']}
-[Msg_DeadMinion] Minion Abusive Sergeant (2FA0CB0) 2/-2 dies.
-[Msg_Status] Change of status for Minion Abusive Sergeant (2FA0CB0) 2/-2: {atq=2, max_atq=2}
-[Msg_Status] Change of status for Minion Dire Wolf Alpha (2FA09B0) 3/2: {atq=2, max_atq=2}
-[Msg_Status] Change of status for Minion Dire Wolf Alpha (2FA09B0) 3/2: {atq=3, max_atq=3}
-[Msg_Status] Change of status for Minion Abusive Sergeant (2FA8D50) 2/-2: {atq=2, max_atq=2}
-[Msg_Status] Change of status for Minion Ironbeak Owl (2FA87F0) 3/1: {atq=3, max_atq=3}
-[Msg_Status] Change of status for Minion Abusive Sergeant (2FA8D50) 2/-2: {hp=-2, max_hp=1, atq=3, max_atq=3, effects=['silence']}
-[Msg_DeadMinion] Minion Abusive Sergeant (2FA8D50) 2/-2 dies.
-[Msg_CheckDead] Minion Abusive Sergeant (2FA8D50) 2/-2 asks for dead cleaning.
+[Act_PlayMinionCard_BC] Card Sergent Grossier (1): 2/1 
+[Msg_PlayCard] [jerome (Jaina) 30HP] plays Sergent Grossier (1): 2/1 
+[Msg_UseMana] Player [jerome (Jaina) 30HP] loses 1 mana crystal
+[Msg_ThrowCard] Player [jerome (Jaina) 30HP] loses Sergent Grossier (1): 2/1 
+[Msg_AddMinion] New Minion Abusive Sergeant (2EB9930) 2/1 on the board for [jerome (Jaina) 30HP]
+[Msg_MinionPopup] Minion Abusive Sergeant (2EB9930) 2/1 pops up
+[Msg_BindEffect] Minion Abusive Sergeant (2EB9930) 2/1 binds effect [buff +2/+0 (temporary)] to Minion Cairne (2EB9C50) 6/5.
+[Msg_Status] Change of status for Minion Cairne (2EB9C50) 6/5: {atq=6, max_atq=6}
+[Act_MinionAttack] Attack with Minion Cairne (2EB9C50) 6/5
+[Msg_StartAttack] Minion Minion Cairne (2EB9C50) 6/5 attacks enemy [IA (Anduin) 11HP]
+[Msg_Damage] [IA (Anduin) 11HP] takes 6 damage from Minion Cairne (2EB9C50) 6/5.
+[Msg_Status] Change of status for [IA (Anduin) 11HP]: {hp=11}
 [Msg_EndAttack] End of attack.
-[Act_EndTurn] End turn
-[Msg_EndTurn] End of turn for [IA (Anduin) 6HP]
-[Msg_StartTurn] Start of turn for [jerome (Jaina) 30HP] 
-[Msg_DrawCard] [jerome (Jaina) 30HP] draw Loup alpha redoutable (2): 2/2  from the deck
-[Act_EndTurn] End turn
-[Msg_EndTurn] End of turn for [jerome (Jaina) 30HP]
-[Msg_StartTurn] Start of turn for [IA (Anduin) 6HP] 
-[Msg_DrawCard] [IA (Anduin) 6HP] draw Loup alpha redoutable (2): 2/2  from the deck
-[Act_PlayMinionCard] Card Loup alpha redoutable (2): 2/2 
-[Msg_PlayCard] [IA (Anduin) 6HP] plays Loup alpha redoutable (2): 2/2 
-[Msg_UseMana] Player [IA (Anduin) 6HP] loses 2 mana crystal
-[Msg_ThrowCard] Player [IA (Anduin) 6HP] loses Loup alpha redoutable (2): 2/2 
-[Msg_AddMinion] New Minion Dire Wolf Alpha (2FA8930) 3/2 on the board for [IA (Anduin) 6HP]
-[Msg_MinionPopup] Minion Dire Wolf Alpha (2FA8930) 3/2 pops up
-[Msg_Status] Change of status for Minion Ironbeak Owl (2FA87F0) 3/1: {atq=2, max_atq=2}
-[Msg_Status] Change of status for Minion Dire Wolf Alpha (2FA8930) 3/2: {atq=3, max_atq=3}
-[Msg_Status] Change of status for Minion Ironbeak Owl (2FA87F0) 3/1: {atq=3, max_atq=3}
-[Msg_Status] Change of status for Minion Dire Wolf Alpha (2FA8950) 3/2: {atq=3, max_atq=3}
-[Act_EndTurn] End turn
-[Msg_EndTurn] End of turn for [IA (Anduin) 6HP]
-[Msg_StartTurn] Start of turn for [jerome (Jaina) 30HP] 
-[Msg_DrawCard] [jerome (Jaina) 30HP] draw Chouette bec-de-fer (2): 2/1  from the deck
-[Act_EndTurn] End turn
-[Msg_EndTurn] End of turn for [jerome (Jaina) 30HP]
-[Msg_StartTurn] Start of turn for [IA (Anduin) 6HP] 
-[Msg_DrawCard] [IA (Anduin) 6HP] draw Sergent Grossier (1): 2/1  from the deck
-[Act_PlayMinionAndEffect] Card Chouette bec-de-fer (2): 2/1 
-[Msg_PlayCard] [IA (Anduin) 6HP] plays Chouette bec-de-fer (2): 2/1 
-[Msg_UseMana] Player [IA (Anduin) 6HP] loses 2 mana crystal
-[Msg_ThrowCard] Player [IA (Anduin) 6HP] loses Chouette bec-de-fer (2): 2/1 
-[Msg_AddMinion] New Minion Ironbeak Owl (2FA8F10) 3/1 on the board for [IA (Anduin) 6HP]
-[Msg_MinionPopup] Minion Ironbeak Owl (2FA8F10) 3/1 pops up
-[Msg_Status] Change of status for Minion Dire Wolf Alpha (2FA8950) 3/2: {atq=2, max_atq=2}
-[Msg_Status] Change of status for Minion Ironbeak Owl (2FA8F10) 3/1: {atq=3, max_atq=3}
-[Msg_Status] Change of status for Minion Dire Wolf Alpha (2FA8950) 3/2: {atq=3, max_atq=3}
-[Msg_TargetedEffect] Minion Ironbeak Owl (2FA87F0) 3/1 receives an effect [silence] from Minion Ironbeak Owl (2FA8F10) 3/1.
-[Msg_Status] Change of status for Minion Ironbeak Owl (2FA87F0) 3/1: {hp=1, max_hp=1, atq=3, max_atq=3, effects=['silence']}
-[Act_PlayMinionAndEffect] Card Chouette bec-de-fer (2): 2/1 
-[Msg_PlayCard] [IA (Anduin) 6HP] plays Chouette bec-de-fer (2): 2/1 
-[Msg_UseMana] Player [IA (Anduin) 6HP] loses 2 mana crystal
-[Msg_ThrowCard] Player [IA (Anduin) 6HP] loses Chouette bec-de-fer (2): 2/1 
-[Msg_AddMinion] New Minion Ironbeak Owl (2FA83F0) 4/1 on the board for [IA (Anduin) 6HP]
-[Msg_MinionPopup] Minion Ironbeak Owl (2FA83F0) 4/1 pops up
-[Msg_Status] Change of status for Minion Dire Wolf Alpha (2FA8930) 2/2: {atq=2, max_atq=2}
-[Msg_Status] Change of status for Minion Ironbeak Owl (2FA87F0) 3/1: {atq=2, max_atq=2}
-[Msg_Status] Change of status for Minion Ironbeak Owl (2FA87F0) 3/1: {atq=3, max_atq=3}
-[Msg_Status] Change of status for Minion Ironbeak Owl (2FA83F0) 4/1: {atq=3, max_atq=3}
-[Msg_Status] Change of status for Minion Ironbeak Owl (2FA8F10) 3/1: {atq=2, max_atq=2}
-[Msg_Status] Change of status for Minion Dire Wolf Alpha (2FA8950) 2/2: {atq=2, max_atq=2}
-[Msg_Status] Change of status for Minion Ironbeak Owl (2FA8F10) 3/1: {atq=3, max_atq=3}
-[Msg_Status] Change of status for Minion Ironbeak Owl (2FA83F0) 4/1: {atq=4, max_atq=4}
-[Msg_TargetedEffect] Minion Ironbeak Owl (2FA87F0) 3/1 receives an effect [silence] from Minion Ironbeak Owl (2FA83F0) 4/1.
-[Msg_Status] Change of status for Minion Ironbeak Owl (2FA87F0) 3/1: {hp=1, max_hp=1, atq=3, max_atq=3, effects=['silence']}
-[Act_MinionAttack] Attack with Minion Dire Wolf Alpha (2FA8950) 2/-1
-[Msg_StartAttack] Minion Minion Dire Wolf Alpha (2FA8950) 2/-1 attacks enemy Minion Dire Wolf Alpha (2FA8A10) 2/0
-[Msg_Damage] Minion Dire Wolf Alpha (2FA8A10) 2/0 takes 2 damage from Minion Dire Wolf Alpha (2FA8950) 2/-1.
-[Msg_Status] Change of status for Minion Dire Wolf Alpha (2FA8A10) 2/0: {hp=0}
-[Msg_Damage] Minion Dire Wolf Alpha (2FA8950) 2/-1 takes 3 damage from Minion Dire Wolf Alpha (2FA8A10) 2/0.
-[Msg_Status] Change of status for Minion Dire Wolf Alpha (2FA8950) 2/-1: {hp=-1}
-[Msg_CheckDead] Minion Dire Wolf Alpha (2FA8A10) 2/0 asks for dead cleaning.
-[Msg_Status] Change of status for Minion Dire Wolf Alpha (2FA09B0) 2/2: {atq=2, max_atq=2}
-[Msg_Status] Change of status for Minion Dire Wolf Alpha (2FA8A10) 2/0: {hp=0, max_hp=2, atq=3, max_atq=3, effects=['silence']}
-[Msg_DeadMinion] Minion Dire Wolf Alpha (2FA8A10) 2/0 dies.
-[Msg_Status] Change of status for Minion Dire Wolf Alpha (2FA8A10) 2/0: {atq=2, max_atq=2}
-[Msg_Status] Change of status for Minion Ironbeak Owl (2FA0C10) 3/1: {atq=2, max_atq=2}
-[Msg_Status] Change of status for Minion Ironbeak Owl (2FA0C10) 3/1: {atq=3, max_atq=3}
-[Msg_CheckDead] Minion Dire Wolf Alpha (2FA8950) 2/-1 asks for dead cleaning.
-[Msg_Status] Change of status for Minion Ironbeak Owl (2FA87F0) 2/1: {atq=2, max_atq=2}
-[Msg_Status] Change of status for Minion Ironbeak Owl (2FA83F0) 3/1: {atq=3, max_atq=3}
-[Msg_Status] Change of status for Minion Dire Wolf Alpha (2FA8950) 2/-1: {hp=-1, max_hp=2, atq=2, max_atq=2, effects=['silence']}
-[Msg_DeadMinion] Minion Dire Wolf Alpha (2FA8950) 2/-1 dies.
+[Act_MinionAttack] Attack with Minion Harvest Golem (2EB9BD0) 2/3
+[Msg_StartAttack] Minion Minion Harvest Golem (2EB9BD0) 2/3 attacks enemy [IA (Anduin) 9HP]
+[Msg_Damage] [IA (Anduin) 9HP] takes 2 damage from Minion Harvest Golem (2EB9BD0) 2/3.
+[Msg_Status] Change of status for [IA (Anduin) 9HP]: {hp=9}
 [Msg_EndAttack] End of attack.
-[Act_EndTurn] End turn
-[Msg_EndTurn] End of turn for [IA (Anduin) 6HP]
-[Msg_StartTurn] Start of turn for [jerome (Jaina) 30HP] 
-[Msg_DrawCard] [jerome (Jaina) 30HP] draw Loup alpha redoutable (2): 2/2  from the deck
-[Act_EndTurn] End turn
-[Msg_EndTurn] End of turn for [jerome (Jaina) 30HP]
-[Msg_StartTurn] Start of turn for [IA (Anduin) 6HP] 
-[Msg_DrawCard] [IA (Anduin) 6HP] draw Chouette bec-de-fer (2): 2/1  from the deck
-[Act_MinionAttack] Attack with Minion Ironbeak Owl (2FA8F10) 2/-2
-[Msg_StartAttack] Minion Minion Ironbeak Owl (2FA8F10) 2/-2 attacks enemy Minion Ironbeak Owl (2FA0C10) 2/-2
-[Msg_Damage] Minion Ironbeak Owl (2FA0C10) 2/-2 takes 3 damage from Minion Ironbeak Owl (2FA8F10) 2/-2.
-[Msg_Status] Change of status for Minion Ironbeak Owl (2FA0C10) 2/-2: {hp=-2}
-[Msg_Damage] Minion Ironbeak Owl (2FA8F10) 2/-2 takes 3 damage from Minion Ironbeak Owl (2FA0C10) 2/-2.
-[Msg_Status] Change of status for Minion Ironbeak Owl (2FA8F10) 2/-2: {hp=-2}
-[Msg_CheckDead] Minion Ironbeak Owl (2FA0C10) 2/-2 asks for dead cleaning.
-[Msg_Status] Change of status for Minion Ironbeak Owl (2FA0C10) 2/-2: {hp=-2, max_hp=1, atq=3, max_atq=3, effects=['silence']}
-[Msg_DeadMinion] Minion Ironbeak Owl (2FA0C10) 2/-2 dies.
-[Msg_Status] Change of status for Minion Ironbeak Owl (2FA0C10) 2/-2: {atq=2, max_atq=2}
-[Msg_Status] Change of status for Minion Ironbeak Owl (2FA8F10) 2/-2: {atq=2, max_atq=2}
-[Msg_Status] Change of status for Minion Ironbeak Owl (2FA83F0) 3/1: {atq=2, max_atq=2}
-[Msg_Status] Change of status for Minion Ironbeak Owl (2FA83F0) 3/1: {atq=3, max_atq=3}
-[Msg_Status] Change of status for Minion Ironbeak Owl (2FA8F10) 2/-2: {hp=-2, max_hp=1, atq=3, max_atq=3, effects=['silence']}
-[Msg_DeadMinion] Minion Ironbeak Owl (2FA8F10) 2/-2 dies.
-[Msg_CheckDead] Minion Ironbeak Owl (2FA8F10) 2/-2 asks for dead cleaning.
-[Msg_EndAttack] End of attack.
-[Act_MinionAttack] Attack with Minion Dire Wolf Alpha (2FA8930) 2/0
-[Msg_StartAttack] Minion Minion Dire Wolf Alpha (2FA8930) 2/0 attacks enemy Minion Dire Wolf Alpha (2FA09B0) 2/0
-[Msg_Damage] Minion Dire Wolf Alpha (2FA09B0) 2/0 takes 2 damage from Minion Dire Wolf Alpha (2FA8930) 2/0.
-[Msg_Status] Change of status for Minion Dire Wolf Alpha (2FA09B0) 2/0: {hp=0}
-[Msg_Damage] Minion Dire Wolf Alpha (2FA8930) 2/0 takes 2 damage from Minion Dire Wolf Alpha (2FA09B0) 2/0.
-[Msg_Status] Change of status for Minion Dire Wolf Alpha (2FA8930) 2/0: {hp=0}
-[Msg_CheckDead] Minion Dire Wolf Alpha (2FA09B0) 2/0 asks for dead cleaning.
-[Msg_Status] Change of status for Minion Dire Wolf Alpha (2FA09B0) 2/0: {hp=0, max_hp=2, atq=2, max_atq=2, effects=['silence']}
-[Msg_DeadMinion] Minion Dire Wolf Alpha (2FA09B0) 2/0 dies.
-[Msg_Status] Change of status for Minion Ironbeak Owl (2FA83F0) 2/1: {atq=2, max_atq=2}
-[Msg_Status] Change of status for Minion Dire Wolf Alpha (2FA8930) 2/0: {hp=0, max_hp=2, atq=2, max_atq=2, effects=['silence']}
-[Msg_DeadMinion] Minion Dire Wolf Alpha (2FA8930) 2/0 dies.
-[Msg_CheckDead] Minion Dire Wolf Alpha (2FA8930) 2/0 asks for dead cleaning.
-[Msg_EndAttack] End of attack.
-[Act_PlayMinionAndEffect] Card Sergent Grossier (1): 2/1 
-[Msg_PlayCard] [IA (Anduin) 6HP] plays Sergent Grossier (1): 2/1 
-[Msg_UseMana] Player [IA (Anduin) 6HP] loses 1 mana crystal
-[Msg_ThrowCard] Player [IA (Anduin) 6HP] loses Sergent Grossier (1): 2/1 
-[Msg_AddMinion] New Minion Abusive Sergeant (2FA8F70) 2/1 on the board for [IA (Anduin) 6HP]
-[Msg_MinionPopup] Minion Abusive Sergeant (2FA8F70) 2/1 pops up
-[Msg_TargetedEffect] Minion Ironbeak Owl (2FA87F0) 4/1 receives an effect [buff +2/+0 (temporary)] from Minion Abusive Sergeant (2FA8F70) 2/1.
-[Msg_Status] Change of status for Minion Ironbeak Owl (2FA87F0) 4/1: {atq=4, max_atq=4}
-[Act_HeroPower] Hero Power (2): heals a character by 2HP
-[Msg_UseMana] Player [IA (Anduin) 6HP] loses 2 mana crystal
-[Msg_StartHeroPower] [[IA (Anduin) 6HP]] uses its hero power
-[Msg_HeroHeal] [IA (Anduin) 6HP] heals Minion Ironbeak Owl (2FA83F0) 2/1 by 2HP.
-[Msg_Status] Change of status for Minion Ironbeak Owl (2FA83F0) 2/1: {hp=1}
-[Msg_EndHeroPower] End of hero power effect
-[Act_PlayMinionAndEffect] Card Chouette bec-de-fer (2): 2/1 
-[Msg_PlayCard] [IA (Anduin) 6HP] plays Chouette bec-de-fer (2): 2/1 
-[Msg_UseMana] Player [IA (Anduin) 6HP] loses 2 mana crystal
-[Msg_ThrowCard] Player [IA (Anduin) 6HP] loses Chouette bec-de-fer (2): 2/1 
-[Msg_AddMinion] New Minion Ironbeak Owl (2FA8D90) 2/1 on the board for [IA (Anduin) 6HP]
-[Msg_MinionPopup] Minion Ironbeak Owl (2FA8D90) 2/1 pops up
-[Msg_TargetedEffect] Minion Ironbeak Owl (2FA87F0) 2/1 receives an effect [silence] from Minion Ironbeak Owl (2FA8D90) 2/1.
-[Msg_Status] Change of status for Minion Ironbeak Owl (2FA87F0) 2/1: {atq=2, max_atq=2}
-[Msg_Status] Change of status for Minion Ironbeak Owl (2FA87F0) 2/1: {hp=1, max_hp=1, atq=2, max_atq=2, effects=['silence']}
-[Act_EndTurn] End turn
-[Msg_EndTurn] End of turn for [IA (Anduin) 6HP]
-[Msg_StartTurn] Start of turn for [jerome (Jaina) 30HP] 
-[Msg_DrawCard] [jerome (Jaina) 30HP] draw Loup alpha redoutable (2): 2/2  from the deck
 [Act_HeroPower] Hero Power (2): deals 1 damage to a character
 [Msg_UseMana] Player [jerome (Jaina) 30HP] loses 2 mana crystal
 [Msg_StartHeroPower] [[jerome (Jaina) 30HP]] uses its hero power
-[Msg_HeroDamage] Minion Abusive Sergeant (2FA8F70) 2/0 takes 1 damage from [jerome (Jaina) 30HP].
-[Msg_Status] Change of status for Minion Abusive Sergeant (2FA8F70) 2/0: {hp=0}
-[Msg_CheckDead] Minion Abusive Sergeant (2FA8F70) 2/0 asks for dead cleaning.
-[Msg_Status] Change of status for Minion Abusive Sergeant (2FA8F70) 2/0: {hp=0, max_hp=1, atq=2, max_atq=2, effects=['silence']}
-[Msg_DeadMinion] Minion Abusive Sergeant (2FA8F70) 2/0 dies.
+[Msg_HeroDamage] [IA (Anduin) 8HP] takes 1 damage from [jerome (Jaina) 30HP].
+[Msg_Status] Change of status for [IA (Anduin) 8HP]: {hp=8}
 [Msg_EndHeroPower] End of hero power effect
+[Act_MinionAttack] Attack with Minion Sludge Belcher (2EB9B50) 3/4
+[Msg_StartAttack] Minion Minion Sludge Belcher (2EB9B50) 3/4 attacks enemy [IA (Anduin) 5HP]
+[Msg_Damage] [IA (Anduin) 5HP] takes 3 damage from Minion Sludge Belcher (2EB9B50) 3/4.
+[Msg_Status] Change of status for [IA (Anduin) 5HP]: {hp=5}
+[Msg_EndAttack] End of attack.
 [Act_EndTurn] End turn
 [Msg_EndTurn] End of turn for [jerome (Jaina) 30HP]
-[Msg_StartTurn] Start of turn for [IA (Anduin) 6HP] 
-[Msg_DrawCard] [IA (Anduin) 6HP] draw Loup alpha redoutable (2): 2/2  from the deck
-[Act_MinionAttack] Attack with Minion Ironbeak Owl (2FA87F0) 2/1
-[Msg_StartAttack] Minion Minion Ironbeak Owl (2FA87F0) 2/1 attacks enemy [jerome (Jaina) 28HP]
-[Msg_Damage] [jerome (Jaina) 28HP] takes 2 damage from Minion Ironbeak Owl (2FA87F0) 2/1.
-[Msg_Status] Change of status for [jerome (Jaina) 28HP]: {hp=28}
-[Msg_EndAttack] End of attack.
-[Act_MinionAttack] Attack with Minion Ironbeak Owl (2FA83F0) 2/1
-[Msg_StartAttack] Minion Minion Ironbeak Owl (2FA83F0) 2/1 attacks enemy [jerome (Jaina) 26HP]
-[Msg_Damage] [jerome (Jaina) 26HP] takes 2 damage from Minion Ironbeak Owl (2FA83F0) 2/1.
-[Msg_Status] Change of status for [jerome (Jaina) 26HP]: {hp=26}
-[Msg_EndAttack] End of attack.
-[Act_HeroPower] Hero Power (2): heals a character by 2HP
-[Msg_UseMana] Player [IA (Anduin) 6HP] loses 2 mana crystal
-[Msg_StartHeroPower] [[IA (Anduin) 6HP]] uses its hero power
-[Msg_HeroHeal] [IA (Anduin) 6HP] heals Minion Ironbeak Owl (2FA8D90) 2/1 by 2HP.
-[Msg_Status] Change of status for Minion Ironbeak Owl (2FA8D90) 2/1: {hp=1}
-[Msg_EndHeroPower] End of hero power effect
+[Msg_Status] Change of status for Minion Cairne (2EB9C50) 4/5: {atq=4, max_atq=4}
+[Msg_StartTurn] Start of turn for [IA (Anduin) 5HP] 
+[Msg_DrawCard] [IA (Anduin) 5HP] draw Soldat de Comte de l'Or (1): 1/2 Taunt from the deck
 [Act_EndTurn] End turn
-[Msg_EndTurn] End of turn for [IA (Anduin) 6HP]
-[Msg_StartTurn] Start of turn for [jerome (Jaina) 26HP] 
-[Msg_DrawCard] [jerome (Jaina) 26HP] draw Sergent Grossier (1): 2/1  from the deck
-[Act_HeroPower] Hero Power (2): deals 1 damage to a character
-[Msg_UseMana] Player [jerome (Jaina) 26HP] loses 2 mana crystal
-[Msg_StartHeroPower] [[jerome (Jaina) 26HP]] uses its hero power
-[Msg_HeroDamage] Minion Ironbeak Owl (2FA87F0) 2/0 takes 1 damage from [jerome (Jaina) 26HP].
-[Msg_Status] Change of status for Minion Ironbeak Owl (2FA87F0) 2/0: {hp=0}
-[Msg_CheckDead] Minion Ironbeak Owl (2FA87F0) 2/0 asks for dead cleaning.
-[Msg_Status] Change of status for Minion Ironbeak Owl (2FA87F0) 2/0: {hp=0, max_hp=1, atq=2, max_atq=2, effects=['silence']}
-[Msg_DeadMinion] Minion Ironbeak Owl (2FA87F0) 2/0 dies.
-[Msg_EndHeroPower] End of hero power effect
+[Msg_EndTurn] End of turn for [IA (Anduin) 5HP]
+[Msg_StartTurn] Start of turn for [jerome (Jaina) 30HP] 
+[Msg_DrawCard] [jerome (Jaina) 30HP] draw Faux Sort de dommage 1 (0): Deal 1 points of damage from the deck
 [Act_EndTurn] End turn
-[Msg_EndTurn] End of turn for [jerome (Jaina) 26HP]
-[Msg_StartTurn] Start of turn for [IA (Anduin) 6HP] 
-[Msg_DrawCard] [IA (Anduin) 6HP] draw Loup alpha redoutable (2): 2/2  from the deck
-[Act_PlayMinionCard] Card Loup alpha redoutable (2): 2/2 
-[Msg_PlayCard] [IA (Anduin) 6HP] plays Loup alpha redoutable (2): 2/2 
-[Msg_UseMana] Player [IA (Anduin) 6HP] loses 2 mana crystal
-[Msg_ThrowCard] Player [IA (Anduin) 6HP] loses Loup alpha redoutable (2): 2/2 
-[Msg_AddMinion] New Minion Dire Wolf Alpha (2FA8B50) 2/2 on the board for [IA (Anduin) 6HP]
-[Msg_MinionPopup] Minion Dire Wolf Alpha (2FA8B50) 2/2 pops up
-[Msg_Status] Change of status for Minion Ironbeak Owl (2FA83F0) 3/1: {atq=3, max_atq=3}
-[Act_MinionAttack] Attack with Minion Ironbeak Owl (2FA8D90) 2/1
-[Msg_StartAttack] Minion Minion Ironbeak Owl (2FA8D90) 2/1 attacks enemy [jerome (Jaina) 24HP]
-[Msg_Damage] [jerome (Jaina) 24HP] takes 2 damage from Minion Ironbeak Owl (2FA8D90) 2/1.
-[Msg_Status] Change of status for [jerome (Jaina) 24HP]: {hp=24}
-[Msg_EndAttack] End of attack.
-[Act_MinionAttack] Attack with Minion Ironbeak Owl (2FA83F0) 3/1
-[Msg_StartAttack] Minion Minion Ironbeak Owl (2FA83F0) 3/1 attacks enemy [jerome (Jaina) 21HP]
-[Msg_Damage] [jerome (Jaina) 21HP] takes 3 damage from Minion Ironbeak Owl (2FA83F0) 3/1.
-[Msg_Status] Change of status for [jerome (Jaina) 21HP]: {hp=21}
-[Msg_EndAttack] End of attack.
+[Msg_EndTurn] End of turn for [jerome (Jaina) 30HP]
+[Msg_StartTurn] Start of turn for [IA (Anduin) 5HP] 
+[Msg_DrawCard] [IA (Anduin) 5HP] draw Defenseur d'Argus (4): 2/3  from the deck
+[Act_SingleSpellDamageCard] Card Faux Sort de dommage 2 (1): Deal 2 points of damage
+[Msg_PlayCard] [IA (Anduin) 5HP] plays Faux Sort de dommage 2 (1): Deal 2 points of damage
+[Msg_UseMana] Player [IA (Anduin) 5HP] loses 1 mana crystal
+[Msg_ThrowCard] Player [IA (Anduin) 5HP] loses Faux Sort de dommage 2 (1): Deal 2 points of damage
+[Msg_StartSpell] Player [IA (Anduin) 5HP] plays spell [Faux Sort de dommage 2 (1): Deal 2 points of damage]
+[Msg_SpellDamage] Minion Harvest Golem (2EB9BD0) 2/1 takes 2 damage from [IA (Anduin) 5HP].
+[Msg_Status] Change of status for Minion Harvest Golem (2EB9BD0) 2/1: {hp=1}
+[Msg_EndSpell] End of spell.
 [Act_EndTurn] End turn
-[Msg_EndTurn] End of turn for [IA (Anduin) 6HP]
-[Msg_StartTurn] Start of turn for [jerome (Jaina) 21HP] 
-[Msg_DrawCard] [jerome (Jaina) 21HP] draw Chouette bec-de-fer (2): 2/1  from the deck
-[Act_HeroPower] Hero Power (2): deals 1 damage to a character
-[Msg_UseMana] Player [jerome (Jaina) 21HP] loses 2 mana crystal
-[Msg_StartHeroPower] [[jerome (Jaina) 21HP]] uses its hero power
-[Msg_HeroDamage] Minion Ironbeak Owl (2FA8D90) 2/0 takes 1 damage from [jerome (Jaina) 21HP].
-[Msg_Status] Change of status for Minion Ironbeak Owl (2FA8D90) 2/0: {hp=0}
-[Msg_CheckDead] Minion Ironbeak Owl (2FA8D90) 2/0 asks for dead cleaning.
-[Msg_Status] Change of status for Minion Ironbeak Owl (2FA8D90) 2/0: {hp=0, max_hp=1, atq=2, max_atq=2, effects=['silence']}
-[Msg_DeadMinion] Minion Ironbeak Owl (2FA8D90) 2/0 dies.
-[Msg_EndHeroPower] End of hero power effect
-[Act_PlayMinionCard] Card Loup alpha redoutable (2): 2/2 
-[Msg_PlayCard] [jerome (Jaina) 21HP] plays Loup alpha redoutable (2): 2/2 
-[Msg_UseMana] Player [jerome (Jaina) 21HP] loses 2 mana crystal
-[Msg_ThrowCard] Player [jerome (Jaina) 21HP] loses Loup alpha redoutable (2): 2/2 
-[Msg_AddMinion] New Minion Dire Wolf Alpha (2FA8FB0) 2/2 on the board for [jerome (Jaina) 21HP]
-[Msg_MinionPopup] Minion Dire Wolf Alpha (2FA8FB0) 2/2 pops up
-[Act_PlayMinionCard] Card Loup alpha redoutable (2): 2/2 
-[Msg_PlayCard] [jerome (Jaina) 21HP] plays Loup alpha redoutable (2): 2/2 
-[Msg_UseMana] Player [jerome (Jaina) 21HP] loses 2 mana crystal
-[Msg_ThrowCard] Player [jerome (Jaina) 21HP] loses Loup alpha redoutable (2): 2/2 
-[Msg_AddMinion] New Minion Dire Wolf Alpha (2FA8C90) 3/2 on the board for [jerome (Jaina) 21HP]
-[Msg_MinionPopup] Minion Dire Wolf Alpha (2FA8C90) 3/2 pops up
-[Msg_Status] Change of status for Minion Dire Wolf Alpha (2FA8C90) 3/2: {atq=3, max_atq=3}
-[Msg_Status] Change of status for Minion Dire Wolf Alpha (2FA8FB0) 3/2: {atq=3, max_atq=3}
-[Act_PlayMinionCard] Card Loup alpha redoutable (2): 2/2 
-[Msg_PlayCard] [jerome (Jaina) 21HP] plays Loup alpha redoutable (2): 2/2 
-[Msg_UseMana] Player [jerome (Jaina) 21HP] loses 2 mana crystal
-[Msg_ThrowCard] Player [jerome (Jaina) 21HP] loses Loup alpha redoutable (2): 2/2 
-[Msg_AddMinion] New Minion Dire Wolf Alpha (2FA8E50) 3/2 on the board for [jerome (Jaina) 21HP]
-[Msg_MinionPopup] Minion Dire Wolf Alpha (2FA8E50) 3/2 pops up
-[Msg_Status] Change of status for Minion Dire Wolf Alpha (2FA8FB0) 3/2: {atq=2, max_atq=2}
-[Msg_Status] Change of status for Minion Dire Wolf Alpha (2FA8FB0) 3/2: {atq=3, max_atq=3}
-[Msg_Status] Change of status for Minion Dire Wolf Alpha (2FA8E50) 3/2: {atq=3, max_atq=3}
-[Msg_Status] Change of status for Minion Dire Wolf Alpha (2FA8C90) 4/2: {atq=4, max_atq=4}
-[Act_PlayMinionAndEffect] Card Chouette bec-de-fer (2): 2/1 
-[Msg_PlayCard] [jerome (Jaina) 21HP] plays Chouette bec-de-fer (2): 2/1 
-[Msg_UseMana] Player [jerome (Jaina) 21HP] loses 2 mana crystal
-[Msg_ThrowCard] Player [jerome (Jaina) 21HP] loses Chouette bec-de-fer (2): 2/1 
-[Msg_AddMinion] New Minion Ironbeak Owl (2FA8D70) 3/1 on the board for [jerome (Jaina) 21HP]
-[Msg_MinionPopup] Minion Ironbeak Owl (2FA8D70) 3/1 pops up
-[Msg_Status] Change of status for Minion Dire Wolf Alpha (2FA8C90) 4/2: {atq=3, max_atq=3}
-[Msg_Status] Change of status for Minion Dire Wolf Alpha (2FA8C90) 4/2: {atq=4, max_atq=4}
-[Msg_Status] Change of status for Minion Ironbeak Owl (2FA8D70) 3/1: {atq=3, max_atq=3}
-[Msg_TargetedEffect] Minion Dire Wolf Alpha (2FA8B50) 2/2 receives an effect [silence] from Minion Ironbeak Owl (2FA8D70) 3/1.
-[Msg_Status] Change of status for Minion Ironbeak Owl (2FA83F0) 2/1: {atq=2, max_atq=2}
-[Msg_Status] Change of status for Minion Dire Wolf Alpha (2FA8B50) 2/2: {hp=2, max_hp=2, atq=2, max_atq=2, effects=['silence']}
+[Msg_EndTurn] End of turn for [IA (Anduin) 5HP]
+[Msg_StartTurn] Start of turn for [jerome (Jaina) 30HP] 
+[Msg_DrawCard] [jerome (Jaina) 30HP] draw Faux Sort de dommage 3 (2): Deal 3 points of damage from the deck
 [Act_EndTurn] End turn
-[Msg_EndTurn] End of turn for [jerome (Jaina) 21HP]
-[Msg_StartTurn] Start of turn for [IA (Anduin) 6HP] 
-[Msg_DrawCard] [IA (Anduin) 6HP] draw Sergent Grossier (1): 2/1  from the deck
-[Act_PlayMinionAndEffect] Card Sergent Grossier (1): 2/1 
-[Msg_PlayCard] [IA (Anduin) 6HP] plays Sergent Grossier (1): 2/1 
-[Msg_UseMana] Player [IA (Anduin) 6HP] loses 1 mana crystal
-[Msg_ThrowCard] Player [IA (Anduin) 6HP] loses Sergent Grossier (1): 2/1 
-[Msg_AddMinion] New Minion Abusive Sergeant (2FA8C10) 2/1 on the board for [IA (Anduin) 6HP]
-[Msg_MinionPopup] Minion Abusive Sergeant (2FA8C10) 2/1 pops up
-[Msg_TargetedEffect] Minion Dire Wolf Alpha (2FA8E50) 5/2 receives an effect [buff +2/+0 (temporary)] from Minion Abusive Sergeant (2FA8C10) 2/1.
-[Msg_Status] Change of status for Minion Dire Wolf Alpha (2FA8E50) 5/2: {atq=5, max_atq=5}
-[Act_PlayMinionCard] Card Loup alpha redoutable (2): 2/2 
-[Msg_PlayCard] [IA (Anduin) 6HP] plays Loup alpha redoutable (2): 2/2 
-[Msg_UseMana] Player [IA (Anduin) 6HP] loses 2 mana crystal
-[Msg_ThrowCard] Player [IA (Anduin) 6HP] loses Loup alpha redoutable (2): 2/2 
-[Msg_AddMinion] New Minion Dire Wolf Alpha (2FA8A70) 2/2 on the board for [IA (Anduin) 6HP]
-[Msg_MinionPopup] Minion Dire Wolf Alpha (2FA8A70) 2/2 pops up
-[Msg_Status] Change of status for Minion Ironbeak Owl (2FA83F0) 3/1: {atq=3, max_atq=3}
-[Act_MinionAttack] Attack with Minion Ironbeak Owl (2FA83F0) 2/-2
-[Msg_StartAttack] Minion Minion Ironbeak Owl (2FA83F0) 2/-2 attacks enemy Minion Ironbeak Owl (2FA8D70) 2/-2
-[Msg_Damage] Minion Ironbeak Owl (2FA8D70) 2/-2 takes 3 damage from Minion Ironbeak Owl (2FA83F0) 2/-2.
-[Msg_Status] Change of status for Minion Ironbeak Owl (2FA8D70) 2/-2: {hp=-2}
-[Msg_Damage] Minion Ironbeak Owl (2FA83F0) 2/-2 takes 3 damage from Minion Ironbeak Owl (2FA8D70) 2/-2.
-[Msg_Status] Change of status for Minion Ironbeak Owl (2FA83F0) 2/-2: {hp=-2}
-[Msg_CheckDead] Minion Ironbeak Owl (2FA8D70) 2/-2 asks for dead cleaning.
-[Msg_Status] Change of status for Minion Ironbeak Owl (2FA83F0) 2/-2: {hp=-2, max_hp=1, atq=3, max_atq=3, effects=['silence']}
-[Msg_DeadMinion] Minion Ironbeak Owl (2FA83F0) 2/-2 dies.
-[Msg_Status] Change of status for Minion Dire Wolf Alpha (2FA8C90) 4/2: {atq=3, max_atq=3}
-[Msg_Status] Change of status for Minion Ironbeak Owl (2FA8D70) 2/-2: {atq=2, max_atq=2}
-[Msg_Status] Change of status for Minion Dire Wolf Alpha (2FA8C90) 4/2: {atq=4, max_atq=4}
-[Msg_Status] Change of status for Minion Ironbeak Owl (2FA83F0) 2/-2: {atq=2, max_atq=2}
-[Msg_Status] Change of status for Minion Abusive Sergeant (2FA8C10) 3/1: {atq=3, max_atq=3}
-[Msg_Status] Change of status for Minion Ironbeak Owl (2FA8D70) 2/-2: {hp=-2, max_hp=1, atq=3, max_atq=3, effects=['silence']}
-[Msg_DeadMinion] Minion Ironbeak Owl (2FA8D70) 2/-2 dies.
-[Msg_CheckDead] Minion Ironbeak Owl (2FA83F0) 2/-2 asks for dead cleaning.
+[Msg_EndTurn] End of turn for [jerome (Jaina) 30HP]
+[Msg_StartTurn] Start of turn for [IA (Anduin) 5HP] 
+[Msg_DrawCard] [IA (Anduin) 5HP] draw Yeti Noroit (4): 4/5  from the deck
+[Act_WeaponAttack] Attack with Weapon Fake Weapon 1 (2EB99D0) 1/0
+[Msg_Status] Change of status for Weapon Fake Weapon 1 (2EB99D0) 1/0: {hp=0}
+[Msg_StartAttack] Minion Weapon Fake Weapon 1 (2EB99D0) 1/0 attacks enemy Minion Sludge Belcher (2EB9B50) 3/3
+[Msg_Damage] Minion Sludge Belcher (2EB9B50) 3/3 takes 1 damage from Weapon Fake Weapon 1 (2EB99D0) 1/0.
+[Msg_Status] Change of status for Minion Sludge Belcher (2EB9B50) 3/3: {hp=3}
+[Msg_Damage] [IA (Anduin) 2HP] takes 3 damage from Minion Sludge Belcher (2EB9B50) 3/3.
+[Msg_Status] Change of status for [IA (Anduin) 2HP]: {hp=2}
+[Msg_CheckDead] Weapon Fake Weapon 1 (2EB99D0) 1/0 asks for dead cleaning.
+[Msg_Status] Change of status for Weapon Fake Weapon 1 (2EB99D0) 1/0: {hp=0, max_hp=2, atq=1, max_atq=1, effects=['silence']}
+[Msg_DeadWeapon] Weapon Fake Weapon 1 (2EB99D0) 1/0 dies.
 [Msg_EndAttack] End of attack.
-[Act_MinionAttack] Attack with Minion Dire Wolf Alpha (2FA8B50) 2/-3
-[Msg_StartAttack] Minion Minion Dire Wolf Alpha (2FA8B50) 2/-3 attacks enemy Minion Dire Wolf Alpha (2FA8E50) 2/0
-[Msg_Damage] Minion Dire Wolf Alpha (2FA8E50) 2/0 takes 2 damage from Minion Dire Wolf Alpha (2FA8B50) 2/-3.
-[Msg_Status] Change of status for Minion Dire Wolf Alpha (2FA8E50) 2/0: {hp=0}
-[Msg_Damage] Minion Dire Wolf Alpha (2FA8B50) 2/-3 takes 5 damage from Minion Dire Wolf Alpha (2FA8E50) 2/0.
-[Msg_Status] Change of status for Minion Dire Wolf Alpha (2FA8B50) 2/-3: {hp=-3}
-[Msg_CheckDead] Minion Dire Wolf Alpha (2FA8E50) 2/0 asks for dead cleaning.
-[Msg_Status] Change of status for Minion Dire Wolf Alpha (2FA8B50) 2/-3: {hp=-3, max_hp=2, atq=2, max_atq=2, effects=['silence']}
-[Msg_DeadMinion] Minion Dire Wolf Alpha (2FA8B50) 2/-3 dies.
-[Msg_Status] Change of status for Minion Dire Wolf Alpha (2FA8FB0) 3/2: {atq=2, max_atq=2}
-[Msg_Status] Change of status for Minion Dire Wolf Alpha (2FA8E50) 2/0: {atq=2, max_atq=2}
-[Msg_Status] Change of status for Minion Dire Wolf Alpha (2FA8FB0) 3/2: {atq=3, max_atq=3}
-[Msg_Status] Change of status for Minion Dire Wolf Alpha (2FA8E50) 2/0: {atq=3, max_atq=3}
-[Msg_Status] Change of status for Minion Dire Wolf Alpha (2FA8C90) 3/2: {atq=3, max_atq=3}
-[Msg_Status] Change of status for Minion Dire Wolf Alpha (2FA8E50) 2/0: {hp=0, max_hp=2, atq=3, max_atq=3, effects=['silence']}
-[Msg_DeadMinion] Minion Dire Wolf Alpha (2FA8E50) 2/0 dies.
-[Msg_CheckDead] Minion Dire Wolf Alpha (2FA8B50) 2/-3 asks for dead cleaning.
+[Act_PlayMinionCard_BC] Card Defenseur d'Argus (4): 2/3 
+[Msg_PlayCard] [IA (Anduin) 2HP] plays Defenseur d'Argus (4): 2/3 
+[Msg_UseMana] Player [IA (Anduin) 2HP] loses 4 mana crystal
+[Msg_ThrowCard] Player [IA (Anduin) 2HP] loses Defenseur d'Argus (4): 2/3 
+[Msg_AddMinion] New Minion Defender of Argus (2EBF6D0) 2/3 on the board for [IA (Anduin) 2HP]
+[Msg_MinionPopup] Minion Defender of Argus (2EBF6D0) 2/3 pops up
+[Msg_BindEffect] Minion Defender of Argus (2EBF6D0) 2/3 binds effect [buff +1/+1] to Minion Abusive Sergeant (2EB9D90) 3/2.
+[Msg_Status] Change of status for Minion Abusive Sergeant (2EB9D90) 3/2: {hp=2, max_hp=2}
+[Msg_Status] Change of status for Minion Abusive Sergeant (2EB9D90) 3/2: {atq=3, max_atq=3}
+[Msg_Status] Change of status for Minion Abusive Sergeant (2EB9D90) 3/2: {effects=[<effects.Eff_BuffMinion object at 0x02EBFAB0>, 'taunt']}
+[Act_PlaySpellCard] Card  (0): Gain one mana crystal this turn only
+[Msg_PlayCard] [IA (Anduin) 2HP] plays  (0): Gain one mana crystal this turn only
+[Msg_UseMana] Player [IA (Anduin) 2HP] loses 0 mana crystal
+[Msg_ThrowCard] Player [IA (Anduin) 2HP] loses  (0): Gain one mana crystal this turn only
+[Msg_StartSpell] Player [IA (Anduin) 2HP] plays spell [ (0): Gain one mana crystal this turn only]
+[Msg_GainMana] Player [IA (Anduin) 2HP] gain 1 mana crystal
+[Msg_EndSpell] End of spell.
+[Act_MinionAttack] Attack with Minion Abusive Sergeant (2EB9D90) 2/-1
+[Msg_StartAttack] Minion Minion Abusive Sergeant (2EB9D90) 2/-1 attacks enemy Minion Sludge Belcher (2EB9B50) 3/0
+[Msg_Damage] Minion Sludge Belcher (2EB9B50) 3/0 takes 3 damage from Minion Abusive Sergeant (2EB9D90) 2/-1.
+[Msg_Status] Change of status for Minion Sludge Belcher (2EB9B50) 3/0: {hp=0}
+[Msg_Damage] Minion Abusive Sergeant (2EB9D90) 2/-1 takes 3 damage from Minion Sludge Belcher (2EB9B50) 3/0.
+[Msg_Status] Change of status for Minion Abusive Sergeant (2EB9D90) 2/-1: {hp=-1}
+[Msg_CheckDead] Minion Sludge Belcher (2EB9B50) 3/0 asks for dead cleaning.
+[Msg_Status] Change of status for Minion Sludge Belcher (2EB9B50) 3/0: {hp=0, max_hp=5, atq=3, max_atq=3, effects=['silence']}
+[Msg_DeadMinion] Minion Sludge Belcher (2EB9B50) 3/0 dies.
+[Msg_Status] Change of status for Minion Abusive Sergeant (2EB9D90) 2/-1: {hp=-1, max_hp=1}
+[Msg_Status] Change of status for Minion Abusive Sergeant (2EB9D90) 2/-1: {atq=2, max_atq=2}
+[Msg_Status] Change of status for Minion Abusive Sergeant (2EB9D90) 2/-1: {hp=-1, max_hp=1, atq=2, max_atq=2, effects=['silence']}
+[Msg_DeadMinion] Minion Abusive Sergeant (2EB9D90) 2/-1 dies.
+[Msg_CheckDead] Minion Abusive Sergeant (2EB9D90) 2/-1 asks for dead cleaning.
+[Msg_DeathRattle] Death rattle casted by Minion Sludge Belcher (2EB9B50) 3/0: New Minion Slime (2833310) 1/2 on the board for [jerome (Jaina) 30HP] (immediate)
+[Msg_AddMinion] New Minion Slime (2833310) 1/2 on the board for [jerome (Jaina) 30HP]
+[Msg_MinionPopup] Minion Slime (2833310) 1/2 pops up
+[Msg_CheckDead] Minion Abusive Sergeant (2EB9D90) 2/-1 asks for dead cleaning.
 [Msg_EndAttack] End of attack.
-[Act_HeroPower] Hero Power (2): heals a character by 2HP
-[Msg_UseMana] Player [IA (Anduin) 6HP] loses 2 mana crystal
-[Msg_StartHeroPower] [[IA (Anduin) 6HP]] uses its hero power
-[Msg_HeroHeal] [IA (Anduin) 6HP] heals Minion Dire Wolf Alpha (2FA8C90) 3/2 by 2HP.
-[Msg_Status] Change of status for Minion Dire Wolf Alpha (2FA8C90) 3/2: {hp=2}
-[Msg_EndHeroPower] End of hero power effect
+[Act_PlayMinionCard] Card Soldat de Comte de l'Or (1): 1/2 Taunt
+[Msg_PlayCard] [IA (Anduin) 2HP] plays Soldat de Comte de l'Or (1): 1/2 Taunt
+[Msg_UseMana] Player [IA (Anduin) 2HP] loses 1 mana crystal
+[Msg_ThrowCard] Player [IA (Anduin) 2HP] loses Soldat de Comte de l'Or (1): 1/2 Taunt
+[Msg_AddMinion] New Minion Goldshire Footman (2EB9790) 1/2 on the board for [IA (Anduin) 2HP]
+[Msg_MinionPopup] Minion Goldshire Footman (2EB9790) 1/2 pops up
 [Act_EndTurn] End turn
-[Msg_EndTurn] End of turn for [IA (Anduin) 6HP]
-[Msg_StartTurn] Start of turn for [jerome (Jaina) 21HP] 
-[Msg_DrawCard] [jerome (Jaina) 21HP] draw Loup alpha redoutable (2): 2/2  from the deck
-[Act_PlayMinionAndEffect] Card Sergent Grossier (1): 2/1 
-[Msg_PlayCard] [jerome (Jaina) 21HP] plays Sergent Grossier (1): 2/1 
-[Msg_UseMana] Player [jerome (Jaina) 21HP] loses 1 mana crystal
-[Msg_ThrowCard] Player [jerome (Jaina) 21HP] loses Sergent Grossier (1): 2/1 
-[Msg_AddMinion] New Minion Abusive Sergeant (2FA89B0) 3/1 on the board for [jerome (Jaina) 21HP]
-[Msg_MinionPopup] Minion Abusive Sergeant (2FA89B0) 3/1 pops up
-[Msg_Status] Change of status for Minion Dire Wolf Alpha (2FA8FB0) 3/2: {atq=2, max_atq=2}
-[Msg_Status] Change of status for Minion Dire Wolf Alpha (2FA8FB0) 3/2: {atq=3, max_atq=3}
-[Msg_Status] Change of status for Minion Abusive Sergeant (2FA89B0) 3/1: {atq=3, max_atq=3}
-[Msg_TargetedEffect] Minion Dire Wolf Alpha (2FA8C90) 5/2 receives an effect [buff +2/+0 (temporary)] from Minion Abusive Sergeant (2FA89B0) 3/1.
-[Msg_Status] Change of status for Minion Dire Wolf Alpha (2FA8C90) 5/2: {atq=5, max_atq=5}
-[Act_PlayMinionAndEffect] Card Chouette bec-de-fer (2): 2/1 
-[Msg_PlayCard] [jerome (Jaina) 21HP] plays Chouette bec-de-fer (2): 2/1 
-[Msg_UseMana] Player [jerome (Jaina) 21HP] loses 2 mana crystal
-[Msg_ThrowCard] Player [jerome (Jaina) 21HP] loses Chouette bec-de-fer (2): 2/1 
-[Msg_AddMinion] New Minion Ironbeak Owl (2FA8E90) 3/1 on the board for [jerome (Jaina) 21HP]
-[Msg_MinionPopup] Minion Ironbeak Owl (2FA8E90) 3/1 pops up
-[Msg_Status] Change of status for Minion Dire Wolf Alpha (2FA8C90) 5/2: {atq=4, max_atq=4}
-[Msg_Status] Change of status for Minion Ironbeak Owl (2FA8E90) 3/1: {atq=3, max_atq=3}
-[Msg_Status] Change of status for Minion Dire Wolf Alpha (2FA8C90) 5/2: {atq=5, max_atq=5}
-[Msg_TargetedEffect] Minion Dire Wolf Alpha (2FA8A70) 2/2 receives an effect [silence] from Minion Ironbeak Owl (2FA8E90) 3/1.
-[Msg_Status] Change of status for Minion Abusive Sergeant (2FA8C10) 2/1: {atq=2, max_atq=2}
-[Msg_Status] Change of status for Minion Dire Wolf Alpha (2FA8A70) 2/2: {hp=2, max_hp=2, atq=2, max_atq=2, effects=['silence']}
-[Act_HeroPower] Hero Power (2): deals 1 damage to a character
-[Msg_UseMana] Player [jerome (Jaina) 21HP] loses 2 mana crystal
-[Msg_StartHeroPower] [[jerome (Jaina) 21HP]] uses its hero power
-[Msg_HeroDamage] Minion Abusive Sergeant (2FA8C10) 2/0 takes 1 damage from [jerome (Jaina) 21HP].
-[Msg_Status] Change of status for Minion Abusive Sergeant (2FA8C10) 2/0: {hp=0}
-[Msg_CheckDead] Minion Abusive Sergeant (2FA8C10) 2/0 asks for dead cleaning.
-[Msg_Status] Change of status for Minion Abusive Sergeant (2FA8C10) 2/0: {hp=0, max_hp=1, atq=2, max_atq=2, effects=['silence']}
-[Msg_DeadMinion] Minion Abusive Sergeant (2FA8C10) 2/0 dies.
-[Msg_EndHeroPower] End of hero power effect
-[Act_PlayMinionCard] Card Loup alpha redoutable (2): 2/2 
-[Msg_PlayCard] [jerome (Jaina) 21HP] plays Loup alpha redoutable (2): 2/2 
-[Msg_UseMana] Player [jerome (Jaina) 21HP] loses 2 mana crystal
-[Msg_ThrowCard] Player [jerome (Jaina) 21HP] loses Loup alpha redoutable (2): 2/2 
-[Msg_AddMinion] New Minion Dire Wolf Alpha (2FA8350) 4/2 on the board for [jerome (Jaina) 21HP]
-[Msg_MinionPopup] Minion Dire Wolf Alpha (2FA8350) 4/2 pops up
-[Msg_Status] Change of status for Minion Ironbeak Owl (2FA8E90) 3/1: {atq=2, max_atq=2}
-[Msg_Status] Change of status for Minion Dire Wolf Alpha (2FA8C90) 5/2: {atq=4, max_atq=4}
-[Msg_Status] Change of status for Minion Ironbeak Owl (2FA8E90) 3/1: {atq=3, max_atq=3}
-[Msg_Status] Change of status for Minion Dire Wolf Alpha (2FA8350) 4/2: {atq=3, max_atq=3}
-[Msg_Status] Change of status for Minion Dire Wolf Alpha (2FA8FB0) 3/2: {atq=2, max_atq=2}
-[Msg_Status] Change of status for Minion Abusive Sergeant (2FA89B0) 3/1: {atq=2, max_atq=2}
-[Msg_Status] Change of status for Minion Abusive Sergeant (2FA89B0) 3/1: {atq=3, max_atq=3}
-[Msg_Status] Change of status for Minion Dire Wolf Alpha (2FA8350) 4/2: {atq=4, max_atq=4}
-[Msg_Status] Change of status for Minion Dire Wolf Alpha (2FA8C90) 5/2: {atq=5, max_atq=5}
-[Msg_Status] Change of status for Minion Dire Wolf Alpha (2FA8FB0) 3/2: {atq=3, max_atq=3}
-[Act_PlayMinionAndEffect] Card Sergent Grossier (1): 2/1 
-[Msg_PlayCard] [jerome (Jaina) 21HP] plays Sergent Grossier (1): 2/1 
-[Msg_UseMana] Player [jerome (Jaina) 21HP] loses 1 mana crystal
-[Msg_ThrowCard] Player [jerome (Jaina) 21HP] loses Sergent Grossier (1): 2/1 
-[Msg_AddMinion] New Minion Abusive Sergeant (2FA88F0) 3/1 on the board for [jerome (Jaina) 21HP]
-[Msg_MinionPopup] Minion Abusive Sergeant (2FA88F0) 3/1 pops up
-[Msg_Status] Change of status for Minion Ironbeak Owl (2FA8E90) 2/1: {atq=2, max_atq=2}
-[Msg_Status] Change of status for Minion Dire Wolf Alpha (2FA8350) 4/2: {atq=3, max_atq=3}
-[Msg_Status] Change of status for Minion Dire Wolf Alpha (2FA8350) 4/2: {atq=4, max_atq=4}
-[Msg_Status] Change of status for Minion Abusive Sergeant (2FA88F0) 3/1: {atq=3, max_atq=3}
-[Msg_TargetedEffect] Minion Dire Wolf Alpha (2FA8FB0) 5/2 receives an effect [buff +2/+0 (temporary)] from Minion Abusive Sergeant (2FA88F0) 3/1.
-[Msg_Status] Change of status for Minion Dire Wolf Alpha (2FA8FB0) 5/2: {atq=5, max_atq=5}
-[Act_MinionAttack] Attack with Minion Dire Wolf Alpha (2FA8FB0) 5/2
-[Msg_StartAttack] Minion Minion Dire Wolf Alpha (2FA8FB0) 5/2 attacks enemy [IA (Anduin) 1HP]
-[Msg_Damage] [IA (Anduin) 1HP] takes 5 damage from Minion Dire Wolf Alpha (2FA8FB0) 5/2.
-[Msg_Status] Change of status for [IA (Anduin) 1HP]: {hp=1}
-[Msg_EndAttack] End of attack.
-[Act_MinionAttack] Attack with Minion Dire Wolf Alpha (2FA8C90) 5/2
-[Msg_StartAttack] Minion Minion Dire Wolf Alpha (2FA8C90) 5/2 attacks enemy [IA (Anduin) -4HP]
-[Msg_Damage] [IA (Anduin) -4HP] takes 5 damage from Minion Dire Wolf Alpha (2FA8C90) 5/2.
-[Msg_Status] Change of status for [IA (Anduin) -4HP]: {hp=-4}
-[Msg_CheckDead] [IA (Anduin) -4HP] asks for dead cleaning.
-[Msg_Status] Change of status for [IA (Anduin) -4HP]: {hp=-4, max_hp=30, atq=0, max_atq=0, effects=['silence']}
-[Msg_DeadHero] [IA (Anduin) -4HP] dies.
+[Msg_EndTurn] End of turn for [IA (Anduin) 2HP]
+[Msg_StartTurn] Start of turn for [jerome (Jaina) 30HP] 
+[Msg_DrawCard] [jerome (Jaina) 30HP] draw Soldat de Comte de l'Or (1): 1/2 Taunt from the deck
+[Act_PlayMinionCard] Card Soldat de Comte de l'Or (1): 1/2 Taunt
+[Msg_PlayCard] [jerome (Jaina) 30HP] plays Soldat de Comte de l'Or (1): 1/2 Taunt
+[Msg_UseMana] Player [jerome (Jaina) 30HP] loses 1 mana crystal
+[Msg_ThrowCard] Player [jerome (Jaina) 30HP] loses Soldat de Comte de l'Or (1): 1/2 Taunt
+[Msg_AddMinion] New Minion Goldshire Footman (2EB9950) 1/2 on the board for [jerome (Jaina) 30HP]
+[Msg_MinionPopup] Minion Goldshire Footman (2EB9950) 1/2 pops up
+[Act_SingleSpellDamageCard] Card Faux Sort de dommage 3 (2): Deal 3 points of damage
+[Msg_PlayCard] [jerome (Jaina) 30HP] plays Faux Sort de dommage 3 (2): Deal 3 points of damage
+[Msg_UseMana] Player [jerome (Jaina) 30HP] loses 2 mana crystal
+[Msg_ThrowCard] Player [jerome (Jaina) 30HP] loses Faux Sort de dommage 3 (2): Deal 3 points of damage
+[Msg_StartSpell] Player [jerome (Jaina) 30HP] plays spell [Faux Sort de dommage 3 (2): Deal 3 points of damage]
+[Msg_SpellDamage] Minion Goldshire Footman (2EB9790) 1/-1 takes 3 damage from [jerome (Jaina) 30HP].
+[Msg_Status] Change of status for Minion Goldshire Footman (2EB9790) 1/-1: {hp=-1}
+[Msg_CheckDead] Minion Goldshire Footman (2EB9790) 1/-1 asks for dead cleaning.
+[Msg_Status] Change of status for Minion Goldshire Footman (2EB9790) 1/-1: {hp=-1, max_hp=2, atq=1, max_atq=1, effects=['silence']}
+[Msg_DeadMinion] Minion Goldshire Footman (2EB9790) 1/-1 dies.
+[Msg_EndSpell] End of spell.
+[Act_MinionAttack] Attack with Minion Cairne (2EB9C50) 4/5
+[Msg_StartAttack] Minion Minion Cairne (2EB9C50) 4/5 attacks enemy [IA (Anduin) -2HP]
+[Msg_Damage] [IA (Anduin) -2HP] takes 4 damage from Minion Cairne (2EB9C50) 4/5.
+[Msg_Status] Change of status for [IA (Anduin) -2HP]: {hp=-2}
+[Msg_CheckDead] [IA (Anduin) -2HP] asks for dead cleaning.
+[Msg_Status] Change of status for [IA (Anduin) -2HP]: {hp=-2, max_hp=30, atq=0, max_atq=0, effects=['silence']}
+[Msg_DeadHero] [IA (Anduin) -2HP] dies.
 [Msg_EndAttack] End of attack.

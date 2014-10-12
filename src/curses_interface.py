@@ -208,7 +208,7 @@ class VizThing (object):
     self.max_hp = obj.max_hp
     self.atq =    obj.atq
     self.max_atq =obj.max_atq
-    self.effects = copy(obj.card.effects)
+    self.effects = copy(obj.effects)
     obj.draw = self.draw
     self.wait = 0
     # create panel
@@ -1099,6 +1099,7 @@ class CursesHSEngine (HSEngine):
       msg = self.display.pop(0)
       line = "[%s] %s\n" %(type(msg).__name__,msg)
       self.logfile.write(line)
+      self.logfile.flush()
       self.log += line
       msg.draw()
 

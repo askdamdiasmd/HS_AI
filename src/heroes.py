@@ -39,7 +39,7 @@ class Card_Hero (Card_Minion):
 
 class Card_Mage (Card_Hero):
     def __init__(self):
-        Card_Hero.__init__(self, "Jaina", 0, 0, 30, cls="mage", name_fr='Jenna',
+        Card_Hero.__init__(self, 30, 0, 30, "Jaina", cls="mage", name_fr='Jenna',
                              desc="deals 1 damage to a character")
         self.power_text = "Fire blast"
         self.power_subtext = "Deal 1 damage"
@@ -54,7 +54,7 @@ class Card_Mage (Card_Hero):
 
 class Card_Priest (Card_Hero):
     def __init__(self):
-        Card_Hero.__init__(self, "Anduin", 0, 0, 30, cls="priest", name_fr='Anduin',
+        Card_Hero.__init__(self, 30, 0, 30, "Anduin", cls="priest", name_fr='Anduin',
                              desc="heals a character by 2HP")
         self.power_text = "Lesser heal"
         self.power_subtext = "Restore 2 health"

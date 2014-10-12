@@ -214,11 +214,17 @@ class Msg_DeadHero (Msg_Dead):
 
 
 
-class Msg_DeathRattle (TargetedMessage):
+class Msg_DeathRattle (Message):
+    """ death rattle: execute a pre-specified instruction """
+    def __init__(self, caster, msg, immediate=True):
+      Message.__init__(self, caster)
+      self.msg = msg
+      self.immediate = immediate
     def __str__(self):
-      return "Death rattle casted by %s: %s" % (self.caster, self.target)
+      return "Death rattle casted by %s: %s%s" % (self.caster, self.msg, 
+                                                  self.immediate and ' (immediate)' or '')
     def execute(self):
-      self.target.execute()
+      self.engine.send_message(self.msg,immediate=self.immediate)
 
 
 # attack / heal
@@ -297,15 +303,15 @@ class Msg_Silence (TargetedMessage):
         self.target.silence()
 
 
-class Msg_TargetedEffect (TargetedMessage):
+class Msg_BindEffect (TargetedMessage):
     def __init__(self, caster, target, effect):
         TargetedMessage.__init__(self,caster,target)
-        effect.init(target)
         self.effect = effect
     def __str__(self):
-        return "%s receives an effect [%s] from %s." % (self.target, self.effect, self.caster)
+        return "%s binds effect [%s] to %s." % (self.caster, self.effect, self.target)
     def execute(self):
-        self.effect.execute()
+        self.effect.bind_to(self.target)
+
 
 
 

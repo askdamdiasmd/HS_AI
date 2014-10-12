@@ -11,7 +11,7 @@ class Deck (object):
 
     def __init__(self, cards):
       self.cards = cards
-      assert len(cards)==30
+      #assert len(cards)==30
       self.owner = None
       self.fatigue = 0
 

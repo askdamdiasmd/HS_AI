@@ -9,6 +9,10 @@ from copy import deepcopy as copy
 ### ------------ generalistic thing (hero, weapon, minon) -------
 
 class Thing (object):
+  @classmethod
+  def set_engine(cls, engine):
+      cls.engine = engine
+
   def __init__(self, card ):
       self.card = card
       self.owner = card.owner
@@ -19,18 +23,20 @@ class Thing (object):
       self.dead = False
 
       # what is below is what can be silenced
-      acfs, mods, trigs, effs = copy((card.action_filters, card.modifiers, card.triggers, card.effects))
-      self.action_filters = acfs  # reacting to actions [(Act_class, handler),...]
-      self.modifiers = mods # modifying messages, list: [(Msg_Class, event),...]
-      self.triggers = trigs # reacting to messages, list: [(Msg_Class, event),...]
-      self.effects = effs # list of effects without triggers: ['taunt','stealth',...]
-      for e in self.effects:  # we have to initalize effects
-        if type(e)!=str:  
-          e.init(self)
+      self.action_filters = []  # reacting to actions [(Act_class, handler),...]
+      self.modifiers = [] # modifying messages, list: [(Msg_Class, event),...]
+      self.triggers = [] # reacting to messages, list: [(Msg_Class, event),...]
+      self.effects = []  # list of effects without triggers: ['taunt','stealth',...]
+      self.add_effects(copy(card.effects), inform=False)
 
-  @classmethod
-  def set_engine(cls, engine):
-      cls.engine = engine
+  def add_effects(self, effects, inform=True):
+      for e in effects:  # we have to initalize effects
+        if type(e)==str:  
+          self.effects.append(e)
+        else:
+          e.bind_to(self)
+      if inform:
+        self.engine.send_message(Msg_Status(self,'effects'),immediate=True)
 
   def __str__(self):
       return "%s %s (%X) %d/%d" %(type(self).__name__, self.card.name, id(self), self.atq, self.hp)
@@ -86,8 +92,7 @@ class Thing (object):
       if self.has_effect('death_rattle'):
         for trigger,eff in self.triggers:
           if trigger=='death_rattle':
-            eff.init(self.owner)
-            self.engine.send_message(Msg_DeathRattle(self,eff), immediate=True)
+            eff.execute()
       self.silence()
       self.engine.board.remove_thing(self)
 

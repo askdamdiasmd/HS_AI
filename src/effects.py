@@ -19,15 +19,14 @@ from messages import *
 
 
 class Effect (object):
-    def __init__(self, owner=None):
-        self.owner = owner    # effect belongs to this minion
     @classmethod
     def set_engine(cls, engine):
         cls.engine = engine
-    def init(self, owner):
+    def __init__(self, owner=None):
+        self.owner = owner    # effect belongs to this minion
+    def bind_to(self, owner):
         self.owner = owner  # when binded to a creature
-    def execute(self):
-        pass  # when effect is set-up
+        owner.effects.append(self) # associate effect to a minion/card
     def filter(self, action):
         pass  # when triggered by owner.action_filters
     def trigger(self, msg):
@@ -63,50 +62,60 @@ class Acf_IncSpellDamage (Effect):
 
 
 ### ---------- effects (applies on Messages) ----------------
-
-class Eff_InvokeCard (Effect):
-    @staticmethod
-    def create_death_rattle(card, new_card):
-      card.effects.append('death_rattle')
-      card.triggers.append(('death_rattle',Eff_InvokeCard(new_card)))
-    def __init__(self, card):
-      Effect.__init__(self)
-      self.card = card
-    def __str__(self):
-      return "Invoke a %s" % str(self.card)
-    def init(self, owner):
-      self.owner = self.card.owner = owner
-      self.pos = self.engine.board.get_minion_pos(owner)
-    def execute(self):
-      assert self.owner and self.pos
-      from creatures import Minion
-      minion = Minion(self.card)
-      self.engine.send_message(Msg_AddMinion(self.owner,minion,self.pos))
-
+  
 
 class Eff_Silence (Effect):
     def __init__(self):
         Effect.__init__(self)
     def __str__(self):
         return "silence"
+    def bind_to(self, minion):
+        minion.silence()
+
+
+class Eff_DR_Invoke_Minion (Effect):
+    """ death rattle effect """
+    def __init__(self, card):
+      Effect.__init__(self)
+      self.card = card
+    def __str__(self):
+      return "Invoke a %s" % str(self.card)
+    def bind_to(self, owner):
+      self.owner = owner
+      owner.effects.append('death_rattle')
+      owner.triggers.append(('death_rattle',self))
     def execute(self):
-        self.owner.silence()
+      pos = self.engine.board.get_minion_pos(self.owner)
+      from creatures import Minion
+      player = self.owner.owner
+      self.card.owner = player  # set card owner
+      msg = Msg_AddMinion(player, Minion(self.card),pos)
+      self.engine.send_message(Msg_DeathRattle(self.owner, msg))
+
 
 class Eff_BuffMinion (Effect):
-    def __init__(self, atq, hp, temp):
+    """ buff a minion (just for this turn of permanent) """
+    def __init__(self, atq, hp, temp=False, others=None):
         Effect.__init__(self)
         self.atq = atq    # buff atq
         self.hp = hp      # buff hp
         self.temp = temp  # temporary effect ? (one turn)
+        assert not(others and self.temp), "error: buff cannot be temporary if other effects"
+        if type(others)==str: others=others.split()
+        self.others = others
     def __str__(self):
         return "buff %+d/%+d%s" % (self.atq, self.hp, self.temp and " (temporary)" or "")
+    def bind_to(self, owner):
+        self.owner = owner
+        owner.effects.append(self)
+        if self.temp: 
+          owner.triggers.append((Msg_EndTurn, self))
+        self.execute()
     def execute(self):
-        target = self.owner
-        if self.hp:   target.change_hp(self.hp)
-        if self.atq:  target.change_atq(self.atq)
-        target.effects.append(self)
-        if self.temp: target.triggers.append((Msg_EndTurn, self))
-    def trigger(self, msg):
+        if self.hp:   self.owner.change_hp(self.hp)
+        if self.atq:  self.owner.change_atq(self.atq)
+        if self.others: self.owner.add_effects(self.others)
+    def trigger(self, msg): # end of temporary effect
         assert self.temp and issubclass(type(msg),Msg_EndTurn), pdb.set_trace()
         self.owner.triggers.remove((Msg_EndTurn, self))
         self.owner.effects.remove(self)
@@ -118,11 +127,7 @@ class Eff_BuffMinion (Effect):
 
 
 class Eff_BuffLeftRight (Effect):
-    @classmethod
-    def create(cls, card, atq, hp):
-        effect = cls(atq,hp)
-        card.effects.append(effect)
-        card.triggers += [(Msg_Popup,effect), (Msg_Dead,effect)]
+    """ permanent buff of left and right minion's neighbors """ 
     def __init__(self, atq, hp):
         Effect.__init__(self)
         self.atq = atq    # buff atq
@@ -130,6 +135,10 @@ class Eff_BuffLeftRight (Effect):
         self.targets = set()
     def __str__(self):
         return "buff neighbors by %+d/%+d" % (self.atq, self.hp)
+    def bind_to(self, owner):
+        self.owner = owner
+        owner.effects.append(self)
+        owner.triggers += [(Msg_Popup,self), (Msg_Dead,self)]
     def get_neighbors(self):
         minion = self.owner
         player = minion.owner
@@ -142,11 +151,12 @@ class Eff_BuffLeftRight (Effect):
           if self.hp:   target.change_hp(self.hp)
           if self.atq:  target.change_atq(self.atq)
     def trigger(self, msg):
-        ngh = self.get_neighbors()
-        if self.targets != ngh: # there has been change of neighbors
-          self.undo()
-          self.targets = ngh
-          self.execute()
+        if msg.caster.owner is self.owner.owner: # avoid useless checks
+          ngh = self.get_neighbors()
+          if self.targets != ngh: # there has been change of neighbors
+            self.undo()
+            self.targets = ngh
+            self.execute()
     def undo(self):
         for target in self.targets:
           if self.hp: target.change_hp(-self.hp)

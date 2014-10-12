@@ -7,12 +7,18 @@ from actions import *
 from effects import *
 
 eff_trad_fr = dict(taunt='Provocation')
+def tolist(l):
+  if type(l)==str:  
+    return l.split()
+  else:
+    return list(l)
 
 
 ### ------- Cards -------------
 
 class Card (object):
-    def __init__(self, name, cost, cls=None, desc='', name_fr='', desc_fr='', effects=None, img='' ):
+    def __init__(self, cost, name, cls=None, desc='', name_fr='', desc_fr='', effects=(), img='' ):
+      self.owner = None # specified after assigning deck to hero
       self.name = name
       self.name_fr = name_fr
       self.cost = cost  # mana cost
@@ -20,16 +26,12 @@ class Card (object):
       self.desc = desc
       self.desc_fr = desc_fr
       self.img = img
-      self.owner = None # specified after assigning deck to hero
-      self.action_filters = [] # reacting to actions before selection: [(Act_class, handler),...]
-      self.modifiers = [] # reacting to event at emission time, list: [(Msg_Class, event),...]
-      self.triggers = [] # reacting to events at execution time, list: [(Msg_Class, event),...]
-      if type(effects)==str:  effects = effects.split()
-      self.effects = effects or [] # list of effects without triggers: {'taunt','stealth', or buffs that can be undone...}
+      self.effects = tolist(effects) # list of effects: {'taunt','stealth', or buffs that can be silenced}
       if desc=='':  
-        self.desc = '. '.join(['%s%s'%(e[0].upper(),e[1:]) for e in self.effects])
+        #assert all([type(e)==str for e in self.effects]), "error: description is missing"
+        self.desc = '. '.join(['%s%s'%(e[0].upper(),e[1:]) for e in self.effects if type(e)==str])
       if desc_fr=='':  
-        self.desc_fr = '. '.join([eff_trad_fr[e] for e in self.effects])
+        self.desc_fr = '. '.join([eff_trad_fr[e] for e in self.effects if type(e)==str])
 
     @classmethod
     def set_engine(cls, engine):
@@ -42,8 +44,8 @@ class Card (object):
 ### --------------- Minion cards ----------------------
 
 class Card_Minion (Card):
-    def __init__(self, name, cost, atq, hp, cat=None, **kwargs ):
-        Card.__init__(self, name, cost, **kwargs )
+    def __init__(self, cost, atq, hp, name, cat=None, **kwargs ):
+        Card.__init__(self, cost, name, **kwargs )
         self.hp = hp    # health point = life
         self.atq = atq  # attack
         self.cat = cat  # category of minion = 'beast', ...
@@ -55,74 +57,33 @@ class Card_Minion (Card):
         return Act_PlayMinionCard(self)
 
 
-class Card_HarvestGolem (Card_Minion):
-    def __init__(self):
-        Card_Minion.__init__(self,"Harvest Golem", 3, 2, 3,
-                             name_fr="Golem des moissons",
-                             desc_fr="Rale d'agonie: Invoque 2 hyenes 2/2")
-        Eff_InvokeCard.create_death_rattle(self, 
-                             Card_Minion("Damaged Golem", 1, 2, 1, 
-                             name_fr="Golem endommage", cat='beast'))
-        
-
-class Card_SavannahHighmane (Card_Minion):
-    def __init__(self):
-        Card_Minion.__init__(self,"Savannah Highmane", 6, 6, 5, 
-                             name_fr="Grande Criniere des Savanes", cat='beast',
-                             desc_fr="Rale d'agonie: Invoque 2 hyenes 2/2")
-        Eff_InvokeCard.create_death_rattle(self, 
-                             Card_Minion("Hyena", 2, 2, 2, 
-                             name_fr="Hyene", cat='beast'))
-        Eff_InvokeCard.create_death_rattle(self, 
-                             Card_Minion("Hyena", 2, 2, 2, 
-                             name_fr="Hyene", cat='beast'))
-
-
-class Card_ShatteredSunCleric (Card_Minion):
-    def __init__(self):
-        Card_Minion.__init__(self,"Shattered Sun Cleric", 3, 3, 2, 
-                             name_fr="Clerc du Soleil brise",
-                             desc_fr="Cri de guerre: confere +1/+1 a un serviteur allie")
+class Card_Minion_BC (Card_Minion):
+    """ Minion with a battle cry """
+    def __init__(self, cost, atq, hp, name, battlecry, targets='minions', **kwargs):
+        Card_Minion.__init__(self, cost, atq, hp, name, **kwargs)
+        self.battlecry = battlecry
+        self.targets = targets
     def list_actions(self):
-        return Act_PlayMinionAndEffect(self, Eff_BuffMinion(1,1,False),
-                                       self.engine.board.get_friendly_minions(self.owner))
-
-
-class Card_IronbeakOwl (Card_Minion):
-    def __init__(self):
-        Card_Minion.__init__(self,"Ironbeak Owl", 2, 2, 1, 
-                             name_fr="Chouette bec-de-fer",
-                             desc_fr="Cri de guerre: reduit au silence un autre serviteur")
-    def list_actions(self):
-        return Act_PlayMinionAndEffect(self, Eff_Silence(), self.engine.board.get_minions())
-
-
-class Card_AbusiveSergeant (Card_Minion):
-    def __init__(self):
-        Card_Minion.__init__(self,"Abusive Sergeant", 1, 2, 1, 
-                             name_fr="Sergent Grossier",
-                             desc_fr="Cri de guerre: confere +2 ATQ a un serviteur pendant ce tour")
-    def list_actions(self):
-        return Act_PlayMinionAndEffect(self, Eff_BuffMinion(2,0,True), self.engine.board.get_minions())
-
-class Card_DireWolfAlpha (Card_Minion):
-    def __init__(self):
-        Card_Minion.__init__(self,"Dire Wolf Alpha", 2, 2, 2, 
-                             name_fr="Loup alpha redoutable",
-                             desc_fr="Les serviteurs adjacents ont +1 ATQ")
-        Eff_BuffLeftRight.create(self,1,0)
-    def list_actions(self):
-        return Act_PlayMinionCard(self)
+        if self.targets=='none':
+          targets = []
+        elif self.targets=='friendly_minions':
+          targets = self.engine.board.get_friendly_minions(self.owner)
+        elif self.targets=='minions':
+          targets = self.engine.board.get_minions()
+        elif self.targets=='neighbors':
+          targets = 'neighbors'
+        else:
+          assert False, "error: unknown target '%s'" % self.targets
+        return Act_PlayMinionCard_BC(self, self.battlecry, targets)
 
 
 ### --------------- Weapon cards ----------------------
 
 class Card_Weapon (Card):
-    def __init__(self, name, cost, atq, hp, cat=None, **kwargs ):
-        Card.__init__(self, name, cost, **kwargs )
+    def __init__(self, cost, atq, hp, name, **kwargs ):
+        Card.__init__(self, cost, name, **kwargs )
         self.hp = hp    # health point = weapon durability
         self.atq = atq  # attack
-        self.cat = cat  # category of minion = 'beast', ...
 
     def __str__(self):
         return "Weapon %s (%d): %d/%d %s" % (self.name_fr, self.cost, self.atq, self.hp, self.desc)
@@ -142,7 +103,7 @@ class Card_Spell (Card):
 
 class Card_Coin (Card_Spell):
     def __init__(self, owner):
-        Card_Spell.__init__(self,"The coin",0,desc="Gain one mana crystal this turn only")
+        Card_Spell.__init__(self, 0, "The coin", desc="Gain one mana crystal this turn only")
         self.owner = owner
     def list_actions(self):
         player = self.owner
@@ -153,7 +114,7 @@ class Card_Coin (Card_Spell):
 class Card_Wrath (Card_Spell):
     """ Druid : Wrath (2 choices) """
     def __init__(self):
-        Card_Spell.__init__(self, "Wrath",2,cls="Druid",name_fr="Colere")
+        Card_Spell.__init__(self, 2, "Wrath", cls="Druid",name_fr="Colere")
     def list_actions(self):
         targets = self.engine.board.get_characters()
         hero = self.owner
@@ -166,7 +127,7 @@ class Card_Wrath (Card_Spell):
 
 class Card_FakeSpell (Card_Spell):
     def __init__(self, damage):
-        Card_Spell.__init__(self, "Fake Damage Spell %d"%damage,damage-1,
+        Card_Spell.__init__(self, damage-1, "Fake Damage Spell %d"%damage,
                             name_fr="Faux Sort de dommage %d"%damage,
                             desc="Deal %d points of damage"%damage)
         self.damage = damage
@@ -179,44 +140,110 @@ class Card_FakeSpell (Card_Spell):
 ### -------- Heathstone cardbook collection --------------
 
 def get_cardbook():
-  cardbook = []
-  cardbook.append( Card_Minion('Wisp',0,1,1,name_fr='Feu follet') )
-  cardbook.append( Card_Minion('Goldshire Footman',1,1,2,name_fr='Soldat de Comte de l\'Or',effects='taunt') )
-  cardbook.append( Card_Minion('River Crocolisk',2,2,3,name_fr='Crocilisque des rivieres') )
-  cardbook.append( Card_HarvestGolem() )
-  cardbook.append( Card_SavannahHighmane() )
-  cardbook.append( Card_ShatteredSunCleric() )
-  cardbook.append( Card_IronbeakOwl() )
-  cardbook.append( Card_AbusiveSergeant() )
-  cardbook.append( Card_DireWolfAlpha() )
-  cardbook.append( Card_Minion('Chillwind Yeti',4,4,5,name_fr='Yeti Noroit') )
+  cardbook = {}
+  def add( card ):
+    assert card.name not in cardbook, "error: %s already in cardbook"%card.name
+    cardbook[card.name] = card
+    if card.name_fr:
+      assert card.name_fr not in cardbook, "error: %s already in cardbook"%card.name
+      cardbook[card.name_fr] = card
 
+  ### O Mana ##################################
+  
+  add( Card_Minion(0, 1, 1, 'Wisp',name_fr='Feu follet') )
+  
+  ### 1 Mana ##################################
+
+  add( Card_Minion_BC(1, 2, 1, "Abusive Sergeant", Eff_BuffMinion(2,0,True), 
+       name_fr="Sergent Grossier", 
+       desc_fr="Cri de guerre: confere +2 ATQ a un serviteur pendant ce tour") )
+  
+  add( Card_Minion(1, 1, 2, 'Goldshire Footman',name_fr='Soldat de Comte de l\'Or',effects='taunt') )
+
+  ### 2 Mana ##################################
+
+  add( Card_Minion(2, 2, 2, "Dire Wolf Alpha", name_fr="Loup alpha redoutable",
+       effects=[Eff_BuffLeftRight(1,0)], desc_fr="Les serviteurs adjacents ont +1 ATQ") )
+
+  add( Card_Minion_BC(2, 2, 1, "Ironbeak Owl", Eff_Silence(), name_fr="Chouette bec-de-fer",
+       desc_fr="Cri de guerre: reduit au silence un autre serviteur") )
+  
+  add( Card_Minion(3, 4, 4, "Nerubian", name_fr="Nerubien") )
+  add( Card_Minion(2, 0, 2, "Nerubian Egg", effects=[Eff_DR_Invoke_Minion(cardbook["Nerubian"])],
+       name_fr="Oeuf de Nerubien", desc_fr="Rale d'agonie: Invoque un Nerubien 4/4", ) )
+
+  add( Card_Minion(2, 2, 3, 'River Crocolisk', name_fr='Crocilisque des rivieres',cat='beast') )
+  
+  add( Card_Minion_BC(2, 2, 3, "Sunfury Protector", Eff_BuffMinion(0,0,others='taunt'), 'neighbors',
+       name_fr="Protectrice Solfury",
+       desc_fr="Cri de guerre: confere Provocation aux serviteurs adjacents") )
+  
+  ### 3 Mana ##################################
+
+  add( Card_Minion(1, 2, 1, "Damaged Golem", name_fr="Golem endommage") )
+  add( Card_Minion(3, 2, 3, "Harvest Golem", effects=[Eff_DR_Invoke_Minion(cardbook["Damaged Golem"])],
+       name_fr="Golem des moissons", desc_fr="Rale d'agonie: Invoque un golem endommage 2/1", ) )
+
+  add( Card_Minion_BC(3, 3, 2, "Shattered Sun Cleric", Eff_BuffMinion(1,1,False), 'friendly_minions',
+       name_fr="Clerc du Soleil brise",
+       desc_fr="Cri de guerre: confere +1/+1 a un serviteur allie") )
+
+  ### 4 Mana ##################################
+
+  add( Card_Minion(4, 4, 5, 'Chillwind Yeti', name_fr='Yeti Noroit') )
+  
+  add( Card_Minion_BC(4, 2, 3, "Defender of Argus", Eff_BuffMinion(1,1,others='taunt'), 'neighbors',
+       name_fr="Defenseur d'Argus",
+       desc_fr="Cri de guerre: donne aux serviteurs adjacents +1/+1 et Provocation") )
+  
+  ### 5 Mana ##################################
+
+  add( Card_Minion(1, 1, 2, "Slime", name_fr="Gelee", effects='taunt') )
+  add( Card_Minion(5, 3, 5, "Sludge Belcher", effects=['taunt',Eff_DR_Invoke_Minion(cardbook["Slime"])],
+       name_fr="Crache-vase", desc_fr="Rale d'agonie: Invoque 1 gelee 1/2 avec provocation") )
+  
+  ### 6 Mana ##################################
+
+  add( Card_Minion(4, 4, 5, "Baine") )
+  add( Card_Minion(6, 4, 5, "Cairne", effects=[Eff_DR_Invoke_Minion(cardbook["Baine"])],
+       desc_fr="Rale d'agonie: Invoque un Baine 4/5" ) )
+
+  add( Card_Minion(2, 2, 2, "Hyena", name_fr="Hyene", cat='beast') )
+  add( Card_Minion(6, 6, 5, "Savannah Highmane", effects=[Eff_DR_Invoke_Minion(cardbook["Hyena"])]*2,
+       name_fr="Grande Criniere des Savanes", cat='beast',
+       desc_fr="Rale d'agonie: Invoque 2 hyenes 2/2") )
+
+  ### 7 Mana ##################################
+  ### 8 Mana ##################################
+  ### 9+ Mana #################################
+
+  
+  
   # add fake creatures
   for i in range(1,11):
-    cardbook.append( Card_Minion('Fake Creature %d'%i,i,i+1,i,name_fr="Fausse creature %d"%i) )
+    add( Card_Minion(i,i+1,i,'Fake Creature %d'%i,name_fr="Fausse creature %d"%i) )
     
   # add fake weapons
   for i in range(1,5):
-    cardbook.append( Card_Weapon('Fake Weapon %d'%i,i,i,2) )
+    add( Card_Weapon(i,i,2,'Fake Weapon %d'%i) )
   
   # add fake spells
   for i in range(1,10):
-    cardbook.append( Card_FakeSpell(i) )
+    add( Card_FakeSpell(i) )
 
   # Druid cards
-  cardbook.append( Card_Wrath() )
+  add( Card_Wrath() )
 
   # transform into a Dictionary
-  cardbook = {card.name:card for card in cardbook}
   return cardbook
 
 
 
 def fake_deck():
-    from copy import copy
+    from copy import deepcopy as copy
     cardbook = get_cardbook()
     deck = []
-    if 1:
+    if 0:
       deck += [copy(cardbook["Abusive Sergeant"]) for i in range(10)]
       deck += [copy(cardbook["Dire Wolf Alpha"]) for i in range(10)]
       deck += [copy(cardbook["Ironbeak Owl"]) for i in range(10)]
@@ -227,13 +254,20 @@ def fake_deck():
 #      deck += [copy(cardbook["Harvest Golem"]) for i in range(6)]
 #      deck += [copy(cardbook["Fake Damage Spell 1"]) for i in range(6)]
     else:
-      deck += [copy(cardbook["Wisp"]) for i in range(4)]
-      deck += [copy(cardbook["River Crocolisk"]) for i in range(4)]
-      deck += [copy(cardbook["Chillwind Yeti"]) for i in range(4)]
+      deck += [copy(cardbook["Wisp"]) for i in range(2)]
+      deck += [copy(cardbook["Abusive Sergeant"]) for i in range(2)]
+      deck += [copy(cardbook["Goldshire Footman"]) for i in range(2)]
+      deck += [copy(cardbook["Nerubian Egg"]) for i in range(2)]
+      deck += [copy(cardbook["Sunfury Protector"]) for i in range(2)]
+      deck += [copy(cardbook["Defender of Argus"]) for i in range(2)]
+      deck += [copy(cardbook["Harvest Golem"]) for i in range(2)]
+      deck += [copy(cardbook["River Crocolisk"]) for i in range(2)]
+      deck += [copy(cardbook["Chillwind Yeti"]) for i in range(2)]
+      deck += [copy(cardbook["Sludge Belcher"]) for i in range(2)]
+      deck += [copy(cardbook["Savannah Highmane"]) for i in range(2)]
+      deck += [copy(cardbook["Cairne"]) for i in range(1)]
       for i in range(1,5):
         deck += [copy(cardbook["Fake Weapon %d"%i])]
-      for i in range(1,8):
-        deck += [copy(cardbook["Fake Creature %d"%i])]
       for i in range(1,8):
         deck += [copy(cardbook["Fake Damage Spell %d"%i])]
 
