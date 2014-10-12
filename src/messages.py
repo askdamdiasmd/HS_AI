@@ -193,8 +193,8 @@ class Msg_CheckDead (Message):
     """ as soon as a minion dies, it asks for its cleaning """
     def execute(self):
         for i in self.engine.board.everybody:
-          if i.dead:  
-            i.death()
+          if i.dead:
+            i.ask_for_death()
     def __str__(self):
         return "%s asks for dead cleaning." % self.caster
 
@@ -203,6 +203,8 @@ class Msg_Dead (Message):
     """ this thing just died, just for information """
     def __str__(self):
         return "%s dies." % self.caster
+    def execute(self):
+        self.caster.death()
 class Msg_DeadMinion (Msg_Dead):
     pass
 class Msg_DeadWeapon (Msg_Dead):
@@ -216,7 +218,7 @@ class Msg_DeadHero (Msg_Dead):
 
 class Msg_DeathRattle (Message):
     """ death rattle: execute a pre-specified instruction """
-    def __init__(self, caster, msg, immediate=True):
+    def __init__(self, caster, msg, immediate=False):
       Message.__init__(self, caster)
       self.msg = msg
       self.immediate = immediate

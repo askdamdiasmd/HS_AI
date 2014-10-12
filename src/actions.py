@@ -106,7 +106,7 @@ class Act_PlayMinionCard_BC (Act_PlayCard):
         actions = [Msg_AddMinion(self.caster, minion, pos)]
         if self.special_targets=='neighbors':
           player = self.caster
-          for target in player.minions[pos.index-1:pos.index+1]:
+          for target in player.minions[max(0,pos.index-1):pos.index+1]:
             actions.append(Msg_BindEffect(minion, target, self.battlecry))
         else:
           target = self.choices[1]

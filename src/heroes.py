@@ -17,9 +17,8 @@ class Hero (Creature):
   def __str__(self):
       return "[%s (%s) %dHP]" % (self.owner.name,self.card.name,self.hp)
 
-  def death(self):
-    Creature.death(self)
-    self.engine.send_message( Msg_DeadHero(self), immediate=True)
+  def ask_for_death(self):
+      self.engine.send_message( Msg_DeadHero(self), immediate=True)
 
 
 ### -------- instanciation of heroes --------------------

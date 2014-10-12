@@ -190,6 +190,10 @@ def get_cardbook():
 
   ### 4 Mana ##################################
 
+  add( Card_Minion_BC(4, 4, 4, "Dark Iron Dwarf", Eff_BuffMinion(2,0,True), 
+       name_fr="Nain sombrefer", 
+       desc_fr="Cri de guerre: confere +2 ATQ a un serviteur pendant ce tour") )
+
   add( Card_Minion(4, 4, 5, 'Chillwind Yeti', name_fr='Yeti Noroit') )
   
   add( Card_Minion_BC(4, 2, 3, "Defender of Argus", Eff_BuffMinion(1,1,others='taunt'), 'neighbors',
@@ -239,20 +243,12 @@ def get_cardbook():
 
 
 
-def fake_deck():
+def fake_deck(debug=False):
     from copy import deepcopy as copy
     cardbook = get_cardbook()
     deck = []
-    if 0:
-      deck += [copy(cardbook["Abusive Sergeant"]) for i in range(10)]
-      deck += [copy(cardbook["Dire Wolf Alpha"]) for i in range(10)]
-      deck += [copy(cardbook["Ironbeak Owl"]) for i in range(10)]
-#      deck += [copy(cardbook["Savannah Highmane"]) for i in range(6)]
-#      deck += [copy(cardbook["Goldshire Footman"]) for i in range(6)]
-##      deck += [copy(cardbook["Wisp"]) for i in range(15)]
-#      deck += [copy(cardbook["Fake Weapon 1"]) for i in range(6)]
-#      deck += [copy(cardbook["Harvest Golem"]) for i in range(6)]
-#      deck += [copy(cardbook["Fake Damage Spell 1"]) for i in range(6)]
+    if debug:
+      deck += [copy(cardbook["Defender of Argus"]) for i in range(30)]
     else:
       deck += [copy(cardbook["Wisp"]) for i in range(2)]
       deck += [copy(cardbook["Abusive Sergeant"]) for i in range(2)]

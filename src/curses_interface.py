@@ -1110,13 +1110,14 @@ if __name__=="__main__":
     args = sys.argv[1:]
     mana = 10 if "mana" in args else 0
     anim = 'anim' in args
+    debug = 'debug' in args
     from cards import fake_deck
 
-    deck1 = fake_deck()
+    deck1 = fake_deck(debug)
     hero1 = Hero(Card_Mage())
     player1 = HumanPlayerAscii(hero1, 'jerome', deck1)
 
-    deck2 = fake_deck()
+    deck2 = fake_deck(debug)
     hero2 = Hero(Card_Priest())
     player2 = RandomPlayer(hero2, 'IA', deck2)
 

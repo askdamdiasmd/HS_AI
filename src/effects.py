@@ -28,11 +28,11 @@ class Effect (object):
         self.owner = owner  # when binded to a creature
         owner.effects.append(self) # associate effect to a minion/card
     def filter(self, action):
-        pass  # when triggered by owner.action_filters
+        assert False, "must be implemented"  # when triggered by owner.action_filters
     def trigger(self, msg):
-        pass  # when triggered by owner.triggers
+        assert False, "must be implemented"  # when triggered by owner.triggers
     def modify(self, msg):
-        return None  # when triggered by owner.modifiers
+        assert False, "must be implemented"  # when triggered by owner.modifiers
     def undo(self):
         pass  # undo its effect when silenced
 
@@ -83,14 +83,15 @@ class Eff_DR_Invoke_Minion (Effect):
     def bind_to(self, owner):
       self.owner = owner
       owner.effects.append('death_rattle')
-      owner.triggers.append(('death_rattle',self))
-    def execute(self):
-      pos = self.engine.board.get_minion_pos(self.owner)
-      from creatures import Minion
-      player = self.owner.owner
-      self.card.owner = player  # set card owner
-      msg = Msg_AddMinion(player, Minion(self.card),pos)
-      self.engine.send_message(Msg_DeathRattle(self.owner, msg))
+      owner.triggers.append((Msg_Dead,self)) # because we are already disappeared when it triggers
+    def trigger(self, msg):
+      if msg.caster is self.owner: # I'm dead !
+        pos = self.engine.board.get_minion_pos(self.owner)
+        from creatures import Minion
+        player = self.owner.owner
+        self.card.owner = player  # set card owner
+        death_rattle = Msg_AddMinion(player, Minion(self.card),pos)
+        self.engine.send_message(Msg_DeathRattle(self.owner, death_rattle),immediate=True)
 
 
 class Eff_BuffMinion (Effect):
@@ -104,7 +105,9 @@ class Eff_BuffMinion (Effect):
         if type(others)==str: others=others.split()
         self.others = others
     def __str__(self):
-        return "buff %+d/%+d%s" % (self.atq, self.hp, self.temp and " (temporary)" or "")
+        others = (' '+' '.join([str(e) for e in self.others])) if None else ''
+        temp = self.temp and " (temporary)" or ""
+        return "buff %+d/%+d%s%s" % (self.atq, self.hp, others, temp)
     def bind_to(self, owner):
         self.owner = owner
         owner.effects.append(self)

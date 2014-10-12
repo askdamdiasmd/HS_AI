@@ -59,6 +59,7 @@ class Thing (object):
   def react_msg(self, msg):
       for trigger,event in list(self.triggers): #copy because modified online
         if type(trigger)==str: continue
+        #if 'Msg_Dead' in type(msg).__name__: pdb.set_trace()
         if issubclass(type(msg),trigger):
           event.trigger(msg)
 
@@ -86,13 +87,13 @@ class Thing (object):
         e = self.effects.pop()
         if type(e)!=str:  e.undo()
       self.effects = ['silence']  
-      self.engine.send_message(Msg_Status(self,'hp max_hp atq max_atq effects'),immediate=True)
+      if not self.dead:
+        self.engine.send_message(Msg_Status(self,'hp max_hp atq max_atq effects'),immediate=True)
+
+  def ask_for_death(self):
+      self.engine.send_message(Msg_Dead(self),immediate=True)
 
   def death(self):
-      if self.has_effect('death_rattle'):
-        for trigger,eff in self.triggers:
-          if trigger=='death_rattle':
-            eff.execute()
       self.silence()
       self.engine.board.remove_thing(self)
 
@@ -108,9 +109,8 @@ class Secret (Thing):
   def list_actions(self):
       return None
 
-  def death(self):
-    Thing.death(self)
-    self.engine.send_message( Msg_DeadSecret(self), immediate=True)
+  def ask_for_death(self):
+      self.engine.send_message( Msg_DeadSecret(self), immediate=True)
 
 
 ### ------------ Weapon ----------
@@ -141,9 +141,8 @@ class Weapon (Thing):
                                 msgs,
                                 Msg_EndAttack(self)])
 
-  def death(self):
-    Thing.death(self)
-    self.engine.send_message( Msg_DeadWeapon(self), immediate=True)
+  def ask_for_death(self):
+      self.engine.send_message( Msg_DeadWeapon(self), immediate=True)
 
 
 ### ------------ Creature (hero or minion) ----------
@@ -208,9 +207,8 @@ class Minion (Creature):
         from actions import Act_MinionAttack
         return [Act_MinionAttack(self, self.engine.board.get_attackable_characters(self.owner))]
 
-  def death(self):
-    Creature.death(self)
-    self.engine.send_message( Msg_DeadMinion(self), immediate=True)
+  def ask_for_death(self):
+      self.engine.send_message( Msg_DeadMinion(self), immediate=True)
 
 
 

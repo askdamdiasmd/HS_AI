@@ -1,265 +1,214 @@
 [Msg_StartTurn] Start of turn for [jerome (Jaina) 30HP] 
+[Msg_DrawCard] [jerome (Jaina) 30HP] draw Weapon  (2): 2/2  from the deck
+[Msg_DrawCard] [jerome (Jaina) 30HP] draw Weapon  (3): 3/2  from the deck
 [Msg_DrawCard] [jerome (Jaina) 30HP] draw Golem des moissons (3): 2/3  from the deck
-[Msg_DrawCard] [jerome (Jaina) 30HP] draw Feu follet (0): 1/1  from the deck
-[Msg_DrawCard] [jerome (Jaina) 30HP] draw Crache-vase (5): 3/5 Taunt from the deck
-[Msg_DrawCard] [IA (Anduin) 30HP] draw Weapon  (1): 1/2  from the deck
-[Msg_DrawCard] [IA (Anduin) 30HP] draw Faux Sort de dommage 2 (1): Deal 2 points of damage from the deck
-[Msg_DrawCard] [IA (Anduin) 30HP] draw Faux Sort de dommage 7 (6): Deal 7 points of damage from the deck
-[Msg_DrawCard] [IA (Anduin) 30HP] draw Protectrice Solfury (2): 2/3  from the deck
+[Msg_DrawCard] [IA (Anduin) 30HP] draw Weapon  (3): 3/2  from the deck
+[Msg_DrawCard] [IA (Anduin) 30HP] draw Faux Sort de dommage 6 (5): Deal 6 points of damage from the deck
+[Msg_DrawCard] [IA (Anduin) 30HP] draw Sergent Grossier (1): 2/1  from the deck
+[Msg_DrawCard] [IA (Anduin) 30HP] draw Golem des moissons (3): 2/3  from the deck
 [Msg_DrawCard] [IA (Anduin) 30HP] draw  (0): Gain one mana crystal this turn only from the deck
-[Msg_DrawCard] [jerome (Jaina) 30HP] draw  (6): 4/5  from the deck
-[Act_PlayMinionCard] Card Crache-vase (5): 3/5 Taunt
-[Msg_PlayCard] [jerome (Jaina) 30HP] plays Crache-vase (5): 3/5 Taunt
-[Msg_UseMana] Player [jerome (Jaina) 30HP] loses 5 mana crystal
-[Msg_ThrowCard] Player [jerome (Jaina) 30HP] loses Crache-vase (5): 3/5 Taunt
-[Msg_AddMinion] New Minion Sludge Belcher (2EB9B50) 3/5 on the board for [jerome (Jaina) 30HP]
-[Msg_MinionPopup] Minion Sludge Belcher (2EB9B50) 3/5 pops up
+[Msg_DrawCard] [jerome (Jaina) 30HP] draw Faux Sort de dommage 5 (4): Deal 5 points of damage from the deck
+[Act_EndTurn] End turn
+[Msg_EndTurn] End of turn for [jerome (Jaina) 30HP]
+[Msg_StartTurn] Start of turn for [IA (Anduin) 30HP] 
+[Msg_DrawCard] [IA (Anduin) 30HP] draw Weapon  (1): 1/2  from the deck
+[Act_SingleSpellDamageCard] Card Faux Sort de dommage 6 (5): Deal 6 points of damage
+[Msg_PlayCard] [IA (Anduin) 24HP] plays Faux Sort de dommage 6 (5): Deal 6 points of damage
+[Msg_UseMana] Player [IA (Anduin) 24HP] loses 5 mana crystal
+[Msg_ThrowCard] Player [IA (Anduin) 24HP] loses Faux Sort de dommage 6 (5): Deal 6 points of damage
+[Msg_StartSpell] Player [IA (Anduin) 24HP] plays spell [Faux Sort de dommage 6 (5): Deal 6 points of damage]
+[Msg_SpellDamage] [IA (Anduin) 24HP] takes 6 damage from [IA (Anduin) 24HP].
+[Msg_Status] Change of status for [IA (Anduin) 24HP]: {hp=24}
+[Msg_EndSpell] End of spell.
+[Act_PlayMinionCard] Card Golem des moissons (3): 2/3 
+[Msg_PlayCard] [IA (Anduin) 24HP] plays Golem des moissons (3): 2/3 
+[Msg_UseMana] Player [IA (Anduin) 24HP] loses 3 mana crystal
+[Msg_ThrowCard] Player [IA (Anduin) 24HP] loses Golem des moissons (3): 2/3 
+[Msg_AddMinion] New Minion Harvest Golem (2EE6D50) 2/3 on the board for [IA (Anduin) 24HP]
+[Msg_MinionPopup] Minion Harvest Golem (2EE6D50) 2/3 pops up
+[Act_PlaySpellCard] Card  (0): Gain one mana crystal this turn only
+[Msg_PlayCard] [IA (Anduin) 24HP] plays  (0): Gain one mana crystal this turn only
+[Msg_UseMana] Player [IA (Anduin) 24HP] loses 0 mana crystal
+[Msg_ThrowCard] Player [IA (Anduin) 24HP] loses  (0): Gain one mana crystal this turn only
+[Msg_StartSpell] Player [IA (Anduin) 24HP] plays spell [ (0): Gain one mana crystal this turn only]
+[Msg_GainMana] Player [IA (Anduin) 24HP] gain 1 mana crystal
+[Msg_EndSpell] End of spell.
+[Act_HeroPower] Hero Power (2): heals a character by 2HP
+[Msg_UseMana] Player [IA (Anduin) 26HP] loses 2 mana crystal
+[Msg_StartHeroPower] [[IA (Anduin) 26HP]] uses its hero power
+[Msg_HeroHeal] [IA (Anduin) 26HP] heals [IA (Anduin) 26HP] by 2HP.
+[Msg_Status] Change of status for [IA (Anduin) 26HP]: {hp=26}
+[Msg_EndHeroPower] End of hero power effect
+[Act_EndTurn] End turn
+[Msg_EndTurn] End of turn for [IA (Anduin) 26HP]
+[Msg_StartTurn] Start of turn for [jerome (Jaina) 30HP] 
+[Msg_DrawCard] [jerome (Jaina) 30HP] draw Weapon  (4): 4/2  from the deck
 [Act_PlayMinionCard] Card Golem des moissons (3): 2/3 
 [Msg_PlayCard] [jerome (Jaina) 30HP] plays Golem des moissons (3): 2/3 
 [Msg_UseMana] Player [jerome (Jaina) 30HP] loses 3 mana crystal
 [Msg_ThrowCard] Player [jerome (Jaina) 30HP] loses Golem des moissons (3): 2/3 
-[Msg_AddMinion] New Minion Harvest Golem (2EB9BD0) 2/3 on the board for [jerome (Jaina) 30HP]
-[Msg_MinionPopup] Minion Harvest Golem (2EB9BD0) 2/3 pops up
-[Act_PlayMinionCard] Card Feu follet (0): 1/1 
-[Msg_PlayCard] [jerome (Jaina) 30HP] plays Feu follet (0): 1/1 
-[Msg_UseMana] Player [jerome (Jaina) 30HP] loses 0 mana crystal
-[Msg_ThrowCard] Player [jerome (Jaina) 30HP] loses Feu follet (0): 1/1 
-[Msg_AddMinion] New Minion Wisp (2EB98D0) 1/1 on the board for [jerome (Jaina) 30HP]
-[Msg_MinionPopup] Minion Wisp (2EB98D0) 1/1 pops up
+[Msg_AddMinion] New Minion Harvest Golem (2EE6770) 2/3 on the board for [jerome (Jaina) 30HP]
+[Msg_MinionPopup] Minion Harvest Golem (2EE6770) 2/3 pops up
 [Act_HeroPower] Hero Power (2): deals 1 damage to a character
 [Msg_UseMana] Player [jerome (Jaina) 30HP] loses 2 mana crystal
 [Msg_StartHeroPower] [[jerome (Jaina) 30HP]] uses its hero power
-[Msg_HeroDamage] [IA (Anduin) 29HP] takes 1 damage from [jerome (Jaina) 30HP].
-[Msg_Status] Change of status for [IA (Anduin) 29HP]: {hp=29}
+[Msg_HeroDamage] Minion Harvest Golem (2EE6770) 2/2 takes 1 damage from [jerome (Jaina) 30HP].
+[Msg_Status] Change of status for Minion Harvest Golem (2EE6770) 2/2: {hp=2}
 [Msg_EndHeroPower] End of hero power effect
-[Act_EndTurn] End turn
-[Msg_EndTurn] End of turn for [jerome (Jaina) 30HP]
-[Msg_StartTurn] Start of turn for [IA (Anduin) 29HP] 
-[Msg_DrawCard] [IA (Anduin) 29HP] draw Sergent Grossier (1): 2/1  from the deck
-[Act_PlayMinionCard_BC] Card Protectrice Solfury (2): 2/3 
-[Msg_PlayCard] [IA (Anduin) 29HP] plays Protectrice Solfury (2): 2/3 
-[Msg_UseMana] Player [IA (Anduin) 29HP] loses 2 mana crystal
-[Msg_ThrowCard] Player [IA (Anduin) 29HP] loses Protectrice Solfury (2): 2/3 
-[Msg_AddMinion] New Minion Sunfury Protector (2EB97B0) 2/3 on the board for [IA (Anduin) 29HP]
-[Msg_MinionPopup] Minion Sunfury Protector (2EB97B0) 2/3 pops up
-[Act_PlayWeaponCard] Card Weapon  (1): 1/2 
-[Msg_PlayCard] [IA (Anduin) 29HP] plays Weapon  (1): 1/2 
-[Msg_UseMana] Player [IA (Anduin) 29HP] loses 1 mana crystal
-[Msg_ThrowCard] Player [IA (Anduin) 29HP] loses Weapon  (1): 1/2 
-[Msg_AddWeapon] [IA (Anduin) 29HP] equipped a Weapon Fake Weapon 1 (2EB99D0) 1/2
-[Msg_WeaponPopup] Weapon Fake Weapon 1 (2EB99D0) 1/2 pops up
-[Act_EndTurn] End turn
-[Msg_EndTurn] End of turn for [IA (Anduin) 29HP]
-[Msg_StartTurn] Start of turn for [jerome (Jaina) 30HP] 
-[Msg_DrawCard] [jerome (Jaina) 30HP] draw Faux Sort de dommage 2 (1): Deal 2 points of damage from the deck
-[Act_MinionAttack] Attack with Minion Sludge Belcher (2EB9B50) 3/5
-[Msg_StartAttack] Minion Minion Sludge Belcher (2EB9B50) 3/5 attacks enemy [IA (Anduin) 26HP]
-[Msg_Damage] [IA (Anduin) 26HP] takes 3 damage from Minion Sludge Belcher (2EB9B50) 3/5.
-[Msg_Status] Change of status for [IA (Anduin) 26HP]: {hp=26}
-[Msg_EndAttack] End of attack.
-[Act_MinionAttack] Attack with Minion Harvest Golem (2EB9BD0) 2/3
-[Msg_StartAttack] Minion Minion Harvest Golem (2EB9BD0) 2/3 attacks enemy [IA (Anduin) 24HP]
-[Msg_Damage] [IA (Anduin) 24HP] takes 2 damage from Minion Harvest Golem (2EB9BD0) 2/3.
-[Msg_Status] Change of status for [IA (Anduin) 24HP]: {hp=24}
-[Msg_EndAttack] End of attack.
-[Act_MinionAttack] Attack with Minion Wisp (2EB98D0) 1/1
-[Msg_StartAttack] Minion Minion Wisp (2EB98D0) 1/1 attacks enemy [IA (Anduin) 23HP]
-[Msg_Damage] [IA (Anduin) 23HP] takes 1 damage from Minion Wisp (2EB98D0) 1/1.
+[Act_PlayWeaponCard] Card Weapon  (3): 3/2 
+[Msg_PlayCard] [jerome (Jaina) 30HP] plays Weapon  (3): 3/2 
+[Msg_UseMana] Player [jerome (Jaina) 30HP] loses 3 mana crystal
+[Msg_ThrowCard] Player [jerome (Jaina) 30HP] loses Weapon  (3): 3/2 
+[Msg_AddWeapon] [jerome (Jaina) 30HP] equipped a Weapon Fake Weapon 3 (2EE6AF0) 3/2
+[Msg_WeaponPopup] Weapon Fake Weapon 3 (2EE6AF0) 3/2 pops up
+[Act_WeaponAttack] Attack with Weapon Fake Weapon 3 (2EE6AF0) 3/1
+[Msg_Status] Change of status for Weapon Fake Weapon 3 (2EE6AF0) 3/1: {hp=1}
+[Msg_StartAttack] Minion Weapon Fake Weapon 3 (2EE6AF0) 3/1 attacks enemy [IA (Anduin) 23HP]
+[Msg_Damage] [IA (Anduin) 23HP] takes 3 damage from Weapon Fake Weapon 3 (2EE6AF0) 3/1.
 [Msg_Status] Change of status for [IA (Anduin) 23HP]: {hp=23}
 [Msg_EndAttack] End of attack.
-[Act_PlayMinionCard] Card  (6): 4/5 
-[Msg_PlayCard] [jerome (Jaina) 30HP] plays  (6): 4/5 
-[Msg_UseMana] Player [jerome (Jaina) 30HP] loses 6 mana crystal
-[Msg_ThrowCard] Player [jerome (Jaina) 30HP] loses  (6): 4/5 
-[Msg_AddMinion] New Minion Cairne (2EB9C50) 4/5 on the board for [jerome (Jaina) 30HP]
-[Msg_MinionPopup] Minion Cairne (2EB9C50) 4/5 pops up
-[Act_SingleSpellDamageCard] Card Faux Sort de dommage 2 (1): Deal 2 points of damage
-[Msg_PlayCard] [jerome (Jaina) 30HP] plays Faux Sort de dommage 2 (1): Deal 2 points of damage
-[Msg_UseMana] Player [jerome (Jaina) 30HP] loses 1 mana crystal
-[Msg_ThrowCard] Player [jerome (Jaina) 30HP] loses Faux Sort de dommage 2 (1): Deal 2 points of damage
-[Msg_StartSpell] Player [jerome (Jaina) 30HP] plays spell [Faux Sort de dommage 2 (1): Deal 2 points of damage]
-[Msg_SpellDamage] [IA (Anduin) 21HP] takes 2 damage from [jerome (Jaina) 30HP].
-[Msg_Status] Change of status for [IA (Anduin) 21HP]: {hp=21}
-[Msg_EndSpell] End of spell.
+[Act_EndTurn] End turn
+[Msg_EndTurn] End of turn for [jerome (Jaina) 30HP]
+[Msg_StartTurn] Start of turn for [IA (Anduin) 23HP] 
+[Msg_DrawCard] [IA (Anduin) 23HP] draw Oeuf de Nerubien (2): 0/2  from the deck
+[Act_PlayWeaponCard] Card Weapon  (3): 3/2 
+[Msg_PlayCard] [IA (Anduin) 23HP] plays Weapon  (3): 3/2 
+[Msg_UseMana] Player [IA (Anduin) 23HP] loses 3 mana crystal
+[Msg_ThrowCard] Player [IA (Anduin) 23HP] loses Weapon  (3): 3/2 
+[Msg_AddWeapon] [IA (Anduin) 23HP] equipped a Weapon Fake Weapon 3 (2EE6A90) 3/2
+[Msg_WeaponPopup] Weapon Fake Weapon 3 (2EE6A90) 3/2 pops up
+[Act_PlayWeaponCard] Card Weapon  (1): 1/2 
+[Msg_PlayCard] [IA (Anduin) 23HP] plays Weapon  (1): 1/2 
+[Msg_UseMana] Player [IA (Anduin) 23HP] loses 1 mana crystal
+[Msg_ThrowCard] Player [IA (Anduin) 23HP] loses Weapon  (1): 1/2 
+[Msg_AddWeapon] [IA (Anduin) 23HP] equipped a Weapon Fake Weapon 1 (2EE6BD0) 1/2
+[Msg_WeaponPopup] Weapon Fake Weapon 1 (2EE6BD0) 1/2 pops up
+[Act_HeroPower] Hero Power (2): heals a character by 2HP
+[Msg_UseMana] Player [IA (Anduin) 25HP] loses 2 mana crystal
+[Msg_StartHeroPower] [[IA (Anduin) 25HP]] uses its hero power
+[Msg_HeroHeal] [IA (Anduin) 25HP] heals [IA (Anduin) 25HP] by 2HP.
+[Msg_Status] Change of status for [IA (Anduin) 25HP]: {hp=25}
+[Msg_EndHeroPower] End of hero power effect
+[Act_WeaponAttack] Attack with Weapon Fake Weapon 1 (2EE6BD0) 1/1
+[Msg_Status] Change of status for Weapon Fake Weapon 1 (2EE6BD0) 1/1: {hp=1}
+[Msg_StartAttack] Minion Weapon Fake Weapon 1 (2EE6BD0) 1/1 attacks enemy [jerome (Jaina) 29HP]
+[Msg_Damage] [jerome (Jaina) 29HP] takes 1 damage from Weapon Fake Weapon 1 (2EE6BD0) 1/1.
+[Msg_Status] Change of status for [jerome (Jaina) 29HP]: {hp=29}
+[Msg_EndAttack] End of attack.
+[Act_EndTurn] End turn
+[Msg_EndTurn] End of turn for [IA (Anduin) 25HP]
+[Msg_StartTurn] Start of turn for [jerome (Jaina) 29HP] 
+[Msg_DrawCard] [jerome (Jaina) 29HP] draw Sergent Grossier (1): 2/1  from the deck
 [Act_HeroPower] Hero Power (2): deals 1 damage to a character
-[Msg_UseMana] Player [jerome (Jaina) 30HP] loses 2 mana crystal
-[Msg_StartHeroPower] [[jerome (Jaina) 30HP]] uses its hero power
-[Msg_HeroDamage] [IA (Anduin) 20HP] takes 1 damage from [jerome (Jaina) 30HP].
+[Msg_UseMana] Player [jerome (Jaina) 29HP] loses 2 mana crystal
+[Msg_StartHeroPower] [[jerome (Jaina) 29HP]] uses its hero power
+[Msg_HeroDamage] Minion Harvest Golem (2EE6D50) 2/2 takes 1 damage from [jerome (Jaina) 29HP].
+[Msg_Status] Change of status for Minion Harvest Golem (2EE6D50) 2/2: {hp=2}
+[Msg_EndHeroPower] End of hero power effect
+[Act_MinionAttack] Attack with Minion Harvest Golem (2EE6770) 2/0
+[Msg_StartAttack] Minion Minion Harvest Golem (2EE6770) 2/0 attacks enemy Minion Harvest Golem (2EE6D50) 2/0
+[Msg_Damage] Minion Harvest Golem (2EE6D50) 2/0 takes 2 damage from Minion Harvest Golem (2EE6770) 2/0.
+[Msg_Status] Change of status for Minion Harvest Golem (2EE6D50) 2/0: {hp=0}
+[Msg_Damage] Minion Harvest Golem (2EE6770) 2/0 takes 2 damage from Minion Harvest Golem (2EE6D50) 2/0.
+[Msg_Status] Change of status for Minion Harvest Golem (2EE6770) 2/0: {hp=0}
+[Msg_CheckDead] Minion Harvest Golem (2EE6D50) 2/0 asks for dead cleaning.
+[Msg_DeadMinion] Minion Harvest Golem (2EE6D50) 2/0 dies.
+[Msg_DeathRattle] Death rattle casted by Minion Harvest Golem (2EE6D50) 2/0: New Minion Damaged Golem (2EB5730) 2/1 on the board for [IA (Anduin) 25HP]
+[Msg_DeadMinion] Minion Harvest Golem (2EE6770) 2/0 dies.
+[Msg_DeathRattle] Death rattle casted by Minion Harvest Golem (2EE6770) 2/0: New Minion Damaged Golem (2EB5690) 2/1 on the board for [jerome (Jaina) 29HP]
+[Msg_CheckDead] Minion Harvest Golem (2EE6770) 2/0 asks for dead cleaning.
+[Msg_AddMinion] New Minion Damaged Golem (2EB5730) 2/1 on the board for [IA (Anduin) 25HP]
+[Msg_MinionPopup] Minion Damaged Golem (2EB5730) 2/1 pops up
+[Msg_AddMinion] New Minion Damaged Golem (2EB5690) 2/1 on the board for [jerome (Jaina) 29HP]
+[Msg_MinionPopup] Minion Damaged Golem (2EB5690) 2/1 pops up
+[Msg_EndAttack] End of attack.
+[Act_PlayMinionCard_BC] Card Sergent Grossier (1): 2/1 
+[Msg_PlayCard] [jerome (Jaina) 29HP] plays Sergent Grossier (1): 2/1 
+[Msg_UseMana] Player [jerome (Jaina) 29HP] loses 1 mana crystal
+[Msg_ThrowCard] Player [jerome (Jaina) 29HP] loses Sergent Grossier (1): 2/1 
+[Msg_AddMinion] New Minion Abusive Sergeant (2EB5790) 2/1 on the board for [jerome (Jaina) 29HP]
+[Msg_MinionPopup] Minion Abusive Sergeant (2EB5790) 2/1 pops up
+[Msg_BindEffect] Minion Abusive Sergeant (2EB5790) 2/1 binds effect [buff +2/+0 (temporary)] to Minion Damaged Golem (2EB5690) 4/1.
+[Msg_Status] Change of status for Minion Damaged Golem (2EB5690) 4/1: {atq=4, max_atq=4}
+[Act_SingleSpellDamageCard] Card Faux Sort de dommage 5 (4): Deal 5 points of damage
+[Msg_PlayCard] [jerome (Jaina) 29HP] plays Faux Sort de dommage 5 (4): Deal 5 points of damage
+[Msg_UseMana] Player [jerome (Jaina) 29HP] loses 4 mana crystal
+[Msg_ThrowCard] Player [jerome (Jaina) 29HP] loses Faux Sort de dommage 5 (4): Deal 5 points of damage
+[Msg_StartSpell] Player [jerome (Jaina) 29HP] plays spell [Faux Sort de dommage 5 (4): Deal 5 points of damage]
+[Msg_SpellDamage] [IA (Anduin) 20HP] takes 5 damage from [jerome (Jaina) 29HP].
 [Msg_Status] Change of status for [IA (Anduin) 20HP]: {hp=20}
-[Msg_EndHeroPower] End of hero power effect
-[Act_EndTurn] End turn
-[Msg_EndTurn] End of turn for [jerome (Jaina) 30HP]
-[Msg_StartTurn] Start of turn for [IA (Anduin) 20HP] 
-[Msg_DrawCard] [IA (Anduin) 20HP] draw Faux Sort de dommage 4 (3): Deal 4 points of damage from the deck
-[Act_PlayMinionCard_BC] Card Sergent Grossier (1): 2/1 
-[Msg_PlayCard] [IA (Anduin) 20HP] plays Sergent Grossier (1): 2/1 
-[Msg_UseMana] Player [IA (Anduin) 20HP] loses 1 mana crystal
-[Msg_ThrowCard] Player [IA (Anduin) 20HP] loses Sergent Grossier (1): 2/1 
-[Msg_AddMinion] New Minion Abusive Sergeant (2EB9D90) 2/1 on the board for [IA (Anduin) 20HP]
-[Msg_MinionPopup] Minion Abusive Sergeant (2EB9D90) 2/1 pops up
-[Msg_BindEffect] Minion Abusive Sergeant (2EB9D90) 2/1 binds effect [buff +2/+0 (temporary)] to Minion Cairne (2EB9C50) 6/5.
-[Msg_Status] Change of status for Minion Cairne (2EB9C50) 6/5: {atq=6, max_atq=6}
-[Act_SingleSpellDamageCard] Card Faux Sort de dommage 4 (3): Deal 4 points of damage
-[Msg_PlayCard] [IA (Anduin) 20HP] plays Faux Sort de dommage 4 (3): Deal 4 points of damage
-[Msg_UseMana] Player [IA (Anduin) 20HP] loses 3 mana crystal
-[Msg_ThrowCard] Player [IA (Anduin) 20HP] loses Faux Sort de dommage 4 (3): Deal 4 points of damage
-[Msg_StartSpell] Player [IA (Anduin) 20HP] plays spell [Faux Sort de dommage 4 (3): Deal 4 points of damage]
-[Msg_SpellDamage] Minion Wisp (2EB98D0) 1/-3 takes 4 damage from [IA (Anduin) 20HP].
-[Msg_Status] Change of status for Minion Wisp (2EB98D0) 1/-3: {hp=-3}
-[Msg_CheckDead] Minion Wisp (2EB98D0) 1/-3 asks for dead cleaning.
-[Msg_Status] Change of status for Minion Wisp (2EB98D0) 1/-3: {hp=-3, max_hp=1, atq=1, max_atq=1, effects=['silence']}
-[Msg_DeadMinion] Minion Wisp (2EB98D0) 1/-3 dies.
 [Msg_EndSpell] End of spell.
-[Act_WeaponAttack] Attack with Weapon Fake Weapon 1 (2EB99D0) 1/1
-[Msg_Status] Change of status for Weapon Fake Weapon 1 (2EB99D0) 1/1: {hp=1}
-[Msg_StartAttack] Minion Weapon Fake Weapon 1 (2EB99D0) 1/1 attacks enemy Minion Sludge Belcher (2EB9B50) 3/4
-[Msg_Damage] Minion Sludge Belcher (2EB9B50) 3/4 takes 1 damage from Weapon Fake Weapon 1 (2EB99D0) 1/1.
-[Msg_Status] Change of status for Minion Sludge Belcher (2EB9B50) 3/4: {hp=4}
-[Msg_Damage] [IA (Anduin) 17HP] takes 3 damage from Minion Sludge Belcher (2EB9B50) 3/4.
-[Msg_Status] Change of status for [IA (Anduin) 17HP]: {hp=17}
+[Act_PlayWeaponCard] Card Weapon  (2): 2/2 
+[Msg_PlayCard] [jerome (Jaina) 29HP] plays Weapon  (2): 2/2 
+[Msg_UseMana] Player [jerome (Jaina) 29HP] loses 2 mana crystal
+[Msg_ThrowCard] Player [jerome (Jaina) 29HP] loses Weapon  (2): 2/2 
+[Msg_AddWeapon] [jerome (Jaina) 29HP] equipped a Weapon Fake Weapon 2 (2EB5750) 2/2
+[Msg_WeaponPopup] Weapon Fake Weapon 2 (2EB5750) 2/2 pops up
+[Act_WeaponAttack] Attack with Weapon Fake Weapon 2 (2EB5750) 2/1
+[Msg_Status] Change of status for Weapon Fake Weapon 2 (2EB5750) 2/1: {hp=1}
+[Msg_StartAttack] Minion Weapon Fake Weapon 2 (2EB5750) 2/1 attacks enemy [IA (Anduin) 18HP]
+[Msg_Damage] [IA (Anduin) 18HP] takes 2 damage from Weapon Fake Weapon 2 (2EB5750) 2/1.
+[Msg_Status] Change of status for [IA (Anduin) 18HP]: {hp=18}
 [Msg_EndAttack] End of attack.
 [Act_EndTurn] End turn
-[Msg_EndTurn] End of turn for [IA (Anduin) 17HP]
-[Msg_Status] Change of status for Minion Cairne (2EB9C50) 4/5: {atq=4, max_atq=4}
-[Msg_StartTurn] Start of turn for [jerome (Jaina) 30HP] 
-[Msg_DrawCard] [jerome (Jaina) 30HP] draw Sergent Grossier (1): 2/1  from the deck
-[Act_PlayMinionCard_BC] Card Sergent Grossier (1): 2/1 
-[Msg_PlayCard] [jerome (Jaina) 30HP] plays Sergent Grossier (1): 2/1 
-[Msg_UseMana] Player [jerome (Jaina) 30HP] loses 1 mana crystal
-[Msg_ThrowCard] Player [jerome (Jaina) 30HP] loses Sergent Grossier (1): 2/1 
-[Msg_AddMinion] New Minion Abusive Sergeant (2EB9930) 2/1 on the board for [jerome (Jaina) 30HP]
-[Msg_MinionPopup] Minion Abusive Sergeant (2EB9930) 2/1 pops up
-[Msg_BindEffect] Minion Abusive Sergeant (2EB9930) 2/1 binds effect [buff +2/+0 (temporary)] to Minion Cairne (2EB9C50) 6/5.
-[Msg_Status] Change of status for Minion Cairne (2EB9C50) 6/5: {atq=6, max_atq=6}
-[Act_MinionAttack] Attack with Minion Cairne (2EB9C50) 6/5
-[Msg_StartAttack] Minion Minion Cairne (2EB9C50) 6/5 attacks enemy [IA (Anduin) 11HP]
-[Msg_Damage] [IA (Anduin) 11HP] takes 6 damage from Minion Cairne (2EB9C50) 6/5.
-[Msg_Status] Change of status for [IA (Anduin) 11HP]: {hp=11}
-[Msg_EndAttack] End of attack.
-[Act_MinionAttack] Attack with Minion Harvest Golem (2EB9BD0) 2/3
-[Msg_StartAttack] Minion Minion Harvest Golem (2EB9BD0) 2/3 attacks enemy [IA (Anduin) 9HP]
-[Msg_Damage] [IA (Anduin) 9HP] takes 2 damage from Minion Harvest Golem (2EB9BD0) 2/3.
-[Msg_Status] Change of status for [IA (Anduin) 9HP]: {hp=9}
+[Msg_EndTurn] End of turn for [jerome (Jaina) 29HP]
+[Msg_Status] Change of status for Minion Damaged Golem (2EB5690) 2/1: {atq=2, max_atq=2}
+[Msg_StartTurn] Start of turn for [IA (Anduin) 18HP] 
+[Msg_DrawCard] [IA (Anduin) 18HP] draw Defenseur d'Argus (4): 2/3  from the deck
+[Act_EndTurn] End turn
+[Msg_EndTurn] End of turn for [IA (Anduin) 18HP]
+[Msg_StartTurn] Start of turn for [jerome (Jaina) 29HP] 
+[Msg_DrawCard] [jerome (Jaina) 29HP] draw Protectrice Solfury (2): 2/3  from the deck
+[Act_PlayMinionCard_BC] Card Protectrice Solfury (2): 2/3 
+[Msg_PlayCard] [jerome (Jaina) 29HP] plays Protectrice Solfury (2): 2/3 
+[Msg_UseMana] Player [jerome (Jaina) 29HP] loses 2 mana crystal
+[Msg_ThrowCard] Player [jerome (Jaina) 29HP] loses Protectrice Solfury (2): 2/3 
+[Msg_AddMinion] New Minion Sunfury Protector (2EB5770) 2/3 on the board for [jerome (Jaina) 29HP]
+[Msg_MinionPopup] Minion Sunfury Protector (2EB5770) 2/3 pops up
+[Msg_BindEffect] Minion Sunfury Protector (2EB5770) 2/3 binds effect [buff +0/+0] to Minion Damaged Golem (2EB5690) 2/1.
+[Msg_Status] Change of status for Minion Damaged Golem (2EB5690) 2/1: {effects=[<effects.Eff_BuffMinion object at 0x02EE6FD0>, 'taunt']}
+[Msg_BindEffect] Minion Sunfury Protector (2EB5770) 2/3 binds effect [buff +0/+0] to Minion Abusive Sergeant (2EB5790) 2/1.
+[Msg_Status] Change of status for Minion Abusive Sergeant (2EB5790) 2/1: {effects=[<effects.Eff_BuffMinion object at 0x02EE6FD0>, 'taunt']}
+[Act_MinionAttack] Attack with Minion Damaged Golem (2EB5690) 2/1
+[Msg_StartAttack] Minion Minion Damaged Golem (2EB5690) 2/1 attacks enemy [IA (Anduin) 16HP]
+[Msg_Damage] [IA (Anduin) 16HP] takes 2 damage from Minion Damaged Golem (2EB5690) 2/1.
+[Msg_Status] Change of status for [IA (Anduin) 16HP]: {hp=16}
 [Msg_EndAttack] End of attack.
 [Act_HeroPower] Hero Power (2): deals 1 damage to a character
-[Msg_UseMana] Player [jerome (Jaina) 30HP] loses 2 mana crystal
-[Msg_StartHeroPower] [[jerome (Jaina) 30HP]] uses its hero power
-[Msg_HeroDamage] [IA (Anduin) 8HP] takes 1 damage from [jerome (Jaina) 30HP].
-[Msg_Status] Change of status for [IA (Anduin) 8HP]: {hp=8}
+[Msg_UseMana] Player [jerome (Jaina) 29HP] loses 2 mana crystal
+[Msg_StartHeroPower] [[jerome (Jaina) 29HP]] uses its hero power
+[Msg_HeroDamage] Minion Damaged Golem (2EB5730) 2/0 takes 1 damage from [jerome (Jaina) 29HP].
+[Msg_Status] Change of status for Minion Damaged Golem (2EB5730) 2/0: {hp=0}
+[Msg_CheckDead] Minion Damaged Golem (2EB5730) 2/0 asks for dead cleaning.
+[Msg_DeadMinion] Minion Damaged Golem (2EB5730) 2/0 dies.
 [Msg_EndHeroPower] End of hero power effect
-[Act_MinionAttack] Attack with Minion Sludge Belcher (2EB9B50) 3/4
-[Msg_StartAttack] Minion Minion Sludge Belcher (2EB9B50) 3/4 attacks enemy [IA (Anduin) 5HP]
-[Msg_Damage] [IA (Anduin) 5HP] takes 3 damage from Minion Sludge Belcher (2EB9B50) 3/4.
-[Msg_Status] Change of status for [IA (Anduin) 5HP]: {hp=5}
+[Act_MinionAttack] Attack with Minion Abusive Sergeant (2EB5790) 2/1
+[Msg_StartAttack] Minion Minion Abusive Sergeant (2EB5790) 2/1 attacks enemy [IA (Anduin) 14HP]
+[Msg_Damage] [IA (Anduin) 14HP] takes 2 damage from Minion Abusive Sergeant (2EB5790) 2/1.
+[Msg_Status] Change of status for [IA (Anduin) 14HP]: {hp=14}
+[Msg_EndAttack] End of attack.
+[Act_PlayWeaponCard] Card Weapon  (4): 4/2 
+[Msg_PlayCard] [jerome (Jaina) 29HP] plays Weapon  (4): 4/2 
+[Msg_UseMana] Player [jerome (Jaina) 29HP] loses 4 mana crystal
+[Msg_ThrowCard] Player [jerome (Jaina) 29HP] loses Weapon  (4): 4/2 
+[Msg_AddWeapon] [jerome (Jaina) 29HP] equipped a Weapon Fake Weapon 4 (2EB5F30) 4/2
+[Msg_WeaponPopup] Weapon Fake Weapon 4 (2EB5F30) 4/2 pops up
+[Act_WeaponAttack] Attack with Weapon Fake Weapon 4 (2EB5F30) 4/1
+[Msg_Status] Change of status for Weapon Fake Weapon 4 (2EB5F30) 4/1: {hp=1}
+[Msg_StartAttack] Minion Weapon Fake Weapon 4 (2EB5F30) 4/1 attacks enemy [IA (Anduin) 10HP]
+[Msg_Damage] [IA (Anduin) 10HP] takes 4 damage from Weapon Fake Weapon 4 (2EB5F30) 4/1.
+[Msg_Status] Change of status for [IA (Anduin) 10HP]: {hp=10}
 [Msg_EndAttack] End of attack.
 [Act_EndTurn] End turn
-[Msg_EndTurn] End of turn for [jerome (Jaina) 30HP]
-[Msg_Status] Change of status for Minion Cairne (2EB9C50) 4/5: {atq=4, max_atq=4}
-[Msg_StartTurn] Start of turn for [IA (Anduin) 5HP] 
-[Msg_DrawCard] [IA (Anduin) 5HP] draw Soldat de Comte de l'Or (1): 1/2 Taunt from the deck
-[Act_EndTurn] End turn
-[Msg_EndTurn] End of turn for [IA (Anduin) 5HP]
-[Msg_StartTurn] Start of turn for [jerome (Jaina) 30HP] 
-[Msg_DrawCard] [jerome (Jaina) 30HP] draw Faux Sort de dommage 1 (0): Deal 1 points of damage from the deck
-[Act_EndTurn] End turn
-[Msg_EndTurn] End of turn for [jerome (Jaina) 30HP]
-[Msg_StartTurn] Start of turn for [IA (Anduin) 5HP] 
-[Msg_DrawCard] [IA (Anduin) 5HP] draw Defenseur d'Argus (4): 2/3  from the deck
-[Act_SingleSpellDamageCard] Card Faux Sort de dommage 2 (1): Deal 2 points of damage
-[Msg_PlayCard] [IA (Anduin) 5HP] plays Faux Sort de dommage 2 (1): Deal 2 points of damage
-[Msg_UseMana] Player [IA (Anduin) 5HP] loses 1 mana crystal
-[Msg_ThrowCard] Player [IA (Anduin) 5HP] loses Faux Sort de dommage 2 (1): Deal 2 points of damage
-[Msg_StartSpell] Player [IA (Anduin) 5HP] plays spell [Faux Sort de dommage 2 (1): Deal 2 points of damage]
-[Msg_SpellDamage] Minion Harvest Golem (2EB9BD0) 2/1 takes 2 damage from [IA (Anduin) 5HP].
-[Msg_Status] Change of status for Minion Harvest Golem (2EB9BD0) 2/1: {hp=1}
-[Msg_EndSpell] End of spell.
-[Act_EndTurn] End turn
-[Msg_EndTurn] End of turn for [IA (Anduin) 5HP]
-[Msg_StartTurn] Start of turn for [jerome (Jaina) 30HP] 
-[Msg_DrawCard] [jerome (Jaina) 30HP] draw Faux Sort de dommage 3 (2): Deal 3 points of damage from the deck
-[Act_EndTurn] End turn
-[Msg_EndTurn] End of turn for [jerome (Jaina) 30HP]
-[Msg_StartTurn] Start of turn for [IA (Anduin) 5HP] 
-[Msg_DrawCard] [IA (Anduin) 5HP] draw Yeti Noroit (4): 4/5  from the deck
-[Act_WeaponAttack] Attack with Weapon Fake Weapon 1 (2EB99D0) 1/0
-[Msg_Status] Change of status for Weapon Fake Weapon 1 (2EB99D0) 1/0: {hp=0}
-[Msg_StartAttack] Minion Weapon Fake Weapon 1 (2EB99D0) 1/0 attacks enemy Minion Sludge Belcher (2EB9B50) 3/3
-[Msg_Damage] Minion Sludge Belcher (2EB9B50) 3/3 takes 1 damage from Weapon Fake Weapon 1 (2EB99D0) 1/0.
-[Msg_Status] Change of status for Minion Sludge Belcher (2EB9B50) 3/3: {hp=3}
-[Msg_Damage] [IA (Anduin) 2HP] takes 3 damage from Minion Sludge Belcher (2EB9B50) 3/3.
-[Msg_Status] Change of status for [IA (Anduin) 2HP]: {hp=2}
-[Msg_CheckDead] Weapon Fake Weapon 1 (2EB99D0) 1/0 asks for dead cleaning.
-[Msg_Status] Change of status for Weapon Fake Weapon 1 (2EB99D0) 1/0: {hp=0, max_hp=2, atq=1, max_atq=1, effects=['silence']}
-[Msg_DeadWeapon] Weapon Fake Weapon 1 (2EB99D0) 1/0 dies.
-[Msg_EndAttack] End of attack.
-[Act_PlayMinionCard_BC] Card Defenseur d'Argus (4): 2/3 
-[Msg_PlayCard] [IA (Anduin) 2HP] plays Defenseur d'Argus (4): 2/3 
-[Msg_UseMana] Player [IA (Anduin) 2HP] loses 4 mana crystal
-[Msg_ThrowCard] Player [IA (Anduin) 2HP] loses Defenseur d'Argus (4): 2/3 
-[Msg_AddMinion] New Minion Defender of Argus (2EBF6D0) 2/3 on the board for [IA (Anduin) 2HP]
-[Msg_MinionPopup] Minion Defender of Argus (2EBF6D0) 2/3 pops up
-[Msg_BindEffect] Minion Defender of Argus (2EBF6D0) 2/3 binds effect [buff +1/+1] to Minion Abusive Sergeant (2EB9D90) 3/2.
-[Msg_Status] Change of status for Minion Abusive Sergeant (2EB9D90) 3/2: {hp=2, max_hp=2}
-[Msg_Status] Change of status for Minion Abusive Sergeant (2EB9D90) 3/2: {atq=3, max_atq=3}
-[Msg_Status] Change of status for Minion Abusive Sergeant (2EB9D90) 3/2: {effects=[<effects.Eff_BuffMinion object at 0x02EBFAB0>, 'taunt']}
-[Act_PlaySpellCard] Card  (0): Gain one mana crystal this turn only
-[Msg_PlayCard] [IA (Anduin) 2HP] plays  (0): Gain one mana crystal this turn only
-[Msg_UseMana] Player [IA (Anduin) 2HP] loses 0 mana crystal
-[Msg_ThrowCard] Player [IA (Anduin) 2HP] loses  (0): Gain one mana crystal this turn only
-[Msg_StartSpell] Player [IA (Anduin) 2HP] plays spell [ (0): Gain one mana crystal this turn only]
-[Msg_GainMana] Player [IA (Anduin) 2HP] gain 1 mana crystal
-[Msg_EndSpell] End of spell.
-[Act_MinionAttack] Attack with Minion Abusive Sergeant (2EB9D90) 2/-1
-[Msg_StartAttack] Minion Minion Abusive Sergeant (2EB9D90) 2/-1 attacks enemy Minion Sludge Belcher (2EB9B50) 3/0
-[Msg_Damage] Minion Sludge Belcher (2EB9B50) 3/0 takes 3 damage from Minion Abusive Sergeant (2EB9D90) 2/-1.
-[Msg_Status] Change of status for Minion Sludge Belcher (2EB9B50) 3/0: {hp=0}
-[Msg_Damage] Minion Abusive Sergeant (2EB9D90) 2/-1 takes 3 damage from Minion Sludge Belcher (2EB9B50) 3/0.
-[Msg_Status] Change of status for Minion Abusive Sergeant (2EB9D90) 2/-1: {hp=-1}
-[Msg_CheckDead] Minion Sludge Belcher (2EB9B50) 3/0 asks for dead cleaning.
-[Msg_Status] Change of status for Minion Sludge Belcher (2EB9B50) 3/0: {hp=0, max_hp=5, atq=3, max_atq=3, effects=['silence']}
-[Msg_DeadMinion] Minion Sludge Belcher (2EB9B50) 3/0 dies.
-[Msg_Status] Change of status for Minion Abusive Sergeant (2EB9D90) 2/-1: {hp=-1, max_hp=1}
-[Msg_Status] Change of status for Minion Abusive Sergeant (2EB9D90) 2/-1: {atq=2, max_atq=2}
-[Msg_Status] Change of status for Minion Abusive Sergeant (2EB9D90) 2/-1: {hp=-1, max_hp=1, atq=2, max_atq=2, effects=['silence']}
-[Msg_DeadMinion] Minion Abusive Sergeant (2EB9D90) 2/-1 dies.
-[Msg_CheckDead] Minion Abusive Sergeant (2EB9D90) 2/-1 asks for dead cleaning.
-[Msg_DeathRattle] Death rattle casted by Minion Sludge Belcher (2EB9B50) 3/0: New Minion Slime (2833310) 1/2 on the board for [jerome (Jaina) 30HP] (immediate)
-[Msg_AddMinion] New Minion Slime (2833310) 1/2 on the board for [jerome (Jaina) 30HP]
-[Msg_MinionPopup] Minion Slime (2833310) 1/2 pops up
-[Msg_CheckDead] Minion Abusive Sergeant (2EB9D90) 2/-1 asks for dead cleaning.
-[Msg_EndAttack] End of attack.
-[Act_PlayMinionCard] Card Soldat de Comte de l'Or (1): 1/2 Taunt
-[Msg_PlayCard] [IA (Anduin) 2HP] plays Soldat de Comte de l'Or (1): 1/2 Taunt
-[Msg_UseMana] Player [IA (Anduin) 2HP] loses 1 mana crystal
-[Msg_ThrowCard] Player [IA (Anduin) 2HP] loses Soldat de Comte de l'Or (1): 1/2 Taunt
-[Msg_AddMinion] New Minion Goldshire Footman (2EB9790) 1/2 on the board for [IA (Anduin) 2HP]
-[Msg_MinionPopup] Minion Goldshire Footman (2EB9790) 1/2 pops up
-[Act_EndTurn] End turn
-[Msg_EndTurn] End of turn for [IA (Anduin) 2HP]
-[Msg_StartTurn] Start of turn for [jerome (Jaina) 30HP] 
-[Msg_DrawCard] [jerome (Jaina) 30HP] draw Soldat de Comte de l'Or (1): 1/2 Taunt from the deck
-[Act_PlayMinionCard] Card Soldat de Comte de l'Or (1): 1/2 Taunt
-[Msg_PlayCard] [jerome (Jaina) 30HP] plays Soldat de Comte de l'Or (1): 1/2 Taunt
-[Msg_UseMana] Player [jerome (Jaina) 30HP] loses 1 mana crystal
-[Msg_ThrowCard] Player [jerome (Jaina) 30HP] loses Soldat de Comte de l'Or (1): 1/2 Taunt
-[Msg_AddMinion] New Minion Goldshire Footman (2EB9950) 1/2 on the board for [jerome (Jaina) 30HP]
-[Msg_MinionPopup] Minion Goldshire Footman (2EB9950) 1/2 pops up
-[Act_SingleSpellDamageCard] Card Faux Sort de dommage 3 (2): Deal 3 points of damage
-[Msg_PlayCard] [jerome (Jaina) 30HP] plays Faux Sort de dommage 3 (2): Deal 3 points of damage
-[Msg_UseMana] Player [jerome (Jaina) 30HP] loses 2 mana crystal
-[Msg_ThrowCard] Player [jerome (Jaina) 30HP] loses Faux Sort de dommage 3 (2): Deal 3 points of damage
-[Msg_StartSpell] Player [jerome (Jaina) 30HP] plays spell [Faux Sort de dommage 3 (2): Deal 3 points of damage]
-[Msg_SpellDamage] Minion Goldshire Footman (2EB9790) 1/-1 takes 3 damage from [jerome (Jaina) 30HP].
-[Msg_Status] Change of status for Minion Goldshire Footman (2EB9790) 1/-1: {hp=-1}
-[Msg_CheckDead] Minion Goldshire Footman (2EB9790) 1/-1 asks for dead cleaning.
-[Msg_Status] Change of status for Minion Goldshire Footman (2EB9790) 1/-1: {hp=-1, max_hp=2, atq=1, max_atq=1, effects=['silence']}
-[Msg_DeadMinion] Minion Goldshire Footman (2EB9790) 1/-1 dies.
-[Msg_EndSpell] End of spell.
-[Act_MinionAttack] Attack with Minion Cairne (2EB9C50) 4/5
-[Msg_StartAttack] Minion Minion Cairne (2EB9C50) 4/5 attacks enemy [IA (Anduin) -2HP]
-[Msg_Damage] [IA (Anduin) -2HP] takes 4 damage from Minion Cairne (2EB9C50) 4/5.
-[Msg_Status] Change of status for [IA (Anduin) -2HP]: {hp=-2}
-[Msg_CheckDead] [IA (Anduin) -2HP] asks for dead cleaning.
-[Msg_Status] Change of status for [IA (Anduin) -2HP]: {hp=-2, max_hp=30, atq=0, max_atq=0, effects=['silence']}
-[Msg_DeadHero] [IA (Anduin) -2HP] dies.
-[Msg_EndAttack] End of attack.
+[Msg_EndTurn] End of turn for [jerome (Jaina) 29HP]
+[Msg_StartTurn] Start of turn for [IA (Anduin) 10HP] 
+[Msg_DrawCard] [IA (Anduin) 10HP] draw Protectrice Solfury (2): 2/3  from the deck
+[Act_HeroPower] Hero Power (2): heals a character by 2HP
+[Msg_UseMana] Player [IA (Anduin) 12HP] loses 2 mana crystal
+[Msg_StartHeroPower] [[IA (Anduin) 12HP]] uses its hero power
+[Msg_HeroHeal] [IA (Anduin) 12HP] heals [IA (Anduin) 12HP] by 2HP.
+[Msg_Status] Change of status for [IA (Anduin) 12HP]: {hp=12}
+[Msg_EndHeroPower] End of hero power effect
+[Act_WeaponAttack] Attack with Weapon Fake Weapon 1 (2EE6BD0) 1/0
+[Msg_Status] Change of status for Weapon Fake Weapon 1 (2EE6BD0) 1/0: {hp=0}
+[Msg_StartAttack] Minion Weapon Fake Weapon 1 (2EE6BD0) 1/0 attacks enemy Minion Abusive Sergeant (2EB5790) 2/0
