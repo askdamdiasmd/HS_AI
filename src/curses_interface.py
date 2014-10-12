@@ -710,6 +710,8 @@ def draw_Msg_SecretPopup(self):
 
 def draw_Msg_DeadMinion(self):
     dead_minion = self.caster
+    if dead_minion not in dead_minion.owner.viz.minions:  
+      return # sometimes, it is already dead
     dead_minion.viz.delete()
     if self.engine.board.viz.animated:
       pl = dead_minion.owner

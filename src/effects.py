@@ -96,23 +96,25 @@ class Eff_DR_Invoke_Minion (Effect):
 
 class Eff_BuffMinion (Effect):
     """ buff a minion (just for this turn of permanent) """
-    def __init__(self, atq, hp, temp=False, others=None):
+    def __init__(self, atq, hp, temp=False, others=''):
         Effect.__init__(self)
         self.atq = atq    # buff atq
         self.hp = hp      # buff hp
         self.temp = temp  # temporary effect ? (one turn)
+        assert type(others)==str
         assert not(others and self.temp), "error: buff cannot be temporary if other effects"
-        if type(others)==str: others=others.split()
-        self.others = others
+        self.others = others.split() # simple effects like taunt, windfury ...
     def __str__(self):
-        others = (' '+' '.join([str(e) for e in self.others])) if None else ''
+        buff = "buff %+d/%+d" % (self.atq, self.hp) if (self.hp and self.atq) else ''
+        others = (' '+' '.join([str(e) for e in self.others])) if self.others else ''
         temp = self.temp and " (temporary)" or ""
-        return "buff %+d/%+d%s%s" % (self.atq, self.hp, others, temp)
+        return "%s%s%s" % (buff, others, temp)
     def bind_to(self, owner):
         self.owner = owner
-        owner.effects.append(self)
-        if self.temp: 
-          owner.triggers.append((Msg_EndTurn, self))
+        if self.hp and self.atq:  # we don't care if just taunt
+          owner.effects.append(self)
+          if self.temp: 
+            owner.triggers.append((Msg_EndTurn, self))
         self.execute()
     def execute(self):
         if self.hp:   self.owner.change_hp(self.hp)
@@ -123,10 +125,26 @@ class Eff_BuffMinion (Effect):
         self.owner.triggers.remove((Msg_EndTurn, self))
         self.owner.effects.remove(self)
         self.undo()
-        return True
     def undo(self):
         if self.hp: self.owner.change_hp(-self.hp)
         if self.atq: self.owner.change_atq(-self.atq)
+
+
+class Eff_DieSoon (Effect):
+    """ buff a minion (just for this turn of permanent) """
+    def __init__(self, death_trigger, condition=lambda self,msg:True):
+        Effect.__init__(self)
+        self.death_trigger = death_trigger    # type, ex: Msg_EndTurn
+        self.condition = condition
+    def __str__(self):
+        return "Death on %s" % (self.death_trigger.__name__)
+    def bind_to(self, owner):
+        self.owner = owner
+        owner.triggers.append((self.death_trigger, self))
+    def trigger(self, msg): # end of temporary effect
+        if self.condition(self,msg):
+          self.owner.dead = True
+          self.owner.ask_for_death()
 
 
 class Eff_BuffLeftRight (Effect):

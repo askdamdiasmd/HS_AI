@@ -40,6 +40,18 @@ class Card (object):
     def list_actions(self):
         assert 0, "must be overloaded"
 
+    def list_targets(self, targets ): # helper function
+        if targets=='none':
+          return []
+        elif targets=='friendly minions':
+          return self.engine.board.get_friendly_minions(self.owner)
+        elif targets=='minions':
+          return self.engine.board.get_minions()
+        elif targets=='neighbors':
+          return 'neighbors'
+        else:
+          assert False, "error: unknown target '%s'" % targets
+
 
 ### --------------- Minion cards ----------------------
 
@@ -64,16 +76,7 @@ class Card_Minion_BC (Card_Minion):
         self.battlecry = battlecry
         self.targets = targets
     def list_actions(self):
-        if self.targets=='none':
-          targets = []
-        elif self.targets=='friendly_minions':
-          targets = self.engine.board.get_friendly_minions(self.owner)
-        elif self.targets=='minions':
-          targets = self.engine.board.get_minions()
-        elif self.targets=='neighbors':
-          targets = 'neighbors'
-        else:
-          assert False, "error: unknown target '%s'" % self.targets
+        targets = self.list_targets(self.targets)
         return Act_PlayMinionCard_BC(self, self.battlecry, targets)
 
 
@@ -101,14 +104,21 @@ class Card_Spell (Card):
         return "%s (%d): %s" % (self.name_fr, self.cost, self.desc)
 
 
-class Card_Coin (Card_Spell):
-    def __init__(self, owner):
-        Card_Spell.__init__(self, 0, "The coin", desc="Gain one mana crystal this turn only")
-        self.owner = owner
+
+class Card_GenericSpell (Card_Spell):
+    def __init__(self, cost, name, actions, targets='none', **kwargs ):
+        Card_Spell.__init__(self, cost, name, **kwargs )
+        self.actions = actions # lambda self: [Msg_* list]
+        self.targets = targets # see list_targets()
     def list_actions(self):
-        player = self.owner
-        actions = lambda self: [Msg_GainMana(self.caster,1)]
-        return Act_PlaySpellCard(self,None,actions)
+        targets = self.list_targets(self.targets)
+        return Act_PlaySpellCard(self,targets,self.actions)
+
+
+class Card_Coin (Card_GenericSpell):
+    def __init__(self, owner):
+        Card_GenericSpell.__init__(self, 0, "The coin", lambda self: [Msg_GainMana(self.caster,1)],
+                                   desc="Gain one mana crystal this turn only")
 
 
 class Card_Wrath (Card_Spell):
@@ -121,11 +131,11 @@ class Card_Wrath (Card_Spell):
         first = Act_SingleSpellDamageCard(self,targets,damage=3)
         actions = lambda self: [Msg_SpellDamage(self.caster,self.choices[0],self.damage),
                                 Msg_DrawCard(hero)]
-        second = Act_PlayCardSpell(self,targets,damage=1,actions=actions)
+        second = Act_SingleSpellDamageCard(self,targets,damage=1,actions=actions)
         return [first,second]
 
 
-class Card_FakeSpell (Card_Spell):
+class Card_DamageSpell (Card_Spell):
     def __init__(self, damage):
         Card_Spell.__init__(self, damage-1, "Fake Damage Spell %d"%damage,
                             name_fr="Faux Sort de dommage %d"%damage,
@@ -150,7 +160,12 @@ def get_cardbook():
 
   ### O Mana ##################################
   
-  add( Card_Minion(0, 1, 1, 'Wisp',name_fr='Feu follet') )
+  add( Card_Minion(0, 1, 1, "Wisp", name_fr="Feu follet") )
+  add( Card_GenericSpell(1,"Power Overwhleming", name_fr="Puissance accablante",
+       actions = lambda self: [Msg_BindEffect(self.caster, self.choices[0], Eff_BuffMinion(4,4)), 
+                               Msg_BindEffect(self.caster, self.choices[0], Eff_DieSoon(Msg_EndTurn))], 
+       targets='friendly minions',
+       desc_fr='Confere +4/+4 a un serviteur allie jusqu\'a la fin du tour. Puis il meurt.') )
   
   ### 1 Mana ##################################
 
@@ -164,6 +179,12 @@ def get_cardbook():
 
   add( Card_Minion(2, 2, 2, "Dire Wolf Alpha", name_fr="Loup alpha redoutable",
        effects=[Eff_BuffLeftRight(1,0)], desc_fr="Les serviteurs adjacents ont +1 ATQ") )
+
+  add( Card_Minion(1, 1, 1, "Spectral Spider", name_fr="Araignee spectrale") )
+  add( Card_Minion(2, 1, 2, "Haunted Creeper", 
+       effects=[Eff_DR_Invoke_Minion(cardbook["Spectral Spider"])]*2,
+       name_fr="Rampante Hantee", cat='beast',
+       desc_fr="Rale d'agonie: Invoque 2 Araignees spectrales 1/1") )
 
   add( Card_Minion_BC(2, 2, 1, "Ironbeak Owl", Eff_Silence(), name_fr="Chouette bec-de-fer",
        desc_fr="Cri de guerre: reduit au silence un autre serviteur") )
@@ -184,7 +205,7 @@ def get_cardbook():
   add( Card_Minion(3, 2, 3, "Harvest Golem", effects=[Eff_DR_Invoke_Minion(cardbook["Damaged Golem"])],
        name_fr="Golem des moissons", desc_fr="Rale d'agonie: Invoque un golem endommage 2/1", ) )
 
-  add( Card_Minion_BC(3, 3, 2, "Shattered Sun Cleric", Eff_BuffMinion(1,1,False), 'friendly_minions',
+  add( Card_Minion_BC(3, 3, 2, "Shattered Sun Cleric", Eff_BuffMinion(1,1,False), 'friendly minions',
        name_fr="Clerc du Soleil brise",
        desc_fr="Cri de guerre: confere +1/+1 a un serviteur allie") )
 
@@ -233,7 +254,7 @@ def get_cardbook():
   
   # add fake spells
   for i in range(1,10):
-    add( Card_FakeSpell(i) )
+    add( Card_DamageSpell(i) )
 
   # Druid cards
   add( Card_Wrath() )
@@ -248,7 +269,8 @@ def fake_deck(debug=False):
     cardbook = get_cardbook()
     deck = []
     if debug:
-      deck += [copy(cardbook["Defender of Argus"]) for i in range(30)]
+      deck += [copy(cardbook["Nerubian Egg"]) for i in range(15)]
+      deck += [copy(cardbook["Power Overwhleming"]) for i in range(15)]
     else:
       deck += [copy(cardbook["Wisp"]) for i in range(2)]
       deck += [copy(cardbook["Abusive Sergeant"]) for i in range(2)]

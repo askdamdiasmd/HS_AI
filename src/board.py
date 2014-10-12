@@ -38,8 +38,11 @@ class Board:
         self.everybody.append(m)
 
   def remove_thing(self, m=None):
-      self.everybody.remove(m)
-      return m.owner.remove_thing(m)
+      try:
+        self.everybody.remove(m)
+        return m.owner.remove_thing(m)
+      except ValueError:
+        pass  # sometimes, it has been already removed
 
   def is_game_ended(self):
       for p in self.players:

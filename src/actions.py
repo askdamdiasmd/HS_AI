@@ -156,8 +156,9 @@ class Act_PlaySpellCard (Act_PlayCard):
     ''' hero plays a generic spell card, specified using "actions" '''
     def __init__(self, card, targets, actions):
         Act_PlayCard.___init___(self, card)
-        self.choices = [targets] if targets else []
+        self.choices = [targets] if targets!=None else None
         self.actions = actions  # execution is defined by card
+        if self.choices[0]==[]: self.cost=1000  # make it invalid
     def execute(self):
         Act_PlayCard.execute(self)
         self.engine.send_message([
