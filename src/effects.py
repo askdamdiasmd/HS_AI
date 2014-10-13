@@ -105,13 +105,13 @@ class Eff_BuffMinion (Effect):
         assert not(others and self.temp), "error: buff cannot be temporary if other effects"
         self.others = others.split() # simple effects like taunt, windfury ...
     def __str__(self):
-        buff = "buff %+d/%+d" % (self.atq, self.hp) if (self.hp and self.atq) else ''
+        buff = "buff %+d/%+d" % (self.atq, self.hp) if (self.hp or self.atq) else ''
         others = (' '+' '.join([str(e) for e in self.others])) if self.others else ''
         temp = self.temp and " (temporary)" or ""
         return "%s%s%s" % (buff, others, temp)
     def bind_to(self, owner):
         self.owner = owner
-        if self.hp and self.atq:  # we don't care if just taunt
+        if self.hp or self.atq:  # we don't care if just taunt
           owner.effects.append(self)
           if self.temp: 
             owner.triggers.append((Msg_EndTurn, self))
