@@ -269,10 +269,11 @@ def fake_deck(debug=False):
     cardbook = get_cardbook()
     deck = []
     if debug:
-      deck += [copy(cardbook["Nerubian Egg"]) for i in range(15)]
+      deck += [copy(cardbook["Goldshire Footman"]) for i in range(15)]
       deck += [copy(cardbook["Power Overwhleming"]) for i in range(15)]
     else:
       deck += [copy(cardbook["Wisp"]) for i in range(2)]
+      deck += [copy(cardbook["Power Overwhleming"]) for i in range(2)]
       deck += [copy(cardbook["Abusive Sergeant"]) for i in range(2)]
       deck += [copy(cardbook["Goldshire Footman"]) for i in range(2)]
       deck += [copy(cardbook["Nerubian Egg"]) for i in range(2)]
@@ -286,9 +287,9 @@ def fake_deck(debug=False):
       deck += [copy(cardbook["Cairne"]) for i in range(1)]
       for i in range(1,5):
         deck += [copy(cardbook["Fake Weapon %d"%i])]
-      for i in range(1,8):
+      for i in range(1,5):
         deck += [copy(cardbook["Fake Damage Spell %d"%i])]
-
+    
     from decks import Deck
     return Deck(deck)
 

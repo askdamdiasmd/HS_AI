@@ -28,6 +28,9 @@ class Action (object):
   def set_engine(cls, engine):
       cls.engine = engine
 
+  def is_valid(self):
+      return True
+
   def num_choices(self):
       return len(self.choices)
 
@@ -158,7 +161,8 @@ class Act_PlaySpellCard (Act_PlayCard):
         Act_PlayCard.___init___(self, card)
         self.choices = [targets] if targets!=None else None
         self.actions = actions  # execution is defined by card
-        if self.choices[0]==[]: self.cost=1000  # make it invalid
+    def is_valid(self):
+        return all([ch!=[] for ch in self.choices]) # choices cannot be empty for a spell
     def execute(self):
         Act_PlayCard.execute(self)
         self.engine.send_message([

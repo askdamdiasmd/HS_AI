@@ -151,20 +151,20 @@ def rounded_box(win):
     addwch(2320,win=win,x=0,y=0)
     addwch(2321,win=win,x=tx-1,y=0)
 
-def strong_box(win):
+def strong_box(win,attr=0):
     if code=='UTF-8':
       h,w = uc.getmaxyx(win)
       w -= 1
       h -= 1
-      addwch(9556,win=win,x=0,y=0)
-      addwch(9552,win=win,nb=w-1)
-      addwch(9559,win=win)
+      addwch(9556,attr,win=win,x=0,y=0)
+      addwch(9552,attr,win=win,nb=w-1)
+      addwch(9559,attr,win=win)
       for i in range(1,h):
-        addwch(9553,win=win,x=0,y=i)
-        addwch(9553,win=win,x=w,y=i)
-      addwch(9562,win=win,x=0,y=h)
-      addwch(9552,win=win,nb=w-1)
-      addwch(9565,win=win)
+        addwch(9553,attr,win=win,x=0,y=i)
+        addwch(9553,attr,win=win,x=w,y=i)
+      addwch(9562,attr,win=win,x=0,y=h)
+      addwch(9552,attr,win=win,nb=w-1)
+      addwch(9565,attr,win=win)
     else:
       uc.wborder(win,9553,9553,9552,9552,9556,9559,9562,9565)
 
@@ -263,7 +263,7 @@ class VizThing (object):
     uc.wbkgd(win,bkgd)
     uc.wattron(win,highlight)
     if 'taunt' in self.effects:
-      strong_box(win)    
+      strong_box(win,highlight)
     else:
       uc.box(win)    
     uc.wattroff(win,highlight)
@@ -973,7 +973,7 @@ class HumanPlayerAscii (HumanPlayer):
         if issubclass(type(a),Act_HeroPower):
           showlist.append((a,self.engine.board.viz.hero_power_buttons[a.caster],{}))
         elif issubclass(type(a),Act_PlayCard):
-          showlist.append((a,a.card,{'small':True}))
+          showlist.append((a,a.card,{'small':True,'cost':a.cost}))
           if a.card in remaining_cards: # choice_of_cards
             remaining_cards.remove(a.card)
         elif issubclass(type(a),Act_MinionAttack):
