@@ -1,361 +1,96 @@
 [Msg_StartTurn] Start of turn for [jerome (Jaina) 30HP] 
-[Msg_DrawCard] [jerome (Jaina) 30HP] draw Puissance accablante (1):  from the deck
-[Msg_DrawCard] [jerome (Jaina) 30HP] draw Oeuf de Nerubien (2): 0/2  from the deck
-[Msg_DrawCard] [jerome (Jaina) 30HP] draw Puissance accablante (1):  from the deck
-[Msg_DrawCard] [IA (Anduin) 30HP] draw Oeuf de Nerubien (2): 0/2  from the deck
-[Msg_DrawCard] [IA (Anduin) 30HP] draw Puissance accablante (1):  from the deck
-[Msg_DrawCard] [IA (Anduin) 30HP] draw Oeuf de Nerubien (2): 0/2  from the deck
-[Msg_DrawCard] [IA (Anduin) 30HP] draw Puissance accablante (1):  from the deck
+[Msg_DrawCard] [jerome (Jaina) 30HP] draw Feu follet (0): 1/1  from the deck
+[Msg_DrawCard] [jerome (Jaina) 30HP] draw Feu follet (0): 1/1  from the deck
+[Msg_DrawCard] [jerome (Jaina) 30HP] draw Defenseur d'Argus (4): 2/3  from the deck
+[Msg_DrawCard] [IA (Anduin) 30HP] draw Feu follet (0): 1/1  from the deck
+[Msg_DrawCard] [IA (Anduin) 30HP] draw Feu follet (0): 1/1  from the deck
+[Msg_DrawCard] [IA (Anduin) 30HP] draw Feu follet (0): 1/1  from the deck
+[Msg_DrawCard] [IA (Anduin) 30HP] draw Feu follet (0): 1/1  from the deck
 [Msg_DrawCard] [IA (Anduin) 30HP] draw  (0): Gain one mana crystal this turn only from the deck
-[Msg_DrawCard] [jerome (Jaina) 30HP] draw Oeuf de Nerubien (2): 0/2  from the deck
-[Act_PlayMinionCard] Card Oeuf de Nerubien (2): 0/2 
-[Msg_PlayCard] [jerome (Jaina) 30HP] plays Oeuf de Nerubien (2): 0/2 
-[Msg_UseMana] Player [jerome (Jaina) 30HP] loses 2 mana crystal
-[Msg_ThrowCard] Player [jerome (Jaina) 30HP] loses Oeuf de Nerubien (2): 0/2 
-[Msg_AddMinion] New Minion Nerubian Egg (2E49C30) 0/2 on the board for [jerome (Jaina) 30HP]
-[Msg_MinionPopup] Minion Nerubian Egg (2E49C30) 0/2 pops up
-[Act_PlayMinionCard] Card Oeuf de Nerubien (2): 0/2 
-[Msg_PlayCard] [jerome (Jaina) 30HP] plays Oeuf de Nerubien (2): 0/2 
-[Msg_UseMana] Player [jerome (Jaina) 30HP] loses 2 mana crystal
-[Msg_ThrowCard] Player [jerome (Jaina) 30HP] loses Oeuf de Nerubien (2): 0/2 
-[Msg_AddMinion] New Minion Nerubian Egg (2E49C10) 0/2 on the board for [jerome (Jaina) 30HP]
-[Msg_MinionPopup] Minion Nerubian Egg (2E49C10) 0/2 pops up
+[Msg_DrawCard] [jerome (Jaina) 30HP] draw Defenseur d'Argus (4): 2/3  from the deck
+[Act_PlayMinionCard] Card Feu follet (0): 1/1 
+[Msg_PlayCard] [jerome (Jaina) 30HP] plays Feu follet (0): 1/1 
+[Msg_UseMana] Player [jerome (Jaina) 30HP] loses 0 mana crystal
+[Msg_ThrowCard] Player [jerome (Jaina) 30HP] loses Feu follet (0): 1/1 
+[Msg_AddMinion] New Minion Wisp (2E54E50) 1/1 on the board for [jerome (Jaina) 30HP]
+[Msg_MinionPopup] Minion Wisp (2E54E50) 1/1 pops up
+[Act_PlayMinionCard] Card Feu follet (0): 1/1 
+[Msg_PlayCard] [jerome (Jaina) 30HP] plays Feu follet (0): 1/1 
+[Msg_UseMana] Player [jerome (Jaina) 30HP] loses 0 mana crystal
+[Msg_ThrowCard] Player [jerome (Jaina) 30HP] loses Feu follet (0): 1/1 
+[Msg_AddMinion] New Minion Wisp (2E54910) 1/1 on the board for [jerome (Jaina) 30HP]
+[Msg_MinionPopup] Minion Wisp (2E54910) 1/1 pops up
+[Act_PlayMinionCard_BC] Card Defenseur d'Argus (4): 2/3 
+[Msg_PlayCard] [jerome (Jaina) 30HP] plays Defenseur d'Argus (4): 2/3 
+[Msg_UseMana] Player [jerome (Jaina) 30HP] loses 4 mana crystal
+[Msg_ThrowCard] Player [jerome (Jaina) 30HP] loses Defenseur d'Argus (4): 2/3 
+[Msg_AddMinion] New Minion Defender of Argus (2E54B50) 2/3 on the board for [jerome (Jaina) 30HP]
+[Msg_MinionPopup] Minion Defender of Argus (2E54B50) 2/3 pops up
+[Msg_BindEffect] Minion Defender of Argus (2E54B50) 2/3 binds effect [buff +1/+1 taunt] to Minion Wisp (2E54E50) 2/2.
+[Msg_Status] Change of status for Minion Wisp (2E54E50) 2/2: {hp=2, max_hp=2}
+[Msg_Status] Change of status for Minion Wisp (2E54E50) 2/2: {atq=2, max_atq=2}
+[Msg_Status] Change of status for Minion Wisp (2E54E50) 2/2: {effects=[<effects.Eff_BuffMinion object at 0x02E54EB0>, 'taunt']}
+[Msg_BindEffect] Minion Defender of Argus (2E54B50) 2/3 binds effect [buff +1/+1 taunt] to Minion Wisp (2E54910) 2/2.
+[Msg_Status] Change of status for Minion Wisp (2E54910) 2/2: {hp=2, max_hp=2}
+[Msg_Status] Change of status for Minion Wisp (2E54910) 2/2: {atq=2, max_atq=2}
+[Msg_Status] Change of status for Minion Wisp (2E54910) 2/2: {effects=[<effects.Eff_BuffMinion object at 0x02E54BD0>, 'taunt']}
 [Act_HeroPower] Hero Power (2): deals 1 damage to a character
 [Msg_UseMana] Player [jerome (Jaina) 30HP] loses 2 mana crystal
 [Msg_StartHeroPower] [[jerome (Jaina) 30HP]] uses its hero power
-[Msg_HeroDamage] [IA (Anduin) 29HP] takes 1 damage from [jerome (Jaina) 30HP].
-[Msg_Status] Change of status for [IA (Anduin) 29HP]: {hp=29}
+[Msg_HeroDamage] Minion Wisp (2E54910) 2/1 takes 1 damage from [jerome (Jaina) 30HP].
+[Msg_Status] Change of status for Minion Wisp (2E54910) 2/1: {hp=1}
 [Msg_EndHeroPower] End of hero power effect
 [Act_EndTurn] End turn
 [Msg_EndTurn] End of turn for [jerome (Jaina) 30HP]
-[Msg_StartTurn] Start of turn for [IA (Anduin) 29HP] 
-[Msg_DrawCard] [IA (Anduin) 29HP] draw Puissance accablante (1):  from the deck
-[Act_PlayMinionCard] Card Oeuf de Nerubien (2): 0/2 
-[Msg_PlayCard] [IA (Anduin) 29HP] plays Oeuf de Nerubien (2): 0/2 
-[Msg_UseMana] Player [IA (Anduin) 29HP] loses 2 mana crystal
-[Msg_ThrowCard] Player [IA (Anduin) 29HP] loses Oeuf de Nerubien (2): 0/2 
-[Msg_AddMinion] New Minion Nerubian Egg (2E49E90) 0/2 on the board for [IA (Anduin) 29HP]
-[Msg_MinionPopup] Minion Nerubian Egg (2E49E90) 0/2 pops up
-[Act_PlayMinionCard] Card Oeuf de Nerubien (2): 0/2 
-[Msg_PlayCard] [IA (Anduin) 29HP] plays Oeuf de Nerubien (2): 0/2 
-[Msg_UseMana] Player [IA (Anduin) 29HP] loses 2 mana crystal
-[Msg_ThrowCard] Player [IA (Anduin) 29HP] loses Oeuf de Nerubien (2): 0/2 
-[Msg_AddMinion] New Minion Nerubian Egg (2E49B10) 0/2 on the board for [IA (Anduin) 29HP]
-[Msg_MinionPopup] Minion Nerubian Egg (2E49B10) 0/2 pops up
-[Act_PlaySpellCard] Card Puissance accablante (1): 
-[Msg_PlayCard] [IA (Anduin) 29HP] plays Puissance accablante (1): 
-[Msg_UseMana] Player [IA (Anduin) 29HP] loses 1 mana crystal
-[Msg_ThrowCard] Player [IA (Anduin) 29HP] loses Puissance accablante (1): 
-[Msg_StartSpell] Player [IA (Anduin) 29HP] plays spell [Puissance accablante (1): ]
-[Msg_BindEffect] [IA (Anduin) 29HP] binds effect [buff +4/+4] to Minion Nerubian Egg (2E49B10) 4/6.
-[Msg_Status] Change of status for Minion Nerubian Egg (2E49B10) 4/6: {hp=6, max_hp=6}
-[Msg_Status] Change of status for Minion Nerubian Egg (2E49B10) 4/6: {atq=4, max_atq=4}
-[Msg_BindEffect] [IA (Anduin) 29HP] binds effect [Death on Msg_EndTurn] to Minion Nerubian Egg (2E49B10) 4/6.
-[Msg_EndSpell] End of spell.
+[Msg_StartTurn] Start of turn for [IA (Anduin) 30HP] 
+[Msg_DrawCard] [IA (Anduin) 30HP] draw Defenseur d'Argus (4): 2/3  from the deck
+[Act_PlayMinionCard] Card Feu follet (0): 1/1 
+[Msg_PlayCard] [IA (Anduin) 30HP] plays Feu follet (0): 1/1 
+[Msg_UseMana] Player [IA (Anduin) 30HP] loses 0 mana crystal
+[Msg_ThrowCard] Player [IA (Anduin) 30HP] loses Feu follet (0): 1/1 
+[Msg_AddMinion] New Minion Wisp (2E54ED0) 1/1 on the board for [IA (Anduin) 30HP]
+[Msg_MinionPopup] Minion Wisp (2E54ED0) 1/1 pops up
+[Act_PlayMinionCard] Card Feu follet (0): 1/1 
+[Msg_PlayCard] [IA (Anduin) 30HP] plays Feu follet (0): 1/1 
+[Msg_UseMana] Player [IA (Anduin) 30HP] loses 0 mana crystal
+[Msg_ThrowCard] Player [IA (Anduin) 30HP] loses Feu follet (0): 1/1 
+[Msg_AddMinion] New Minion Wisp (2E54F90) 1/1 on the board for [IA (Anduin) 30HP]
+[Msg_MinionPopup] Minion Wisp (2E54F90) 1/1 pops up
 [Act_EndTurn] End turn
-[Msg_EndTurn] End of turn for [IA (Anduin) 29HP]
-[Msg_DeadMinion] Minion Nerubian Egg (2E49B10) 0/2 dies.
-[Msg_DeathRattle] Death rattle casted by Minion Nerubian Egg (2E49B10) 0/2: New Minion Nerubian (2E49AF0) 4/4 on the board for [IA (Anduin) 29HP]
-[Msg_Status] Change of status for Minion Nerubian Egg (2E49B10) 0/2: {hp=2, max_hp=2}
-[Msg_Status] Change of status for Minion Nerubian Egg (2E49B10) 0/2: {atq=0, max_atq=0}
-[Msg_AddMinion] New Minion Nerubian (2E49AF0) 4/4 on the board for [IA (Anduin) 29HP]
-[Msg_MinionPopup] Minion Nerubian (2E49AF0) 4/4 pops up
+[Msg_EndTurn] End of turn for [IA (Anduin) 30HP]
 [Msg_StartTurn] Start of turn for [jerome (Jaina) 30HP] 
-[Msg_DrawCard] [jerome (Jaina) 30HP] draw Oeuf de Nerubien (2): 0/2  from the deck
-[Act_PlaySpellCard] Card Puissance accablante (1): 
-[Msg_PlayCard] [jerome (Jaina) 30HP] plays Puissance accablante (1): 
-[Msg_UseMana] Player [jerome (Jaina) 30HP] loses 1 mana crystal
-[Msg_ThrowCard] Player [jerome (Jaina) 30HP] loses Puissance accablante (1): 
-[Msg_StartSpell] Player [jerome (Jaina) 30HP] plays spell [Puissance accablante (1): ]
-[Msg_BindEffect] [jerome (Jaina) 30HP] binds effect [buff +4/+4] to Minion Nerubian Egg (2E49C10) 4/6.
-[Msg_Status] Change of status for Minion Nerubian Egg (2E49C10) 4/6: {hp=6, max_hp=6}
-[Msg_Status] Change of status for Minion Nerubian Egg (2E49C10) 4/6: {atq=4, max_atq=4}
-[Msg_BindEffect] [jerome (Jaina) 30HP] binds effect [Death on Msg_EndTurn] to Minion Nerubian Egg (2E49C10) 4/6.
-[Msg_EndSpell] End of spell.
-[Act_MinionAttack] Attack with Minion Nerubian Egg (2E49C10) 4/2
-[Msg_StartAttack] Minion Minion Nerubian Egg (2E49C10) 4/2 attacks enemy Minion Nerubian (2E49AF0) 4/0
-[Msg_Damage] Minion Nerubian (2E49AF0) 4/0 takes 4 damage from Minion Nerubian Egg (2E49C10) 4/2.
-[Msg_Status] Change of status for Minion Nerubian (2E49AF0) 4/0: {hp=0}
-[Msg_Damage] Minion Nerubian Egg (2E49C10) 4/2 takes 4 damage from Minion Nerubian (2E49AF0) 4/0.
-[Msg_Status] Change of status for Minion Nerubian Egg (2E49C10) 4/2: {hp=2}
-[Msg_CheckDead] Minion Nerubian (2E49AF0) 4/0 asks for dead cleaning.
-[Msg_DeadMinion] Minion Nerubian (2E49AF0) 4/0 dies.
-[Msg_EndAttack] End of attack.
-[Act_PlaySpellCard] Card Puissance accablante (1): 
-[Msg_PlayCard] [jerome (Jaina) 30HP] plays Puissance accablante (1): 
-[Msg_UseMana] Player [jerome (Jaina) 30HP] loses 1 mana crystal
-[Msg_ThrowCard] Player [jerome (Jaina) 30HP] loses Puissance accablante (1): 
-[Msg_StartSpell] Player [jerome (Jaina) 30HP] plays spell [Puissance accablante (1): ]
-[Msg_BindEffect] [jerome (Jaina) 30HP] binds effect [buff +4/+4] to Minion Nerubian Egg (2E49C30) 4/6.
-[Msg_Status] Change of status for Minion Nerubian Egg (2E49C30) 4/6: {hp=6, max_hp=6}
-[Msg_Status] Change of status for Minion Nerubian Egg (2E49C30) 4/6: {atq=4, max_atq=4}
-[Msg_BindEffect] [jerome (Jaina) 30HP] binds effect [Death on Msg_EndTurn] to Minion Nerubian Egg (2E49C30) 4/6.
-[Msg_EndSpell] End of spell.
-[Act_MinionAttack] Attack with Minion Nerubian Egg (2E49C30) 4/6
-[Msg_StartAttack] Minion Minion Nerubian Egg (2E49C30) 4/6 attacks enemy [IA (Anduin) 25HP]
-[Msg_Damage] [IA (Anduin) 25HP] takes 4 damage from Minion Nerubian Egg (2E49C30) 4/6.
-[Msg_Status] Change of status for [IA (Anduin) 25HP]: {hp=25}
-[Msg_EndAttack] End of attack.
-[Act_PlayMinionCard] Card Oeuf de Nerubien (2): 0/2 
-[Msg_PlayCard] [jerome (Jaina) 30HP] plays Oeuf de Nerubien (2): 0/2 
+[Msg_DrawCard] [jerome (Jaina) 30HP] draw Feu follet (0): 1/1  from the deck
+[Act_HeroPower] Hero Power (2): deals 1 damage to a character
 [Msg_UseMana] Player [jerome (Jaina) 30HP] loses 2 mana crystal
-[Msg_ThrowCard] Player [jerome (Jaina) 30HP] loses Oeuf de Nerubien (2): 0/2 
-[Msg_AddMinion] New Minion Nerubian Egg (2E49990) 0/2 on the board for [jerome (Jaina) 30HP]
-[Msg_MinionPopup] Minion Nerubian Egg (2E49990) 0/2 pops up
-[Act_EndTurn] End turn
-[Msg_EndTurn] End of turn for [jerome (Jaina) 30HP]
-[Msg_DeadMinion] Minion Nerubian Egg (2E49C30) 0/2 dies.
-[Msg_DeathRattle] Death rattle casted by Minion Nerubian Egg (2E49C30) 0/2: New Minion Nerubian (2E49B50) 4/4 on the board for [jerome (Jaina) 30HP]
-[Msg_Status] Change of status for Minion Nerubian Egg (2E49C30) 0/2: {hp=2, max_hp=2}
-[Msg_Status] Change of status for Minion Nerubian Egg (2E49C30) 0/2: {atq=0, max_atq=0}
-[Msg_DeadMinion] Minion Nerubian Egg (2E49C10) 0/2 dies.
-[Msg_DeathRattle] Death rattle casted by Minion Nerubian Egg (2E49C10) 0/2: New Minion Nerubian (2E500F0) 4/4 on the board for [jerome (Jaina) 30HP]
-[Msg_Status] Change of status for Minion Nerubian Egg (2E49C10) 0/2: {hp=2, max_hp=2}
-[Msg_Status] Change of status for Minion Nerubian Egg (2E49C10) 0/2: {atq=0, max_atq=0}
-[Msg_AddMinion] New Minion Nerubian (2E49B50) 4/4 on the board for [jerome (Jaina) 30HP]
-[Msg_MinionPopup] Minion Nerubian (2E49B50) 4/4 pops up
-[Msg_AddMinion] New Minion Nerubian (2E500F0) 4/4 on the board for [jerome (Jaina) 30HP]
-[Msg_MinionPopup] Minion Nerubian (2E500F0) 4/4 pops up
-[Msg_StartTurn] Start of turn for [IA (Anduin) 25HP] 
-[Msg_DrawCard] [IA (Anduin) 25HP] draw Puissance accablante (1):  from the deck
-[Act_HeroPower] Hero Power (2): heals a character by 2HP
-[Msg_UseMana] Player [IA (Anduin) 25HP] loses 2 mana crystal
-[Msg_StartHeroPower] [[IA (Anduin) 25HP]] uses its hero power
-[Msg_HeroHeal] [IA (Anduin) 25HP] heals [jerome (Jaina) 30HP] by 2HP.
-[Msg_Status] Change of status for [jerome (Jaina) 30HP]: {hp=30}
+[Msg_StartHeroPower] [[jerome (Jaina) 30HP]] uses its hero power
+[Msg_HeroDamage] Minion Wisp (2E54E50) 2/1 takes 1 damage from [jerome (Jaina) 30HP].
+[Msg_Status] Change of status for Minion Wisp (2E54E50) 2/1: {hp=1}
 [Msg_EndHeroPower] End of hero power effect
-[Act_PlaySpellCard] Card Puissance accablante (1): 
-[Msg_PlayCard] [IA (Anduin) 25HP] plays Puissance accablante (1): 
-[Msg_UseMana] Player [IA (Anduin) 25HP] loses 1 mana crystal
-[Msg_ThrowCard] Player [IA (Anduin) 25HP] loses Puissance accablante (1): 
-[Msg_StartSpell] Player [IA (Anduin) 25HP] plays spell [Puissance accablante (1): ]
-[Msg_BindEffect] [IA (Anduin) 25HP] binds effect [buff +4/+4] to Minion Nerubian Egg (2E49E90) 4/6.
-[Msg_Status] Change of status for Minion Nerubian Egg (2E49E90) 4/6: {hp=6, max_hp=6}
-[Msg_Status] Change of status for Minion Nerubian Egg (2E49E90) 4/6: {atq=4, max_atq=4}
-[Msg_BindEffect] [IA (Anduin) 25HP] binds effect [Death on Msg_EndTurn] to Minion Nerubian Egg (2E49E90) 4/6.
-[Msg_EndSpell] End of spell.
-[Act_PlaySpellCard] Card Puissance accablante (1): 
-[Msg_PlayCard] [IA (Anduin) 25HP] plays Puissance accablante (1): 
-[Msg_UseMana] Player [IA (Anduin) 25HP] loses 1 mana crystal
-[Msg_ThrowCard] Player [IA (Anduin) 25HP] loses Puissance accablante (1): 
-[Msg_StartSpell] Player [IA (Anduin) 25HP] plays spell [Puissance accablante (1): ]
-[Msg_BindEffect] [IA (Anduin) 25HP] binds effect [buff +4/+4] to Minion Nerubian Egg (2E49E90) 8/10.
-[Msg_Status] Change of status for Minion Nerubian Egg (2E49E90) 8/10: {hp=10, max_hp=10}
-[Msg_Status] Change of status for Minion Nerubian Egg (2E49E90) 8/10: {atq=8, max_atq=8}
-[Msg_BindEffect] [IA (Anduin) 25HP] binds effect [Death on Msg_EndTurn] to Minion Nerubian Egg (2E49E90) 8/10.
-[Msg_EndSpell] End of spell.
-[Act_EndTurn] End turn
-[Msg_EndTurn] End of turn for [IA (Anduin) 25HP]
-[Msg_DeadMinion] Minion Nerubian Egg (2E49E90) 0/2 dies.
-[Msg_DeathRattle] Death rattle casted by Minion Nerubian Egg (2E49E90) 0/2: New Minion Nerubian (2E50A50) 4/4 on the board for [IA (Anduin) 25HP]
-[Msg_Status] Change of status for Minion Nerubian Egg (2E49E90) 0/2: {hp=6, max_hp=6}
-[Msg_Status] Change of status for Minion Nerubian Egg (2E49E90) 0/2: {atq=4, max_atq=4}
-[Msg_Status] Change of status for Minion Nerubian Egg (2E49E90) 0/2: {hp=2, max_hp=2}
-[Msg_Status] Change of status for Minion Nerubian Egg (2E49E90) 0/2: {atq=0, max_atq=0}
-[Msg_DeadMinion] Minion Nerubian Egg (2E49E90) 0/2 dies.
-[Msg_AddMinion] New Minion Nerubian (2E50A50) 4/4 on the board for [IA (Anduin) 25HP]
-[Msg_MinionPopup] Minion Nerubian (2E50A50) 4/4 pops up
-[Msg_StartTurn] Start of turn for [jerome (Jaina) 30HP] 
-[Msg_DrawCard] [jerome (Jaina) 30HP] draw Oeuf de Nerubien (2): 0/2  from the deck
-[Act_PlayMinionCard] Card Oeuf de Nerubien (2): 0/2 
-[Msg_PlayCard] [jerome (Jaina) 30HP] plays Oeuf de Nerubien (2): 0/2 
-[Msg_UseMana] Player [jerome (Jaina) 30HP] loses 2 mana crystal
-[Msg_ThrowCard] Player [jerome (Jaina) 30HP] loses Oeuf de Nerubien (2): 0/2 
-[Msg_AddMinion] New Minion Nerubian Egg (2E49F10) 0/2 on the board for [jerome (Jaina) 30HP]
-[Msg_MinionPopup] Minion Nerubian Egg (2E49F10) 0/2 pops up
-[Act_MinionAttack] Attack with Minion Nerubian (2E500F0) 4/0
-[Msg_StartAttack] Minion Minion Nerubian (2E500F0) 4/0 attacks enemy Minion Nerubian (2E50A50) 4/0
-[Msg_Damage] Minion Nerubian (2E50A50) 4/0 takes 4 damage from Minion Nerubian (2E500F0) 4/0.
-[Msg_Status] Change of status for Minion Nerubian (2E50A50) 4/0: {hp=0}
-[Msg_Damage] Minion Nerubian (2E500F0) 4/0 takes 4 damage from Minion Nerubian (2E50A50) 4/0.
-[Msg_Status] Change of status for Minion Nerubian (2E500F0) 4/0: {hp=0}
-[Msg_CheckDead] Minion Nerubian (2E50A50) 4/0 asks for dead cleaning.
-[Msg_DeadMinion] Minion Nerubian (2E500F0) 4/0 dies.
-[Msg_DeadMinion] Minion Nerubian (2E50A50) 4/0 dies.
-[Msg_CheckDead] Minion Nerubian (2E500F0) 4/0 asks for dead cleaning.
+[Act_MinionAttack] Attack with Minion Wisp (2E54E50) 1/0
+[Msg_StartAttack] Minion Minion Wisp (2E54E50) 1/0 attacks enemy Minion Wisp (2E54F90) 1/-1
+[Msg_Damage] Minion Wisp (2E54F90) 1/-1 takes 2 damage from Minion Wisp (2E54E50) 1/0.
+[Msg_Status] Change of status for Minion Wisp (2E54F90) 1/-1: {hp=-1}
+[Msg_Damage] Minion Wisp (2E54E50) 1/0 takes 1 damage from Minion Wisp (2E54F90) 1/-1.
+[Msg_Status] Change of status for Minion Wisp (2E54E50) 1/0: {hp=0}
+[Msg_CheckDead] Minion Wisp (2E54F90) 1/-1 asks for dead cleaning.
+[Msg_DeadMinion] Minion Wisp (2E54E50) 1/0 dies.
+[Msg_Status] Change of status for Minion Wisp (2E54E50) 1/0: {hp=0, max_hp=1}
+[Msg_Status] Change of status for Minion Wisp (2E54E50) 1/0: {atq=1, max_atq=1}
+[Msg_DeadMinion] Minion Wisp (2E54F90) 1/-1 dies.
+[Msg_CheckDead] Minion Wisp (2E54E50) 1/0 asks for dead cleaning.
+[Msg_CheckDead] Minion Wisp (2E54E50) 1/0 asks for dead cleaning.
 [Msg_EndAttack] End of attack.
-[Act_MinionAttack] Attack with Minion Nerubian (2E49B50) 4/4
-[Msg_StartAttack] Minion Minion Nerubian (2E49B50) 4/4 attacks enemy [IA (Anduin) 21HP]
-[Msg_Damage] [IA (Anduin) 21HP] takes 4 damage from Minion Nerubian (2E49B50) 4/4.
-[Msg_Status] Change of status for [IA (Anduin) 21HP]: {hp=21}
-[Msg_EndAttack] End of attack.
-[Act_EndTurn] End turn
-[Msg_EndTurn] End of turn for [jerome (Jaina) 30HP]
-[Msg_StartTurn] Start of turn for [IA (Anduin) 21HP] 
-[Msg_DrawCard] [IA (Anduin) 21HP] draw Puissance accablante (1):  from the deck
-[Act_HeroPower] Hero Power (2): heals a character by 2HP
-[Msg_UseMana] Player [IA (Anduin) 21HP] loses 2 mana crystal
-[Msg_StartHeroPower] [[IA (Anduin) 21HP]] uses its hero power
-[Msg_HeroHeal] [IA (Anduin) 21HP] heals Minion Nerubian Egg (2E49F10) 0/2 by 2HP.
-[Msg_Status] Change of status for Minion Nerubian Egg (2E49F10) 0/2: {hp=2}
-[Msg_EndHeroPower] End of hero power effect
-[Act_EndTurn] End turn
-[Msg_EndTurn] End of turn for [IA (Anduin) 21HP]
-[Msg_StartTurn] Start of turn for [jerome (Jaina) 30HP] 
-[Msg_DrawCard] [jerome (Jaina) 30HP] draw Oeuf de Nerubien (2): 0/2  from the deck
-[Act_PlayMinionCard] Card Oeuf de Nerubien (2): 0/2 
-[Msg_PlayCard] [jerome (Jaina) 30HP] plays Oeuf de Nerubien (2): 0/2 
-[Msg_UseMana] Player [jerome (Jaina) 30HP] loses 2 mana crystal
-[Msg_ThrowCard] Player [jerome (Jaina) 30HP] loses Oeuf de Nerubien (2): 0/2 
-[Msg_AddMinion] New Minion Nerubian Egg (2E50050) 0/2 on the board for [jerome (Jaina) 30HP]
-[Msg_MinionPopup] Minion Nerubian Egg (2E50050) 0/2 pops up
-[Act_MinionAttack] Attack with Minion Nerubian (2E49B50) 4/4
-[Msg_StartAttack] Minion Minion Nerubian (2E49B50) 4/4 attacks enemy [IA (Anduin) 17HP]
-[Msg_Damage] [IA (Anduin) 17HP] takes 4 damage from Minion Nerubian (2E49B50) 4/4.
-[Msg_Status] Change of status for [IA (Anduin) 17HP]: {hp=17}
-[Msg_EndAttack] End of attack.
-[Act_EndTurn] End turn
-[Msg_EndTurn] End of turn for [jerome (Jaina) 30HP]
-[Msg_StartTurn] Start of turn for [IA (Anduin) 17HP] 
-[Msg_DrawCard] [IA (Anduin) 17HP] draw Oeuf de Nerubien (2): 0/2  from the deck
-[Act_PlayMinionCard] Card Oeuf de Nerubien (2): 0/2 
-[Msg_PlayCard] [IA (Anduin) 17HP] plays Oeuf de Nerubien (2): 0/2 
-[Msg_UseMana] Player [IA (Anduin) 17HP] loses 2 mana crystal
-[Msg_ThrowCard] Player [IA (Anduin) 17HP] loses Oeuf de Nerubien (2): 0/2 
-[Msg_AddMinion] New Minion Nerubian Egg (2E49BF0) 0/2 on the board for [IA (Anduin) 17HP]
-[Msg_MinionPopup] Minion Nerubian Egg (2E49BF0) 0/2 pops up
-[Act_HeroPower] Hero Power (2): heals a character by 2HP
-[Msg_UseMana] Player [IA (Anduin) 17HP] loses 2 mana crystal
-[Msg_StartHeroPower] [[IA (Anduin) 17HP]] uses its hero power
-[Msg_HeroHeal] [IA (Anduin) 17HP] heals Minion Nerubian Egg (2E49F10) 0/2 by 2HP.
-[Msg_Status] Change of status for Minion Nerubian Egg (2E49F10) 0/2: {hp=2}
-[Msg_EndHeroPower] End of hero power effect
-[Act_EndTurn] End turn
-[Msg_EndTurn] End of turn for [IA (Anduin) 17HP]
-[Msg_StartTurn] Start of turn for [jerome (Jaina) 30HP] 
-[Msg_DrawCard] [jerome (Jaina) 30HP] draw Puissance accablante (1):  from the deck
-[Act_PlaySpellCard] Card Puissance accablante (1): 
-[Msg_PlayCard] [jerome (Jaina) 30HP] plays Puissance accablante (1): 
-[Msg_UseMana] Player [jerome (Jaina) 30HP] loses 1 mana crystal
-[Msg_ThrowCard] Player [jerome (Jaina) 30HP] loses Puissance accablante (1): 
-[Msg_StartSpell] Player [jerome (Jaina) 30HP] plays spell [Puissance accablante (1): ]
-[Msg_BindEffect] [jerome (Jaina) 30HP] binds effect [buff +4/+4] to Minion Nerubian Egg (2E49F10) 4/6.
-[Msg_Status] Change of status for Minion Nerubian Egg (2E49F10) 4/6: {hp=6, max_hp=6}
-[Msg_Status] Change of status for Minion Nerubian Egg (2E49F10) 4/6: {atq=4, max_atq=4}
-[Msg_BindEffect] [jerome (Jaina) 30HP] binds effect [Death on Msg_EndTurn] to Minion Nerubian Egg (2E49F10) 4/6.
-[Msg_EndSpell] End of spell.
-[Act_MinionAttack] Attack with Minion Nerubian Egg (2E49F10) 4/6
-[Msg_StartAttack] Minion Minion Nerubian Egg (2E49F10) 4/6 attacks enemy Minion Nerubian Egg (2E49BF0) 0/-2
-[Msg_Damage] Minion Nerubian Egg (2E49BF0) 0/-2 takes 4 damage from Minion Nerubian Egg (2E49F10) 4/6.
-[Msg_Status] Change of status for Minion Nerubian Egg (2E49BF0) 0/-2: {hp=-2}
-[Msg_CheckDead] Minion Nerubian Egg (2E49BF0) 0/-2 asks for dead cleaning.
-[Msg_DeadMinion] Minion Nerubian Egg (2E49BF0) 0/-2 dies.
-[Msg_DeathRattle] Death rattle casted by Minion Nerubian Egg (2E49BF0) 0/-2: New Minion Nerubian (2E52510) 4/4 on the board for [IA (Anduin) 17HP]
-[Msg_AddMinion] New Minion Nerubian (2E52510) 4/4 on the board for [IA (Anduin) 17HP]
-[Msg_MinionPopup] Minion Nerubian (2E52510) 4/4 pops up
-[Msg_EndAttack] End of attack.
-[Act_MinionAttack] Attack with Minion Nerubian (2E49B50) 4/4
-[Msg_StartAttack] Minion Minion Nerubian (2E49B50) 4/4 attacks enemy [IA (Anduin) 13HP]
-[Msg_Damage] [IA (Anduin) 13HP] takes 4 damage from Minion Nerubian (2E49B50) 4/4.
-[Msg_Status] Change of status for [IA (Anduin) 13HP]: {hp=13}
-[Msg_EndAttack] End of attack.
-[Act_EndTurn] End turn
-[Msg_EndTurn] End of turn for [jerome (Jaina) 30HP]
-[Msg_DeadMinion] Minion Nerubian Egg (2E49F10) 0/2 dies.
-[Msg_DeathRattle] Death rattle casted by Minion Nerubian Egg (2E49F10) 0/2: New Minion Nerubian (2E524F0) 4/4 on the board for [jerome (Jaina) 30HP]
-[Msg_Status] Change of status for Minion Nerubian Egg (2E49F10) 0/2: {hp=2, max_hp=2}
-[Msg_Status] Change of status for Minion Nerubian Egg (2E49F10) 0/2: {atq=0, max_atq=0}
-[Msg_AddMinion] New Minion Nerubian (2E524F0) 4/4 on the board for [jerome (Jaina) 30HP]
-[Msg_MinionPopup] Minion Nerubian (2E524F0) 4/4 pops up
-[Msg_StartTurn] Start of turn for [IA (Anduin) 13HP] 
-[Msg_DrawCard] [IA (Anduin) 13HP] draw Oeuf de Nerubien (2): 0/2  from the deck
-[Act_PlaySpellCard] Card Puissance accablante (1): 
-[Msg_PlayCard] [IA (Anduin) 13HP] plays Puissance accablante (1): 
-[Msg_UseMana] Player [IA (Anduin) 13HP] loses 1 mana crystal
-[Msg_ThrowCard] Player [IA (Anduin) 13HP] loses Puissance accablante (1): 
-[Msg_StartSpell] Player [IA (Anduin) 13HP] plays spell [Puissance accablante (1): ]
-[Msg_BindEffect] [IA (Anduin) 13HP] binds effect [buff +4/+4] to Minion Nerubian (2E52510) 8/8.
-[Msg_Status] Change of status for Minion Nerubian (2E52510) 8/8: {hp=8, max_hp=8}
-[Msg_Status] Change of status for Minion Nerubian (2E52510) 8/8: {atq=8, max_atq=8}
-[Msg_BindEffect] [IA (Anduin) 13HP] binds effect [Death on Msg_EndTurn] to Minion Nerubian (2E52510) 8/8.
-[Msg_EndSpell] End of spell.
-[Act_HeroPower] Hero Power (2): heals a character by 2HP
-[Msg_UseMana] Player [IA (Anduin) 13HP] loses 2 mana crystal
-[Msg_StartHeroPower] [[IA (Anduin) 13HP]] uses its hero power
-[Msg_HeroHeal] [IA (Anduin) 13HP] heals Minion Nerubian Egg (2E49990) 0/2 by 2HP.
-[Msg_Status] Change of status for Minion Nerubian Egg (2E49990) 0/2: {hp=2}
-[Msg_EndHeroPower] End of hero power effect
-[Act_PlayMinionCard] Card Oeuf de Nerubien (2): 0/2 
-[Msg_PlayCard] [IA (Anduin) 13HP] plays Oeuf de Nerubien (2): 0/2 
-[Msg_UseMana] Player [IA (Anduin) 13HP] loses 2 mana crystal
-[Msg_ThrowCard] Player [IA (Anduin) 13HP] loses Oeuf de Nerubien (2): 0/2 
-[Msg_AddMinion] New Minion Nerubian Egg (2E50070) 0/2 on the board for [IA (Anduin) 13HP]
-[Msg_MinionPopup] Minion Nerubian Egg (2E50070) 0/2 pops up
-[Act_PlaySpellCard] Card Puissance accablante (1): 
-[Msg_PlayCard] [IA (Anduin) 13HP] plays Puissance accablante (1): 
-[Msg_UseMana] Player [IA (Anduin) 13HP] loses 1 mana crystal
-[Msg_ThrowCard] Player [IA (Anduin) 13HP] loses Puissance accablante (1): 
-[Msg_StartSpell] Player [IA (Anduin) 13HP] plays spell [Puissance accablante (1): ]
-[Msg_BindEffect] [IA (Anduin) 13HP] binds effect [buff +4/+4] to Minion Nerubian Egg (2E50070) 4/6.
-[Msg_Status] Change of status for Minion Nerubian Egg (2E50070) 4/6: {hp=6, max_hp=6}
-[Msg_Status] Change of status for Minion Nerubian Egg (2E50070) 4/6: {atq=4, max_atq=4}
-[Msg_BindEffect] [IA (Anduin) 13HP] binds effect [Death on Msg_EndTurn] to Minion Nerubian Egg (2E50070) 4/6.
-[Msg_EndSpell] End of spell.
-[Act_EndTurn] End turn
-[Msg_EndTurn] End of turn for [IA (Anduin) 13HP]
-[Msg_DeadMinion] Minion Nerubian (2E52510) 4/4 dies.
-[Msg_Status] Change of status for Minion Nerubian (2E52510) 4/4: {hp=4, max_hp=4}
-[Msg_Status] Change of status for Minion Nerubian (2E52510) 4/4: {atq=4, max_atq=4}
-[Msg_DeadMinion] Minion Nerubian Egg (2E50070) 0/2 dies.
-[Msg_DeathRattle] Death rattle casted by Minion Nerubian Egg (2E50070) 0/2: New Minion Nerubian (2E524B0) 4/4 on the board for [IA (Anduin) 13HP]
-[Msg_Status] Change of status for Minion Nerubian Egg (2E50070) 0/2: {hp=2, max_hp=2}
-[Msg_Status] Change of status for Minion Nerubian Egg (2E50070) 0/2: {atq=0, max_atq=0}
-[Msg_AddMinion] New Minion Nerubian (2E524B0) 4/4 on the board for [IA (Anduin) 13HP]
-[Msg_MinionPopup] Minion Nerubian (2E524B0) 4/4 pops up
-[Msg_StartTurn] Start of turn for [jerome (Jaina) 30HP] 
-[Msg_DrawCard] [jerome (Jaina) 30HP] draw Puissance accablante (1):  from the deck
-[Act_PlaySpellCard] Card Puissance accablante (1): 
-[Msg_PlayCard] [jerome (Jaina) 30HP] plays Puissance accablante (1): 
-[Msg_UseMana] Player [jerome (Jaina) 30HP] loses 1 mana crystal
-[Msg_ThrowCard] Player [jerome (Jaina) 30HP] loses Puissance accablante (1): 
-[Msg_StartSpell] Player [jerome (Jaina) 30HP] plays spell [Puissance accablante (1): ]
-[Msg_BindEffect] [jerome (Jaina) 30HP] binds effect [buff +4/+4] to Minion Nerubian Egg (2E50050) 4/6.
-[Msg_Status] Change of status for Minion Nerubian Egg (2E50050) 4/6: {hp=6, max_hp=6}
-[Msg_Status] Change of status for Minion Nerubian Egg (2E50050) 4/6: {atq=4, max_atq=4}
-[Msg_BindEffect] [jerome (Jaina) 30HP] binds effect [Death on Msg_EndTurn] to Minion Nerubian Egg (2E50050) 4/6.
-[Msg_EndSpell] End of spell.
-[Act_MinionAttack] Attack with Minion Nerubian Egg (2E50050) 4/2
-[Msg_StartAttack] Minion Minion Nerubian Egg (2E50050) 4/2 attacks enemy Minion Nerubian (2E524B0) 4/0
-[Msg_Damage] Minion Nerubian (2E524B0) 4/0 takes 4 damage from Minion Nerubian Egg (2E50050) 4/2.
-[Msg_Status] Change of status for Minion Nerubian (2E524B0) 4/0: {hp=0}
-[Msg_Damage] Minion Nerubian Egg (2E50050) 4/2 takes 4 damage from Minion Nerubian (2E524B0) 4/0.
-[Msg_Status] Change of status for Minion Nerubian Egg (2E50050) 4/2: {hp=2}
-[Msg_CheckDead] Minion Nerubian (2E524B0) 4/0 asks for dead cleaning.
-[Msg_DeadMinion] Minion Nerubian (2E524B0) 4/0 dies.
-[Msg_EndAttack] End of attack.
-[Act_MinionAttack] Attack with Minion Nerubian (2E49B50) 4/4
-[Msg_StartAttack] Minion Minion Nerubian (2E49B50) 4/4 attacks enemy [IA (Anduin) 9HP]
-[Msg_Damage] [IA (Anduin) 9HP] takes 4 damage from Minion Nerubian (2E49B50) 4/4.
-[Msg_Status] Change of status for [IA (Anduin) 9HP]: {hp=9}
-[Msg_EndAttack] End of attack.
-[Act_MinionAttack] Attack with Minion Nerubian (2E524F0) 4/4
-[Msg_StartAttack] Minion Minion Nerubian (2E524F0) 4/4 attacks enemy [IA (Anduin) 5HP]
-[Msg_Damage] [IA (Anduin) 5HP] takes 4 damage from Minion Nerubian (2E524F0) 4/4.
-[Msg_Status] Change of status for [IA (Anduin) 5HP]: {hp=5}
-[Msg_EndAttack] End of attack.
-[Act_EndTurn] End turn
-[Msg_EndTurn] End of turn for [jerome (Jaina) 30HP]
-[Msg_DeadMinion] Minion Nerubian Egg (2E50050) 0/2 dies.
-[Msg_DeathRattle] Death rattle casted by Minion Nerubian Egg (2E50050) 0/2: New Minion Nerubian (2E52590) 4/4 on the board for [jerome (Jaina) 30HP]
-[Msg_Status] Change of status for Minion Nerubian Egg (2E50050) 0/2: {hp=2, max_hp=2}
-[Msg_Status] Change of status for Minion Nerubian Egg (2E50050) 0/2: {atq=0, max_atq=0}
-[Msg_AddMinion] New Minion Nerubian (2E52590) 4/4 on the board for [jerome (Jaina) 30HP]
-[Msg_MinionPopup] Minion Nerubian (2E52590) 4/4 pops up
-[Msg_StartTurn] Start of turn for [IA (Anduin) 5HP] 
-[Msg_DrawCard] [IA (Anduin) 5HP] draw Puissance accablante (1):  from the deck
-[Act_EndTurn] End turn
-[Msg_EndTurn] End of turn for [IA (Anduin) 5HP]
-[Msg_StartTurn] Start of turn for [jerome (Jaina) 30HP] 
-[Msg_DrawCard] [jerome (Jaina) 30HP] draw Oeuf de Nerubien (2): 0/2  from the deck
-[Act_MinionAttack] Attack with Minion Nerubian (2E52590) 4/4
-[Msg_StartAttack] Minion Minion Nerubian (2E52590) 4/4 attacks enemy [IA (Anduin) 1HP]
-[Msg_Damage] [IA (Anduin) 1HP] takes 4 damage from Minion Nerubian (2E52590) 4/4.
-[Msg_Status] Change of status for [IA (Anduin) 1HP]: {hp=1}
-[Msg_EndAttack] End of attack.
-[Act_MinionAttack] Attack with Minion Nerubian (2E524F0) 4/4
-[Msg_StartAttack] Minion Minion Nerubian (2E524F0) 4/4 attacks enemy [IA (Anduin) -3HP]
-[Msg_Damage] [IA (Anduin) -3HP] takes 4 damage from Minion Nerubian (2E524F0) 4/4.
-[Msg_Status] Change of status for [IA (Anduin) -3HP]: {hp=-3}
-[Msg_CheckDead] [IA (Anduin) -3HP] asks for dead cleaning.
-[Msg_DeadHero] [IA (Anduin) -3HP] dies.
+[Act_MinionAttack] Attack with Minion Wisp (2E54910) 1/0
+[Msg_StartAttack] Minion Minion Wisp (2E54910) 1/0 attacks enemy Minion Wisp (2E54ED0) 1/-1
+[Msg_Damage] Minion Wisp (2E54ED0) 1/-1 takes 2 damage from Minion Wisp (2E54910) 1/0.
+[Msg_Status] Change of status for Minion Wisp (2E54ED0) 1/-1: {hp=-1}
+[Msg_Damage] Minion Wisp (2E54910) 1/0 takes 1 damage from Minion Wisp (2E54ED0) 1/-1.
+[Msg_Status] Change of status for Minion Wisp (2E54910) 1/0: {hp=0}
+[Msg_CheckDead] Minion Wisp (2E54ED0) 1/-1 asks for dead cleaning.
+[Msg_DeadMinion] Minion Wisp (2E54910) 1/0 dies.
+[Msg_Status] Change of status for Minion Wisp (2E54910) 1/0: {hp=0, max_hp=1}
+[Msg_Status] Change of status for Minion Wisp (2E54910) 1/0: {atq=1, max_atq=1}
+[Msg_DeadMinion] Minion Wisp (2E54ED0) 1/-1 dies.
+[Msg_CheckDead] Minion Wisp (2E54910) 1/0 asks for dead cleaning.
+[Msg_CheckDead] Minion Wisp (2E54910) 1/0 asks for dead cleaning.
 [Msg_EndAttack] End of attack.
