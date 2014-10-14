@@ -12,6 +12,7 @@ from copy import copy
 
 class Message (object):
     def __init__(self, caster):
+        assert caster!=None, pdb.set_trace()
         self.caster = caster
     @classmethod
     def set_engine(cls, engine):
@@ -24,11 +25,13 @@ class Message (object):
 class TargetedMessage (Message):
     def __init__(self, caster, target):
         Message.__init__(self, caster)
+        assert target!=None, pdb.set_trace()
         self.target = target
 
 class CardMessage (Message):
     def __init__(self, caster, card):
         Message.__init__(self, caster)
+        assert card!=None, pdb.set_trace()
         self.card = card
 
 class Msg_Debug (Message):
@@ -155,6 +158,7 @@ class Msg_EndHeroPower (Message):
 class Msg_AddThing (Message):
     def __init__(self, caster, thing, pos=None):
         Message.__init__(self, caster)
+        assert thing!=None, pdb.set_trace()
         self.thing = thing
         self.pos = pos
     def execute(self):

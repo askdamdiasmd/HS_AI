@@ -119,6 +119,7 @@ class Card_Coin (Card_GenericSpell):
     def __init__(self, owner):
         Card_GenericSpell.__init__(self, 0, "The coin", lambda self: [Msg_GainMana(self.caster,1)],
                                    desc="Gain one mana crystal this turn only")
+        self.owner = owner
 
 
 class Card_Wrath (Card_Spell):
@@ -181,9 +182,9 @@ def get_cardbook():
        effects=[Eff_BuffLeftRight(1,0)], desc_fr="Les serviteurs adjacents ont +1 ATQ") )
 
   add( Card_Minion(1, 1, 1, "Spectral Spider", name_fr="Araignee spectrale") )
-  add( Card_Minion(2, 1, 2, "Haunted Creeper", 
-       effects=[Eff_DR_Invoke_Minion(cardbook["Spectral Spider"])]*2,
-       name_fr="Rampante Hantee", cat='beast',
+  add( Card_Minion(2, 1, 2, "Haunted Creeper", name_fr="Rampante Hantee", cat='beast',
+       effects=[Eff_DR_Invoke_Minion(cardbook["Spectral Spider"]),
+                Eff_DR_Invoke_Minion(cardbook["Spectral Spider"])],
        desc_fr="Rale d'agonie: Invoque 2 Araignees spectrales 1/1") )
 
   add( Card_Minion_BC(2, 2, 1, "Ironbeak Owl", Eff_Silence(), name_fr="Chouette bec-de-fer",
@@ -234,8 +235,9 @@ def get_cardbook():
        desc_fr="Rale d'agonie: Invoque un Baine 4/5" ) )
 
   add( Card_Minion(2, 2, 2, "Hyena", name_fr="Hyene", cat='beast') )
-  add( Card_Minion(6, 6, 5, "Savannah Highmane", effects=[Eff_DR_Invoke_Minion(cardbook["Hyena"])]*2,
-       name_fr="Grande Criniere des Savanes", cat='beast',
+  add( Card_Minion(6, 6, 5, "Savannah Highmane", name_fr="Grande Criniere des Savanes", cat='beast',
+       effects=[Eff_DR_Invoke_Minion(cardbook["Hyena"]),
+                Eff_DR_Invoke_Minion(cardbook["Hyena"])],
        desc_fr="Rale d'agonie: Invoque 2 hyenes 2/2") )
 
   ### 7 Mana ##################################
@@ -269,8 +271,8 @@ def fake_deck(debug=False):
     cardbook = get_cardbook()
     deck = []
     if debug:
-      deck += [copy(cardbook["Goldshire Footman"]) for i in range(15)]
-      deck += [copy(cardbook["Power Overwhleming"]) for i in range(15)]
+      deck += [copy(cardbook["Defender of Argus"]) for i in range(15)]
+      deck += [copy(cardbook["Wisp"]) for i in range(15)]
     else:
       deck += [copy(cardbook["Wisp"]) for i in range(2)]
       deck += [copy(cardbook["Power Overwhleming"]) for i in range(2)]

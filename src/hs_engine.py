@@ -121,9 +121,7 @@ class HSEngine:
       actions = player.list_actions()
       # filter actions
       actions = self.filter_actions(actions)
-      actions = [a for a in actions if a.cost<=player.mana]
-      if len(player.minions)>=7:
-        actions = [a for a in actions if not issubclass(type(a),Act_PlayMinionCard)]        
+      actions = [a for a in actions if a.is_valid() and a.cost<=player.mana]
       action = player.choose_actions(actions)  # action can be Msg_EndTurn
       self.send_message(action)
 

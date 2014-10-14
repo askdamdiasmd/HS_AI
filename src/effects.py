@@ -144,7 +144,8 @@ class Eff_DieSoon (Effect):
     def trigger(self, msg): # end of temporary effect
         if self.condition(self,msg):
           self.owner.dead = True
-          self.owner.ask_for_death()
+          self.engine.send_message(Msg_CheckDead(self.owner))
+          #self.owner.ask_for_death()
 
 
 class Eff_BuffLeftRight (Effect):

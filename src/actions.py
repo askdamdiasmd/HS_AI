@@ -13,6 +13,7 @@ An action includes
 '''
 import pdb
 from messages import *
+from copy import deepcopy
 
 
 ### ---------- Actions ---------------
@@ -82,6 +83,9 @@ class Act_PlayMinionCard (Act_PlayCard):
     def __init__(self, card):
         Act_PlayCard.___init___(self,card)
         self.choices = [self.engine.board.get_free_slots(card.owner)]
+    def is_valid(self):
+        player = self.caster
+        return len(player.minions)<7
     def execute(self):
         Act_PlayCard.execute(self)
         pos = self.choices[0]
@@ -90,10 +94,10 @@ class Act_PlayMinionCard (Act_PlayCard):
         self.engine.send_message(Msg_AddMinion(self.caster, Minion(self.card), pos))
 
 
-class Act_PlayMinionCard_BC (Act_PlayCard):
+class Act_PlayMinionCard_BC (Act_PlayMinionCard):
     ''' hero plays a minion card with battlecry '''
     def __init__(self, card, battlecry, targets):
-        Act_PlayCard.___init___(self,card)
+        Act_PlayMinionCard.___init___(self,card)
         self.choices = [self.engine.board.get_free_slots(card.owner),targets]
         self.battlecry = battlecry
         self.special_targets = None
@@ -110,7 +114,7 @@ class Act_PlayMinionCard_BC (Act_PlayCard):
         if self.special_targets=='neighbors':
           player = self.caster
           for target in player.minions[max(0,pos.index-1):pos.index+1]:
-            actions.append(Msg_BindEffect(minion, target, self.battlecry))
+            actions.append(Msg_BindEffect(minion, target, deepcopy(self.battlecry)))
         else:
           target = self.choices[1]
           if target!=None:
