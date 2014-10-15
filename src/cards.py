@@ -174,7 +174,11 @@ def get_cardbook():
        desc_fr="Cri de guerre: confere +2 ATQ a un serviteur pendant ce tour") )
   
   add( Card_Minion(1, 1, 2, 'Goldshire Footman',name_fr='Soldat de Comte de l\'Or',effects='taunt') )
-
+  
+#  add( Card_Minion(1, 1, 2, "Hungry crab", name_fr="Crabe affame", cat='beast', effects= ) )
+  
+  add( Card_Minion(1, 2, 1, 'Murloc Raider',name_fr='Ecumeur murloc') )
+  
   ### 2 Mana ##################################
 
   add( Card_Minion(2, 2, 2, "Dire Wolf Alpha", name_fr="Loup alpha redoutable",
