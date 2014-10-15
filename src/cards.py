@@ -128,10 +128,9 @@ class Card_Wrath (Card_Spell):
         Card_Spell.__init__(self, 2, "Wrath", cls="Druid",name_fr="Colere")
     def list_actions(self):
         targets = self.engine.board.get_characters()
-        hero = self.owner
         first = Act_SingleSpellDamageCard(self,targets,damage=3)
         actions = lambda self: [Msg_SpellDamage(self.caster,self.choices[0],self.damage),
-                                Msg_DrawCard(hero)]
+                                Msg_DrawCard(self.owner)]
         second = Act_SingleSpellDamageCard(self,targets,damage=1,actions=actions)
         return [first,second]
 
@@ -202,6 +201,10 @@ def get_cardbook():
   
   ### 3 Mana ##################################
 
+  add( Card_Minion(3, 1, 3, "Acolyte of Pain", name_fr="Acolyte de la souffrance", 
+       effects=[Eff_DrawCard(Msg_Damage,lambda self,msg: msg.target is self.owner, immediate=True)],
+       desc_fr="Cri de guerre: Detruit les serviteurs adjacents et gagne leurs pts d'Attaque et de Vie."))
+
   add( Card_Minion(1, 2, 1, "Damaged Golem", name_fr="Golem endommage") )
   add( Card_Minion(3, 2, 3, "Harvest Golem", effects=[Eff_DR_Invoke_Minion(cardbook["Damaged Golem"])],
        name_fr="Golem des moissons", desc_fr="Rale d'agonie: Invoque un golem endommage 2/1", ) )
@@ -209,6 +212,10 @@ def get_cardbook():
   add( Card_Minion_BC(3, 3, 2, "Shattered Sun Cleric", Eff_BuffMinion(1,1,False), 'friendly minions',
        name_fr="Clerc du Soleil brise",
        desc_fr="Cri de guerre: confere +1/+1 a un serviteur allie") )
+
+  add( Card_Minion_BC(3, 3, 3, "Void Terror", Eff_Absorb(), 'neighbors', 
+       name_fr="Terreur du vide", cls="warlock",
+       desc_fr="Cri de guerre: Detruit les serviteurs adjacents et gagne leurs pts d'Attaque et de Vie."))
 
   ### 4 Mana ##################################
 
@@ -271,8 +278,7 @@ def fake_deck(debug=False):
     cardbook = get_cardbook()
     deck = []
     if debug:
-      deck += [copy(cardbook["Defender of Argus"]) for i in range(15)]
-      deck += [copy(cardbook["Wisp"]) for i in range(15)]
+      deck += [copy(cardbook["Acolyte of Pain"]) for i in range(15)]
     else:
       deck += [copy(cardbook["Wisp"]) for i in range(2)]
       deck += [copy(cardbook["Power Overwhleming"]) for i in range(2)]

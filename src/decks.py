@@ -2,6 +2,7 @@
 a deck
 """
 import random
+from messages import *
 
 
 class Deck (object):
