@@ -176,7 +176,7 @@ def get_cardbook():
   
   add( Card_Minion(1, 1, 2, 'Goldshire Footman',name_fr='Soldat de Comte de l\'Or',effects='taunt') )
   
-#  add( Card_Minion(1, 1, 2, "Hungry crab", name_fr="Crabe affamé", cat='beast', effects= ) )
+#  add( Card_Minion(1, 1, 2, "Hungry crab", name_fr="Crabe affame", cat='beast', effects= ) )
   
   add( Card_Minion(1, 2, 1, 'Murloc Raider',name_fr='Ecumeur murloc') )
   
