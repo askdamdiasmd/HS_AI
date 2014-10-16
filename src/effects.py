@@ -24,7 +24,7 @@ class Effect (object):
         cls.engine = engine
     def __init__(self, owner=None):
         self.owner = owner    # effect belongs to this minion
-    def bind_to(self, owner):
+    def bind_to(self, owner, caster=None):
         self.owner = owner  # when binded to a creature
         owner.effects.append(self) # associate effect to a minion/card
     def filter(self, action):
@@ -69,7 +69,7 @@ class Eff_Silence (Effect):
         Effect.__init__(self)
     def __str__(self):
         return "silence"
-    def bind_to(self, minion):
+    def bind_to(self, minion, caster=None):
         minion.silence()
 
 
@@ -80,7 +80,7 @@ class Eff_DR_Invoke_Minion (Effect):
       self.card = card
     def __str__(self):
       return "Invoke a %s" % str(self.card)
-    def bind_to(self, owner):
+    def bind_to(self, owner, caster=None):
       self.owner = owner
       owner.effects.append('death_rattle')
       owner.triggers.append((Msg_Dead,self)) # because we are already disappeared when it triggers
@@ -109,7 +109,7 @@ class Eff_BuffMinion (Effect):
         others = (' '+' '.join([str(e) for e in self.others])) if self.others else ''
         temp = self.temp and " (temporary)" or ""
         return "%s%s%s" % (buff, others, temp)
-    def bind_to(self, owner):
+    def bind_to(self, owner, caster=None):
         self.owner = owner
         if self.hp or self.atq:  # we don't care if just taunt
           owner.effects.append(self)
@@ -138,7 +138,7 @@ class Eff_DieSoon (Effect):
         self.condition = condition
     def __str__(self):
         return "Death on %s" % (self.death_trigger.__name__)
-    def bind_to(self, owner):
+    def bind_to(self, owner, caster=None):
         self.owner = owner
         owner.triggers.append((self.death_trigger, self))
     def trigger(self, msg): # end of temporary effect
@@ -146,6 +146,19 @@ class Eff_DieSoon (Effect):
           self.owner.dead = True
           self.engine.send_message(Msg_CheckDead(self.owner))
           #self.owner.ask_for_death()
+
+
+class Eff_Absorb (Effect):
+    """ buff a minion (just for this turn of permanent) """
+    def __init__(self):
+        Effect.__init__(self)
+    def __str__(self):
+        return "Absorb hp and atq"
+    def bind_to(self, owner, caster=None):
+        eff = Eff_BuffMinion(owner.atq,owner.hp)
+        self.engine.send_message(Msg_BindEffect(owner,caster,eff),immediate=True)
+        owner.dead = True
+        self.engine.send_message(Msg_CheckDead(owner))
 
 
 class Eff_BuffLeftRight (Effect):
@@ -185,8 +198,20 @@ class Eff_BuffLeftRight (Effect):
           if self.atq: target.change_atq(-self.atq)
 
 
-
-
+class Eff_DrawCard (Effect):
+    def __init__(self, trigger, condition, immediate):
+        Effect.__init__(self)
+        self.trig_msg = trigger
+        self.condition = condition
+        self.immediate = immediate
+    def bind_to(self, owner, caster=None):
+        self.owner = owner
+        owner.effects.append("effect")
+        owner.triggers.append((self.trig_msg, self))
+    def trigger(self, msg):
+        if self.condition(self,msg):
+          caster = self.owner.owner
+          self.engine.send_message(Msg_DrawCard(caster),immediate=self.immediate)
 
 
 

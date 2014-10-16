@@ -74,7 +74,14 @@ class Msg_Status (Message):
 
 # play card messages
 
-class Msg_DrawCard (CardMessage):
+class Msg_DrawCard (Message):
+    '''just to inform that caster drew a card'''
+    def __str__(self):
+        return '%s is going to draw a card' % (self.caster)
+    def execute(self):
+        self.caster.draw_card()
+
+class Msg_CardDrawn (CardMessage):
     '''just to inform that caster drew a card'''
     def __str__(self):
         return '%s draw %s from the deck' % (self.caster, self.card)
@@ -118,6 +125,17 @@ class Msg_PlayCard (CardMessage):
         self.engine.send_message(
             [Msg_UseMana(self.caster,self.cost), 
              Msg_ThrowCard(self.caster,self.card)], immediate=True)
+
+
+class Msg_Fatigue (Message):
+    """ fatigue damage points (no more cards) """
+    def __init__(self, caster, damage):
+        Message.__init__(self, caster)
+        self.damage = damage
+    def __str__(self):
+        return "%s takes %d points of fatigue" % (self.caster, self.damage)
+    def execute(self):
+        self.caster.hero.hurt(self.damage)
 
 
 # start/end messages
@@ -316,7 +334,7 @@ class Msg_BindEffect (TargetedMessage):
     def __str__(self):
         return "%s binds effect [%s] to %s." % (self.caster, self.effect, self.target)
     def execute(self):
-        self.effect.bind_to(self.target)
+        self.effect.bind_to(self.target, caster=self.caster)
 
 
 

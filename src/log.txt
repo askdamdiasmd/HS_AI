@@ -1,0 +1,218 @@
+[Msg_StartTurn] Start of turn for [jerome (Jaina) 30HP] 
+[Msg_CardDrawn] [jerome (Jaina) 30HP] draw Acolyte de la souffrance (3): 1/3  from the deck
+[Msg_CardDrawn] [jerome (Jaina) 30HP] draw Acolyte de la souffrance (3): 1/3  from the deck
+[Msg_CardDrawn] [jerome (Jaina) 30HP] draw Acolyte de la souffrance (3): 1/3  from the deck
+[Msg_CardDrawn] [IA (Anduin) 30HP] draw Acolyte de la souffrance (3): 1/3  from the deck
+[Msg_CardDrawn] [IA (Anduin) 30HP] draw Acolyte de la souffrance (3): 1/3  from the deck
+[Msg_CardDrawn] [IA (Anduin) 30HP] draw Acolyte de la souffrance (3): 1/3  from the deck
+[Msg_CardDrawn] [IA (Anduin) 30HP] draw Acolyte de la souffrance (3): 1/3  from the deck
+[Msg_CardDrawn] [IA (Anduin) 30HP] draw  (0): Gain one mana crystal this turn only from the deck
+[Msg_DrawCard] [jerome (Jaina) 30HP] is going to draw a card
+[Msg_CardDrawn] [jerome (Jaina) 30HP] draw Acolyte de la souffrance (3): 1/3  from the deck
+[Act_PlayMinionCard] Card Acolyte de la souffrance (3): 1/3 
+[Msg_PlayCard] [jerome (Jaina) 30HP] plays Acolyte de la souffrance (3): 1/3 
+[Msg_UseMana] Player [jerome (Jaina) 30HP] loses 3 mana crystal
+[Msg_ThrowCard] Player [jerome (Jaina) 30HP] loses Acolyte de la souffrance (3): 1/3 
+[Msg_AddMinion] New Minion Acolyte of Pain (2F06290) 1/3 on the board for [jerome (Jaina) 30HP]
+[Msg_MinionPopup] Minion Acolyte of Pain (2F06290) 1/3 pops up
+[Act_PlayMinionCard] Card Acolyte de la souffrance (3): 1/3 
+[Msg_PlayCard] [jerome (Jaina) 30HP] plays Acolyte de la souffrance (3): 1/3 
+[Msg_UseMana] Player [jerome (Jaina) 30HP] loses 3 mana crystal
+[Msg_ThrowCard] Player [jerome (Jaina) 30HP] loses Acolyte de la souffrance (3): 1/3 
+[Msg_AddMinion] New Minion Acolyte of Pain (2F061B0) 1/3 on the board for [jerome (Jaina) 30HP]
+[Msg_MinionPopup] Minion Acolyte of Pain (2F061B0) 1/3 pops up
+[Act_PlayMinionCard] Card Acolyte de la souffrance (3): 1/3 
+[Msg_PlayCard] [jerome (Jaina) 30HP] plays Acolyte de la souffrance (3): 1/3 
+[Msg_UseMana] Player [jerome (Jaina) 30HP] loses 3 mana crystal
+[Msg_ThrowCard] Player [jerome (Jaina) 30HP] loses Acolyte de la souffrance (3): 1/3 
+[Msg_AddMinion] New Minion Acolyte of Pain (2F06530) 1/3 on the board for [jerome (Jaina) 30HP]
+[Msg_MinionPopup] Minion Acolyte of Pain (2F06530) 1/3 pops up
+[Act_EndTurn] End turn
+[Msg_EndTurn] End of turn for [jerome (Jaina) 30HP]
+[Msg_StartTurn] Start of turn for [IA (Anduin) 30HP] 
+[Msg_DrawCard] [IA (Anduin) 30HP] is going to draw a card
+[Msg_CardDrawn] [IA (Anduin) 30HP] draw Acolyte de la souffrance (3): 1/3  from the deck
+[Act_PlayMinionCard] Card Acolyte de la souffrance (3): 1/3 
+[Msg_PlayCard] [IA (Anduin) 30HP] plays Acolyte de la souffrance (3): 1/3 
+[Msg_UseMana] Player [IA (Anduin) 30HP] loses 3 mana crystal
+[Msg_ThrowCard] Player [IA (Anduin) 30HP] loses Acolyte de la souffrance (3): 1/3 
+[Msg_AddMinion] New Minion Acolyte of Pain (2F06370) 1/3 on the board for [IA (Anduin) 30HP]
+[Msg_MinionPopup] Minion Acolyte of Pain (2F06370) 1/3 pops up
+[Act_PlayMinionCard] Card Acolyte de la souffrance (3): 1/3 
+[Msg_PlayCard] [IA (Anduin) 30HP] plays Acolyte de la souffrance (3): 1/3 
+[Msg_UseMana] Player [IA (Anduin) 30HP] loses 3 mana crystal
+[Msg_ThrowCard] Player [IA (Anduin) 30HP] loses Acolyte de la souffrance (3): 1/3 
+[Msg_AddMinion] New Minion Acolyte of Pain (2F06590) 1/3 on the board for [IA (Anduin) 30HP]
+[Msg_MinionPopup] Minion Acolyte of Pain (2F06590) 1/3 pops up
+[Act_PlayMinionCard] Card Acolyte de la souffrance (3): 1/3 
+[Msg_PlayCard] [IA (Anduin) 30HP] plays Acolyte de la souffrance (3): 1/3 
+[Msg_UseMana] Player [IA (Anduin) 30HP] loses 3 mana crystal
+[Msg_ThrowCard] Player [IA (Anduin) 30HP] loses Acolyte de la souffrance (3): 1/3 
+[Msg_AddMinion] New Minion Acolyte of Pain (2F06730) 1/3 on the board for [IA (Anduin) 30HP]
+[Msg_MinionPopup] Minion Acolyte of Pain (2F06730) 1/3 pops up
+[Act_EndTurn] End turn
+[Msg_EndTurn] End of turn for [IA (Anduin) 30HP]
+[Msg_StartTurn] Start of turn for [jerome (Jaina) 30HP] 
+[Msg_DrawCard] [jerome (Jaina) 30HP] is going to draw a card
+[Msg_CardDrawn] [jerome (Jaina) 30HP] draw Acolyte de la souffrance (3): 1/3  from the deck
+[Act_PlayMinionCard] Card Acolyte de la souffrance (3): 1/3 
+[Msg_PlayCard] [jerome (Jaina) 30HP] plays Acolyte de la souffrance (3): 1/3 
+[Msg_UseMana] Player [jerome (Jaina) 30HP] loses 3 mana crystal
+[Msg_ThrowCard] Player [jerome (Jaina) 30HP] loses Acolyte de la souffrance (3): 1/3 
+[Msg_AddMinion] New Minion Acolyte of Pain (2F06650) 1/3 on the board for [jerome (Jaina) 30HP]
+[Msg_MinionPopup] Minion Acolyte of Pain (2F06650) 1/3 pops up
+[Act_PlayMinionCard] Card Acolyte de la souffrance (3): 1/3 
+[Msg_PlayCard] [jerome (Jaina) 30HP] plays Acolyte de la souffrance (3): 1/3 
+[Msg_UseMana] Player [jerome (Jaina) 30HP] loses 3 mana crystal
+[Msg_ThrowCard] Player [jerome (Jaina) 30HP] loses Acolyte de la souffrance (3): 1/3 
+[Msg_AddMinion] New Minion Acolyte of Pain (2F06470) 1/3 on the board for [jerome (Jaina) 30HP]
+[Msg_MinionPopup] Minion Acolyte of Pain (2F06470) 1/3 pops up
+[Act_MinionAttack] Attack with Minion Acolyte of Pain (2F06530) 1/2
+[Msg_StartAttack] Minion Minion Acolyte of Pain (2F06530) 1/2 attacks enemy Minion Acolyte of Pain (2F06370) 1/2
+[Msg_Damage] Minion Acolyte of Pain (2F06370) 1/2 takes 1 damage from Minion Acolyte of Pain (2F06530) 1/2.
+[Msg_DrawCard] [IA (Anduin) 30HP] is going to draw a card
+[Msg_CardDrawn] [IA (Anduin) 30HP] draw Acolyte de la souffrance (3): 1/3  from the deck
+[Msg_Status] Change of status for Minion Acolyte of Pain (2F06370) 1/2: {hp=2}
+[Msg_Damage] Minion Acolyte of Pain (2F06530) 1/2 takes 1 damage from Minion Acolyte of Pain (2F06370) 1/2.
+[Msg_DrawCard] [jerome (Jaina) 30HP] is going to draw a card
+[Msg_CardDrawn] [jerome (Jaina) 30HP] draw Acolyte de la souffrance (3): 1/3  from the deck
+[Msg_Status] Change of status for Minion Acolyte of Pain (2F06530) 1/2: {hp=2}
+[Msg_EndAttack] End of attack.
+[Act_MinionAttack] Attack with Minion Acolyte of Pain (2F061B0) 1/2
+[Msg_StartAttack] Minion Minion Acolyte of Pain (2F061B0) 1/2 attacks enemy Minion Acolyte of Pain (2F06590) 1/2
+[Msg_Damage] Minion Acolyte of Pain (2F06590) 1/2 takes 1 damage from Minion Acolyte of Pain (2F061B0) 1/2.
+[Msg_DrawCard] [IA (Anduin) 30HP] is going to draw a card
+[Msg_CardDrawn] [IA (Anduin) 30HP] draw Acolyte de la souffrance (3): 1/3  from the deck
+[Msg_Status] Change of status for Minion Acolyte of Pain (2F06590) 1/2: {hp=2}
+[Msg_Damage] Minion Acolyte of Pain (2F061B0) 1/2 takes 1 damage from Minion Acolyte of Pain (2F06590) 1/2.
+[Msg_DrawCard] [jerome (Jaina) 30HP] is going to draw a card
+[Msg_CardDrawn] [jerome (Jaina) 30HP] draw Acolyte de la souffrance (3): 1/3  from the deck
+[Msg_Status] Change of status for Minion Acolyte of Pain (2F061B0) 1/2: {hp=2}
+[Msg_EndAttack] End of attack.
+[Act_MinionAttack] Attack with Minion Acolyte of Pain (2F06290) 1/2
+[Msg_StartAttack] Minion Minion Acolyte of Pain (2F06290) 1/2 attacks enemy Minion Acolyte of Pain (2F06590) 1/1
+[Msg_Damage] Minion Acolyte of Pain (2F06590) 1/1 takes 1 damage from Minion Acolyte of Pain (2F06290) 1/2.
+[Msg_DrawCard] [IA (Anduin) 30HP] is going to draw a card
+[Msg_CardDrawn] [IA (Anduin) 30HP] draw Acolyte de la souffrance (3): 1/3  from the deck
+[Msg_Status] Change of status for Minion Acolyte of Pain (2F06590) 1/1: {hp=1}
+[Msg_Damage] Minion Acolyte of Pain (2F06290) 1/2 takes 1 damage from Minion Acolyte of Pain (2F06590) 1/1.
+[Msg_DrawCard] [jerome (Jaina) 30HP] is going to draw a card
+[Msg_CardDrawn] [jerome (Jaina) 30HP] draw Acolyte de la souffrance (3): 1/3  from the deck
+[Msg_Status] Change of status for Minion Acolyte of Pain (2F06290) 1/2: {hp=2}
+[Msg_EndAttack] End of attack.
+[Act_PlayMinionCard] Card Acolyte de la souffrance (3): 1/3 
+[Msg_PlayCard] [jerome (Jaina) 30HP] plays Acolyte de la souffrance (3): 1/3 
+[Msg_UseMana] Player [jerome (Jaina) 30HP] loses 3 mana crystal
+[Msg_ThrowCard] Player [jerome (Jaina) 30HP] loses Acolyte de la souffrance (3): 1/3 
+[Msg_AddMinion] New Minion Acolyte of Pain (2F06D30) 1/3 on the board for [jerome (Jaina) 30HP]
+[Msg_MinionPopup] Minion Acolyte of Pain (2F06D30) 1/3 pops up
+[Act_EndTurn] End turn
+[Msg_EndTurn] End of turn for [jerome (Jaina) 30HP]
+[Msg_StartTurn] Start of turn for [IA (Anduin) 30HP] 
+[Msg_DrawCard] [IA (Anduin) 30HP] is going to draw a card
+[Msg_CardDrawn] [IA (Anduin) 30HP] draw Acolyte de la souffrance (3): 1/3  from the deck
+[Act_HeroPower] Hero Power (2): heals a character by 2HP
+[Msg_UseMana] Player [IA (Anduin) 30HP] loses 2 mana crystal
+[Msg_StartHeroPower] [[IA (Anduin) 30HP]] uses its hero power
+[Msg_HeroHeal] [IA (Anduin) 30HP] heals Minion Acolyte of Pain (2F06530) 1/3 by 2HP.
+[Msg_Status] Change of status for Minion Acolyte of Pain (2F06530) 1/3: {hp=3}
+[Msg_EndHeroPower] End of hero power effect
+[Act_PlayMinionCard] Card Acolyte de la souffrance (3): 1/3 
+[Msg_PlayCard] [IA (Anduin) 30HP] plays Acolyte de la souffrance (3): 1/3 
+[Msg_UseMana] Player [IA (Anduin) 30HP] loses 3 mana crystal
+[Msg_ThrowCard] Player [IA (Anduin) 30HP] loses Acolyte de la souffrance (3): 1/3 
+[Msg_AddMinion] New Minion Acolyte of Pain (2F06430) 1/3 on the board for [IA (Anduin) 30HP]
+[Msg_MinionPopup] Minion Acolyte of Pain (2F06430) 1/3 pops up
+[Act_PlayMinionCard] Card Acolyte de la souffrance (3): 1/3 
+[Msg_PlayCard] [IA (Anduin) 30HP] plays Acolyte de la souffrance (3): 1/3 
+[Msg_UseMana] Player [IA (Anduin) 30HP] loses 3 mana crystal
+[Msg_ThrowCard] Player [IA (Anduin) 30HP] loses Acolyte de la souffrance (3): 1/3 
+[Msg_AddMinion] New Minion Acolyte of Pain (2F06850) 1/3 on the board for [IA (Anduin) 30HP]
+[Msg_MinionPopup] Minion Acolyte of Pain (2F06850) 1/3 pops up
+[Act_MinionAttack] Attack with Minion Acolyte of Pain (2F06730) 1/2
+[Msg_StartAttack] Minion Minion Acolyte of Pain (2F06730) 1/2 attacks enemy Minion Acolyte of Pain (2F06530) 1/2
+[Msg_Damage] Minion Acolyte of Pain (2F06530) 1/2 takes 1 damage from Minion Acolyte of Pain (2F06730) 1/2.
+[Msg_DrawCard] [jerome (Jaina) 30HP] is going to draw a card
+[Msg_CardDrawn] [jerome (Jaina) 30HP] draw Acolyte de la souffrance (3): 1/3  from the deck
+[Msg_Status] Change of status for Minion Acolyte of Pain (2F06530) 1/2: {hp=2}
+[Msg_Damage] Minion Acolyte of Pain (2F06730) 1/2 takes 1 damage from Minion Acolyte of Pain (2F06530) 1/2.
+[Msg_DrawCard] [IA (Anduin) 30HP] is going to draw a card
+[Msg_CardDrawn] [IA (Anduin) 30HP] draw Acolyte de la souffrance (3): 1/3  from the deck
+[Msg_Status] Change of status for Minion Acolyte of Pain (2F06730) 1/2: {hp=2}
+[Msg_EndAttack] End of attack.
+[Act_MinionAttack] Attack with Minion Acolyte of Pain (2F06590) 1/0
+[Msg_StartAttack] Minion Minion Acolyte of Pain (2F06590) 1/0 attacks enemy Minion Acolyte of Pain (2F061B0) 1/1
+[Msg_Damage] Minion Acolyte of Pain (2F061B0) 1/1 takes 1 damage from Minion Acolyte of Pain (2F06590) 1/0.
+[Msg_DrawCard] [jerome (Jaina) 30HP] is going to draw a card
+[Msg_CardDrawn] [jerome (Jaina) 30HP] draw Acolyte de la souffrance (3): 1/3  from the deck
+[Msg_Status] Change of status for Minion Acolyte of Pain (2F061B0) 1/1: {hp=1}
+[Msg_Damage] Minion Acolyte of Pain (2F06590) 1/0 takes 1 damage from Minion Acolyte of Pain (2F061B0) 1/1.
+[Msg_DrawCard] [IA (Anduin) 30HP] is going to draw a card
+[Msg_CardDrawn] [IA (Anduin) 30HP] draw Acolyte de la souffrance (3): 1/3  from the deck
+[Msg_Status] Change of status for Minion Acolyte of Pain (2F06590) 1/0: {hp=0}
+[Msg_CheckDead] Minion Acolyte of Pain (2F06590) 1/0 asks for dead cleaning.
+[Msg_DeadMinion] Minion Acolyte of Pain (2F06590) 1/0 dies.
+[Msg_EndAttack] End of attack.
+[Act_EndTurn] End turn
+[Msg_EndTurn] End of turn for [IA (Anduin) 30HP]
+[Msg_StartTurn] Start of turn for [jerome (Jaina) 30HP] 
+[Msg_DrawCard] [jerome (Jaina) 30HP] is going to draw a card
+[Msg_CardDrawn] [jerome (Jaina) 30HP] draw Acolyte de la souffrance (3): 1/3  from the deck
+[Act_MinionAttack] Attack with Minion Acolyte of Pain (2F06470) 1/2
+[Msg_StartAttack] Minion Minion Acolyte of Pain (2F06470) 1/2 attacks enemy Minion Acolyte of Pain (2F06730) 1/1
+[Msg_Damage] Minion Acolyte of Pain (2F06730) 1/1 takes 1 damage from Minion Acolyte of Pain (2F06470) 1/2.
+[Msg_DrawCard] [IA (Anduin) 30HP] is going to draw a card
+[Msg_CardDrawn] [IA (Anduin) 30HP] draw Acolyte de la souffrance (3): 1/3  from the deck
+[Msg_Status] Change of status for Minion Acolyte of Pain (2F06730) 1/1: {hp=1}
+[Msg_Damage] Minion Acolyte of Pain (2F06470) 1/2 takes 1 damage from Minion Acolyte of Pain (2F06730) 1/1.
+[Msg_DrawCard] [jerome (Jaina) 30HP] is going to draw a card
+[Msg_CardDrawn] [jerome (Jaina) 30HP] draw Acolyte de la souffrance (3): 1/3  from the deck
+[Msg_Status] Change of status for Minion Acolyte of Pain (2F06470) 1/2: {hp=2}
+[Msg_EndAttack] End of attack.
+[Act_MinionAttack] Attack with Minion Acolyte of Pain (2F06650) 1/2
+[Msg_StartAttack] Minion Minion Acolyte of Pain (2F06650) 1/2 attacks enemy Minion Acolyte of Pain (2F06730) 1/0
+[Msg_Damage] Minion Acolyte of Pain (2F06730) 1/0 takes 1 damage from Minion Acolyte of Pain (2F06650) 1/2.
+[Msg_DrawCard] [IA (Anduin) 30HP] is going to draw a card
+[Msg_CardDrawn] [IA (Anduin) 30HP] draw Acolyte de la souffrance (3): 1/3  from the deck
+[Msg_Status] Change of status for Minion Acolyte of Pain (2F06730) 1/0: {hp=0}
+[Msg_Damage] Minion Acolyte of Pain (2F06650) 1/2 takes 1 damage from Minion Acolyte of Pain (2F06730) 1/0.
+[Msg_DrawCard] [jerome (Jaina) 30HP] is going to draw a card
+[Msg_CardDrawn] [jerome (Jaina) 30HP] draw Acolyte de la souffrance (3): 1/3  from the deck
+[Msg_Status] Change of status for Minion Acolyte of Pain (2F06650) 1/2: {hp=2}
+[Msg_CheckDead] Minion Acolyte of Pain (2F06730) 1/0 asks for dead cleaning.
+[Msg_DeadMinion] Minion Acolyte of Pain (2F06730) 1/0 dies.
+[Msg_EndAttack] End of attack.
+[Act_MinionAttack] Attack with Minion Acolyte of Pain (2F06D30) 1/2
+[Msg_StartAttack] Minion Minion Acolyte of Pain (2F06D30) 1/2 attacks enemy Minion Acolyte of Pain (2F06430) 1/2
+[Msg_Damage] Minion Acolyte of Pain (2F06430) 1/2 takes 1 damage from Minion Acolyte of Pain (2F06D30) 1/2.
+[Msg_DrawCard] [IA (Anduin) 30HP] is going to draw a card
+[Msg_CardDrawn] [IA (Anduin) 30HP] draw Acolyte de la souffrance (3): 1/3  from the deck
+[Msg_Status] Change of status for Minion Acolyte of Pain (2F06430) 1/2: {hp=2}
+[Msg_Damage] Minion Acolyte of Pain (2F06D30) 1/2 takes 1 damage from Minion Acolyte of Pain (2F06430) 1/2.
+[Msg_DrawCard] [jerome (Jaina) 30HP] is going to draw a card
+[Msg_CardDrawn] [jerome (Jaina) 30HP] draw Acolyte de la souffrance (3): 1/3  from the deck
+[Msg_Status] Change of status for Minion Acolyte of Pain (2F06D30) 1/2: {hp=2}
+[Msg_EndAttack] End of attack.
+[Act_PlayMinionCard] Card Acolyte de la souffrance (3): 1/3 
+[Msg_PlayCard] [jerome (Jaina) 30HP] plays Acolyte de la souffrance (3): 1/3 
+[Msg_UseMana] Player [jerome (Jaina) 30HP] loses 3 mana crystal
+[Msg_ThrowCard] Player [jerome (Jaina) 30HP] loses Acolyte de la souffrance (3): 1/3 
+[Msg_AddMinion] New Minion Acolyte of Pain (2F06830) 1/3 on the board for [jerome (Jaina) 30HP]
+[Msg_MinionPopup] Minion Acolyte of Pain (2F06830) 1/3 pops up
+[Act_HeroPower] Hero Power (2): deals 1 damage to a character
+[Msg_UseMana] Player [jerome (Jaina) 30HP] loses 2 mana crystal
+[Msg_StartHeroPower] [[jerome (Jaina) 30HP]] uses its hero power
+[Msg_HeroDamage] Minion Acolyte of Pain (2F06430) 1/1 takes 1 damage from [jerome (Jaina) 30HP].
+[Msg_DrawCard] [IA (Anduin) 30HP] is going to draw a card
+[Msg_DrawBurnCard] [IA (Anduin) 30HP] draw Acolyte de la souffrance (3): 1/3  from the deck
+[Msg_Status] Change of status for Minion Acolyte of Pain (2F06430) 1/1: {hp=1}
+[Msg_EndHeroPower] End of hero power effect
+[Act_MinionAttack] Attack with Minion Acolyte of Pain (2F06530) 1/1
+[Msg_StartAttack] Minion Minion Acolyte of Pain (2F06530) 1/1 attacks enemy Minion Acolyte of Pain (2F06430) 1/0
+[Msg_Damage] Minion Acolyte of Pain (2F06430) 1/0 takes 1 damage from Minion Acolyte of Pain (2F06530) 1/1.
+[Msg_DrawCard] [IA (Anduin) 29HP] is going to draw a card
+[Msg_Status] Change of status for Minion Acolyte of Pain (2F06430) 1/0: {hp=0}
+[Msg_Damage] Minion Acolyte of Pain (2F06530) 1/1 takes 1 damage from Minion Acolyte of Pain (2F06430) 1/0.
+[Msg_DrawCard] [jerome (Jaina) 30HP] is going to draw a card
+[Msg_CardDrawn] [jerome (Jaina) 30HP] draw Acolyte de la souffrance (3): 1/3  from the deck
+[Msg_Status] Change of status for Minion Acolyte of Pain (2F06530) 1/1: {hp=1}

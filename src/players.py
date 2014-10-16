@@ -90,7 +90,7 @@ class Player (object):
       self.weapon.start_turn()
     self.mana = self.max_mana
     self.add_mana_crystal(1)
-    self.draw_card()
+    self.engine.send_message(Msg_DrawCard(self))
 
   def end_turn(self):
     self.hero.end_turn()
@@ -119,7 +119,7 @@ class Player (object):
     if card:  
       if len(self.cards)<10:
         self.cards.append(card)
-        self.engine.send_message(Msg_DrawCard(self,card),immediate=True)
+        self.engine.send_message(Msg_CardDrawn(self,card),immediate=True)
       else:
         self.engine.send_message(Msg_DrawBurnCard(self,card),immediate=True)
 
@@ -140,7 +140,7 @@ class Player (object):
       if coin:  
         self.cards.append(Card_Coin(self))
       for c in self.cards:
-        self.engine.send_message(Msg_DrawCard(self,c),immediate=True)
+        self.engine.send_message(Msg_CardDrawn(self,c),immediate=True)
 
   def choose_actions(self, actions):
       assert 0, "must be overloaded"

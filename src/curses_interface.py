@@ -627,7 +627,7 @@ def draw_Msg_StartTurn(self):
     self.engine.board.viz.hero_power_buttons[player].used = False
     self.engine.board.draw()
 
-def draw_Msg_DrawCard(self):
+def draw_Msg_CardDrawn(self):
     card = self.card
     self.caster.viz.cards.append(card)
     bottom_player = self.engine.board.viz.get_top_bottom_players()[1]

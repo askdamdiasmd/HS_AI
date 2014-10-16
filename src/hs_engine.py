@@ -4,6 +4,7 @@ from messages import Message, Msg_StartTurn
 from actions import Action, Act_EndTurn, Act_PlayMinionCard
 from effects import Effect
 from cards import Card
+from decks import Deck
 from players import Player
 
 def tree_go_up( level, stack ):
@@ -38,6 +39,7 @@ class HSEngine:
     Action.set_engine(self)
     Effect.set_engine(self)
     Card.set_engine(self)
+    Deck.set_engine(self)
     Message.set_engine(self)
     Player.set_engine(self)
 
