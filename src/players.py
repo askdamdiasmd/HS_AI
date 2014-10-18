@@ -19,7 +19,6 @@ class Player (object):
     self.mana = self.max_mana = 0
     self.weapon = None
     self.secrets = []
-    self.n_remaining_power = 0
 
     # init ownership
     self.hero.set_owner(self)
@@ -43,6 +42,8 @@ class Player (object):
         self.engine.send_message( Msg_SecretPopup(thing), immediate=True)
       elif issubclass(type(thing), Minion) and len(self.minions)<7:
         mp = self.minions_pos
+        if pos.fpos=="right": # helper
+          pos.fpos = (mp[-2]+mp[-1])/2
         i = searchsorted(mp,pos.fpos,side='right')
         if mp[i-1]==pos.fpos: # already exist, so create new number
           pos.fpos = (pos.fpos+mp[i])/2
@@ -77,12 +78,7 @@ class Player (object):
   def gain_mana(self, nb):
     self.mana = min(10,self.mana + nb)
 
-  def use_hero_power(self):
-    self.n_remaining_power -= 1
-    assert self.n_remaining_power>=0
-
   def start_turn(self):    # activated by Msg_StartTurn(player)
-    self.n_remaining_power = 1
     self.hero.start_turn()
     for m in self.minions:
       m.start_turn()
@@ -100,13 +96,12 @@ class Player (object):
   def list_actions(self):
     res = [Act_EndTurn(self)]
     # first, hero power
-    if self.n_remaining_power:
-      res.append(self.hero.hero_power())
+    res += self.hero.list_actions()
     # then, all card's actions
     for card in self.cards:
       actions = card.list_actions()
       res += actions if type(actions)==list else [actions]
-    # then, weapon's attack (if any)
+    # then, weapon/hero's attack (if any)
     if self.weapon:
       res += self.weapon.list_actions()
     # then, all minions actions

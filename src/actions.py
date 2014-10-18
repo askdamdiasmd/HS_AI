@@ -139,6 +139,10 @@ class Act_MinionAttack (Act_Attack):
     ''' when one minion attacks something'''
     pass
 
+class Act_HeroAttack (Act_Attack):
+    ''' when the hero (druid) attacks something'''
+    pass
+
 class Act_WeaponAttack (Act_Attack):
     ''' when a hero attacks something'''
     pass
@@ -177,12 +181,12 @@ class Act_PlaySpellCard (Act_PlayCard):
 
 class Act_SingleSpellDamageCard (Act_PlaySpellCard):
     ''' inflict damage to a single target'''
-    def __init__(self, card, target, damage ):
+    def __init__(self, card, targets, damage ):
         def actions(self):
             target = self.choices[0]
             assert type(target)!=list
             return [Msg_SpellDamage(self.caster,target,self.damage)]
-        Act_PlaySpellCard.__init__(self, card, target, actions)
+        Act_PlaySpellCard.__init__(self, card, targets, actions)
         self.damage = damage
 
 class Act_MultiSpellDamageCard (Act_PlaySpellCard):

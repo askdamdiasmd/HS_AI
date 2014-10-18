@@ -304,20 +304,26 @@ class VizHero (VizThing):
     ty,tx = uc.getmaxyx(win)
     hero = self.obj
     print_middle(win,1,1,tx-2,hero.owner.name)
-    print_middle(win,2,1,tx-2,"(%s)"%hero.card.name,uc.blue_on_black)
+    hero_name = hero.card.name[:(hero.card.name+' ').find(' ')]
+    print_middle(win,2,1,tx-2,"(%s)"%hero_name,uc.blue_on_black)
     if self.armor:
       tar = "[%d]"%self.armor
       uc.mvwaddstr(win,ty-2,tx-1-len(tar),tar)
     pl = hero.owner.viz
-    if pl.weapon:
-      atq = pl.weapon.atq
-      uc.mvwaddstr(win,ty-1,1," %d "%atq,highlight|pl.weapon.viz.buff_color('atq'))
+    atq = pl.weapon.atq if pl.weapon else self.atq
+    if atq:
+      hh = pl.weapon.viz.buff_color('atq') if pl.weapon else self.buff_color('atq')
+      uc.mvwaddstr(win,ty-1,1," %d "%atq,highlight|hh)
 
   def create_hero_power_button(self):
     card = self.obj.card
     y,x = uc.getbegyx(self.win)
-    up, down = card.power_text.split()
-    return HeroPowerButton(y,x+24,up,down,card.power_cost,tx=9,ty=4)
+    name = card.ability.name.split()[:2]
+    if len(name)==1: 
+      name = name[0]
+      name = name[:4], name[4:]
+    up,down = name[:2]
+    return HeroPowerButton(y,x+24,up,down,card.ability.cost,tx=9,ty=4)
     
 
 ### Minion -----------
@@ -980,6 +986,8 @@ class HumanPlayerAscii (HumanPlayer):
           showlist.append((a,a.caster,{}))
         elif issubclass(type(a),Act_WeaponAttack):
           showlist.append((a,a.caster.hero,{}))
+        elif issubclass(type(a),Act_HeroAttack):
+          showlist.append((a,a.caster,{}))
         else:
           end_turn_action = a
           showlist.append((a,self.engine.board.viz.end_turn,{}))
@@ -1112,15 +1120,18 @@ if __name__=="__main__":
     args = sys.argv[1:]
     mana = 10 if "mana" in args else 0
     anim = 'anim' in args
-    debug = 'debug' in args
-    from cards import fake_deck
+    dbg = 'debug' in args
+    
+    from collection import get_cardbook
+    from decks import fake_deck
+    cardbook = get_cardbook()
 
-    deck1 = fake_deck(debug)
-    hero1 = Hero(Card_Mage())
+    deck1 = fake_deck(cardbook,dbg)
+    hero1 = Hero(cardbook["Malfurion Stormrage"])
     player1 = HumanPlayerAscii(hero1, 'jerome', deck1)
 
-    deck2 = fake_deck(debug)
-    hero2 = Hero(Card_Priest())
+    deck2 = fake_deck(cardbook,dbg)
+    hero2 = Hero(cardbook["Jaina Proudmoore"])
     player2 = RandomPlayer(hero2, 'IA', deck2)
 
     stdscr = init_screen()

@@ -26,7 +26,7 @@ class Effect (object):
         self.owner = owner    # effect belongs to this minion
     def bind_to(self, owner, caster=None):
         self.owner = owner  # when binded to a creature
-        owner.effects.append(self) # associate effect to a minion/card
+        owner.effects.add(self) # associate effect to a minion/card
     def filter(self, action):
         assert False, "must be implemented"  # when triggered by owner.action_filters
     def trigger(self, msg):
@@ -82,7 +82,7 @@ class Eff_DR_Invoke_Minion (Effect):
       return "Invoke a %s" % str(self.card)
     def bind_to(self, owner, caster=None):
       self.owner = owner
-      owner.effects.append('death_rattle')
+      owner.effects.add('death_rattle')
       owner.triggers.append((Msg_Dead,self)) # because we are already disappeared when it triggers
     def trigger(self, msg):
       if msg.caster is self.owner: # I'm dead !
@@ -96,11 +96,13 @@ class Eff_DR_Invoke_Minion (Effect):
 
 class Eff_BuffMinion (Effect):
     """ buff a minion (just for this turn of permanent) """
-    def __init__(self, atq, hp, temp=False, others=''):
+    def __init__(self, atq, hp, temp=False, armor=0, others=''):
         Effect.__init__(self)
         self.atq = atq    # buff atq
         self.hp = hp      # buff hp
         self.temp = temp  # temporary effect ? (one turn)
+        assert armor>=0, "error: cannot remove armor"
+        self.armor = armor  # note: cannot be silenced
         assert type(others)==str
         assert not(others and self.temp), "error: buff cannot be temporary if other effects"
         self.others = others.split() # simple effects like taunt, windfury ...
@@ -112,13 +114,17 @@ class Eff_BuffMinion (Effect):
     def bind_to(self, owner, caster=None):
         self.owner = owner
         if self.hp or self.atq:  # we don't care if just taunt
-          owner.effects.append(self)
+          owner.effects.add(self)
           if self.temp: 
             owner.triggers.append((Msg_EndTurn, self))
+        if self.armor:
+          from heroes import Hero
+          assert type(owner)==Hero, pdb.set_trace()
         self.execute()
     def execute(self):
         if self.hp:   self.owner.change_hp(self.hp)
         if self.atq:  self.owner.change_atq(self.atq)
+        if self.armor:  self.owner.add_armor(self.armor)
         if self.others: self.owner.add_effects(self.others)
     def trigger(self, msg): # end of temporary effect
         assert self.temp and issubclass(type(msg),Msg_EndTurn), pdb.set_trace()
@@ -172,7 +178,7 @@ class Eff_BuffLeftRight (Effect):
         return "buff neighbors by %+d/%+d" % (self.atq, self.hp)
     def bind_to(self, owner):
         self.owner = owner
-        owner.effects.append(self)
+        owner.effects.add(self)
         owner.triggers += [(Msg_Popup,self), (Msg_Dead,self)]
     def get_neighbors(self):
         minion = self.owner
@@ -206,7 +212,7 @@ class Eff_DrawCard (Effect):
         self.immediate = immediate
     def bind_to(self, owner, caster=None):
         self.owner = owner
-        owner.effects.append("effect")
+        owner.effects.add("effect")
         owner.triggers.append((self.trig_msg, self))
     def trigger(self, msg):
         if self.condition(self,msg):

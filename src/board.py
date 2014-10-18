@@ -54,6 +54,9 @@ class Board:
       p = self.players
       return p[0] if player is not p[0] else p[1]
 
+  def get_enemy_hero(self, player):
+      return self.get_enemy_player(player).hero
+
   def get_friendly_minions(self, player):
       return player.minions
 

@@ -1,68 +1,82 @@
-from messages import *
+import pdb
 from creatures import Creature
+from messages import Msg_DeadHero, Msg_Status
 
 ### ------------ Hero ----------
 
 class Hero (Creature):
-  def __init__(self, card ):
-      Creature.__init__(self, card )
+  def __init__(self, card, owner=None ):
+      Creature.__init__(self, card, owner=owner )
       self.armor = 0
-      self.hero_power = card.hero_power
+      self.n_remaining_power = 0
       self.popup()
 
   def set_owner(self, owner):
       self.owner = owner
       self.card.owner = owner
+      self.card.ability.owner = owner
 
   def __str__(self):
       return "[%s (%s) %dHP]" % (self.owner.name,self.card.name,self.hp)
 
+  def start_turn(self):
+    Creature.start_turn(self)
+    self.n_remaining_power = 1
+
+  def use_hero_power(self):
+    self.n_remaining_power -= 1
+    assert self.n_remaining_power>=0
+
+  def list_actions(self):
+      res = []
+      if self.n_remaining_power:
+        res += self.card.ability.list_actions()
+      if self.n_atq and self.atq:
+        from actions import Act_HeroAttack
+        res.append(Act_HeroAttack(self, self.engine.board.get_attackable_characters(self.owner)))
+      return res
+
   def ask_for_death(self):
       self.engine.send_message( Msg_DeadHero(self), immediate=True)
 
+  def hurt(self, damage):
+      if self.has_effect('insensible'):
+        return  # cannot die this turn
+      assert damage>0, pdb.set_trace()
+      absorbed = min(damage, self.armor)
+      self.armor -= absorbed
+      damage -= absorbed
+      self.hp -= damage
+      self.engine.send_message(Msg_Status(self,'hp armor'),immediate=True)
+      self.check_dead()
 
-### -------- instanciation of heroes --------------------
+  def add_armor(self, n):
+      self.armor += n
+      self.engine.send_message(Msg_Status(self,"armor"), immediate=True)
 
-from cards import Card_Minion
-from actions import Act_HeroPower
+
+
+### --------  Heroes' abilities and cards  --------------------
+
+from cards import Card, Card_Minion
+
+class Card_HeroAbility (Card):
+    def __init__(self, cost, name, actions, targets="none", **kwargs):
+        Card.__init__(self, cost, name, **kwargs)
+        self.targets = targets
+        self.actions = actions # lambda self: [messages...]
+    def list_actions(self):
+        from actions import Act_HeroPower
+        return [Act_HeroPower(self.owner, self.cost, self.list_targets(self.targets), self.actions)]
+
 
 class Card_Hero (Card_Minion):
     def __init__(self, *args, **kwargs):
+        ability = kwargs.pop('ability') 
         Card_Minion.__init__(self,*args,**kwargs)
         self.effects = ['charge'] # if weapon can attack immediately
-    def hero_power(self):
-        assert 0  # return an action
-
-
-### - Mage -
-
-class Card_Mage (Card_Hero):
-    def __init__(self):
-        Card_Hero.__init__(self, 30, 0, 30, "Jaina", cls="mage", name_fr='Jenna',
-                             desc="deals 1 damage to a character")
-        self.power_text = "Fire blast"
-        self.power_subtext = "Deal 1 damage"
-        self.power_cost = 2
-
-    def hero_power(self):
-        actions = lambda self: [Msg_HeroDamage(self.caster,self.choices[0],1)]
-        return Act_HeroPower(self.owner, self.power_cost, 
-                             self.engine.board.get_characters(), actions)
-
-### - Priest -
-
-class Card_Priest (Card_Hero):
-    def __init__(self):
-        Card_Hero.__init__(self, 30, 0, 30, "Anduin", cls="priest", name_fr='Anduin',
-                             desc="heals a character by 2HP")
-        self.power_text = "Lesser heal"
-        self.power_subtext = "Restore 2 health"
-        self.power_cost = 2
-
-    def hero_power(self):
-        actions = lambda self: [Msg_HeroHeal(self.caster,self.choices[0],2)]
-        return Act_HeroPower(self.owner, self.power_cost, 
-                             self.engine.board.get_characters(), actions)
+        assert type(ability)==Card_HeroAbility
+        self.ability = ability
 
 
 

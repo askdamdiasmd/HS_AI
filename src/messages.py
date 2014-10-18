@@ -163,7 +163,7 @@ class Msg_EndSpell (Msg_EndCard):
 
 class Msg_StartHeroPower (Message):
     def execute(self):
-        self.caster.use_hero_power()
+        self.caster.hero.use_hero_power()
     def __str__(self):
         return "[%s] uses its hero power" % self.caster
 class Msg_EndHeroPower (Message):

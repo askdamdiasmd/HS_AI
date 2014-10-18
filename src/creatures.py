@@ -13,9 +13,9 @@ class Thing (object):
   def set_engine(cls, engine):
       cls.engine = engine
 
-  def __init__(self, card ):
+  def __init__(self, card, owner=None ):
       self.card = card
-      self.owner = card.owner
+      self.owner = owner or card.owner
       self.hp = self.max_hp = card.hp
       self.atq = self.max_atq = card.atq
 
@@ -26,13 +26,13 @@ class Thing (object):
       self.action_filters = []  # reacting to actions [(Act_class, handler),...]
       self.modifiers = [] # modifying messages, list: [(Msg_Class, event),...]
       self.triggers = [] # reacting to messages, list: [(Msg_Class, event),...]
-      self.effects = []  # list of effects without triggers: ['taunt','stealth',...]
+      self.effects = set()  # list of effects without triggers: ['taunt','stealth',...]
       self.add_effects(copy(card.effects), inform=False)
 
   def add_effects(self, effects, inform=True):
       for e in effects:  # we have to initalize effects
         if type(e)==str:  
-          self.effects.append(e)
+          self.effects.add(e)
         else:
           e.bind_to(self)
       if inform:
@@ -116,8 +116,8 @@ class Secret (Thing):
 ### ------------ Weapon ----------
 
 class Weapon (Thing):
-  def __init__(self, card ):
-      Thing.__init__(self, card )
+  def __init__(self, card, owner=None ):
+      Thing.__init__(self, card, owner=owner )
       self.hero = card.owner.hero
 
   def list_actions(self):
@@ -148,15 +148,21 @@ class Weapon (Thing):
 ### ------------ Creature (hero or minion) ----------
 
 class Creature (Thing):
-  def __init__(self, card ):
-      Thing.__init__(self, card )
+  def __init__(self, card, owner=None ):
+      Thing.__init__(self, card, owner=owner )
 
   def hurt(self, damage):
-      self.hp -= damage
-      self.engine.send_message(Msg_Status(self,'hp'),immediate=True)
-      self.check_dead()
+      assert damage>0, pdb.set_trace()
+      if self.has_effect('divine_shield'):
+        self.effects.remove('divine_shield')
+        self.engine.send_message(Msg_Status(self,'effects'),immediate=True)
+      else:
+        self.hp -= damage
+        self.engine.send_message(Msg_Status(self,'hp'),immediate=True)
+        self.check_dead()
 
   def heal(self, hp):
+      assert hp>0, pdb.set_trace()
       self.hp = min(self.max_hp, self.hp+hp)
       self.engine.send_message(Msg_Status(self,'hp'),immediate=True)
 
@@ -194,8 +200,8 @@ class Creature (Thing):
 
 
 class Minion (Creature):
-  def __init__(self, card ):
-      Creature.__init__(self, card )
+  def __init__(self, card, owner=None ):
+      Creature.__init__(self, card, owner=owner )
 
   def has_taunt(self):
       return 'taunt' in self.effects
