@@ -314,8 +314,10 @@ def get_cardbook():
         self.engine.board.get_enemy_hero(self.owner.owner),2))],
         desc="Deathrattle: Deal 2 damage to the enemy hero.") )
 
-  #add( Card_Minion(1, 1, 2, "Lightwarden", name_fr="", 
-        #desc="Whenever a character is healed, gain +2 Attack.") )
+  add( Card_Minion(1, 1, 2, "Lightwarden", name_fr="Gardelumiere", 
+        effects=['effect',Eff_Trigger(Msg_Heal,lambda self, msg:True, lambda self,msg: 
+        Msg_BindEffect(self.owner,self.owner,Eff_BuffMinion(atq=2)))],
+        desc="Whenever a character is healed, gain +2 Attack.") )
   
   add( Card_Minion(1, 2, 1, "Mechanical Dragonling", name_fr="Petit Dragon mecanique") )
   
@@ -323,8 +325,10 @@ def get_cardbook():
 
   #add( Card_Minion(1, 1, 2, "Murloc Tidecaller", name_fr="", 
         #desc="Whenever a Murloc is summoned, gain +1 Attack.", cat="murloc") )
-  #add( Card_Minion(1, 1, 1, "Naga Myrmidon") )
-  #add( Card_Minion(1, 1, 1, "Pandaren Scout") )
+  
+  add( Card_Minion(1, 1, 1, "Naga Myrmidon", collectible=False) )
+
+  add( Card_Minion(1, 1, 1, "Pandaren Scout", collectible=False) )
 
   #add( Card_Minion(1, 0, 3, "Poultryizer", name_fr="", 
         #desc="At the start of your turn, transform a random minion into a 1/1 Chicken.") )
@@ -332,15 +336,15 @@ def get_cardbook():
   #add( Card_Minion(1, 0, 3, "Repair Bot", name_fr="", 
         #desc="At the end of your turn, restore 6 Health to a damaged character.") )
 
-  #add( Card_Minion(1, 2, 1, "Riverpaw Gnoll") )
-
-  #add( Card_Minion(1, 1, 2, "Secretkeeper", name_fr="", 
-        #desc="Whenever a Secret is played, gain +1/+1.") )
+#  add( Card_Minion(1, 1, 2, "Secretkeeper", name_fr="", 
+#        effects=['effect',Eff_Trigger(Act_Play,lambda self, msg:True, lambda self,msg: 
+#        Msg_BindEffect(self.owner,self.owner,Eff_BuffMinion(atq=2)))],
+#        desc="Whenever a Secret is played, gain +1/+1.") )
 
   add( Card_Minion(1, 0, 4, "Shieldbearer", name_fr="Porte bouclier", 
         desc="Taunt", effects="taunt") )
   
-  #add( Card_Minion(1, 1, 1, "Skeleton") )
+  add( Card_Minion(1, 1, 1, "Skeleton", collectible=False) )
   
   #add( Card_Minion(1, 2, 1, "Southsea Deckhand", name_fr="", 
         #desc="Has Charge while you have a weapon equipped.", cat="pirate") )
@@ -356,7 +360,7 @@ def get_cardbook():
         Eff_Message(lambda self: Msg_Heal(self.caster,self.owner,2)), "characters", 
         name_fr="Docteur Vaudou", desc="Battlecry: Restore 2 Health.") )
   
-  #add( Card_Minion(1, 1, 1, "Whelp", cat="dragon") )
+  add( Card_Minion(1, 1, 1, "Whelp", name_fr="Dragonnet", cat="dragon", collectible=False) )
   
   add( Card_Minion(1, 2, 1, "Worgen Infiltrator", name_fr="Infiltrateur Worgen", 
         desc="Stealth", effects="stealth") )
@@ -367,12 +371,17 @@ def get_cardbook():
   #add( Card_Minion(1, 2, 1, "Young Priestess", name_fr="", 
         #desc="At the end of your turn, give another random friendly minion +1 Health.") )
   
-  #add( Card_Minion_BC(2, 3, 2, "Acidic Swamp Ooze", name_fr="", 
-        #desc="Battlecry: Destroy your opponent's weapon.") )
+  add( Card_Minion_BC(2, 3, 2, "Acidic Swamp Ooze", 
+        Eff_Message(lambda self: Msg_DeadWeapon(self.owner)), "enemy weapon",
+        name_fr="Limon des marais acides", 
+        desc="Battlecry: Destroy your opponent's weapon.") )
+  
   #add( Card_Minion(2, 2, 3, "Amani Berserker", name_fr="", 
         #desc="Enrage: +3 Attack", effects="enrage") )
+  
   #add( Card_Minion(2, 4, 5, "Ancient Watcher", name_fr="", 
         #desc="Can't Attack.") )
+  
   #add( Card_Minion(2, 3, 2, "Bloodfen Raptor", cat="beast") )
   #add( Card_Minion(2, 1, 1, "Bloodmage Thalnos", name_fr="", 
         #desc="Spell Damage +1. Deathrattle: Draw a card.", effects="spell damage deathrattle") )
