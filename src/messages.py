@@ -64,6 +64,8 @@ class Msg_Status (Message):
     ''' just to tell the interface that something happened '''
     def __init__(self, caster, attrs):
       Message.__init__(self,caster)
+      self.status_id = caster.status_id
+      caster.status_id += 1
       self.attrs = attrs.split() if type(attrs)==str else attrs
       for attr in self.attrs:
         setattr(self,attr,copy(getattr(caster,attr)))

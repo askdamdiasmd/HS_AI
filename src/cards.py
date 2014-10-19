@@ -9,7 +9,8 @@ eff_trad_fr = dict(taunt='Provocation',
                    charge='Charge',
                    divine_shield='Bouclier Divin',
                    stealth='Camouflage',
-                   windfury='Furie des vents')
+                   windfury='Furie des vents',
+                   effect='')
 def tolist(l):
   if type(l)==str:  
     return l.split()
@@ -36,7 +37,8 @@ class Card (object):
         #assert all([type(e)==str for e in self.effects]), "error: description is missing"
         self.desc = '. '.join(['%s%s'%(e[0].upper(),e[1:]) for e in self.effects if type(e)==str])
       if desc_fr=='':  
-        self.desc_fr = '. '.join([eff_trad_fr[e] for e in self.effects if type(e)==str])
+        fr = [eff_trad_fr[e] for e in self.effects if type(e)==str]
+        self.desc_fr = '. '.join([e for e in fr if e])
 
     @classmethod
     def set_engine(cls, engine):

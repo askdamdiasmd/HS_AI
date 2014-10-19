@@ -31,7 +31,7 @@ class Hero (Creature):
       res = []
       if self.n_remaining_power:
         res += self.card.ability.list_actions()
-      if self.n_atq and self.atq:
+      if self.n_atq<self.n_max_atq and self.atq>0 and not self.has_effect('frozen'):
         from actions import Act_HeroAttack
         res.append(Act_HeroAttack(self, self.engine.board.get_attackable_characters(self.owner)))
       return res

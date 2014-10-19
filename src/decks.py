@@ -57,7 +57,7 @@ def fake_deck(cardbook, debug=False):
     from copy import deepcopy as copy
     deck = []
     if debug:
-      cards = ["Worgen Infiltrator", "Defender of Argus"]
+      cards = ["Water Elemental"]
       for c in cards:
         deck += [copy(cardbook[c]) for i in range(30/len(cards))]      
     else:

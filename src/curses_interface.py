@@ -215,6 +215,7 @@ class VizThing (object):
     self.effects = copy(obj.effects)
     obj.draw = self.draw
     self.wait = 0
+    self.status_id = 0
     # create panel
     self.win = uc.newwin(size[0],size[1],pos[0],pos[1])
     self.panel = uc.new_panel(self.win)
@@ -264,8 +265,10 @@ class VizThing (object):
     if pos and pos!=uc.getbegyx(win):
       uc.move_panel(panel,*pos)    
     
-    if 'divine_shield' in self.effects or 'insensible' in self.effects:
+    if 'frozen' in self.effects or 'insensible' in self.effects:
       bkgd = uc.black_on_cyan
+    elif 'divine_shield' in self.effects:
+      bkgd = uc.black_on_yellow
     
     uc.wbkgd(win,bkgd)
     uc.wattron(win,highlight)
@@ -283,6 +286,8 @@ class VizThing (object):
     return win
 
   def update_stats(self, msg, show_hp=True):
+    if self.status_id != msg.status_id: return False
+    self.status_id += 1
     anim = self.obj.engine.board.viz.animated
     for attr in msg.attrs:
       oldval = getattr(self,attr)
@@ -293,6 +298,7 @@ class VizThing (object):
         if diff:
           temp_panel(self,"%+d"%diff,self.buff_color(diff,highlight=1),duration=1.5)
     self.draw()
+    return True
 
 
 ### Hero -----------
@@ -352,10 +358,11 @@ class VizMinion (VizThing):
       ty,tx = uc.getmaxyx(win)
       name = minion.card.name_fr or minion.card.name
       print_longtext(win,1,1,ty-1,tx-1,name,uc.yellow_on_black)
-      ref_atq = min(self.obj.card.atq, self.max_atq)
       uc.mvwaddstr(win,ty-1,1," %d "%self.atq, highlight|self.buff_color('atq'))
       if 'death_rattle' in self.effects:
         uc.mvwaddstr(win,ty-1,tx/2,'D',highlight)
+      elif 'effect' in self.effects:
+        uc.mvwaddstr(win,ty-1,tx/2,'Z',highlight)
       if 'silence' in self.effects:
         line = uc.derwin(win,1,tx,ty/2,0)
         uc.wbkgd(line,0,uc.black_on_red)
@@ -754,8 +761,10 @@ def draw_Msg_DeadWeapon(self):
     self.engine.board.draw('heroes',which=dead_weapon.owner)
 
 def draw_Msg_Status(self):
-    self.caster.viz.update_stats(self)
-    show_panels()
+    if hasattr(self.caster,'viz'):
+      if not self.caster.viz.update_stats(self):
+        return False
+      show_panels()
 
 def draw_Msg_StartAttack(self):
     if self.engine.board.viz.animated:
@@ -930,7 +939,8 @@ class HumanPlayerAscii (HumanPlayer):
       end_button = Button(25,(NC-6)/2,'  OK  ')
       showlist = [(end_button,dict(highlight=uc.black_on_blue))]
       for i,card in enumerate(cards):
-          showlist.append((card,dict(pos=(6,int((NC-6)*(i+0.5)/nc-7)), small=False, highlight=uc.black_on_green)))
+          showlist.append((card,dict(pos=(6,int((NC-6)*(i+0.5)/nc-7)), 
+                                     small=False, highlight=uc.black_on_green)))
       
       discarded = []
       while True:
@@ -1120,7 +1130,8 @@ class CursesHSEngine (HSEngine):
       self.logfile.write(line)
       self.logfile.flush()
       self.log += line
-      msg.draw()
+      if msg.draw()==False:
+        self.display.append(msg)  # needs to be displayed later
 
 
 

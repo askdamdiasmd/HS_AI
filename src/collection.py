@@ -166,23 +166,35 @@ def get_cardbook():
   add( Card_Minion(2, 2, 2, "Hyena", name_fr="Hyene", 
         cls="hunter", cat="beast", collectible=False) )
   
-  #add( Card_Minion(2, 2, 2, "Scavenging Hyena", name_fr="", 
-        #desc="Whenever a friendly Beast dies, gain +2/+1.", cls="hunter", cat="beast") )
-  #add( Card_Minion(5, 3, 2, "Starving Buzzard", name_fr="", 
-        #desc="Whenever you summon a Beast, draw a card.", cls="hunter", cat="beast") )
+  add( Card_Minion(2, 2, 2, "Scavenging Hyena", name_fr="Hyene charognarde", 
+        effects=['effect',Eff_Trigger(Msg_DeadMinion,
+        lambda self,msg: msg.caster.owner is self.owner.owner and msg.caster.card.cat=="beast",
+        lambda self,msg: Msg_BindEffect(msg.caster,self.owner,Eff_BuffMinion(2,1)), immediate=0)],
+        desc="Whenever a friendly Beast dies, gain +2/+1.", cls="hunter", cat="beast") )
+  
+  add( Card_Minion(5, 3, 2, "Starving Buzzard", name_fr="Busard affame", 
+        effects=['effect',Eff_DrawCard(Msg_DeadMinion,
+        lambda self,msg: msg.caster.owner is self.owner.owner and msg.caster.card.cat=="beast",
+        immediate=False)],
+        desc="Whenever you summon a Beast, draw a card.", cls="hunter", cat="beast") )
+  
   add( Card_Minion(3, 4, 2, "Huffer", name_fr="Souffleur", 
         desc="Charge", cls="hunter", cat="beast", effects="charge") )
+  
   add( Card_Minion(3, 2, 4, "Leokk", name_fr="Leokk", 
         effects=[Eff_BuffFriends(1,0)],
         desc="Other friendly minions have +1 Attack.", cls="hunter", cat="beast") )
+
   add( Card_Minion(3, 4, 4, "Misha", name_fr="Misha", 
         desc="Taunt", cls="hunter", cat="beast", effects="taunt") )
+
   add( Card_Minion_BC(4, 4, 3, "Houndmaster", Eff_BuffMinion(2,2,others="taunt"), 
         "friendly beast", name_fr="Maitre des chiens", 
         desc="Battlecry: Give a friendly Beast +2/+2 and Taunt.", cls="hunter") )
   
-  #add( Card_Minion(5, 2, 5, "Tundra Rhino", name_fr="", 
-        #desc="Your Beasts have Charge.", cls="hunter", cat="beast") )
+  add( Card_Minion(5, 2, 5, "Tundra Rhino", name_fr="Rhino de la toundra", effects=['charge', 
+        Eff_GiveCharge(lambda self,minion: minion.card.cat=='beast',retroactive=True)],
+        desc="Your Beasts have Charge.", cls="hunter", cat="beast") )
 
   add( Card_Minion(6, 6, 5, "Savannah Highmane", name_fr="Grande Criniere des Savanes", 
         effects=[Eff_DR_Invoke_Minion(cardbook["Hyena"]),
@@ -198,20 +210,30 @@ def get_cardbook():
   
   add( Card_Minion(0, 1, 3, "Spellbender", name_fr="Courbe-sort", cls="mage") )
   
-  #add( Card_Minion(1, 1, 3, "Mana Wyrm", name_fr="", 
-        #desc="Whenever you cast a spell, gain +1 Attack.", cls="mage") )
+  add( Card_Minion(1, 1, 3, "Mana Wyrm", name_fr="Wyrm de mana",
+        effects=['effect',Eff_Trigger(Msg_StartSpell,
+        lambda self,msg: self.owner.owner is msg.caster, 
+        lambda self,msg: Msg_BindEffect(msg.caster,self.owner,Eff_BuffMinion(1,0)), immediate=0)],
+        desc="Whenever you cast a spell, gain +1 Attack.", cls="mage") )
   
-  #add( Card_Minion(2, 3, 2, "Sorcerer's Apprentice", name_fr="", 
-        #desc="Your spells cost (1) less.", cls="mage") )
+  add( Card_Minion(2, 3, 2, "Sorcerer's Apprentice", name_fr="Apprentie du sorcier",
+        effects=['effect',Acf_SpellCost(-1)],
+        desc="Your spells cost (1) less.", cls="mage") )
   
   #add( Card_Minion_BC(3, 4, 3, "Kirin Tor Mage", name_fr="", 
         #desc="Battlecry: The next Secret you play this turn costs (0).", cls="mage") )
   
-  #add( Card_Minion(4, 3, 3, "Ethereal Arcanist", name_fr="", 
-        #desc="If you control a Secret at the end of your turn, gain +2/+2.", cls="mage") )
+  add( Card_Minion(4, 3, 3, "Ethereal Arcanist", name_fr="Arcaniste etherien",
+        effects=['effect',Eff_Trigger(Msg_EndTurn, lambda self,msg: msg.caster is self.owner.owner,
+        lambda self,msg: Msg_BindEffect(msg.caster,self.owner,Eff_BuffMinion(2,2)))],
+        desc="If you control a Secret at the end of your turn, gain +2/+2.", cls="mage") )
   
-  #add( Card_Minion(4, 3, 6, "Water Elemental", name_fr="", 
-        #desc="Freeze any character damaged by this minion.", cls="mage") )
+  add( Card_Minion(4, 3, 6, "Water Elemental", name_fr="Elementaire d'eau", 
+        effects=[Eff_Trigger(Msg_StartAttack, lambda self,msg: self.owner is msg.caster,
+        lambda self,msg: Msg_BindEffect(self.owner,msg.target,Eff_BuffMinion(others='frozen'))),
+        Eff_Trigger(Msg_StartAttack, lambda self,msg: self.owner is msg.target,
+        lambda self,msg: Msg_BindEffect(self.owner,msg.caster,Eff_BuffMinion(others='frozen')))],
+        desc="Freeze any character damaged by this minion.", cls="mage") )
   
   #add( Card_Minion(7, 5, 7, "Archmage Antonidas", name_fr="", 
         #desc="Whenever you cast a spell, put a 'Fireball' spell into your hand.", cls="mage") )

@@ -19,6 +19,7 @@ class Player (object):
     self.mana = self.max_mana = 0
     self.weapon = None
     self.secrets = []
+    self.owner = self # for conveniency
 
     # init ownership
     self.hero.set_owner(self)

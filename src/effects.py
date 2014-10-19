@@ -26,7 +26,7 @@ class Effect (object):
         self.owner = owner    # effect belongs to this minion
     def bind_to(self, owner, caster=None):
         self.owner = owner  # when binded to a creature
-        owner.effects.add(self) # associate effect to a minion/card
+        owner.effects.append(self) # associate effect to a minion/card
     def filter(self, action):
         assert False, "must be implemented"  # when triggered by owner.action_filters
     def trigger(self, msg):
@@ -51,14 +51,30 @@ class Acf_NotSpellTargetable (Effect):
           pass
         return action
 
-
-
 class Acf_IncSpellDamage (Effect):
     """ increase spelle damages """
 #    def triggers(self):
 #        return Act_SpellDamageCard
     def filter(self, action):
         pass
+
+
+class Acf_SpellCost (Effect):
+    """ modify spell cost """
+    def __init__(self, additional_cost, min_cost=0):
+        Effect.__init__(self)
+        self.cost = additional_cost
+        self.min_cost = min_cost
+    def __str__(self):
+        return "Spells cost (%d) more" % self.cost
+    def bind_to(self, owner, caster=None):
+        self.owner = owner
+        owner.action_filters.append((Act_PlaySpellCard,self))
+    def filter(self, act):
+        if act.caster is self.owner.owner:
+          act.cost = max(self.min_cost, act.cost+self.cost)
+        return act
+
 
 
 ### ---------- effects (applies on Messages) ----------------
@@ -93,7 +109,7 @@ class Eff_DR_Invoke_Minion (Effect):
       return "Invoke a %s" % str(self.card)
     def bind_to(self, owner, caster=None):
       self.owner = owner
-      owner.effects.add('death_rattle')
+      owner.effects.append('death_rattle')
       owner.triggers.append((Msg_Dead,self)) # because we are already disappeared when it triggers
     def trigger(self, msg):
       if msg.caster is self.owner: # I'm dead !
@@ -107,7 +123,7 @@ class Eff_DR_Invoke_Minion (Effect):
 
 class Eff_BuffMinion (Effect):
     """ buff a minion (just for this turn of permanent) """
-    def __init__(self, atq, hp, temp=False, armor=0, others=''):
+    def __init__(self, atq=0, hp=0, temp=False, armor=0, others=''):
         Effect.__init__(self)
         self.atq = atq    # buff atq
         self.hp = hp      # buff hp
@@ -125,7 +141,7 @@ class Eff_BuffMinion (Effect):
     def bind_to(self, owner, caster=None):
         self.owner = owner
         if self.hp or self.atq:  # we don't care if just taunt
-          owner.effects.add(self)
+          owner.effects.append(self)
           if self.temp: 
             owner.triggers.append((Msg_EndTurn, self))
         if self.armor:
@@ -189,7 +205,7 @@ class Eff_BuffLeftRight (Effect):
         return "buff neighbors by %+d/%+d" % (self.atq, self.hp)
     def bind_to(self, owner):
         self.owner = owner
-        owner.effects.add(self)
+        owner.effects.append(self)
         owner.triggers += [(Msg_Popup,self), (Msg_Dead,self)]
     def get_neighbors(self):
         minion = self.owner
@@ -227,12 +243,12 @@ class Eff_BuffFriends (Effect):
         return "buff friends by %+d/%+d" % (self.atq, self.hp)
     def bind_to(self, owner):
         self.owner = owner
-        owner.effects.add(self)
+        owner.effects.append(self)
         owner.triggers += [(Msg_Popup,self), (Msg_Dead,self)]
     def get_neighbors(self):
         minion = self.owner
         player = minion.owner
-        targets = set([m for m in player.minions if not self.cat or m.cat==self.cat])
+        targets = set([m for m in player.minions if not self.cat or m.card.cat==self.cat])
         targets.remove(minion)
         return targets
     def execute(self):
@@ -260,7 +276,7 @@ class Eff_DrawCard (Effect):
         self.immediate = immediate
     def bind_to(self, owner, caster=None):
         self.owner = owner
-        owner.effects.add("effect")
+        owner.effects.append("effect")
         owner.triggers.append((self.trig_msg, self))
     def trigger(self, msg):
         if self.condition(self,msg):
@@ -268,7 +284,43 @@ class Eff_DrawCard (Effect):
           self.engine.send_message(Msg_DrawCard(caster),immediate=self.immediate)
 
 
+class Eff_GiveCharge (Effect):
+    """ give charge to others minions on Msg_AddMinion trigger """
+    def __init__(self, condition, retroactive=False):
+        Effect.__init__(self)
+        self.condition = condition
+        self.retroactive = retroactive  # give charge to minions already on board
+    def bind_to(self, owner, caster=None):
+        self.owner = owner
+        self.caster = caster
+        owner.triggers.append((Msg_Popup, self))
+    def trigger(self, msg):      
+        if self.retroactive and msg.caster is self.owner:  
+          for m in self.owner.owner.minions:
+            if self.condition(self,m):
+              m.add_effects(['charge'])
+        elif msg.caster.owner is self.owner.owner and self.condition(self,msg.caster):
+          if not msg.caster.has_effect("charge"):
+            charge = Msg_BindEffect(self.owner,msg.caster,Eff_BuffMinion(0,0,others='charge'))
+            self.engine.send_message(charge,immediate=True)
 
+
+
+class Eff_Trigger (Effect):
+    """ generic effect: send a message when it triggers """
+    def __init__(self, trigger, condition, msg_func, immediate=True):
+        Effect.__init__(self)
+        self.trig_msg = trigger
+        self.condition = condition
+        self.msg_func = msg_func
+        self.immediate = immediate
+    def bind_to(self, owner, caster=None):
+        self.owner = owner
+        self.caster = caster
+        owner.triggers.append((self.trig_msg, self))
+    def trigger(self, msg):
+        if self.condition(self,msg):
+          self.engine.send_message(self.msg_func(self,msg),immediate=self.immediate)
 
 
 
