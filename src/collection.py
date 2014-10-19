@@ -400,16 +400,20 @@ def get_cardbook():
   
   #add( Card_Minion(2, 0, 7, "Doomsayer", name_fr="", 
         #desc="At the start of your turn, destroy ALL minions.") )
+
   #add( Card_Minion(2, 3, 2, "Faerie Dragon", name_fr="", 
         #desc="Can't be targeted by Spells or Hero Powers.", cat="dragon") )
+  
   #add( Card_Minion(2, 3, 3, "Finkle Einhorn") )
-  #add( Card_Minion(2, 2, 2, "Frostwolf Grunt", name_fr="", 
-        #desc="Taunt", effects="taunt") )
+  
+  add( Card_Minion(2, 2, 2, "Frostwolf Grunt", name_fr="Grunt loup-de-givre", 
+        desc="Taunt", effects="taunt") )
+  
   #add( Card_Minion(2, 2, 2, "Gnoll", name_fr="", 
         #desc="Taunt", effects="taunt") )
+  
   #add( Card_Minion(2, 1, 3, "Hidden Gnome", name_fr="", 
         #desc="Was hiding in a barrel!") )
-  #add( Card_Minion_BC(2, 2, 1, "Ironbeak Owl", , ) )
   
   add( Card_Minion_BC(2, 2, 1, "Ironbeak Owl", Eff_Silence(), "minions", 
        name_fr="Chouette bec-de-fer", desc="Battlecry: Silence a minion.", cat="beast",
@@ -417,10 +421,14 @@ def get_cardbook():
   
   #add( Card_Minion(2, 3, 2, "Knife Juggler", name_fr="", 
         #desc="After you summon a minion, deal 1 damage to a random enemy.") )
+
   #add( Card_Minion(2, 2, 2, "Kobold Geomancer", name_fr="", 
         #desc="Spell Damage +1", effects="spell damage") )
-  #add( Card_Minion(2, 2, 1, "Loot Hoarder", name_fr="", 
-        #desc="Deathrattle: Draw a card.", effects="deathrattle") )
+
+  add( Card_Minion(2, 2, 1, "Loot Hoarder", name_fr="Amasseur de butin",
+        effects=[Eff_DeathRattle(lambda self,pos: Msg_DrawCard(self.owner.owner))],
+        desc="Deathrattle: Draw a card.") )
+
   #add( Card_Minion(2, 0, 4, "Lorewalker Cho", name_fr="", 
         #desc="Whenever a player casts a spell, put a copy into the other player's hand.") )
   #add( Card_Minion_BC(2, 3, 2, "Mad Bomber", name_fr="", 
