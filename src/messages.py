@@ -7,7 +7,7 @@ list of possible messages
     which are then executed one after one)
 '''
 import pdb
-from copy import copy
+from copy import copy, deepcopy
 
 
 class Message (object):
@@ -83,10 +83,24 @@ class Msg_DrawCard (Message):
     def execute(self):
         self.caster.draw_card()
 
+class Msg_GiveCard (CardMessage):
+    '''give a card to target'''
+    def __init__(self, caster, card, target):
+      CardMessage.__init__(self,caster,card)
+      self.target = target
+    def __str__(self):
+        return '%s gives %s to %s' % (self.caster, self.card, self.target)
+    def execute(self):
+        self.target.give_card(deepcopy(self.card))
+
 class Msg_CardDrawn (CardMessage):
     '''just to inform that caster drew a card'''
+    def __init__(self, caster, card, origin=None):
+        CardMessage.__init__(self,caster,card)
+        self.origin = origin
     def __str__(self):
-        return '%s draw %s from the deck' % (self.caster, self.card)
+        origin = self.origin or 'the deck'
+        return '%s draw %s from %s' % (self.caster, self.card, origin)
 
 class Msg_DrawBurnCard (CardMessage):
     '''a card was burned because hand is too full'''

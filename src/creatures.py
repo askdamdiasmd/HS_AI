@@ -156,6 +156,12 @@ class Weapon (Thing):
                                 msgs,
                                 Msg_EndAttack(self.hero)])
 
+  def hurt(self, damage):
+      assert damage>0, pdb.set_trace()
+      self.hp -= damage
+      self.engine.send_message(Msg_Status(self,'hp'),immediate=True)
+      self.check_dead()
+
   def ask_for_death(self):
       self.engine.send_message( Msg_DeadWeapon(self), immediate=True)
 

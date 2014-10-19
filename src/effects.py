@@ -88,12 +88,13 @@ class Eff_Silence (Effect):
 
 
 class Eff_Message (Effect):
+    """ send a message to someone """
     def __init__(self, action, immediate=True):
         Effect.__init__(self)
         self.action = action
         self.immediate = immediate
     def __str__(self):
-        return "Inflict %d damages" % self.damage
+        return "Send a message: %s" % str(self.action(self))
     def bind_to(self, owner, caster=None):
         self.owner = owner
         self.caster = caster

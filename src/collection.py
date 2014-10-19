@@ -235,11 +235,11 @@ def get_cardbook():
         lambda self,msg: Msg_BindEffect(self.owner,msg.caster,Eff_BuffMinion(others='frozen')))],
         desc="Freeze any character damaged by this minion.", cls="mage") )
   
-  #add( Card_Minion(7, 5, 7, "Archmage Antonidas", name_fr="", 
-        #desc="Whenever you cast a spell, put a 'Fireball' spell into your hand.", cls="mage") )
-  
-  #add( Card_Minion(0, 1, 1, "Avatar of the Coin", name_fr="", 
-        #desc="You lost the coin flip, but gained a friend.") )
+  add( Card_Minion(7, 5, 7, "Archmage Antonidas", name_fr="Archimage Antonidas", 
+        effects=['effect',Eff_Trigger(Msg_StartSpell,
+        lambda self,msg: msg.caster is self.owner.owner,
+        lambda self,msg: Msg_GiveCard(msg.caster,cardbook["Fireball"],origin=self.owner))],
+        desc="Whenever you cast a spell, put a 'Fireball' spell into your hand.", cls="mage") )
   
   add( Card_Minion(0, 0, 2, "Barrel", name_fr="Tonneau", 
          desc="Is something in this barrel?", collectible=False) )
@@ -270,8 +270,10 @@ def get_cardbook():
   add( Card_Minion(1, 1, 1, "Argent Squire", name_fr="Ecuyere d'argent", 
         desc="Divine Shield", effects="divine_shield") )
   
-  #add( Card_Minion_BC(1, 1, 2, "Bloodsail Corsair", name_fr="", 
-        #desc="Battlecry: Remove 1 Durability from your opponent's weapon.", cat="pirate") )
+  add( Card_Minion_BC(1, 1, 2, "Bloodsail Corsair", 
+        Eff_Message(lambda self: Msg_Damage(self.caster,self.owner,1)), "enemy weapon",
+        name_fr="Forban de la voile sanglante", 
+        desc="Battlecry: Remove 1 Durability from your opponent's weapon.", cat="pirate") )
   
   add( Card_Minion(1, 1, 1, "Boar", name_fr="Sanglier", cat="beast", collectible=False) )
   
@@ -283,7 +285,7 @@ def get_cardbook():
   add( Card_Minion(1, 2, 1, "Damaged Golem", name_fr="Golem endommage", collectible=False) )
   
   add( Card_Minion_BC(1, 1, 1, "Elven Archer", 
-        Eff_Message(lambda self: Msg_Damage(self.caster,self.owner,1)), "minions", 
+        Eff_Message(lambda self: Msg_Damage(self.caster,self.owner,1)), "characters", 
         name_fr="Archere elfe", desc="Battlecry: Deal 1 damage.") )
         
   #add( Card_Minion(1, 0, 4, "Emboldener 3000", name_fr="", 

@@ -118,7 +118,6 @@ class Act_PlayMinionCard_BC (Act_PlayMinionCard):
         else:
           target = self.choices[1]
           if target!=None:
-            assert type(target)==Minion, pdb.set_trace()
             actions.append(Msg_BindEffect(minion, target, self.battlecry))
         self.engine.send_message(actions)
 

@@ -60,6 +60,8 @@ class Card (object):
         return self.engine.board.get_minions(self.owner)
       elif targets=='neighbors':
         return 'neighbors'
+      elif targets=='enemy weapon':
+        return self.engine.board.get_enemy_player(self.owner).weapon
       else:
         assert False, "error: unknown target '%s'" % targets
 

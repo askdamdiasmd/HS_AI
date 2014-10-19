@@ -118,6 +118,10 @@ class Player (object):
         self.engine.send_message(Msg_CardDrawn(self,card),immediate=True)
       else:
         self.engine.send_message(Msg_DrawBurnCard(self,card),immediate=True)
+  
+  def give_card(self, card, origin):
+      self.cards.append(card)
+      self.engine.send_message(Msg_CardDrawn(self,card,origin=origin),immediate=True)
 
   def throw_card(self, card):
 #      if type(card)==int:
