@@ -101,6 +101,23 @@ class Eff_Message (Effect):
         self.engine.send_message(self.action(self), immediate=self.immediate)
 
 
+class Eff_DeathRattle (Effect):
+    """ death rattle effect """
+    def __init__(self, action):
+      Effect.__init__(self)
+      self.action = action
+    def __str__(self):
+      return "execute %s" % str(self.action(self,None))
+    def bind_to(self, owner, caster=None):
+      self.owner = owner
+      owner.effects.append('death_rattle')
+      owner.triggers.append((Msg_Dead,self)) # because we are already disappeared when it triggers
+    def trigger(self, msg):
+      if msg.caster is self.owner: # I'm dead !
+        pos = self.engine.board.get_minion_pos(self.owner)
+        self.engine.send_message(Msg_DeathRattle(self.owner,self.action(self,pos)),immediate=True)
+
+
 class Eff_DR_Invoke_Minion (Effect):
     """ death rattle effect """
     def __init__(self, card):
@@ -120,6 +137,9 @@ class Eff_DR_Invoke_Minion (Effect):
         self.card.owner = player  # set card owner
         death_rattle = Msg_AddMinion(player, Minion(self.card),pos)
         self.engine.send_message(Msg_DeathRattle(self.owner, death_rattle),immediate=True)
+
+
+
 
 
 class Eff_BuffMinion (Effect):

@@ -288,24 +288,32 @@ def get_cardbook():
         Eff_Message(lambda self: Msg_Damage(self.caster,self.owner,1)), "characters", 
         name_fr="Archere elfe", desc="Battlecry: Deal 1 damage.") )
         
-  #add( Card_Minion(1, 0, 4, "Emboldener 3000", name_fr="", 
+  #add( Card_Minion(1, 0, 4, "Emboldener 3000", name_fr="", collectible=False, 
         #desc="At the end of your turn, give a random minion +1/+1.") )
-  #add( Card_Minion(1, 2, 1, "Flame of Azzinoth") )
-  #add( Card_Minion(1, 2, 1, "Flame of Azzinoth") )
-  #add( Card_Minion(1, 1, 1, "Gnoll") )
+  
+  add( Card_Minion(1, 2, 1, "Flame of Azzinoth", collectible=False) )
+
+  add( Card_Minion(1, 1, 1, "Gnoll", collectible=False) )
 
   add( Card_Minion(1, 1, 2, 'Goldshire Footman',
-        name_fr='Soldat de Comte de l\'Or',effects='taunt') )
+        name_fr='Soldat de Comte de l\'Or', effects='taunt') )
 
   #add( Card_Minion(1, 1, 1, "Grimscale Oracle", name_fr="", 
         #desc="ALL other Murlocs have +1 Attack.", cat="murloc") )
+  
   #add( Card_Minion(1, 0, 1, "Homing Chicken", name_fr="", 
         #desc="At the start of your turn, destroy this minion and draw 3 cards.") )
+  
   #add( Card_Minion_BC(1, 1, 2, "Hungry Crab", name_fr="Crabe affame", 
         #desc="Battlecry: Destroy a Murloc and gain +2/+2.", cat="beast") )
-  #add( Card_Minion(1, 1, 1, "Imp", cat="demon") )
-  #add( Card_Minion(1, 2, 1, "Leper Gnome", name_fr="Gnome lepreux", 
-        #desc="Deathrattle: Deal 2 damage to the enemy hero.", effects="deathrattle") )
+
+  add( Card_Minion(1, 1, 1, "Imp", cat="demon", collectible=False) )
+
+  add( Card_Minion(1, 2, 1, "Leper Gnome", name_fr="Gnome lepreux", 
+        effects=[Eff_DeathRattle(lambda self,pos: Msg_Damage(self.owner,
+        self.engine.board.get_enemy_hero(self.owner.owner),2))],
+        desc="Deathrattle: Deal 2 damage to the enemy hero.") )
+
   #add( Card_Minion(1, 1, 2, "Lightwarden", name_fr="", 
         #desc="Whenever a character is healed, gain +2 Attack.") )
   
