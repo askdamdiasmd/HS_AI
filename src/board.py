@@ -61,13 +61,16 @@ class Board:
       return player.minions
 
   def get_enemy_minions(self, player):
-      return self.get_enemy_player(player).minions
+      # get targetables enemy minions
+      return [e for e in self.get_enemy_player(player).minions if not e.has_stealth()]
 
-  def get_minions(self):
-      return [v for v in self.everybody if issubclass(type(v),Minion)]
+  def get_minions(self, player):
+      # get targetables characters
+      return player.minions + self.get_enemy_player(player).minions
   
-  def get_characters(self):
-      return [v for v in self.everybody if issubclass(type(v),Creature)]
+  def get_characters(self, player):
+      # get targetables characters
+      return self.everybody[:2] + self.get_minions(player)
 
   def get_attackable_characters(self, player):
       enemies = self.get_enemy_minions(player)

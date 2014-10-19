@@ -57,7 +57,9 @@ def fake_deck(cardbook, debug=False):
     from copy import deepcopy as copy
     deck = []
     if debug:
-      deck += [copy(cardbook["Acolyte of Pain"]) for i in range(15)]
+      cards = ["Worgen Infiltrator", "Defender of Argus"]
+      for c in cards:
+        deck += [copy(cardbook[c]) for i in range(30/len(cards))]      
     else:
       deck += [copy(cardbook["Wisp"]) for i in range(2)]
       deck += [copy(cardbook["Power Overwhleming"]) for i in range(2)]

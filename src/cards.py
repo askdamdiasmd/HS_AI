@@ -5,7 +5,11 @@ import pdb
 from minions import *
 from actions import *
 
-eff_trad_fr = dict(taunt='Provocation')
+eff_trad_fr = dict(taunt='Provocation', 
+                   charge='Charge',
+                   divine_shield='Bouclier Divin',
+                   stealth='Camouflage',
+                   windfury='Furie des vents')
 def tolist(l):
   if type(l)==str:  
     return l.split()
@@ -36,24 +40,26 @@ class Card (object):
 
     @classmethod
     def set_engine(cls, engine):
-        cls.engine = engine
+      cls.engine = engine
 
     def list_actions(self):
-        assert 0, "must be overloaded"
+      assert 0, "must be overloaded"
 
     def list_targets(self, targets ): # helper function
-        if targets=='none':
-          return []
-        elif targets=="characters":
-          return self.engine.board.get_characters()
-        elif targets=='friendly minions':
-          return self.engine.board.get_friendly_minions(self.owner)
-        elif targets=='minions':
-          return self.engine.board.get_minions()
-        elif targets=='neighbors':
-          return 'neighbors'
-        else:
-          assert False, "error: unknown target '%s'" % targets
+      if targets=='none':
+        return []
+      elif targets=="characters":
+        return self.engine.board.get_characters(self.owner)
+      elif targets=='friendly minions':
+        return self.engine.board.get_friendly_minions(self.owner)
+      elif targets=='friendly beasts':
+        return [b for b in self.engine.board.get_friendly_minions(self.owner) if b.card.cat=="beast"]
+      elif targets=='minions':
+        return self.engine.board.get_minions(self.owner)
+      elif targets=='neighbors':
+        return 'neighbors'
+      else:
+        assert False, "error: unknown target '%s'" % targets
 
 
 ### --------------- Minion cards ----------------------

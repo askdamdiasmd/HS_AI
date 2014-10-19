@@ -65,12 +65,23 @@ class Acf_IncSpellDamage (Effect):
   
 
 class Eff_Silence (Effect):
-    def __init__(self):
-        Effect.__init__(self)
     def __str__(self):
         return "silence"
     def bind_to(self, minion, caster=None):
         minion.silence()
+
+
+class Eff_Message (Effect):
+    def __init__(self, action, immediate=True):
+        Effect.__init__(self)
+        self.action = action
+        self.immediate = immediate
+    def __str__(self):
+        return "Inflict %d damages" % self.damage
+    def bind_to(self, owner, caster=None):
+        self.owner = owner
+        self.caster = caster
+        self.engine.send_message(self.action(self), immediate=self.immediate)
 
 
 class Eff_DR_Invoke_Minion (Effect):
@@ -185,6 +196,43 @@ class Eff_BuffLeftRight (Effect):
         player = minion.owner
         i = player.minions.index(minion)
         targets = set(player.minions[max(0,i-1):i+2])
+        targets.remove(minion)
+        return targets
+    def execute(self):
+        for target in self.targets:
+          if self.hp:   target.change_hp(self.hp)
+          if self.atq:  target.change_atq(self.atq)
+    def trigger(self, msg):
+        if msg.caster.owner is self.owner.owner: # avoid useless checks
+          ngh = self.get_neighbors()
+          if self.targets != ngh: # there has been change of neighbors
+            self.undo()
+            self.targets = ngh
+            self.execute()
+    def undo(self):
+        for target in self.targets:
+          if self.hp: target.change_hp(-self.hp)
+          if self.atq: target.change_atq(-self.atq)
+
+
+class Eff_BuffFriends (Effect):
+    """ permanent buff of left and right minion's neighbors """ 
+    def __init__(self, atq, hp, cat=None):
+        Effect.__init__(self)
+        self.atq = atq    # buff atq
+        self.hp = hp      # buff hp
+        self.cat = cat
+        self.targets = set()
+    def __str__(self):
+        return "buff friends by %+d/%+d" % (self.atq, self.hp)
+    def bind_to(self, owner):
+        self.owner = owner
+        owner.effects.add(self)
+        owner.triggers += [(Msg_Popup,self), (Msg_Dead,self)]
+    def get_neighbors(self):
+        minion = self.owner
+        player = minion.owner
+        targets = set([m for m in player.minions if not self.cat or m.cat==self.cat])
         targets.remove(minion)
         return targets
     def execute(self):

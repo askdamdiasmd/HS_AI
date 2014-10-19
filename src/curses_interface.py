@@ -152,21 +152,25 @@ def rounded_box(win):
     addwch(2321,win=win,x=tx-1,y=0)
 
 def strong_box(win,attr=0):
-    if code=='UTF-8':
-      h,w = uc.getmaxyx(win)
-      w -= 1
-      h -= 1
-      addwch(9556,attr,win=win,x=0,y=0)
-      addwch(9552,attr,win=win,nb=w-1)
-      addwch(9559,attr,win=win)
-      for i in range(1,h):
-        addwch(9553,attr,win=win,x=0,y=i)
-        addwch(9553,attr,win=win,x=w,y=i)
-      addwch(9562,attr,win=win,x=0,y=h)
-      addwch(9552,attr,win=win,nb=w-1)
-      addwch(9565,attr,win=win)
-    else:
-      uc.wborder(win,9553,9553,9552,9552,9556,9559,9562,9565)
+    uc.wborder(win,*((uc.ACS_BOARD,)*8))    
+#    if code=='UTF-8':
+#      h,w = uc.getmaxyx(win)
+#      w -= 1
+#      h -= 1
+#      addwch(9556,attr,win=win,x=0,y=0)
+#      addwch(9552,attr,win=win,nb=w-1)
+#      addwch(9559,attr,win=win)
+#      for i in range(1,h):
+#        addwch(9553,attr,win=win,x=0,y=i)
+#        addwch(9553,attr,win=win,x=w,y=i)
+#      addwch(9562,attr,win=win,x=0,y=h)
+#      addwch(9552,attr,win=win,nb=w-1)
+#      addwch(9565,attr,win=win)
+#    else:
+#      uc.wborder(win,9553,9553,9552,9552,9556,9559,9562,9565)
+
+def weak_box(win,attr=0):
+    uc.wborder(win,ord(':'),ord(':'),ord('-'),ord('-'))  
 
 def manual_box(win,y,x,h,w):
     w -= 1
@@ -260,9 +264,14 @@ class VizThing (object):
     if pos and pos!=uc.getbegyx(win):
       uc.move_panel(panel,*pos)    
     
+    if 'divine_shield' in self.effects or 'insensible' in self.effects:
+      bkgd = uc.black_on_cyan
+    
     uc.wbkgd(win,bkgd)
     uc.wattron(win,highlight)
-    if 'taunt' in self.effects:
+    if 'stealth' in self.effects:
+      weak_box(win,highlight)
+    elif 'taunt' in self.effects:
       strong_box(win,highlight)
     else:
       uc.box(win)    
@@ -318,11 +327,11 @@ class VizHero (VizThing):
   def create_hero_power_button(self):
     card = self.obj.card
     y,x = uc.getbegyx(self.win)
-    name = card.ability.name.split()[:2]
+    name = card.ability.name.split()
     if len(name)==1: 
       name = name[0]
-      name = name[:4], name[4:]
-    up,down = name[:2]
+      name = name[:4], [name[4:]]
+    up,down = name[0], ' '.join(name[1])
     return HeroPowerButton(y,x+24,up,down,card.ability.cost,tx=9,ty=4)
     
 

@@ -187,6 +187,9 @@ class Creature (Thing):
   def attacks(self, target):
       self.n_atq -= 1
       assert self.n_atq>=0
+      if self.has_effect('stealth'):
+        self.effects.remove('stealth')
+        self.engine.send_message(Msg_Status(self,'effects'),immediate=True)
       msgs = [Msg_Damage(self, target, self.atq)]
       if target.atq: msgs.append(Msg_Damage(target, self, target.atq))
       self.engine.send_message([Msg_StartAttack(self,target),
@@ -205,6 +208,9 @@ class Minion (Creature):
 
   def has_taunt(self):
       return 'taunt' in self.effects
+
+  def has_stealth(self):
+      return 'stealth' in self.effects
 
   def list_actions(self):
       if self.n_atq<=0 or self.atq==0:
