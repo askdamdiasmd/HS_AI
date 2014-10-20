@@ -91,6 +91,30 @@ class Thing (object):
   def end_turn(self):
       pass
 
+  def hurt(self, damage):
+      assert damage>0, pdb.set_trace()
+      self.hp -= damage
+      self.engine.send_message(Msg_Status(self,'hp'),immediate=True)
+      self.check_dead()
+
+  def heal(self, hp):
+      assert hp>0, pdb.set_trace()
+      self.hp = min(self.max_hp, self.hp+hp)
+      self.engine.send_message(Msg_Status(self,'hp'),immediate=True)
+
+  def change_hp(self, hp):
+        self.max_hp += hp
+        assert self.max_hp>=1, pdb.set_trace()
+        self.hp += max(0,hp)  # only add if positive
+        self.hp = min(self.hp, self.max_hp)
+        self.engine.send_message(Msg_Status(self,'hp max_hp'),immediate=True)
+        self.check_dead()
+
+  def change_atq(self, atq):
+        self.atq += atq
+        self.max_atq += atq
+        self.engine.send_message(Msg_Status(self,'atq max_atq'),immediate=True)
+
   def silence(self):
       self.action_filter = []
       self.modifiers = []
@@ -104,6 +128,11 @@ class Thing (object):
       self.effects = ['silence']
       if not self.dead:
         self.engine.send_message(Msg_Status(self,'hp max_hp atq max_atq effects'),immediate=True)
+
+  def check_dead(self):
+      if self.hp <= 0:
+        self.dead = True
+        self.engine.send_message( Msg_CheckDead(self) )
 
   def ask_for_death(self):
       self.engine.send_message(Msg_Dead(self),immediate=True)
@@ -147,20 +176,10 @@ class Weapon (Thing):
       assert self.hero.n_atq<=self.hero.n_max_atq
       msgs = [Msg_Damage(self, target, self.atq)]
       if target.atq: msgs.append(Msg_Damage(target, self.hero, target.atq))
-      self.hp -= 1  # lose one durability
-      self.engine.send_message(Msg_Status(self,'hp'),immediate=True)
-      if self.hp <= 0:
-        self.dead = True
-        msgs.append( Msg_CheckDead(self) )
+      self.hurt(1)
       self.engine.send_message([Msg_StartAttack(self.hero,target),
                                 msgs,
                                 Msg_EndAttack(self.hero)])
-
-  def hurt(self, damage):
-      assert damage>0, pdb.set_trace()
-      self.hp -= damage
-      self.engine.send_message(Msg_Status(self,'hp'),immediate=True)
-      self.check_dead()
 
   def ask_for_death(self):
       self.engine.send_message( Msg_DeadWeapon(self), immediate=True)
@@ -178,32 +197,7 @@ class Creature (Thing):
         self.effects.remove('divine_shield')
         self.engine.send_message(Msg_Status(self,'effects'),immediate=True)
       else:
-        self.hp -= damage
-        self.engine.send_message(Msg_Status(self,'hp'),immediate=True)
-        self.check_dead()
-
-  def heal(self, hp):
-      assert hp>0, pdb.set_trace()
-      self.hp = min(self.max_hp, self.hp+hp)
-      self.engine.send_message(Msg_Status(self,'hp'),immediate=True)
-
-  def change_hp(self, hp):
-        self.max_hp += hp
-        assert self.max_hp>=1, pdb.set_trace()
-        self.hp += max(0,hp)  # only add if positive
-        self.hp = min(self.hp, self.max_hp)
-        self.engine.send_message(Msg_Status(self,'hp max_hp'),immediate=True)
-        self.check_dead()
-
-  def change_atq(self, atq):
-        self.atq += atq
-        self.max_atq += atq
-        self.engine.send_message(Msg_Status(self,'atq max_atq'),immediate=True)
-
-  def check_dead(self):
-      if self.hp <= 0:
-        self.dead = True
-        self.engine.send_message( Msg_CheckDead(self) )
+        Thing.hurt(self,damage)
 
   def attacks(self, target):
       self.n_atq += 1

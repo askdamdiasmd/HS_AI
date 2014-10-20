@@ -101,31 +101,39 @@ class Eff_Message (Effect):
         self.engine.send_message(self.action(self), immediate=self.immediate)
 
 
-class Eff_Weapon (Effect):
+class Eff_BuffWeapon (Effect):
     """ send a message to enemy weapon """
-    def __init__(self, action, no_weapon_action=None, enemy=True, immediate=True):
+    def __init__(self, atq=0, damage=0, hp=0, temp=False, destroy=False, enemy=True, immediate=True):
         Effect.__init__(self)
-        self.action = action
-        self.no_weapon_action = no_weapon_action
+        self.atq = atq
+        self.hp = hp
+        assert damage>=0
+        self.damage = damage
+        assert temp==False, "todo"
+        self.destroy = destroy
+        self.temp = temp
         self.enemy = enemy
         self.immediate = immediate
     def __str__(self):
-        return "Send a message: %s" % str(self.action(self))
+        which = 'enemy' if self.enemy else 'friendly'
+        if self.destroy:
+          return "Destroy %s weapon" % which
+        else:
+          return "Buff %s weapon by %+d/%+d" % (which, self.atq, self.hp)
     def bind_to(self, owner, caster=None):
         self.owner = owner
         self.caster = caster
-        
         if self.enemy:
-          self.weapon = self.engine.board.get_enemy_player(owner.owner).weapon
+          weapon = self.engine.board.get_enemy_player(owner.owner).weapon
         else:
-          self.weapon = owner.owner.weapon
-        
+          weapon = owner.owner.weapon
         if self.weapon:
-          if self.action:
-            self.engine.send_message(self.action(self), immediate=self.immediate)
-        else:
-          if self.no_weapon_action:
-            self.engine.send_message(self.no_weapon_action(self), immediate=self.immediate)
+          if self.destroy:
+            self.engine.send_message(Msg_DeadWeapon(weapon), immediate=self.immediate)
+          else:
+            if self.atq: weapon.change_atq(self.atq)
+            if self.hp: weapon.change_hp(self.hp)
+            if self.damage: weapon.hurt(self.damage)
 
 
 
@@ -135,7 +143,7 @@ class Eff_DeathRattle (Effect):
       Effect.__init__(self)
       self.action = action
     def __str__(self):
-      return "execute %s" % str(self.action(self,None))
+      return "Deathrattle"
     def bind_to(self, owner, caster=None):
       self.owner = owner
       owner.effects.append('death_rattle')

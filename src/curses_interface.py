@@ -379,6 +379,7 @@ class VizWeapon (VizThing):
   def draw(self, **kwargs):
       weapon = self.obj
       win = VizThing.draw(self,**kwargs)
+      if not win: return
       highlight = kwargs.get('highlight',0)
       ty,tx = uc.getmaxyx(win)
       name = weapon.card.name_fr or weapon.card.name

@@ -204,7 +204,7 @@ def get_cardbook():
   add( Card_Minion(0, 0, 2, "Mirror Image", name_fr="Image mirroir", 
         desc="Taunt", cls="mage", effects="taunt") )
   
-  add( Card_Minion(0, 1, 3, "Spellbender", name_fr="Courbe-sort", cls="mage") )
+  add( Card_Minion(0, 1, 3, "Spellbender", name_fr="Courbe-sort", cls="mage", collectible=False) )
   
   add( Card_Minion(1, 1, 3, "Mana Wyrm", name_fr="Wyrm de mana",
         effects=['effect',Eff_Trigger(Msg_StartSpell,
@@ -220,7 +220,7 @@ def get_cardbook():
         #desc="Battlecry: The next Secret you play this turn costs (0).", cls="mage") )
   
   add( Card_Minion(4, 3, 3, "Ethereal Arcanist", name_fr="Arcaniste etherien",
-        effects=['effect',Eff_Trigger(Msg_EndTurn, lambda self,msg: msg.caster is self.owner.owner,
+        effects=['effect',Eff_Trigger(Msg_EndTurn, lambda self,msg: msg.caster is self.owner.owner and msg.caster.secrets,
         lambda self,msg: Msg_BindEffect(msg.caster,self.owner,Eff_BuffMinion(2,2)))],
         desc="If you control a Secret at the end of your turn, gain +2/+2.", cls="mage") )
   
@@ -267,7 +267,7 @@ def get_cardbook():
         desc="Divine Shield", effects="divine_shield") )
   
   add( Card_Minion_BC(1, 1, 2, "Bloodsail Corsair", 
-        Eff_Weapon(lambda self: Msg_Damage(self.owner,self.weapon,1)), "prespecified",
+        Eff_BuffWeapon(hp=-1,enemy=True), "prespecified",
         name_fr="Forban de la voile sanglante", 
         desc="Battlecry: Remove 1 Durability from your opponent's weapon.", cat="pirate") )
   
@@ -342,7 +342,7 @@ def get_cardbook():
   
   add( Card_Minion(1, 1, 1, "Skeleton", collectible=False) )
   
-  #add( Card_Minion(1, 2, 1, "Southsea Deckhand", name_fr="", 
+  #add( Card_Minion(1, 2, 1, "Southsea Deckhand", name_fr="Matelot des mers du sud", 
         #desc="Has Charge while you have a weapon equipped.", cat="pirate") )
   
   add( Card_Minion(1, 2, 2, "Squire", name_fr="Ecuyer", collectible=False) )
@@ -368,7 +368,7 @@ def get_cardbook():
         #desc="At the end of your turn, give another random friendly minion +1 Health.") )
   
   add( Card_Minion_BC(2, 3, 2, "Acidic Swamp Ooze", 
-        Eff_Weapon(lambda self: Msg_DeadWeapon(self.weapon),enemy=True), "prespecified",
+        Eff_BuffWeapon(destroy=1,enemy=True), "prespecified",
         name_fr="Limon des marais acides", 
         desc="Battlecry: Destroy your opponent's weapon.") )
   
