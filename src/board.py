@@ -51,6 +51,7 @@ class Board:
       return False
 
   def get_enemy_player(self, player):
+      assert player in self.players, pdb.set_trace()
       p = self.players
       return p[0] if player is not p[0] else p[1]
 

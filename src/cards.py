@@ -50,6 +50,8 @@ class Card (object):
     def list_targets(self, targets ): # helper function
       if targets=='none':
         return []
+      elif targets=="prespecified":
+        return "prespecified"
       elif targets=="characters":
         return self.engine.board.get_characters(self.owner)
       elif targets=='friendly minions':

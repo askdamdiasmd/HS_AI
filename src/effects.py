@@ -101,6 +101,34 @@ class Eff_Message (Effect):
         self.engine.send_message(self.action(self), immediate=self.immediate)
 
 
+class Eff_Weapon (Effect):
+    """ send a message to enemy weapon """
+    def __init__(self, action, no_weapon_action=None, enemy=True, immediate=True):
+        Effect.__init__(self)
+        self.action = action
+        self.no_weapon_action = no_weapon_action
+        self.enemy = enemy
+        self.immediate = immediate
+    def __str__(self):
+        return "Send a message: %s" % str(self.action(self))
+    def bind_to(self, owner, caster=None):
+        self.owner = owner
+        self.caster = caster
+        
+        if self.enemy:
+          self.weapon = self.engine.board.get_enemy_player(owner.owner).weapon
+        else:
+          self.weapon = owner.owner.weapon
+        
+        if self.weapon:
+          if self.action:
+            self.engine.send_message(self.action(self), immediate=self.immediate)
+        else:
+          if self.no_weapon_action:
+            self.engine.send_message(self.no_weapon_action(self), immediate=self.immediate)
+
+
+
 class Eff_DeathRattle (Effect):
     """ death rattle effect """
     def __init__(self, action):

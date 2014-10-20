@@ -115,6 +115,8 @@ class Act_PlayMinionCard_BC (Act_PlayMinionCard):
           player = self.caster
           for target in player.minions[max(0,pos.index-1):pos.index+1]:
             actions.append(Msg_BindEffect(minion, target, deepcopy(self.battlecry)))
+        elif self.special_targets=="prespecified":
+          actions.append(Msg_BindEffect(minion, minion, self.battlecry))
         else:
           target = self.choices[1]
           if target!=None:

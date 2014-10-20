@@ -54,10 +54,6 @@ def get_cardbook():
   ### 8 Mana ##################################
   ### 9+ Mana #################################
   
-  # add fake creatures
-  for i in range(1,11):
-    add( Card_Minion(i,i+1,i,'Fake Creature %d'%i,name_fr="Fausse creature %d"%i) )
-    
   # add fake weapons
   for i in range(1,5):
     add( Card_Weapon(i,i,2,'Fake Weapon %d'%i) )
@@ -199,7 +195,7 @@ def get_cardbook():
   add( Card_Minion(6, 6, 5, "Savannah Highmane", name_fr="Grande Criniere des Savanes", 
         effects=[Eff_DR_Invoke_Minion(cardbook["Hyena"]),
                 Eff_DR_Invoke_Minion(cardbook["Hyena"])],
-        desc="Deathrattle: Summon two 2/2 Hyenas.", cls="hunter", cat='beast',
+        desc="Deathrattle Summon two 2/2 Hyenas.", cls="hunter", cat='beast',
         desc_fr="Rale d'agonie: Invoque 2 hyenes 2/2") )
 
   add( Card_Minion(9, 8, 8, "King Krush", name_fr="Roi Krush", desc="Charge", cls="hunter",
@@ -271,7 +267,7 @@ def get_cardbook():
         desc="Divine Shield", effects="divine_shield") )
   
   add( Card_Minion_BC(1, 1, 2, "Bloodsail Corsair", 
-        Eff_Message(lambda self: Msg_Damage(self.caster,self.owner,1)), "enemy weapon",
+        Eff_Weapon(lambda self: Msg_Damage(self.owner,self.weapon,1)), "prespecified",
         name_fr="Forban de la voile sanglante", 
         desc="Battlecry: Remove 1 Durability from your opponent's weapon.", cat="pirate") )
   
@@ -312,7 +308,7 @@ def get_cardbook():
   add( Card_Minion(1, 2, 1, "Leper Gnome", name_fr="Gnome lepreux", 
         effects=[Eff_DeathRattle(lambda self,pos: Msg_Damage(self.owner,
         self.engine.board.get_enemy_hero(self.owner.owner),2))],
-        desc="Deathrattle: Deal 2 damage to the enemy hero.") )
+        desc="Deathrattle Deal 2 damage to the enemy hero.") )
 
   add( Card_Minion(1, 1, 2, "Lightwarden", name_fr="Gardelumiere", 
         effects=['effect',Eff_Trigger(Msg_Heal,lambda self, msg:True, lambda self,msg: 
@@ -372,7 +368,7 @@ def get_cardbook():
         #desc="At the end of your turn, give another random friendly minion +1 Health.") )
   
   add( Card_Minion_BC(2, 3, 2, "Acidic Swamp Ooze", 
-        Eff_Message(lambda self: Msg_DeadWeapon(self.owner)), "enemy weapon",
+        Eff_Weapon(lambda self: Msg_DeadWeapon(self.weapon),enemy=True), "prespecified",
         name_fr="Limon des marais acides", 
         desc="Battlecry: Destroy your opponent's weapon.") )
   
@@ -384,7 +380,7 @@ def get_cardbook():
   
   #add( Card_Minion(2, 3, 2, "Bloodfen Raptor", cat="beast") )
   #add( Card_Minion(2, 1, 1, "Bloodmage Thalnos", name_fr="", 
-        #desc="Spell Damage +1. Deathrattle: Draw a card.", effects="spell damage deathrattle") )
+        #desc="Spell Damage +1. Deathrattle Draw a card.", effects="spell damage deathrattle") )
   #add( Card_Minion_BC(2, 2, 3, "Bloodsail Raider", name_fr="", 
         #desc="Battlecry: Gain Attack equal to the Attack of your weapon.", cat="pirate") )
   #add( Card_Minion(2, 2, 1, "Bluegill Warrior", name_fr="", 
@@ -427,7 +423,7 @@ def get_cardbook():
 
   add( Card_Minion(2, 2, 1, "Loot Hoarder", name_fr="Amasseur de butin",
         effects=[Eff_DeathRattle(lambda self,pos: Msg_DrawCard(self.owner.owner))],
-        desc="Deathrattle: Draw a card.") )
+        desc="Deathrattle Draw a card.") )
 
   #add( Card_Minion(2, 0, 4, "Lorewalker Cho", name_fr="", 
         #desc="Whenever a player casts a spell, put a copy into the other player's hand.") )
@@ -495,7 +491,7 @@ def get_cardbook():
   
   add( Card_Minion(3, 2, 3, "Harvest Golem", 
        effects=[Eff_DR_Invoke_Minion(cardbook["Damaged Golem"])],
-       name_fr="Golem des moissons", desc="Deathrattle: Summon a 2/1 Damaged Golem.",
+       name_fr="Golem des moissons", desc="Deathrattle Summon a 2/1 Damaged Golem.",
        desc_fr="Rale d'agonie: Invoque un golem endommage 2/1", ) )
   
   #add( Card_Minion(3, 1, 5, "Imp Master", name_fr="", 
@@ -596,7 +592,7 @@ def get_cardbook():
   #add( Card_Minion(4, 3, 5, "Violet Teacher", name_fr="", 
         #desc="Whenever you cast a spell, summon a 1/1 Violet Apprentice.") )
   #add( Card_Minion(5, 4, 4, "Abomination", name_fr="", 
-        #desc="Taunt. Deathrattle: Deal 2 damage to ALL characters.", effects="taunt deathrattle") )
+        #desc="Taunt. Deathrattle Deal 2 damage to ALL characters.", effects="taunt deathrattle") )
   #add( Card_Minion_BC(5, 4, 4, "Azure Drake", name_fr="", 
         #desc="Spell Damage +1. Battlecry: Draw a card.", cat="dragon", effects="spell damage") )
   #add( Card_Minion(5, 5, 4, "Booty Bay Bodyguard", name_fr="", 
@@ -639,7 +635,7 @@ def get_cardbook():
   #add( Card_Minion(6, 6, 7, "Boulderfist Ogre") )
   
   add( Card_Minion(6, 4, 5, "Cairne", effects=[Eff_DR_Invoke_Minion(cardbook["Baine Bloodhoof"])],
-       desc="Deathrattle: Summon a 4/5 Baine Bloodhoof.",
+       desc="Deathrattle Summon a 4/5 Baine Bloodhoof.",
        desc_fr="Rale d'agonie: Invoque un Baine 4/5" ) )
   
   #add( Card_Minion_BC(6, 5, 5, "Frost Elemental", name_fr="", 
@@ -661,9 +657,9 @@ def get_cardbook():
   #add( Card_Minion(6, 4, 5, "Sunwalker", name_fr="", 
         #desc="Taunt. Divine Shield", effects="taunt divine_shield") )
   #add( Card_Minion(6, 5, 5, "Sylvanas Windrunner", name_fr="", 
-        #desc="Deathrattle: Take control of a random enemy minion.", effects="deathrattle") )
+        #desc="Deathrattle Take control of a random enemy minion.", effects="deathrattle") )
   #add( Card_Minion(6, 9, 7, "The Beast", name_fr="", 
-        #desc="Deathrattle: Summon a 3/3 Finkle Einhorn for your opponent.", cat="beast", effects="deathrattle") )
+        #desc="Deathrattle Summon a 3/3 Finkle Einhorn for your opponent.", cat="beast", effects="deathrattle") )
   #add( Card_Minion_BC(6, 4, 5, "The Black Knight", name_fr="", 
         #desc="Battlecry: Destroy an enemy minion with Taunt.") )
   #add( Card_Minion(6, 4, 5, "Windfury Harpy", name_fr="", 
@@ -699,7 +695,7 @@ def get_cardbook():
   #add( Card_Minion_BC(7, 5, 6, "Guardian of Kings", name_fr="", 
         #desc="Battlecry: Restore 6 Health to your hero.", cls="paladin") )
   #add( Card_Minion(8, 6, 6, "Tirion Fordring", name_fr="", 
-        #desc="Divine Shield. Taunt. Deathrattle: Equip a 5/3 Ashbringer.", cls="paladin", effects="divine_shield taunt deathrattle") )
+        #desc="Divine Shield. Taunt. Deathrattle Equip a 5/3 Ashbringer.", cls="paladin", effects="divine_shield taunt deathrattle") )
   #add( Card_Minion(0, 0, 1, "Shadow of Nothing", name_fr="", 
         #desc="Mindgames whiffed! Your opponent had no minions!", cls="priest") )
   #add( Card_Minion(1, 1, 3, "Northshire Cleric", name_fr="", 
@@ -874,7 +870,7 @@ def get_cardbook():
   #add( Card_Spell(4, "Bite", name_fr="", 
         #desc="Give your hero +4 Attack this turn and 4 Armor.", cls="druid") )
   #add( Card_Spell(4, "Soul of the Forest", name_fr="", 
-        #desc="Give your minions "Deathrattle: Summon a 2/2 Treant."", cls="druid") )
+        #desc="Give your minions "Deathrattle Summon a 2/2 Treant."", cls="druid") )
   #add( Card_Spell(4, "Swipe", name_fr="", 
         #desc="Deal 4 damage to an enemy and 1 damage to all other enemies.", cls="druid") )
   #add( Card_Spell(5, "Nourish", name_fr="", 
@@ -1201,7 +1197,7 @@ def get_cardbook():
         #desc="Whenever your hero attacks, restore 2 Health to it.", cls="paladin") )
   #add( Card_Weapon(5, 5, 3, "Ashbringer", cls="paladin") )
   
-  add( Card_Weapon(1, 1, 2, "Wicked Knife", cls="rogue") )
+  add( Card_Weapon(1, 1, 2, "Wicked Knife", cls="rogue", collectible=False) )
   
   #add( Card_Weapon(3, 2, 2, "Perdition's Blade", name_fr="", 
         #desc="Battlecry: Deal 1 damage. Combo: Deal 2 instead.", cls="rogue") )

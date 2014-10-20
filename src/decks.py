@@ -57,7 +57,7 @@ def fake_deck(cardbook, debug=False):
     from copy import deepcopy
     deck = []
     if debug:
-      cards = ["Sunfury Protector"]
+      cards = ["Wicked Knife","Limon des marais acides"]
       for c in cards:
         deck += [deepcopy(cardbook[c]) for i in range(30/len(cards))]      
     else:
