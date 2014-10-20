@@ -152,7 +152,7 @@ def rounded_box(win):
     addwch(2321,win=win,x=tx-1,y=0)
 
 def strong_box(win,attr=0):
-    uc.wborder(win,*((uc.ACS_BOARD,)*8))    
+    uc.wborder(win,*((uc.ACS_BLOCK,)*8))    
 #    if code=='UTF-8':
 #      h,w = uc.getmaxyx(win)
 #      w -= 1
@@ -387,7 +387,7 @@ class VizWeapon (VizThing):
       uc.mvwaddstr(win,ty-1,1," %d "%self.atq, highlight|self.buff_color('atq'))
   
   def update_stats(self, msg):
-    VizThing.update_stats(self, msg, show_hp=False)
+    return VizThing.update_stats(self, msg, show_hp=False)
 
 
 ### Player -----------
@@ -1130,8 +1130,8 @@ class CursesHSEngine (HSEngine):
       self.logfile.write(line)
       self.logfile.flush()
       self.log += line
-      if msg.draw()==False:
-        self.display.append(msg)  # needs to be displayed later
+      assert msg.draw()!=False, pdb.set_trace()
+      #self.display.append(msg)  # needs to be displayed later
 
 
 

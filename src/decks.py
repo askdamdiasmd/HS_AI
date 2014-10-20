@@ -57,7 +57,7 @@ def fake_deck(cardbook, debug=False):
     from copy import deepcopy as copy
     deck = []
     if debug:
-      cards = ["Elven Archer","Loot Hoarder"]
+      cards = ["Sunfury Protector"]
       for c in cards:
         deck += [copy(cardbook[c]) for i in range(30/len(cards))]      
     else:
@@ -81,6 +81,44 @@ def fake_deck(cardbook, debug=False):
     
     from decks import Deck
     return Deck(deck)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
