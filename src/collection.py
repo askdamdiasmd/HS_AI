@@ -136,17 +136,17 @@ def get_cardbook():
   ### Minions #######################################
   
   #add( Card_Minion(1, 2, 2, "Treant", cls="druid") )
-  add( Card_Minion(1, 2, 2, "Treant", cls="druid", 
+  add( Card_Minion(1, 2, 2, "Treant", name_fr="Treant", cls="druid", collectible=False, 
         desc="Charge.  At the end of the turn, destroy this minion.", effects="charge") )
   #add( Card_Minion(1, 2, 2, "Treant", name_fr="", 
         #desc="Taunt", cls="druid", effects="taunt") )
-  add( Card_Minion(2, 3, 2, "Panther", cls="druid", cat="beast") )
+  add( Card_Minion(2, 3, 2, "Panther", name_fr="Panthere", cls="druid", cat="beast", collectible=False) )
   #add( Card_Minion(4, 2, 4, "Keeper of the Grove", name_fr="Gardien du bosquet", 
         #desc="Choose One - Deal 2 damage; or Silence a minion.", cls="druid") )
   add( Card_Minion(5, 4, 4, "Druid of the Claw", name_fr="Druide de la griffe", 
-         desc="Charge", cls="druid", effects="charge") )
+         desc="Charge", cls="druid", effects="charge", collectible=False) )
   add( Card_Minion(5, 4, 6, "Druid of the Claw", name_fr="Druide de la griffe", 
-         desc="Taunt", cls="druid", effects="taunt") )
+         desc="Taunt", cls="druid", effects="taunt", collectible=False) )
   #add( Card_Minion(5, 4, 4, "Druid of the Claw", name_fr="", 
         #desc="Choose One - Charge; or +2 Health and Taunt.", cls="druid") )
   #add( Card_Minion(7, 5, 5, "Ancient of Lore", name_fr="", 
@@ -158,7 +158,7 @@ def get_cardbook():
   #add( Card_Minion(9, 5, 8, "Cenarius",  cls="druid",
         #desc="Choose One - Give your other minions +2/+2; or Summon two 2/2 Treants with Taunt."))
   
-  add( Card_Minion(0, 1, 1, "Snake", cls="hunter", cat="beast") )
+  add( Card_Minion(0, 1, 1, "Snake", name_fr="Serpent", cls="hunter", cat="beast", collectible=False) )
   add( Card_Minion(1, 1, 1, "Timber Wolf", name_fr="Loup des bois", cls="hunter", cat="beast", 
         effects=[Eff_BuffFriends(1,0,cat="beast")],
         desc="Your other Beasts have +1 Attack.", desc_fr="Vos autres betes ont +1 ATQ") )
@@ -178,18 +178,18 @@ def get_cardbook():
         immediate=False)],
         desc="Whenever you summon a Beast, draw a card.", cls="hunter", cat="beast") )
   
-  add( Card_Minion(3, 4, 2, "Huffer", name_fr="Souffleur", 
+  add( Card_Minion(3, 4, 2, "Huffer", name_fr="Souffleur", collectible=False, 
         desc="Charge", cls="hunter", cat="beast", effects="charge") )
   
   add( Card_Minion(3, 2, 4, "Leokk", name_fr="Leokk", 
-        effects=[Eff_BuffFriends(1,0)],
+        effects=[Eff_BuffFriends(1,0)], collectible=False,
         desc="Other friendly minions have +1 Attack.", cls="hunter", cat="beast") )
 
-  add( Card_Minion(3, 4, 4, "Misha", name_fr="Misha", 
+  add( Card_Minion(3, 4, 4, "Misha", name_fr="Misha", collectible=False, 
         desc="Taunt", cls="hunter", cat="beast", effects="taunt") )
 
   add( Card_Minion_BC(4, 4, 3, "Houndmaster", Eff_BuffMinion(2,2,others="taunt"), 
-        "friendly beast", name_fr="Maitre des chiens", 
+        "friendly beasts", name_fr="Maitre des chiens", 
         desc="Battlecry: Give a friendly Beast +2/+2 and Taunt.", cls="hunter") )
   
   add( Card_Minion(5, 2, 5, "Tundra Rhino", name_fr="Rhino de la toundra", effects=['charge', 
@@ -319,7 +319,7 @@ def get_cardbook():
         Msg_BindEffect(self.owner,self.owner,Eff_BuffMinion(atq=2)))],
         desc="Whenever a character is healed, gain +2 Attack.") )
   
-  add( Card_Minion(1, 2, 1, "Mechanical Dragonling", name_fr="Petit Dragon mecanique") )
+  add( Card_Minion(1, 2, 1, "Mechanical Dragonling", name_fr="Petit Dragon mecanique", collectible=False) )
   
   add( Card_Minion(1, 2, 1, 'Murloc Raider',name_fr='Ecumeur murloc', cat="murloc") )
 

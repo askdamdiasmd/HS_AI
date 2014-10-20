@@ -62,7 +62,7 @@ from cards import Card, Card_Minion
 
 class Card_HeroAbility (Card):
     def __init__(self, cost, name, actions, targets="none", **kwargs):
-        Card.__init__(self, cost, name, **kwargs)
+        Card.__init__(self, cost, name, collectible=False, **kwargs)
         self.targets = targets
         self.actions = actions # lambda self: [messages...]
     def list_actions(self):
@@ -73,7 +73,7 @@ class Card_HeroAbility (Card):
 class Card_Hero (Card_Minion):
     def __init__(self, *args, **kwargs):
         ability = kwargs.pop('ability') 
-        Card_Minion.__init__(self,*args,**kwargs)
+        Card_Minion.__init__(self,*args,collectible=False,**kwargs)
         self.effects = ['charge'] # if weapon can attack immediately
         assert type(ability)==Card_HeroAbility
         self.ability = ability
