@@ -123,7 +123,7 @@ class HSEngine:
       actions = player.list_actions()
       # filter actions
       actions = self.filter_actions(actions)
-      actions = [a for a in actions if a.is_valid() and a.cost<=player.mana]
+      actions = [a for a in actions if a and a.is_valid() and a.cost<=player.mana]
       action = player.choose_actions(actions)  # action can be Msg_EndTurn
       self.send_message(action)
 

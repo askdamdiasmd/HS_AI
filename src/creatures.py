@@ -17,14 +17,15 @@ class Thing (object):
       self.card = card
       self.owner = owner or card.owner
       self.hp = self.max_hp = card.hp
+      self.armor = 0
       self.atq = self.max_atq = card.atq
 
       # some status
-      self.n_max_atq = 1 # number of times we can attack per turn
+      self.fresh = True # first turn
       self.n_atq = 99 # number of times we attacked already
+      self.n_max_atq = 1 # number of times we can attack per turn
       self.dead = False
       self.status_id = 0
-      self.frozen_count = 0 # number of turns before getting unfrozen
 
       # what is below is what can be silenced
       self.action_filters = []  # reacting to actions [(Act_class, handler),...]
@@ -40,10 +41,25 @@ class Thing (object):
             self.effects.append(e)
             if e in ('charge','windfury'):
               self.popup()  # redo popup to set n_atq/n_max_atq
-            elif e=='frozen':
-              self.frozen_count = 3
         else:
           e.bind_to(self)
+      if inform:
+        self.engine.send_message(Msg_Status(self,'effects'),immediate=True)
+
+  def remove_effect(self,effect,inform=True):
+      if effect not in self.effects:  return  # nothing to do
+      self.effects.remove(effect)
+      if type(effect)!=str: 
+        effect.undo()
+        # verify that nothing remains...
+        for _,eff in self.triggers:
+          assert effect is not eff, pdb.set_trace() 
+        for _,eff in self.action_filters:
+          assert effect is not eff, pdb.set_trace() 
+        for _,eff in self.modifiers:
+          assert effect is not eff, pdb.set_trace() 
+      else:
+        self.popup()  # reset n_max_atq
       if inform:
         self.engine.send_message(Msg_Status(self,'effects'),immediate=True)
 
@@ -66,12 +82,6 @@ class Thing (object):
       return msg
 
   def react_msg(self, msg):
-      if issubclass(type(msg), Msg_StartTurn) and self.has_effect('frozen'):
-        # hard-coded (native) trigger for frozen effect
-        self.frozen_count -= 1
-        if self.frozen_count<=0:
-          self.effects.remove('frozen')
-          self.engine.send_message(Msg_Status(self,'effects'),immediate=True)
       for trigger,event in list(self.triggers): #copy because modified online
         if type(trigger)==str: continue
         if issubclass(type(msg),trigger):
@@ -81,15 +91,21 @@ class Thing (object):
       return effect in self.effects
 
   def popup(self):  # executed when created
-    self.n_max_atq = 2 if self.has_effect('windfury') else 1
-    if self.has_effect('charge') and self.n_atq==99:
-      self.n_atq = 0  # we can attack !
+      self.n_max_atq = 2 if self.has_effect('windfury') else 1
+      if self.has_effect('charge'):
+        if self.n_atq==99: 
+          self.n_atq = 0 
+      elif self.fresh:
+        if self.n_atq==0:
+          self.n_atq = 99 # as if nothing happened
   
   def start_turn(self):
+      self.fresh = False # we were here before
       self.n_atq = 0  # didn't attack yet this turn
 
   def end_turn(self):
-      pass
+      if self.has_effect('frozen') and self.n_atq==0:
+        self.remove_effect('frozen')
 
   def hurt(self, damage):
       assert damage>0, pdb.set_trace()
@@ -116,7 +132,7 @@ class Thing (object):
         self.engine.send_message(Msg_Status(self,'atq max_atq'),immediate=True)
 
   def silence(self):
-      self.action_filter = []
+      self.action_filters = []
       self.modifiers = []
       self.triggers = []
       while self.effects:

@@ -1127,12 +1127,13 @@ class CursesHSEngine (HSEngine):
   def wait_for_display(self):
     while self.display:
       msg = self.display.pop(0)
-      line = "[%s] %s\n" %(type(msg).__name__,msg)
-      self.logfile.write(line)
-      self.logfile.flush()
-      self.log += line
-      assert msg.draw()!=False, pdb.set_trace()
-      #self.display.append(msg)  # needs to be displayed later
+      if msg.draw()==False:
+        self.display.insert(1,msg)  # needs to be displayed later
+      else:
+        line = "[%s] %s\n" %(type(msg).__name__,msg)
+        self.logfile.write(line)
+        self.logfile.flush()
+        self.log += line
 
 
 
@@ -1148,7 +1149,7 @@ if __name__=="__main__":
     cardbook = get_cardbook()
 
     deck1 = fake_deck(cardbook,dbg)
-    hero1 = Hero(cardbook["Malfurion Stormrage"])
+    hero1 = Hero(cardbook["Anduin Wrynn"])
     player1 = HumanPlayerAscii(hero1, 'jerome', deck1)
 
     deck2 = fake_deck(cardbook,dbg)

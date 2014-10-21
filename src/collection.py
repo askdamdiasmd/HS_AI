@@ -225,10 +225,9 @@ def get_cardbook():
         desc="If you control a Secret at the end of your turn, gain +2/+2.", cls="mage") )
   
   add( Card_Minion(4, 3, 6, "Water Elemental", name_fr="Elementaire d'eau", 
-        effects=[Eff_Trigger(Msg_StartAttack, lambda self,msg: self.owner is msg.caster,
-        lambda self,msg: Msg_BindEffect(self.owner,msg.target,Eff_BuffMinion(others='frozen'))),
-        Eff_Trigger(Msg_StartAttack, lambda self,msg: self.owner is msg.target,
-        lambda self,msg: Msg_BindEffect(self.owner,msg.caster,Eff_BuffMinion(others='frozen')))],
+        effects=[Eff_Trigger(Msg_Damage, 
+        lambda self,msg: self.owner is msg.caster and msg.target.armor<msg.damage,
+        lambda self,msg: Msg_BindEffect(self.owner,msg.target,Eff_BuffMinion(others='frozen')))],
         desc="Freeze any character damaged by this minion.", cls="mage") )
   
   add( Card_Minion(7, 5, 7, "Archmage Antonidas", name_fr="Archimage Antonidas", 
@@ -260,8 +259,8 @@ def get_cardbook():
         desc="Battlecry: Give a friendly minion +2 Attack this turn.",
         desc_fr="Cri de guerre: confere +2 ATQ a un serviteur pendant ce tour") )
   
-  #add( Card_Minion(1, 1, 1, "Angry Chicken", name_fr="Poulet furieux", 
-        #desc="Enrage: +5 Attack.", cat="beast", effects="enrage") )
+  add( Card_Minion(1, 1, 1, "Angry Chicken", name_fr="Poulet furieux", 
+        effects=[Eff_Enrage(5)], desc="Enrage: +5 Attack.", cat="beast") )
   
   add( Card_Minion(1, 1, 1, "Argent Squire", name_fr="Ecuyere d'argent", 
         desc="Divine Shield", effects="divine_shield") )
@@ -342,8 +341,12 @@ def get_cardbook():
   
   add( Card_Minion(1, 1, 1, "Skeleton", collectible=False) )
   
-  #add( Card_Minion(1, 2, 1, "Southsea Deckhand", name_fr="Matelot des mers du sud", 
-        #desc="Has Charge while you have a weapon equipped.", cat="pirate") )
+  is_dead = lambda x: x.dead if x else True
+  add( Card_Minion(1, 2, 1, "Southsea Deckhand", name_fr="Matelot des mers du sud", 
+        effects=[Eff_While((Msg_DeadWeapon,Msg_MinionPopup,Msg_WeaponPopup), 
+        lambda self,msg: not is_dead(self.owner.owner.weapon), 'charge', 
+        prerequisite=lambda self,msg: msg.caster in (self.owner, self.owner.owner.weapon))],
+        desc="Has Charge while you have a weapon equipped.", cat="pirate") )
   
   add( Card_Minion(1, 2, 2, "Squire", name_fr="Ecuyer", collectible=False) )
   
@@ -372,11 +375,12 @@ def get_cardbook():
         name_fr="Limon des marais acides", 
         desc="Battlecry: Destroy your opponent's weapon.") )
   
-  #add( Card_Minion(2, 2, 3, "Amani Berserker", name_fr="", 
-        #desc="Enrage: +3 Attack", effects="enrage") )
+  add( Card_Minion(2, 2, 3, "Amani Berserker", name_fr="Berseker Amani", 
+        effects=[Eff_Enrage(3)], desc="Enrage: +3 Attack") )
   
-  #add( Card_Minion(2, 4, 5, "Ancient Watcher", name_fr="", 
-        #desc="Can't Attack.") )
+  add( Card_Minion(2, 4, 5, "Ancient Watcher", name_fr="Guetteur ancien", 
+        effects=[Acf_Delete(Act_MinionAttack,lambda self,act: act.caster is self.owner)], 
+        desc="Can't Attack.") )
   
   #add( Card_Minion(2, 3, 2, "Bloodfen Raptor", cat="beast") )
   #add( Card_Minion(2, 1, 1, "Bloodmage Thalnos", name_fr="", 
@@ -456,8 +460,10 @@ def get_cardbook():
   
   #add( Card_Minion(2, 3, 2, "Wild Pyromancer", name_fr="", 
         #desc="After you cast a spell, deal 1 damage to ALL minions.") )
+  
   #add( Card_Minion_BC(2, 3, 2, "Youthful Brewmaster", name_fr="", 
         #desc="Battlecry: Return a friendly minion from the battlefield to your hand.") )
+  
   #add( Card_Minion(20, 8, 8, "Molten Giant", name_fr="", 
         #desc="Costs (1) less for each damage your hero has taken.") )
   
@@ -515,8 +521,10 @@ def get_cardbook():
         #desc="ALL other Murlocs have +2/+1.", cat="murloc") )
   #add( Card_Minion(3, 2, 2, "Questing Adventurer", name_fr="", 
         #desc="Whenever you play a card, gain +1/+1.") )
-  #add( Card_Minion(3, 3, 3, "Raging Worgen", name_fr="", 
-        #desc="Enrage: Windfury and +1 Attack", effects="enrage") )
+  
+  add( Card_Minion(3, 3, 3, "Raging Worgen", name_fr="Worgen dechaine", 
+        effects=[Eff_Enrage(1,windfury=True)], desc="Enrage: Windfury and +1 Attack") )
+  
   #add( Card_Minion(3, 2, 2, "Raid Leader", name_fr="", 
         #desc="Your other minions have +1 Attack.") )
   #add( Card_Minion_BC(3, 2, 3, "Razorfen Hunter", name_fr="", 
@@ -532,8 +540,10 @@ def get_cardbook():
         #desc="Taunt", cat="beast", effects="taunt") )
   #add( Card_Minion(3, 3, 3, "Southsea Captain", name_fr="", 
         #desc="Your other Pirates have +1/+1.", cat="pirate") )
-  #add( Card_Minion(3, 2, 3, "Tauren Warrior", name_fr="", 
-        #desc="Taunt. Enrage: +3 Attack", effects="taunt enrage") )
+
+  add( Card_Minion(3, 2, 3, "Tauren Warrior", name_fr="Guerrier tauren", 
+        desc="Taunt. Enrage: +3 Attack", effects=[Eff_Enrage(3)]) )
+
   #add( Card_Minion(3, 2, 3, "Thrallmar Farseer", name_fr="", 
         #desc="Windfury", effects="windfury") )
   #add( Card_Minion_BC(3, 3, 3, "Tinkmaster Overspark", name_fr="", 
@@ -791,8 +801,10 @@ def get_cardbook():
         #desc="Battlecry: Equip a 2/2 weapon.", cls="warrior") )
   #add( Card_Minion(4, 4, 3, "Kor'kron Elite", name_fr="", 
         #desc="Charge", cls="warrior", effects="charge") )
-  #add( Card_Minion(8, 4, 9, "Grommash Hellscream", name_fr="", 
-        #desc="Charge.  Enrage: +6 Attack", cls="warrior", effects="charge enrage") )
+  
+  add( Card_Minion(8, 4, 9, "Grommash Hellscream", name_fr="Grommash Hurlenfer", 
+        desc="Charge.  Enrage: +6 Attack", cls="warrior", effects=['charge',Eff_Enrage(6)]) )
+  
   #add( Card_Minion_BC(10, 12, 12, "Deathwing", name_fr="", 
         #desc="Battlecry: Destroy all other minions and discard your hand.", cat="dragon") )
   

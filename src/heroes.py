@@ -7,7 +7,6 @@ from messages import Msg_DeadHero, Msg_Status
 class Hero (Creature):
   def __init__(self, card, owner=None ):
       Creature.__init__(self, card, owner=owner )
-      self.armor = 0
       self.n_remaining_power = 0
       self.popup()
 

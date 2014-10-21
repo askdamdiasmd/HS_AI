@@ -76,6 +76,22 @@ class Acf_SpellCost (Effect):
         return act
 
 
+class Acf_Delete (Effect):
+    """ delete a specific action """
+    def __init__(self, trigger, condition):
+        Effect.__init__(self)
+        self.trigger = trigger
+        self.condition = condition
+    def __str__(self):
+        return "Delete action %s" % self.trigger.__name__
+    def bind_to(self, owner, caster=None):
+        self.owner = owner
+        owner.action_filters.append((self.trigger,self))
+    def filter(self, act):
+        if self.condition(self,act):
+          act = None
+        return act
+
 
 ### ---------- effects (applies on Messages) ----------------
   
@@ -323,6 +339,59 @@ class Eff_BuffFriends (Effect):
         for target in self.targets:
           if self.hp: target.change_hp(-self.hp)
           if self.atq: target.change_atq(-self.atq)
+
+
+class Eff_Enrage (Effect):
+    def __init__(self, atq=0, windfury=False):
+        Effect.__init__(self)
+        self.atq = atq
+        self.windfury = windfury
+        self.last_state = False
+    def bind_to(self, owner, caster=None):
+        self.owner = owner
+        owner.effects.append(self)
+        owner.triggers.append((Msg_Status,self))
+    def trigger(self, msg):
+        if msg.caster is not self.owner: return
+        enraged = self.owner.hp<self.owner.max_hp
+        if enraged==self.last_state:  return
+        if enraged:
+          if self.atq:  self.owner.change_atq(self.atq)
+          if self.windfury: self.owner.add_effects(['windfury'])
+        else:
+          self.undo()
+        self.last_state = enraged
+    def undo(self):
+        if self.last_state: # owner is enraged
+          if self.atq:  self.owner.change_atq(-self.atq)
+          if self.windfury: self.owner.remove_effect('windfury')
+  
+
+class Eff_While (Effect):
+    """ give a target an effect while a condition is met """
+    def __init__(self, triggers, condition, effect, 
+                 prerequisite=lambda self,msg: msg.caster is self.owner,
+                 target=lambda self: self.owner):
+        Effect.__init__(self)
+        self.triggers = triggers
+        self.condition = condition
+        self.effect = effect
+        self.target = target
+        self.prerequisite = prerequisite
+    def bind_to(self, owner, caster=None):
+        self.owner = owner
+        for trigger in self.triggers:
+          owner.triggers.append((trigger, self))
+    def trigger(self, msg):
+        if self.prerequisite(self,msg):
+          targ = self.target(self)
+          if self.condition(self,msg):
+            targ.add_effects((self.effect,))
+          else:
+            targ.remove_effect(self.effect)
+    def undo(self):
+        self.owner.remove_effect(self.effect)
+      
 
 
 class Eff_DrawCard (Effect):
