@@ -382,9 +382,12 @@ def get_cardbook():
         effects=[Acf_Delete(Act_MinionAttack,lambda self,act: act.caster is self.owner)], 
         desc="Can't Attack.") )
   
-  #add( Card_Minion(2, 3, 2, "Bloodfen Raptor", cat="beast") )
-  #add( Card_Minion(2, 1, 1, "Bloodmage Thalnos", name_fr="", 
-        #desc="Spell Damage +1. Deathrattle Draw a card.", effects="spell damage deathrattle") )
+  add( Card_Minion(2, 3, 2, "Bloodfen Raptor", name_fr="Raptor rougefange", cat="beast") )
+  
+  add( Card_Minion(2, 1, 1, "Bloodmage Thalnos", name_fr="Mage de sang Thalnos", 
+        effects=[Eff_DeathRattle(lambda self,pos: Msg_DrawCard(self.owner.owner)),
+        Eff_SpellDamage(1)], desc="Spell Damage +1. Deathrattle Draw a card.") )
+  
   #add( Card_Minion_BC(2, 2, 3, "Bloodsail Raider", name_fr="", 
         #desc="Battlecry: Gain Attack equal to the Attack of your weapon.", cat="pirate") )
   #add( Card_Minion(2, 2, 1, "Bluegill Warrior", name_fr="", 
@@ -422,8 +425,8 @@ def get_cardbook():
   #add( Card_Minion(2, 3, 2, "Knife Juggler", name_fr="", 
         #desc="After you summon a minion, deal 1 damage to a random enemy.") )
 
-  #add( Card_Minion(2, 2, 2, "Kobold Geomancer", name_fr="", 
-        #desc="Spell Damage +1", effects="spell damage") )
+  add( Card_Minion(2, 2, 2, "Kobold Geomancer", name_fr="Geomancien kobold", 
+        effects=[Eff_SpellDamage(1)], desc="Spell Damage +1") )
 
   add( Card_Minion(2, 2, 1, "Loot Hoarder", name_fr="Amasseur de butin",
         effects=[Eff_DeathRattle(lambda self,pos: Msg_DrawCard(self.owner.owner))],
@@ -484,8 +487,10 @@ def get_cardbook():
         #desc="Battlecry: Each player draws 2 cards.", cat="murloc") )
   #add( Card_Minion_BC(3, 2, 3, "Coldlight Seer", name_fr="", 
         #desc="Battlecry: Give ALL other Murlocs +2 Health.", cat="murloc") )
-  #add( Card_Minion(3, 1, 4, "Dalaran Mage", name_fr="", 
-        #desc="Spell Damage +1", effects="spell damage") )
+  
+  add( Card_Minion(3, 1, 4, "Dalaran Mage", name_fr="Mage de Dalaran", 
+        effects=[Eff_SpellDamage(1)], desc="Spell Damage +1") )
+  
   #add( Card_Minion(3, 1, 4, "Demolisher", name_fr="", 
         #desc="At the start of your turn, deal 2 damage to a random enemy.") )
   #add( Card_Minion_BC(3, 3, 3, "Earthen Ring Farseer", name_fr="", 
@@ -552,8 +557,9 @@ def get_cardbook():
         #desc="Charge", effects="charge") )
   #add( Card_Minion_BC(4, 5, 4, "Ancient Brewmaster", name_fr="", 
         #desc="Battlecry: Return a friendly minion from the battlefield to your hand.") )
-  #add( Card_Minion_BC(4, 2, 5, "Ancient Mage", name_fr="", 
-        #desc="Battlecry: Give adjacent minions Spell Damage +1.") )
+  
+  add( Card_Minion_BC(4, 2, 5, "Ancient Mage", Eff_SpellDamage(1), "neighbors",
+        name_fr="Mage ancien", desc="Battlecry: Give adjacent minions Spell Damage +1.") )
 
   add( Card_Minion(4, 4, 5, "Baine Bloodhoof") )
   
@@ -585,8 +591,10 @@ def get_cardbook():
   #add( Card_Minion(4, 1, 7, "Mogu'shan Warden", name_fr="", 
         #desc="Taunt", effects="taunt") )
   #add( Card_Minion(4, 2, 7, "Oasis Snapjaw", cat="beast") )
-  #add( Card_Minion(4, 4, 4, "Ogre Magi", name_fr="", 
-        #desc="Spell Damage +1", effects="spell damage") )
+  
+  add( Card_Minion(4, 4, 4, "Ogre Magi", name_fr="Ogre-magi", 
+        effects=[Eff_SpellDamage(1)], desc="Spell Damage +1") )
+  
   #add( Card_Minion(4, 2, 4, "Old Murk-Eye", name_fr="", 
         #desc="Charge. Has +1 Attack for each other Murloc on the battlefield.", cat="murloc", effects="charge") )
   #add( Card_Minion(4, 3, 5, "Sen'jin Shieldmasta", name_fr="", 
@@ -603,8 +611,12 @@ def get_cardbook():
         #desc="Whenever you cast a spell, summon a 1/1 Violet Apprentice.") )
   #add( Card_Minion(5, 4, 4, "Abomination", name_fr="", 
         #desc="Taunt. Deathrattle Deal 2 damage to ALL characters.", effects="taunt deathrattle") )
-  #add( Card_Minion_BC(5, 4, 4, "Azure Drake", name_fr="", 
-        #desc="Spell Damage +1. Battlecry: Draw a card.", cat="dragon", effects="spell damage") )
+  
+  add( Card_Minion_BC(5, 4, 4, "Azure Drake",
+        Eff_Message(lambda self: Msg_DrawCard(self.owner.owner)), "prespecified", 
+        name_fr="Drake azur", effects=[Eff_SpellDamage(1)], 
+        desc="Spell Damage +1. Battlecry: Draw a card.", cat="dragon") )
+  
   #add( Card_Minion(5, 5, 4, "Booty Bay Bodyguard", name_fr="", 
         #desc="Taunt", effects="taunt") )
   #add( Card_Minion_BC(5, 5, 4, "Captain Greenskin", name_fr="", 
@@ -638,8 +650,10 @@ def get_cardbook():
         #desc="Stealth", cat="beast", effects="stealth") )
   #add( Card_Minion(5, 7, 6, "Venture Co. Mercenary", name_fr="", 
         #desc="Your minions cost (3) more.") )
-  #add( Card_Minion(6, 4, 7, "Archmage", name_fr="", 
-        #desc="Spell Damage +1", effects="spell damage") )
+  
+  add( Card_Minion(6, 4, 7, "Archmage", name_fr="Archimage",
+        effects=[Eff_SpellDamage(1)], desc="Spell Damage +1") )
+  
   #add( Card_Minion(6, 4, 2, "Argent Commander", name_fr="", 
         #desc="Charge, Divine Shield", effects="charge divine_shield") )
   #add( Card_Minion(6, 6, 7, "Boulderfist Ogre") )
@@ -688,8 +702,10 @@ def get_cardbook():
         #desc="Can't Attack.  At the end of your turn, deal 8 damage to a random enemy.") )
   #add( Card_Minion_BC(9, 8, 8, "Alexstrasza", name_fr="", 
         #desc="Battlecry: Set a hero's remaining Health to 15.", cat="dragon") )
-  #add( Card_Minion(9, 4, 12, "Malygos", name_fr="", 
-        #desc="Spell Damage +5", cat="dragon", effects="spell damage") )
+
+  add( Card_Minion(9, 4, 12, "Malygos", name_fr="Malygos", effects=[Eff_SpellDamage(1)],
+        desc="Spell Damage +5", cat="dragon") )
+  
   #add( Card_Minion(9, 8, 8, "Nozdormu", name_fr="", 
         #desc="Players only have 15 seconds to take their turns.", cat="dragon") )
   #add( Card_Minion_BC(9, 8, 8, "Onyxia", name_fr="", 
@@ -742,8 +758,10 @@ def get_cardbook():
   #add( Card_Minion(1, 1, 1, "Searing Totem", cls="shaman", cat="totem") )
   #add( Card_Minion(1, 0, 2, "Stoneclaw Totem", name_fr="", 
         #desc="Taunt", cls="shaman", cat="totem", effects="taunt") )
-  #add( Card_Minion(1, 0, 2, "Wrath of Air Totem", name_fr="", 
-        #desc="Spell Damage +1", cls="shaman", cat="totem", effects="spell damage") )
+  
+  add( Card_Minion(1, 0, 2, "Wrath of Air Totem", name_fr="Totem de courroux de l'air", 
+        effects=[Eff_SpellDamage(1)], desc="Spell Damage +1", cls="shaman", cat="totem") )
+  
   #add( Card_Minion(2, 0, 3, "Flametongue Totem", name_fr="", 
         #desc="Adjacent minions have +2 Attack.", cls="shaman", cat="totem") )
   #add( Card_Minion(2, 2, 3, "Spirit Wolf", name_fr="", 

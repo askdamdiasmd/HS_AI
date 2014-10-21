@@ -103,6 +103,22 @@ class Eff_Silence (Effect):
         minion.silence()
 
 
+class Eff_SpellDamage (Effect):
+    """ increases spell damage """
+    def __init__(self, damage):
+        Effect.__init__(self)
+        self.damage = damage
+    def __str__(self):
+        return "Spell damage %+d" % self.damage
+    def bind_to(self, owner, caster=None):
+        self.owner = owner
+        owner.triggers.append((Msg_SpellDamage,self))
+    def trigger(self, msg):
+        if msg.caster is self.owner.owner:
+          msg.damage += self.damage
+        return msg
+
+
 class Eff_Message (Effect):
     """ send a message to someone """
     def __init__(self, action, immediate=True):
