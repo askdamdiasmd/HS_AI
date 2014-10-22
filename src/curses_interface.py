@@ -1179,6 +1179,7 @@ if __name__=="__main__":
     show_panels()
     uc.getch()    
     uc.endwin()
+    uc.endwin()
 
 
 
