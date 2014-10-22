@@ -750,14 +750,19 @@ def get_cardbook():
         #desc="Combo: Return a minion to its owner's hand.", cls="rogue", effects="combo") )
   #add( Card_Minion(1, 3, 1, "Dust Devil", name_fr="", 
         #desc="Windfury. Overload: (2)", cls="shaman", effects="windfury overload") )
-  #add( Card_Minion(1, 0, 2, "Healing Totem", name_fr="", 
-        #desc="At the end of your turn, restore 1 Health to all friendly minions.", cls="shaman", cat="totem") )
-  #add( Card_Minion(1, 1, 1, "Searing Totem", cls="shaman", cat="totem") )
-  #add( Card_Minion(1, 0, 2, "Stoneclaw Totem", name_fr="", 
-        #desc="Taunt", cls="shaman", cat="totem", effects="taunt") )
+  
+#  add( Card_Minion(1, 0, 2, "Healing Totem", name_fr="Totem de soins", 
+#        desc="At the end of your turn, restore 1 Health to all friendly minions.", 
+#        cls="shaman", cat="totem", collectible=False) )
+  
+  add( Card_Minion(1, 1, 1, "Searing Totem", name_fr="Totem incendiaire", 
+        cls="shaman", cat="totem", collectible=False) )
+  
+  add( Card_Minion(1, 0, 2, "Stoneclaw Totem", name_fr="Totem de griffes de pierre", 
+        desc="Taunt", cls="shaman", cat="totem", effects="taunt", collectible=False) )
   
   add( Card_Minion(1, 0, 2, "Wrath of Air Totem", name_fr="Totem de courroux de l'air", 
-        effects=[Eff_SpellDamage(1)], desc="Spell Damage +1", cls="shaman", cat="totem") )
+        effects=[Eff_SpellDamage(1)], desc="Spell Damage +1", cls="shaman", cat="totem", collectible=False) )
   
   #add( Card_Minion(2, 0, 3, "Flametongue Totem", name_fr="", 
         #desc="Adjacent minions have +2 Attack.", cls="shaman", cat="totem") )
