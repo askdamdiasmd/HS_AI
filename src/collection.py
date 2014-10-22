@@ -202,7 +202,7 @@ def get_cardbook():
         cat="beast", effects="charge") )
   
   add( Card_Minion(0, 0, 2, "Mirror Image", name_fr="Image mirroir", 
-        desc="Taunt", cls="mage", effects="taunt") )
+        desc="Taunt", cls="mage", effects="taunt", collectible=False) )
   
   add( Card_Minion(0, 1, 3, "Spellbender", name_fr="Courbe-sort", cls="mage", collectible=False) )
   
@@ -949,7 +949,7 @@ def get_cardbook():
         #desc="Deal 3 damage randomly split among enemy characters.", cls="mage") )
   #add( Card_Spell(1, "Ice Lance", name_fr="", 
         #desc="Freeze a character. If it was already Frozen, deal 4 damage instead.", cls="mage") )
-  #add( Card_Spell(1, "Mirror Image", name_fr="", 
+  #add( Card_Spell(1, "Mirror Image", name_fr="Image mirroir", 
         #desc="Summon two 0/2 minions with Taunt.", cls="mage") )
   #add( Card_Spell(10, "Pyroblast", name_fr="", 
         #desc="Deal 10 damage.", cls="mage") )
