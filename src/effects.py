@@ -159,7 +159,7 @@ class Eff_BuffWeapon (Effect):
           weapon = self.engine.board.get_enemy_player(owner.owner).weapon
         else:
           weapon = owner.owner.weapon
-        if self.weapon:
+        if weapon:
           if self.destroy:
             self.engine.send_message(Msg_DeadWeapon(weapon), immediate=self.immediate)
           else:

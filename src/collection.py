@@ -263,7 +263,7 @@ def get_cardbook():
         desc="Divine Shield", effects="divine_shield") )
   
   add( Card_Minion_BC(1, 1, 2, "Bloodsail Corsair", 
-        Eff_BuffWeapon(hp=-1,enemy=True), "prespecified",
+        Eff_BuffWeapon(damage=1,enemy=True), "prespecified",
         name_fr="Forban de la voile sanglante", 
         desc="Battlecry: Remove 1 Durability from your opponent's weapon.", cat="pirate") )
   
