@@ -10,7 +10,7 @@ eff_trad_fr = dict(taunt='Provocation',
                    divine_shield='Bouclier Divin',
                    stealth='Camouflage',
                    windfury='Furie des vents',
-                   effect='')
+                   effect='', freeze='')
 def tolist(l):
   if type(l)==str:  
     return l.split()

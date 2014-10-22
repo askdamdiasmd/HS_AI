@@ -274,7 +274,7 @@ class Msg_Damage (TargetedMessage):
         TargetedMessage.__init__(self, caster, target)
         self.damage = damage
     def execute(self):
-        self.target.hurt(self.damage)
+        self.target.hurt(self.damage,self.caster)
     def __str__(self):
         return "%s takes %d damage from %s." % (self.target, self.damage, self.caster)
 

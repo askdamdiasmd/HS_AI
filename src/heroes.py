@@ -19,12 +19,14 @@ class Hero (Creature):
       return "[%s (%s) %dHP]" % (self.owner.name,self.card.name,self.hp)
 
   def start_turn(self):
-    Creature.start_turn(self)
-    self.n_remaining_power = 1
+      Creature.start_turn(self)
+      self.n_remaining_power = 1
+      if self.has_effect('insensible'):
+        self.remove_effect('insensible')
 
   def use_hero_power(self):
-    self.n_remaining_power -= 1
-    assert self.n_remaining_power>=0
+      self.n_remaining_power -= 1
+      assert self.n_remaining_power>=0
 
   def list_actions(self):
       res = []
@@ -38,16 +40,9 @@ class Hero (Creature):
   def ask_for_death(self):
       self.engine.send_message( Msg_DeadHero(self), immediate=True)
 
-  def hurt(self, damage):
-      if self.has_effect('insensible'):
-        return  # cannot die this turn
-      assert damage>0, pdb.set_trace()
-      absorbed = min(damage, self.armor)
-      self.armor -= absorbed
-      damage -= absorbed
-      self.hp -= damage
-      self.engine.send_message(Msg_Status(self,'hp armor'),immediate=True)
-      self.check_dead()
+  def hurt(self, damage, caster=None):
+      if not self.has_effect('insensible'):
+        Creature.hurt(self, damage, caster)
 
   def add_armor(self, n):
       self.armor += n

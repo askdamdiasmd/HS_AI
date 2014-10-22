@@ -22,7 +22,7 @@ class Thing (object):
 
       # some status
       self.fresh = True # first turn
-      self.n_atq = 99 # number of times we attacked already
+      self.n_atq = 0 # number of times we attacked already
       self.n_max_atq = 1 # number of times we can attack per turn
       self.dead = False
       self.status_id = 0
@@ -92,12 +92,6 @@ class Thing (object):
 
   def popup(self):  # executed when created
       self.n_max_atq = 2 if self.has_effect('windfury') else 1
-      if self.has_effect('charge'):
-        if self.n_atq==99: 
-          self.n_atq = 0 
-      elif self.fresh:
-        if self.n_atq==0:
-          self.n_atq = 99 # as if nothing happened
   
   def start_turn(self):
       self.fresh = False # we were here before
@@ -107,10 +101,17 @@ class Thing (object):
       if self.has_effect('frozen') and self.n_atq==0:
         self.remove_effect('frozen')
 
-  def hurt(self, damage):
+  def hurt(self, damage, caster=None):
       assert damage>0, pdb.set_trace()
+      absorbed = min(damage, self.armor)
+      if absorbed:
+        self.armor -= absorbed
+        self.engine.send_message(Msg_Status(self,'hp armor'),immediate=True)
+        damage -= absorbed
       self.hp -= damage
       self.engine.send_message(Msg_Status(self,'hp'),immediate=True)
+      if caster and hasattr(caster,'effects') and caster.has_effect('freeze'):
+        self.add_effects(('frozen',))
       self.check_dead()
 
   def heal(self, hp):
@@ -181,7 +182,9 @@ class Weapon (Thing):
       self.hero = card.owner.hero
 
   def list_actions(self):
-      if self.hero.n_atq>=self.hero.n_max_atq or self.hero.has_effect('frozen'):
+      if( self.hero.n_atq>=self.hero.n_max_atq or 
+         (self.hero.fresh and not self.hero.has_effect('charge')) or 
+         self.hero.has_effect('frozen')):
         return []
       else:
         from actions import Act_WeaponAttack
@@ -206,14 +209,6 @@ class Weapon (Thing):
 class Creature (Thing):
   def __init__(self, card, owner=None ):
       Thing.__init__(self, card, owner=owner )
-
-  def hurt(self, damage):
-      assert damage>0, pdb.set_trace()
-      if self.has_effect('divine_shield'):
-        self.effects.remove('divine_shield')
-        self.engine.send_message(Msg_Status(self,'effects'),immediate=True)
-      else:
-        Thing.hurt(self,damage)
 
   def attacks(self, target):
       self.n_atq += 1
@@ -244,11 +239,21 @@ class Minion (Creature):
       return 'stealth' in self.effects
 
   def list_actions(self):
-      if self.n_atq>=self.n_max_atq or self.atq==0 or self.has_effect('frozen'):
+      if( self.n_atq>=self.n_max_atq or 
+         (self.fresh and not self.has_effect('charge')) or 
+         self.atq==0 or self.has_effect('frozen')):
         return []
       else:
         from actions import Act_MinionAttack
         return [Act_MinionAttack(self, self.engine.board.get_attackable_characters(self.owner))]
+
+  def hurt(self, damage, caster=None):
+      assert damage>0, pdb.set_trace()
+      if self.has_effect('divine_shield'):
+        self.effects.remove('divine_shield')
+        self.engine.send_message(Msg_Status(self,'effects'),immediate=True)
+      else:
+        Creature.hurt(self,damage,caster)
 
   def ask_for_death(self):
       self.engine.send_message( Msg_DeadMinion(self), immediate=True)

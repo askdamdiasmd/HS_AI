@@ -225,10 +225,7 @@ def get_cardbook():
         desc="If you control a Secret at the end of your turn, gain +2/+2.", cls="mage") )
   
   add( Card_Minion(4, 3, 6, "Water Elemental", name_fr="Elementaire d'eau", 
-        effects=[Eff_Trigger(Msg_Damage, 
-        lambda self,msg: self.owner is msg.caster and msg.target.armor<msg.damage,
-        lambda self,msg: Msg_BindEffect(self.owner,msg.target,Eff_BuffMinion(others='frozen')))],
-        desc="Freeze any character damaged by this minion.", cls="mage") )
+        effects=['freeze'], desc="Freeze any character damaged by this minion.", cls="mage") )
   
   add( Card_Minion(7, 5, 7, "Archmage Antonidas", name_fr="Archimage Antonidas", 
         effects=['effect',Eff_Trigger(Msg_StartSpell,
