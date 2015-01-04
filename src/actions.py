@@ -111,7 +111,7 @@ class Act_PlayMinionCard_BC (Act_PlayMinionCard):
         minion = Minion(self.card)
         actions = [Msg_AddMinion(self.caster, minion, pos)]
         if self.hidden_target=='neighbors':
-          for target in player.minions[max(0,pos.index-1):pos.index+1]:
+          for target in self.card.owner.minions[max(0,pos.index-1):pos.index+1]:
             actions.append(Msg_BindEffect(minion, target, deepcopy(self.battlecry)))
         elif len(self.choices)>1 or self.hidden_target:
           target = self.hidden_target or self.choices[1]

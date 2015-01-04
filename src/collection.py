@@ -466,7 +466,7 @@ def build_cardbook():
   
   #add( Card_Minion(2, 2, 2, "Shado-Pan Monk") )
   
-  add( Card_Minion_BC(2, 2, 3, "Sunfury Protector", Eff_BuffMinion(0,0,others='taunt'), 'neighbors',
+  add( Card_Minion_BC(2, 2, 3, "Sunfury Protector", Eff_BuffMinion(0,0,others='taunt'), hidden_target='neighbors',
        name_fr="Protectrice Solfury", desc="Battlecry: Give adjacent minions Taunt.",
        desc_fr="Cri de guerre: confere Provocation aux serviteurs adjacents") )
   
@@ -571,7 +571,7 @@ def build_cardbook():
   #add( Card_Minion_BC(4, 5, 4, "Ancient Brewmaster", name_fr="", 
         #desc="Battlecry: Return a friendly minion from the battlefield to your hand.") )
   
-  add( Card_Minion_BC(4, 2, 5, "Ancient Mage", Eff_SpellDamage(1), "neighbors",
+  add( Card_Minion_BC(4, 2, 5, "Ancient Mage", Eff_SpellDamage(1), hidden_target="neighbors",
         name_fr="Mage ancien", desc="Battlecry: Give adjacent minions Spell Damage +1.") )
 
   add( Card_Minion(4, 4, 5, "Baine Bloodhoof") )
@@ -587,7 +587,7 @@ def build_cardbook():
        name_fr="Nain sombrefer", desc="Battlecry: Give a minion +2 Attack this turn.",
        desc_fr="Cri de guerre: confere +2 ATQ a un serviteur pendant ce tour") )
   
-  add( Card_Minion_BC(4, 2, 3, "Defender of Argus", Eff_BuffMinion(1,1,others='taunt'), 'neighbors',
+  add( Card_Minion_BC(4, 2, 3, "Defender of Argus", Eff_BuffMinion(1,1,others='taunt'), hidden_target='neighbors',
        name_fr="Defenseur d'Argus", desc="Battlecry: Give adjacent minions +1/+1 and Taunt.",
        desc_fr="Cri de guerre: donne aux serviteurs adjacents +1/+1 et Provocation") )
   
@@ -809,7 +809,7 @@ def build_cardbook():
   #add( Card_Minion_BC(3, 3, 5, "Felguard", name_fr="", 
         #desc="Taunt. Battlecry: Destroy one of your Mana Crystals.", cls="warlock", cat="demon", effects="taunt") )
 
-  add( Card_Minion_BC(3, 3, 3, "Void Terror", Eff_Absorb(), 'neighbors', 
+  add( Card_Minion_BC(3, 3, 3, "Void Terror", Eff_Absorb(), hidden_target='neighbors', 
        desc="Battlecry: Destroy adjacent minions and gain their Attack and Health.", 
        name_fr="Terreur du vide", cls="warlock", cat="demon",
        desc_fr="Cri de guerre: Detruit les serviteurs adjacents et gagne leur ATQ et Vie."))
