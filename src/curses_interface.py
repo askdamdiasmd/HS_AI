@@ -152,22 +152,22 @@ def rounded_box(win):
     addwch(2321,win=win,x=tx-1,y=0)
 
 def strong_box(win,attr=0):
-    uc.wborder(win,*((uc.ACS_BLOCK,)*8))    
-#    if code=='UTF-8':
-#      h,w = uc.getmaxyx(win)
-#      w -= 1
-#      h -= 1
-#      addwch(9556,attr,win=win,x=0,y=0)
-#      addwch(9552,attr,win=win,nb=w-1)
-#      addwch(9559,attr,win=win)
-#      for i in range(1,h):
-#        addwch(9553,attr,win=win,x=0,y=i)
-#        addwch(9553,attr,win=win,x=w,y=i)
-#      addwch(9562,attr,win=win,x=0,y=h)
-#      addwch(9552,attr,win=win,nb=w-1)
-#      addwch(9565,attr,win=win)
-#    else:
-#      uc.wborder(win,9553,9553,9552,9552,9556,9559,9562,9565)
+#    uc.wborder(win,*((uc.ACS_BLOCK,)*8))    
+    if code=='UTF-8':
+      h,w = uc.getmaxyx(win)
+      w -= 1
+      h -= 1
+      addwch(9556,attr,win=win,x=0,y=0)
+      addwch(9552,attr,win=win,nb=w-1)
+      addwch(9559,attr,win=win)
+      for i in range(1,h):
+        addwch(9553,attr,win=win,x=0,y=i)
+        addwch(9553,attr,win=win,x=w,y=i)
+      addwch(9562,attr,win=win,x=0,y=h)
+      addwch(9552,attr,win=win,nb=w-1)
+      addwch(9565,attr,win=win)
+    else:
+      uc.wborder(win,9553,9553,9552,9552,9556,9559,9562,9565)
 
 def weak_box(win,attr=0):
     uc.wborder(win,ord(':'),ord(':'),ord('-'),ord('-'))  
@@ -459,13 +459,20 @@ class HeroPowerButton (Button):
       self.cost = cost
       self.used = False
 
-  def draw(self,**kwargs):
+  def draw(self,blink=0,**kwargs):
       coltext = uc.yellow_on_black
+      if blink:
+          for i in range(int(10*blink)):
+            kwargs['bkgd'] = [uc.black_on_yellow,uc.yellow_on_black][i%2]
+            Button.draw(self,ytext=1,coltext=coltext,**kwargs)
+            show_panels()
+            time.sleep(0.1)            
       if self.used: kwargs['bkgd'] = uc.black_on_yellow
       Button.draw(self,ytext=1,coltext=coltext,**kwargs)
       ty, tx = uc.getmaxyx(self.win)
       uc.mvwaddstr(self.win,0,tx/2-1,"(%d)"%self.cost,uc.cyan_on_black)
       print_longtext(self.win,2,1,ty-1,tx-1,self.subtext,coltext)
+      
 
 
 def temp_panel(viz,text,color,duration=2):
@@ -553,6 +560,7 @@ def draw_Card(self, pos=None, highlight=0, cost=None, small=True, bkgd=0, **kwar
         uc.hide_panel(self.panel)
       if not hasattr(self,"small_win"):
         ty, tx = small, card_size[1]
+        assert pos, pdb.set_trace()
         self.small_win = uc.newwin(ty,tx,pos[0],pos[1])
         self.small_panel = uc.new_panel(self.small_win)
         set_panel_userptr(self.small_panel, self)
@@ -790,7 +798,7 @@ def draw_Msg_StartHeroPower(self):
     player = self.caster
     button = self.engine.board.viz.hero_power_buttons[player]
     button.used = True
-    button.draw()
+    button.draw(blink=1)
     
 
 
@@ -1095,7 +1103,7 @@ class HumanPlayerAscii (HumanPlayer):
         
         elif ch == ord('\n'):
           if active==None:
-            return end_turn_action.select([])
+            return end_turn_action.select(())
         
         elif ch == 27: # escape
           erase_elems(showlist)
@@ -1136,6 +1144,11 @@ class CursesHSEngine (HSEngine):
         self.log += line
 
 
+def dbg_add_minion(player, card):
+    from copy import deepcopy
+    card = deepcopy(card)
+    card.owner = player
+    engine.send_message(Msg_AddMinion(player, Minion(card), pos=engine.board.get_free_slots(player)[0] ))
 
 
 if __name__=="__main__":
@@ -1143,26 +1156,38 @@ if __name__=="__main__":
     mana = 10 if "mana" in args else 0
     anim = 'anim' in args
     dbg = 'debug' in args
+    setup = 'setup' in args
     
-    from collection import get_cardbook
+    from collection import build_cardbook
     from decks import fake_deck
-    cardbook = get_cardbook()
+    cardbook = build_cardbook()
 
-    deck1 = fake_deck(cardbook,dbg)
+    deck1 = fake_deck(cardbook,dbg,"fake weapon 2")
     hero1 = Hero(cardbook["Anduin Wrynn"])
     player1 = HumanPlayerAscii(hero1, 'jerome', deck1)
 
-    deck2 = fake_deck(cardbook,dbg)
+    deck2 = fake_deck(cardbook,dbg,"fake weapon 2")
     hero2 = Hero(cardbook["Jaina Proudmoore"])
-    player2 = RandomPlayer(hero2, 'IA', deck2)
-
+    if True:
+      from ai import SimpleAI
+      player2 = SimpleAI(hero2, 'simpleAI', deck2)
+    elif True:
+      from ai import VerySimpleAI
+      player2 = VerySimpleAI(hero2, 'simpleAI', deck2)
+    else:
+      player2 = RandomPlayer(hero2, 'IA', deck2)
+    
     stdscr = init_screen()
     engine = CursesHSEngine( player1, player2 )
     engine.board.viz = VizBoard(engine.board, switch=False, animated=anim)
 
     if mana:
-      engine.players[0].add_mana_crystal(mana)
-      engine.players[1].add_mana_crystal(mana)  
+      player1.add_mana_crystal(mana)
+      player2.add_mana_crystal(mana)  
+
+    if setup:
+      dbg_add_minion(player1, cardbook["chillwind yeti"])
+      dbg_add_minion(player2, cardbook["spectral spider"])
     
     # start playing
     #show_ACS()

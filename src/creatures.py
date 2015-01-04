@@ -26,6 +26,7 @@ class Thing (object):
       self.n_max_atq = 1 # number of times we can attack per turn
       self.dead = False
       self.status_id = 0
+      self.saved = dict()
 
       # what is below is what can be silenced
       self.action_filters = []  # reacting to actions [(Act_class, handler),...]
@@ -33,6 +34,33 @@ class Thing (object):
       self.triggers = [] # reacting to messages, list: [(Msg_Class, event),...]
       self.effects = []  # list of effects without triggers: ['taunt','stealth',...]
       self.add_effects(deepcopy(card.effects), inform=False)
+
+  def save_state(self, num=0):
+      self.saved[num] = dict(hp=self.hp, max_hp=self.max_hp, armor=self.armor, atq=self.atq, max_atq=self.max_atq, 
+                             fresh=self.fresh, n_atq=self.n_atq, n_max_atq=self.n_max_atq, dead=self.dead, status_id=self.status_id, 
+                             action_filters=list(self.action_filters), modifiers=list(self.modifiers),
+                             triggers=list(self.triggers), effects=list(self.effects))
+  def restore_state(self, num=0):
+      self.__dict__.update(self.saved[num])
+      self.action_filters = list(self.action_filters)
+      self.modifiers = list(self.modifiers)
+      self.triggers = list(self.triggers)
+      self.effects = list(self.effects)
+  def end_simulation(self):
+      self.saved = dict()
+
+  def list_targets(self, targets ): # helper function
+      not_self = False
+      if targets.startswith("other "):
+        not_self = True
+        targets = targets[6:]
+      if targets=="self":
+        res = [owner]
+      else:
+        res = self.engine.board.list_targets(self.owner, targets)
+      if not_self and self in res:
+        res.remove(self)
+      return res
 
   def add_effects(self, effects, inform=True):
       for e in effects:  # we have to initalize effects
@@ -158,6 +186,10 @@ class Thing (object):
       self.silence()
       self.engine.board.remove_thing(self)
 
+  def score_situation(self):
+      assert False, "error: pure virtual function"
+
+
 
 ### ------------ Secret ----------
 
@@ -165,13 +197,21 @@ class Secret (Thing):
   def __init__(self, card, hero ):
       Thing.__init__(self, card )
       self.hero = hero
-      self.active = False
+#      self.active = False
+
+#  def save_state(self, num=0):
+#      Thing.save_state(self, num)
+#      self.saved[num]['active'] = self.active
 
   def list_actions(self):
       return None
 
   def ask_for_death(self):
       self.engine.send_message( Msg_DeadSecret(self), immediate=True)
+
+  def score_situation(self):
+      if self.dead: return 0
+      assert 0
 
 
 ### ------------ Weapon ----------
@@ -192,7 +232,7 @@ class Weapon (Thing):
 
   def attacks(self, target):
       self.hero.n_atq += 1
-      assert self.hero.n_atq<=self.hero.n_max_atq
+      assert self.hero.n_atq<=self.hero.n_max_atq, pdb.set_trace()
       msgs = [Msg_Damage(self, target, self.atq)]
       if target.atq: msgs.append(Msg_Damage(target, self.hero, target.atq))
       self.hurt(1)
@@ -202,6 +242,14 @@ class Weapon (Thing):
 
   def ask_for_death(self):
       self.engine.send_message( Msg_DeadWeapon(self), immediate=True)
+
+  def score_situation(self):
+      if self.dead: return 0
+      atq = 0 if self.hero.has_effect('frozen') else self.atq
+      atq *= 1 + self.has_effect('windFury')
+      return (self.hp*0.6 + atq*0.57 )
+
+
 
 
 ### ------------ Creature (hero or minion) ----------
@@ -258,10 +306,44 @@ class Minion (Creature):
   def ask_for_death(self):
       self.engine.send_message( Msg_DeadMinion(self), immediate=True)
 
+  def score_situation(self):
+      '''
+      Effect	cost per point
+      Destroy minion	5.33
+      Draw card	1.84
+      Board damage	1.84
+      Divine Shield	1.40
+      WindFury	1.19
+      Freeze	1.02
+      Silence	0.83
+      Damage	0.82
+      Stealth	0.61
+      Durability	0.60
+      Attack	0.57
+      Taunt	0.51
+      SpellPower	0.46
+      Health	0.41
+      Heal	0.34
+      Self hero-heal	0.34
+      Charge	0.33
+      
+      intrisic ?? -0.17
 
-
-
-
+      Opponent draw card	-1.98
+      Discard cards	-1.25
+      Overload	-0.83
+      Self hero damage	-0.27
+      '''
+      if self.dead: return 0
+      atq = 0 if self.has_effect('frozen') else self.atq
+      atq *= 1 + self.has_effect('windFury') 
+      return (self.hp*0.41 + atq*0.57 + 
+              self.has_effect('divine_shield')*1.4 +
+              self.has_effect('windFury')*1.19 +
+              self.has_effect('stealth')*0.6 +
+              self.has_effect('taunt')*0.51 +
+              self.has_effect('spell_power')*0.46 )
+      
 
 
 

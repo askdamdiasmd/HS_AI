@@ -33,6 +33,7 @@ class Card (object):
       self.img = img
       self.collectible = collectible # if False, cannot be in a deck
       self.effects = tolist(effects) # list of effects: {'taunt','stealth', or buffs that can be silenced}
+      self.score = 0 # estimated real mana cost, dependent on a specific deck it's in
       if desc=='':  
         #assert all([type(e)==str for e in self.effects]), "error: description is missing"
         self.desc = '. '.join(['%s%s'%(e[0].upper(),e[1:]) for e in self.effects if type(e)==str])
@@ -47,25 +48,8 @@ class Card (object):
     def list_actions(self):
       assert 0, "must be overloaded"
 
-    def list_targets(self, targets ): # helper function
-      if targets=='none':
-        return []
-      elif targets=="prespecified":
-        return "prespecified"
-      elif targets=="characters":
-        return self.engine.board.get_characters(self.owner)
-      elif targets=='friendly minions':
-        return self.engine.board.get_friendly_minions(self.owner)
-      elif targets=='friendly beasts':
-        return [b for b in self.engine.board.get_friendly_minions(self.owner) if b.card.cat=="beast"]
-      elif targets=='minions':
-        return self.engine.board.get_minions(self.owner)
-      elif targets=='neighbors':
-        return 'neighbors'
-      elif targets=='enemy weapon':
-        return self.engine.board.get_enemy_player(self.owner).weapon
-      else:
-        assert False, "error: unknown target '%s'" % targets
+    def list_targets(self, targets):
+        return self.engine.board.list_targets(self.owner,targets)
 
 
 ### --------------- Minion cards ----------------------
@@ -116,15 +100,14 @@ class Card_Weapon (Card):
 
 
 class Card_Spell (Card):
-    def __init__(self, cost, name, actions, targets='none', **kwargs ):
+    def __init__(self, cost, name, actions, targets=None, **kwargs ):
         Card.__init__(self, cost, name, **kwargs )
         self.actions = actions # lambda self: [Msg_* list]
         self.targets = targets # see list_targets()
     def __str__(self):
         return "%s (%d): %s" % (self.name_fr, self.cost, self.desc)
     def list_actions(self):
-        targets = self.list_targets(self.targets)
-        return Act_PlaySpellCard(self,targets,self.actions)
+        return Act_PlaySpellCard(self, self.list_targets(self.targets), self.actions)
 
 
 class Card_Coin (Card_Spell):
@@ -147,15 +130,19 @@ class Card_Wrath (Card_Spell):
         return [first,second]
 '''
 
-class Card_FakeDamageSpell (Card_Spell):
-    def __init__(self, damage, targets="characters"):
-        Card_Spell.__init__(self, damage-1, "Fake Damage Spell %d"%damage, None, targets,
-                            name_fr="Faux Sort de dommage %d"%damage,
-                            desc="Deal %d points of damage"%damage)
+class Card_DamageSpell (Card_Spell):
+    def __init__(self, cost, damage, name, targets="characters", name_fr="", desc="", cls=None):
+        Card_Spell.__init__(self, cost, name, None, targets, name_fr=name_fr, desc=desc, cls=cls)
         self.damage = damage
     def list_actions(self):
-        targets = self.list_targets(self.targets)
-        return Act_SingleSpellDamageCard(self,targets,self.damage)
+        return Act_SingleSpellDamageCard(self, self.list_targets(self.targets), self.damage)
+
+
+class Card_FakeDamageSpell (Card_DamageSpell):
+    def __init__(self, damage, targets="characters"):
+        Card_DamageSpell.__init__(self, damage-1, damage, "Fake Damage Spell %d"%damage, targets,
+                            name_fr="Faux Sort de dommage %d"%damage,
+                            desc="Deal %d points of damage"%damage)
 
 
 

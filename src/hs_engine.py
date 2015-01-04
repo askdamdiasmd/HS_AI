@@ -1,4 +1,5 @@
 import pdb
+from copy import deepcopy
 from creatures import Thing
 from messages import Message, Msg_StartTurn
 from actions import Action, Act_EndTurn, Act_PlayMinionCard
@@ -6,6 +7,8 @@ from effects import Effect
 from cards import Card
 from decks import Deck
 from players import Player
+from board import Board, Slot
+
 
 def tree_go_up( level, stack ):
     while not level: # empty level
@@ -24,14 +27,15 @@ def tree_go_down( level, stack=[] ):
 
 class HSEngine:
   def __init__(self, player1, player2 ):
-    from board import Board, Slot
     self.players = [player1, player2]
     self.board = Board(player1, player2)
     self.turn = 0
     self.messages = []
     self.immediate = []
     self.executing = False
+    self.set_default()
 
+  def set_default(self):
     # init global variables : everyone can access board or send messages
     Board.set_engine(self)
     Slot.set_engine(self)
@@ -42,6 +46,30 @@ class HSEngine:
     Deck.set_engine(self)
     Message.set_engine(self)
     Player.set_engine(self)
+
+  def launch_simulation(self, num=0):
+    res = HSEngine(*self.players)
+    res.true_engine = self
+    res.board = self.board
+    res.turn = self.turn
+    res.saved = dict()
+    res.save_state(num)
+    return res
+  def save_state(self, num=0):
+    '''to run a simulation based on current state,
+       and see what happens if we take some action'''
+    self.saved[num] = dict(turn=self.turn)
+    self.board.save_state(num)
+  def restore_state(self, num=0):
+    self.__dict__.update(self.saved[num])
+    self.board.restore_state(num)
+  def hash_state(self):
+    return self.board.hash_state()
+  def end_simulation(self, num=0):
+    self.restore_state(num)
+    del self.saved
+    self.board.end_simulation()
+    self.true_engine.set_default()
 
   def send_message(self, messages, immediate=False ):
     if type(messages)!=list:
@@ -61,8 +89,7 @@ class HSEngine:
     self.exec_messages()
 
   def display_msg(self, msg):
-    """ default implementation """
-    print "[%s] %s" %(type(msg).__name__,msg)
+    pass
 
   def wait_for_display(self):
     pass
@@ -114,16 +141,19 @@ class HSEngine:
     self.players[0].draw_init_cards(3)
     self.players[1].draw_init_cards(4, coin=True)
 
+  def list_player_actions(self, player):
+    actions = player.list_actions()
+    actions = self.filter_actions(actions) # filter actions
+    actions = [a for a in actions if a and a.is_valid() and a.cost<=player.mana]
+    return actions
+
   def play_turn(self):
     player = self.get_current_player()
     self.send_message( Msg_StartTurn(player) )
     
     action = None
     while not self.is_game_ended() and type(action)!=Act_EndTurn:
-      actions = player.list_actions()
-      # filter actions
-      actions = self.filter_actions(actions)
-      actions = [a for a in actions if a and a.is_valid() and a.cost<=player.mana]
+      actions = self.list_player_actions(player)
       action = player.choose_actions(actions)  # action can be Msg_EndTurn
       self.send_message(action)
 
@@ -140,5 +170,19 @@ class HSEngine:
       return p1
     return None
     
+
+
+
+class DisplayHSEngine (HSEngine):
+  def display_msg(self, msg):
+    print "[%s] %s" %(type(msg).__name__,msg)
+
+
+
+
+
+
+
+
 
 

@@ -15,6 +15,10 @@ class Hero (Creature):
       self.card.owner = owner
       self.card.ability.owner = owner
 
+  def save_state(self, num=0):
+      Creature.save_state(self, num)
+      self.saved[num]['n_remaining_power'] = self.n_remaining_power
+
   def __str__(self):
       return "[%s (%s) %dHP]" % (self.owner.name,self.card.name,self.hp)
 
@@ -48,6 +52,11 @@ class Hero (Creature):
       self.armor += n
       self.engine.send_message(Msg_Status(self,"armor"), immediate=True)
 
+  def score_situation(self):
+      # healthpoint: 1 at 0, 0.3 at 30
+      # sum_i=1..hp max(0, 1-0.0233*i)
+      f = lambda n: ((19767-233*n)*n)/20000. 
+      return f(min(42, self.armor+self.hp))
 
 
 ### --------  Heroes' abilities and cards  --------------------

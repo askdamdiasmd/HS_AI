@@ -9,6 +9,10 @@ from heroes import Hero
 from actions import Act_EndTurn
 
 class Player (object):
+  @classmethod
+  def set_engine(cls, engine):
+    cls.engine = engine
+
   def __init__(self, hero, name, deck):
     self.hero = hero
     self.name = name
@@ -24,10 +28,21 @@ class Player (object):
     # init ownership
     self.hero.set_owner(self)
     self.deck.set_owner(self)
+    self.saved = dict()
 
-  @classmethod
-  def set_engine(cls, engine):
-    cls.engine = engine
+  def save_state(self, num=0):
+      self.deck.save_state(num)
+      self.saved[num] = dict(cards=list(self.cards), minions=list(self.minions), minions_pos=list(self.minions_pos),
+                             mana=self.mana, max_mana=self.max_mana, weapon=self.weapon, secrets=list(self.secrets))
+  def restore_state(self, num=0):
+      self.deck.restore_state(num)
+      self.__dict__.update(self.saved[num])
+      self.cards = list(self.cards)
+      self.minions = list(self.minions)
+      self.minions_pos = list(self.minions_pos)
+      self.secrets = list(self.secrets)
+  def end_simulation(self):
+       self.saved = dict()
 
   def __str__(self):
       return str(self.hero)
@@ -36,6 +51,8 @@ class Player (object):
       if issubclass(type(thing), Hero):
         assert 0, "todo"
       elif issubclass(type(thing), Weapon):
+        if self.weapon: # kill it 
+          self.weapon.ask_for_death()
         self.weapon = thing
         self.engine.send_message( Msg_WeaponPopup(thing), immediate=True)
       elif issubclass(type(thing), Secret):
@@ -145,6 +162,18 @@ class Player (object):
   def choose_actions(self, actions):
       assert 0, "must be overloaded"
 
+  def score_situation(self):
+      res = self.hero.score_situation()
+      for card in self.cards:
+        res += card.score
+      if self.weapon:
+        res += self.weapon.score_situation()
+      for m in self.minions:
+        res += m.score_situation()
+      for m in self.secrets:
+        res += m.score_situation()
+      return res
+
 
 # instanciation of players
 
@@ -188,14 +217,6 @@ class RandomPlayer (Player):
         else:
           choices.append(None)
       return action.select(choices)
-
-
-### ------ attempter simple IA based on heuristics without forecasting ------------
-
-class SimpleIA (Player):
-  ''' todo
-  attempter simple IA based on heuristics without forecasting'''
-  pass
 
 
 

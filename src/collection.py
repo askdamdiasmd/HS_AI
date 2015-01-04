@@ -1,27 +1,37 @@
 """
 full set of hearthstone cards
 """
+import pdb
 from effects import *
 from creatures import Minion, Weapon
 from heroes import Card_Hero, Card_HeroAbility
 
+card_count = 0
+collection = [] # cards indexed by their id
+cardbook = {}   # cards indexed by their name
 
-def get_cardbook():
-  cardbook = {}
-  def add( card ):
-    name = card.name
-    if name in cardbook:
-      name = "%s-%d-%d-%d" %(name,card.cost,card.atq,card.hp)
-    assert name not in cardbook, "error: %s already in cardbook"%card.name
-    cardbook[name] = cardbook[name.lower()] = card
-    if card.name_fr:
-      name_fr = card.name_fr
-      if name_fr in cardbook:
-        name_fr = "%s-%d-%d-%d" %(name_fr,card.cost,card.atq,card.hp)
-      assert name_fr not in cardbook, "error: %s already in cardbook"%card.name
-      cardbook[name_fr] = cardbook[name_fr.lower()] = card
+def add( card ):
+  global card_count
+  name = card.name
+  
+  if issubclass(type(card), Card_Minion) and name in cardbook:
+    name = "%s-%d-%d-%d" %(name,card.cost,card.atq,card.hp)
+  assert name not in cardbook, "error: %s already in cardbook"%card.name
+  
+  card.id = card_count
+  cardbook[name] = cardbook[name.lower()] = card
+  collection.append( card )
+  card_count = len(collection)
+  
+  if card.name_fr:
+    name_fr = card.name_fr
+    if issubclass(type(card), Card_Minion) and name_fr in cardbook:
+      name_fr = "%s-%d-%d-%d" %(name_fr,card.cost,card.atq,card.hp)
+    assert name_fr not in cardbook, "error: %s already in cardbook"%name_fr
+    cardbook[name_fr] = cardbook[name_fr.lower()] = card
 
 
+def build_cardbook():
   ### O Mana ##################################
   
   ### 1 Mana ##################################
@@ -76,7 +86,7 @@ def get_cardbook():
   
   add( Card_HeroAbility(2, "Fireblast", 
         lambda self: [Msg_HeroDamage(self.caster,self.choices[0],1)],
-        targets="characters", name_fr="Boule de feu", 
+        targets="characters", name_fr="Explosion de feu", 
         desc="Deal 1 damage.", cls="mage") )
 
   add( Card_HeroAbility(2, "Reinforce", 
@@ -263,7 +273,7 @@ def get_cardbook():
         desc="Divine Shield", effects="divine_shield") )
   
   add( Card_Minion_BC(1, 1, 2, "Bloodsail Corsair", 
-        Eff_BuffWeapon(damage=1,enemy=True), "prespecified",
+        Eff_BuffWeapon(damage=1,enemy=True), "enemy weapon",
         name_fr="Forban de la voile sanglante", 
         desc="Battlecry: Remove 1 Durability from your opponent's weapon.", cat="pirate") )
   
@@ -328,10 +338,10 @@ def get_cardbook():
   #add( Card_Minion(1, 0, 3, "Repair Bot", name_fr="", 
         #desc="At the end of your turn, restore 6 Health to a damaged character.") )
 
-#  add( Card_Minion(1, 1, 2, "Secretkeeper", name_fr="", 
-#        effects=['effect',Eff_Trigger(Act_Play,lambda self, msg:True, lambda self,msg: 
-#        Msg_BindEffect(self.owner,self.owner,Eff_BuffMinion(atq=2)))],
-#        desc="Whenever a Secret is played, gain +1/+1.") )
+  add( Card_Minion(1, 1, 2, "Secretkeeper", name_fr="Gardienne des secrets", 
+        effects=['effect',Eff_Trigger(Act_PlaySecretCard,lambda self, msg:True, 
+        lambda self,msg: Msg_BindEffect(self.owner,self.owner,Eff_BuffMinion(1,1)))],
+        desc="Whenever a Secret is played, gain +1/+1.") )
 
   add( Card_Minion(1, 0, 4, "Shieldbearer", name_fr="Porte bouclier", 
         desc="Taunt", effects="taunt") )
@@ -360,15 +370,17 @@ def get_cardbook():
   
   add( Card_Minion(1, 2, 1, "Worgen Infiltrator", name_fr="Infiltrateur Worgen", 
         desc="Stealth", effects="stealth") )
-        
+
   add( Card_Minion(1, 1, 1, "Young Dragonhawk", name_fr="Jeune faucon-dragon", 
         desc="Windfury", cat="beast", effects="windfury") )
   
-  #add( Card_Minion(1, 2, 1, "Young Priestess", name_fr="", 
-        #desc="At the end of your turn, give another random friendly minion +1 Health.") )
+  add( Card_Minion(1, 2, 1, "Young Priestess", name_fr="Jeune pretresse",
+        effects=[Eff_Trigger(Msg_EndTurn,lambda self,msg: msg.caster is self.owner.owner,
+        lambda self,msg: Msg_BindEffect(self.owner,"other friendly minion",Eff_BuffMinion(hp=1)))],
+        desc="At the end of your turn, give another random friendly minion +1 Health.") )
   
   add( Card_Minion_BC(2, 3, 2, "Acidic Swamp Ooze", 
-        Eff_BuffWeapon(destroy=1,enemy=True), "prespecified",
+        Eff_BuffWeapon(destroy=1,enemy=True), "enemy weapon",
         name_fr="Limon des marais acides", 
         desc="Battlecry: Destroy your opponent's weapon.") )
   
@@ -502,6 +514,8 @@ def get_cardbook():
        name_fr="Golem des moissons", desc="Deathrattle Summon a 2/1 Damaged Golem.",
        desc_fr="Rale d'agonie: Invoque un golem endommage 2/1", ) )
   
+  add( Card_Minion(3, 3, 4, "Spider Tank", name_fr="Char araignee") )
+  
   #add( Card_Minion(3, 1, 5, "Imp Master", name_fr="", 
         #desc="At the end of your turn, deal 1 damage to this minion and summon a 1/1 Imp.") )
   #add( Card_Minion_BC(3, 4, 7, "Injured Blademaster", name_fr="", 
@@ -516,7 +530,9 @@ def get_cardbook():
         #desc="Battlecry: Give your opponent 2 Bananas.", cat="beast") )
   #add( Card_Minion(3, 3, 5, "Laughing Sister", name_fr="", 
         #desc="Can't be targeted by Spells or Hero Powers.") )
-  #add( Card_Minion(3, 5, 1, "Magma Rager") )
+  
+  add( Card_Minion(3, 5, 1, "Magma Rager", name_fr="Enragee du magma") )
+  
   #add( Card_Minion_BC(3, 3, 3, "Mind Control Tech", name_fr="", 
         #desc="Battlecry: If your opponent has 4 or more minions, take control of one at random.") )
   #add( Card_Minion(3, 3, 3, "Murloc Warleader", name_fr="", 
@@ -610,7 +626,7 @@ def get_cardbook():
         #desc="Taunt. Deathrattle Deal 2 damage to ALL characters.", effects="taunt deathrattle") )
   
   add( Card_Minion_BC(5, 4, 4, "Azure Drake",
-        Eff_Message(lambda self: Msg_DrawCard(self.owner.owner)), "prespecified", 
+        Eff_Message(lambda self: Msg_DrawCard(self.owner.owner)), "owner", 
         name_fr="Drake azur", effects=[Eff_SpellDamage(1)], 
         desc="Spell Damage +1. Battlecry: Draw a card.", cat="dragon") )
   
@@ -975,8 +991,9 @@ def get_cardbook():
         #desc="Secret: When a minion attacks your hero, destroy it.", cls="mage") )
   #add( Card_Spell(4, "Cone of Cold", name_fr="", 
         #desc="Freeze a minion and the minions next to it, and deal 1 damage to them.", cls="mage") )
-  #add( Card_Spell(4, "Fireball", name_fr="", 
-        #desc="Deal 6 damage.", cls="mage") )
+  
+  add( Card_DamageSpell(4, 6, "Fireball", name_fr="Boule de feu", desc="Deal 6 damage.", cls="mage") )
+  
   #add( Card_Spell(4, "Polymorph", name_fr="", 
         #desc="Transform a minion into a 1/1 Sheep.", cls="mage") )
   #add( Card_Spell(6, "Blizzard", name_fr="", 

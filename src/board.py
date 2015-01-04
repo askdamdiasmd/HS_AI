@@ -24,14 +24,38 @@ class Slot (object):
 class Board:
   ''' Contains everything on the board: the 2 heroes, and their minions
   '''
+  @classmethod
+  def set_engine(cls, engine):
+      cls.engine = engine
+
   def __init__(self, player1, player2 ):
       self.players = [player1, player2]
       self.minions = []
       self.everybody = [player1.hero,player2.hero] # heroes + weapons + minion, in order of creation
+      self.saved = dict()
 
-  @classmethod
-  def set_engine(cls, engine):
-      cls.engine = engine
+  def save_state(self, num=0):
+      self.saved[num] = dict(minions=list(self.minions), everybody=list(self.everybody))
+      for pl in self.players:
+         pl.save_state(num)
+      for obj in self.everybody:
+        obj.save_state(num)
+  def restore_state(self, num=0):
+      self.__dict__.update(self.saved[num])
+      self.everybody = list(self.everybody)
+      self.minions = list(self.minions)
+      for pl in self.players:
+         pl.restore_state(num)
+      for obj in self.everybody:
+          obj.restore_state(num)
+  def hash_state(self):
+      return 0 # todo
+  def end_simulation(self):
+      self.saved = dict()
+      for pl in self.players:
+        pl.end_simulation()
+      for obj in self.everybody:
+         obj.end_simulation()
 
   def add_thing(self, m, pos=None):
       if m.owner.add_thing(m, pos): 
@@ -59,19 +83,19 @@ class Board:
       return self.get_enemy_player(player).hero
 
   def get_friendly_minions(self, player):
-      return player.minions
+      return list(player.minions) # copy it !!
 
   def get_enemy_minions(self, player):
       # get targetables enemy minions
       return [e for e in self.get_enemy_player(player).minions if not e.has_stealth()]
 
-  def get_minions(self, player):
+  def get_minions(self):
       # get targetables characters
-      return player.minions + self.get_enemy_player(player).minions
+      return self.players[0].minions + self.players[1].minions
   
-  def get_characters(self, player):
+  def get_characters(self):
       # get targetables characters
-      return self.everybody[:2] + self.get_minions(player)
+      return self.everybody[:2] + self.get_minions()
 
   def get_attackable_characters(self, player):
       enemies = self.get_enemy_minions(player)
@@ -80,6 +104,29 @@ class Board:
         return taunts
       else:
         return [self.get_enemy_player(player).hero] + enemies
+
+  def list_targets(self, owner, targets):
+      if targets==None:
+        res = None
+      elif targets=='nobody':
+        res = []
+      elif targets=="owner":
+        res = owner
+      elif targets.startswith("character"):
+        res = self.get_characters()
+      elif targets.startswith('friendly minion'):
+        res = self.get_friendly_minions(owner)
+      elif targets.startswith('friendly beast'):
+        res = [b for b in self.get_friendly_minions(owner) if b.card.cat=="beast"]
+      elif targets.startswith('minion'):
+        res = self.get_minions()
+      elif targets=='neighbors':
+        res = 'neighbors'
+      elif targets.startswith('enemy weapon'):
+        res = self.get_enemy_player(owner).weapon
+      else:
+        assert False, pdb.set_trace() # "error: unknown target '%s'" % targets
+      return res
 
   def get_free_slots(self, player):
       if len(player.minions)<7:
@@ -96,6 +143,14 @@ class Board:
       else:
         return None
 
+  def score_situation(self, player):
+    adv = self.get_enemy_player(player)
+    if player.hero.dead:
+      return -float('inf')
+    elif adv.hero.dead:
+      return float('inf')
+    else:
+      return player.score_situation() - adv.score_situation()
 
 
 

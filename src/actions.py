@@ -168,10 +168,10 @@ class Act_PlaySpellCard (Act_PlayCard):
     ''' hero plays a generic spell card, specified using "actions" '''
     def __init__(self, card, targets, actions):
         Act_PlayCard.___init___(self, card)
-        self.choices = [targets] if targets!=None else None
+        self.choices = [targets] if targets!=None else []
         self.actions = actions  # execution is defined by card
     def is_valid(self):
-        return all([ch!=[] for ch in self.choices]) # choices cannot be empty for a spell
+        return all([bool(ch) for ch in self.choices]) # choices cannot be empty for a spell
     def execute(self):
         Act_PlayCard.execute(self)
         self.engine.send_message([
@@ -215,6 +215,9 @@ class Act_RandomSpellDamageCard (Act_PlaySpellCard):
         ])
 
 
+class Act_PlaySecretCard (Act_PlaySpellCard):
+    pass
+
 
 ### ------------------- Hero powers -----------------
 
@@ -225,7 +228,10 @@ class Act_HeroPower (Action):
         self.choices = [targets]
         self.actions = actions  # execution is defined by card
     def __str__(self):
-        return "Hero Power (%d): %s" % (self.cost, self.caster.hero.card.desc)
+        if type(self.choices)==tuple and len(self.choices):
+          return "Hero Power (%d): %s on %s" % (self.cost, self.caster.hero.card.desc, self.choices[0])
+        else:    
+          return "Hero Power (%d): %s" % (self.cost, self.caster.hero.card.desc)
     def execute(self):
         self.engine.send_message([
           Msg_UseMana(self.caster,self.cost),

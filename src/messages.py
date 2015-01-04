@@ -6,7 +6,7 @@ list of possible messages
     (actions are decomposed into messages,
     which are then executed one after one)
 '''
-import pdb
+import pdb, random
 from copy import copy, deepcopy
 
 
@@ -27,6 +27,13 @@ class TargetedMessage (Message):
         Message.__init__(self, caster)
         assert target!=None, pdb.set_trace()
         self.target = target
+    def resolve_target(self):
+        if type(self.target)==str:  # undetermined at creation time
+          targets = self.caster.list_targets(self.target)
+          return targets[random.randint(0,len(targets)-1)] if targets else None
+        else:
+          return self.target
+
 
 class CardMessage (Message):
     def __init__(self, caster, card):
@@ -329,6 +336,18 @@ class Msg_Heal (TargetedMessage):
 class Msg_HeroHeal (Msg_Heal):
     pass
 
+class Msg_RandomHeal (Message):
+    ''' heal a random target, see targets definition in Card::list_targets '''
+    def __init__(self, caster, targets, heal ):
+        Message.__init__(self, caster, targets)
+        self.heal = heal
+    def execute(self):
+        targets = self.caster.list_targets(self.target)
+        if targets: # enough targets
+          target = targets[random.randint(0,len(targets)-1)]
+          self.engine.send_message( Msg_Heal(self.caster, target, self.heal), immediate=True)
+    def __str__(self):
+        return "%s heal by %d a random %s" % (self.caster, self.heal, self.target)
 
 
 
@@ -348,9 +367,12 @@ class Msg_BindEffect (TargetedMessage):
         TargetedMessage.__init__(self,caster,target)
         self.effect = effect
     def __str__(self):
-        return "%s binds effect [%s] to %s." % (self.caster, self.effect, self.target)
+        random = 'random 'if type(self.target)==str else ''
+        return "%s binds effect [%s] to %s%s." % (self.caster, self.effect, random, self.target)
     def execute(self):
-        self.effect.bind_to(self.target, caster=self.caster)
+        target = self.resolve_target()
+        if target:
+          self.effect.bind_to(target, caster=self.caster)
 
 
 
