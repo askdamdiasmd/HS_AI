@@ -273,7 +273,7 @@ def build_cardbook():
         desc="Divine Shield", effects="divine_shield") )
   
   add( Card_Minion_BC(1, 1, 2, "Bloodsail Corsair", 
-        Eff_BuffWeapon(damage=1,enemy=True), "enemy weapon",
+        Eff_BuffWeapon(damage=1), hidden_target="enemy weapon",
         name_fr="Forban de la voile sanglante", 
         desc="Battlecry: Remove 1 Durability from your opponent's weapon.", cat="pirate") )
   
@@ -380,7 +380,7 @@ def build_cardbook():
         desc="At the end of your turn, give another random friendly minion +1 Health.") )
   
   add( Card_Minion_BC(2, 3, 2, "Acidic Swamp Ooze", 
-        Eff_BuffWeapon(destroy=1,enemy=True), "enemy weapon",
+        Eff_BuffWeapon(destroy=1), hidden_target="enemy weapon",
         name_fr="Limon des marais acides", 
         desc="Battlecry: Destroy your opponent's weapon.") )
   

@@ -134,8 +134,8 @@ class Eff_Message (Effect):
 
 
 class Eff_BuffWeapon (Effect):
-    """ send a message to enemy weapon """
-    def __init__(self, atq=0, damage=0, hp=0, temp=False, destroy=False, enemy=True, immediate=True):
+    """ change stat of a weapon """
+    def __init__(self, atq=0, damage=0, hp=0, temp=False, destroy=False, immediate=True):
         Effect.__init__(self)
         self.atq = atq
         self.hp = hp
@@ -144,21 +144,17 @@ class Eff_BuffWeapon (Effect):
         assert temp==False, "todo"
         self.destroy = destroy
         self.temp = temp
-        self.enemy = enemy
         self.immediate = immediate
     def __str__(self):
-        which = 'enemy' if self.enemy else 'friendly'
+        which = str(self.owner.owner)+"'s" if self.owner else ''
         if self.destroy:
           return "Destroy %s weapon" % which
         else:
-          return "Buff %s weapon by %+d/%+d" % (which, self.atq, self.hp)
+          return "Buff %s weapon by %+d/%+d" % (which, self.atq, self.hp or -self.damage)
     def bind_to(self, owner, caster=None):
-        self.owner = owner
+        self.owner = weapon = owner
         self.caster = caster
-        if self.enemy:
-          weapon = self.engine.board.get_enemy_player(owner.owner).weapon
-        else:
-          weapon = owner.owner.weapon
+        assert type(weapon).__name__ == 'Weapon', pdb.set_trace()
         if weapon:
           if self.destroy:
             self.engine.send_message(Msg_DeadWeapon(weapon), immediate=self.immediate)

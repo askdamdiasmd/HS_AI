@@ -96,14 +96,13 @@ class Act_PlayMinionCard (Act_PlayCard):
 
 class Act_PlayMinionCard_BC (Act_PlayMinionCard):
     ''' hero plays a minion card with battlecry '''
-    def __init__(self, card, battlecry, targets):
+    def __init__(self, card, battlecry, chosable_targets=None, hidden_target=None):
         Act_PlayMinionCard.___init___(self,card)
-        self.choices = [self.engine.board.get_free_slots(card.owner),targets]
+        self.choices = [self.engine.board.get_free_slots(card.owner)]
+        self.hidden_target = None
+        if chosable_targets!=None:  self.choices += [chosable_targets]
+        elif hidden_target!=None:  self.hidden_target = hidden_target
         self.battlecry = battlecry
-        self.special_targets = None
-        if type(targets)==str:  
-          self.special_targets = targets
-          self.choices[1]=[]  # remove choice
     def execute(self):
         Act_PlayCard.execute(self)
         pos = self.choices[0]
@@ -111,16 +110,12 @@ class Act_PlayMinionCard_BC (Act_PlayMinionCard):
         from creatures import Minion
         minion = Minion(self.card)
         actions = [Msg_AddMinion(self.caster, minion, pos)]
-        if self.special_targets=='neighbors':
-          player = self.caster
+        if self.hidden_target=='neighbors':
           for target in player.minions[max(0,pos.index-1):pos.index+1]:
             actions.append(Msg_BindEffect(minion, target, deepcopy(self.battlecry)))
-        elif self.special_targets=="prespecified":
-          actions.append(Msg_BindEffect(minion, minion, self.battlecry))
-        else:
-          target = self.choices[1]
-          if target!=None:
-            actions.append(Msg_BindEffect(minion, target, self.battlecry))
+        elif len(self.choices)>1 or self.hidden_target:
+          target = self.hidden_target or self.choices[1]
+          actions.append(Msg_BindEffect(minion, target, self.battlecry))
         self.engine.send_message(actions)
 
 

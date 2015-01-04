@@ -1161,12 +1161,13 @@ if __name__=="__main__":
     from collection import build_cardbook
     from decks import fake_deck
     cardbook = build_cardbook()
-
-    deck1 = fake_deck(cardbook,dbg,"fake weapon 2")
+    
+    cards = ["fake weapon 2","Bloodsail Corsair"]
+    deck1 = fake_deck(cardbook,dbg,cards)
     hero1 = Hero(cardbook["Anduin Wrynn"])
     player1 = HumanPlayerAscii(hero1, 'jerome', deck1)
 
-    deck2 = fake_deck(cardbook,dbg,"fake weapon 2")
+    deck2 = fake_deck(cardbook,dbg,cards)
     hero2 = Hero(cardbook["Jaina Proudmoore"])
     if True:
       from ai import SimpleAI

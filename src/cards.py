@@ -70,13 +70,15 @@ class Card_Minion (Card):
 
 class Card_Minion_BC (Card_Minion):
     """ Minion with a battle cry """
-    def __init__(self, cost, atq, hp, name, battlecry, targets='none', **kwargs):
+    def __init__(self, cost, atq, hp, name, battlecry, targets=None, hidden_target=None, **kwargs):
         Card_Minion.__init__(self, cost, atq, hp, name, **kwargs)
         self.battlecry = battlecry
         self.targets = targets
+        self.hidden_target = hidden_target
     def list_actions(self):
-        targets = self.list_targets(self.targets)
-        return Act_PlayMinionCard_BC(self, self.battlecry, targets)
+        targets = self.list_targets(self.targets) if self.targets else None
+        hidden_target = self.list_targets(self.hidden_target) if self.hidden_target else None
+        return Act_PlayMinionCard_BC(self, self.battlecry, targets, hidden_target)
 
 
 ### --------------- Weapon cards ----------------------
