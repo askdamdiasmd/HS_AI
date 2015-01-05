@@ -10,7 +10,8 @@ eff_trad_fr = dict(taunt='Provocation',
                    divine_shield='Bouclier Divin',
                    stealth='Camouflage',
                    windfury='Furie des vents',
-                   effect='', freeze='')
+                   effect='', freeze='',
+                   untargetable='Ne peut pas etre la cible de sorts ou de pouvoirs heroiques')
 def tolist(l):
   if type(l)==str:  
     return l.split()
@@ -102,10 +103,11 @@ class Card_Weapon (Card):
 
 
 class Card_Spell (Card):
-    def __init__(self, cost, name, actions, targets=None, **kwargs ):
+    def __init__(self, cost, name, actions, targets='none', **kwargs ):
         Card.__init__(self, cost, name, **kwargs )
         self.actions = actions # lambda self: [Msg_* list]
-        self.targets = targets # see list_targets()
+        assert type(targets)==str, pdb.set_trace()
+        self.targets = "targetable "+targets # see list_targets()
     def __str__(self):
         return "%s (%d): %s" % (self.name_fr, self.cost, self.desc)
     def list_actions(self):

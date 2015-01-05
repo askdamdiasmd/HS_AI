@@ -99,7 +99,7 @@ def build_cardbook():
         lambda self: [Msg_HeroHeal(self.caster,self.choices[0],2)],
         targets="characters", name_fr="Soins inferieurs", 
         desc="Restore 2 Health.", cls="priest") )
-        
+  
   add( Card_HeroAbility(2, "Mind Spike", 
         lambda self: [Msg_HeroDamage(self.caster,self.choices[0],1)], 
         targets="characters", name_fr="Pointe mentale", 
@@ -413,8 +413,8 @@ def build_cardbook():
   #add( Card_Minion(2, 0, 7, "Doomsayer", name_fr="", 
         #desc="At the start of your turn, destroy ALL minions.") )
 
-  #add( Card_Minion(2, 3, 2, "Faerie Dragon", name_fr="", 
-        #desc="Can't be targeted by Spells or Hero Powers.", cat="dragon") )
+  add( Card_Minion(2, 3, 2, "Faerie Dragon", name_fr="Dragon feerique", effects="untargetable",
+        desc="Can't be targeted by Spells or Hero Powers.", cat="dragon") )
   
   #add( Card_Minion(2, 3, 3, "Finkle Einhorn") )
   
@@ -528,8 +528,8 @@ def build_cardbook():
         #desc="Stealth", cat="beast", effects="stealth") )
   #add( Card_Minion_BC(3, 5, 5, "King Mukla", name_fr="", 
         #desc="Battlecry: Give your opponent 2 Bananas.", cat="beast") )
-  #add( Card_Minion(3, 3, 5, "Laughing Sister", name_fr="", 
-        #desc="Can't be targeted by Spells or Hero Powers.") )
+  add( Card_Minion(3, 3, 5, "Laughing Sister", name_fr="Soeur rieuse", effects="untargetable",
+        desc="Can't be targeted by Spells or Hero Powers.") )
   
   add( Card_Minion(3, 5, 1, "Magma Rager", name_fr="Enragee du magma") )
   
@@ -666,6 +666,9 @@ def build_cardbook():
   
   add( Card_Minion(6, 4, 7, "Archmage", name_fr="Archimage",
         effects=[Eff_SpellDamage(1)], desc="Spell Damage +1") )
+  
+  add( Card_Minion(5, 4, 6, "Spectral Knight", name_fr="Chevalier spectral", effects="untargetable",
+        desc="Can't be targeted by Spells or Hero Powers.") )
   
   #add( Card_Minion(6, 4, 2, "Argent Commander", name_fr="", 
         #desc="Charge, Divine Shield", effects="charge divine_shield") )

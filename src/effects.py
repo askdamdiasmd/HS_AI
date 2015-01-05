@@ -40,17 +40,6 @@ class Effect (object):
 ### ----------- Action filters (applies on Actions) ---------------
 
 
-class Acf_NotSpellTargetable (Effect):
-    """ not targetable by spells or hero power"""
-#    def execute(self):
-#        return Act_SingleSpellDamage
-    def filter(self, action):
-        try:  # remove ourselves from potential targets
-          action.choices[0].remove(self.owner)
-        except ValueError:
-          pass
-        return action
-
 class Acf_IncSpellDamage (Effect):
     """ increase spelle damages """
 #    def triggers(self):

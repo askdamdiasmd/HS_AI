@@ -286,6 +286,11 @@ class Minion (Creature):
   def has_stealth(self):
       return 'stealth' in self.effects
 
+  def is_targetable(self, player):
+      if self.has_effect('untargetable'): return False
+      if self.owner is not player and self.has_effect('stealth'): return False
+      return True
+
   def list_actions(self):
       if( self.n_atq>=self.n_max_atq or 
          (self.fresh and not self.has_effect('charge')) or 

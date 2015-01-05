@@ -94,12 +94,12 @@ class SimpleAI (Player):
       # select succession of actions with the best return
       state = 0
       sim = self.engine.launch_simulation(state) # open simulation
-      end_turn = (actions[0],(),None)
+      end_turn = (actions[0],())
       assert type(end_turn[0]) == Act_EndTurn
       
       start_time = time.time()
       best = -float('inf')
-      predictions = []
+      predictions = [end_turn]
       todo = [(state, 0, [])]
       while todo and time.time()-start_time<self.timeout:
         cur_state, score, cur_actions = todo.pop(0) # explore paths from this lattice node 
@@ -121,15 +121,14 @@ class SimpleAI (Player):
                 sim.save_state(state)
                 todo.append((state, score, cur_actions + [(action, choice)]))
               
-              if score > best: 
+              elif score > best: # last action is end turn
                 best = score
                 predictions = cur_actions + [(action, choice)]
             
             sim.restore_state(cur_state) # reset simulation
       
       sim.end_simulation(0)
-      if not todo: predictions.append(end_turn)  # so we can add end_turn
-
+      
       action, choice = predictions.pop(0)
       action.select(choice)
       return action

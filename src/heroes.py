@@ -22,6 +22,9 @@ class Hero (Creature):
   def __str__(self):
       return "[%s (%s) %dHP]" % (self.owner.name,self.card.name,self.hp)
 
+  def is_targetable(self, player):
+      return True
+  
   def start_turn(self):
       Creature.start_turn(self)
       self.n_remaining_power = 1
@@ -66,7 +69,7 @@ from cards import Card, Card_Minion
 class Card_HeroAbility (Card):
     def __init__(self, cost, name, actions, targets="none", **kwargs):
         Card.__init__(self, cost, name, collectible=False, **kwargs)
-        self.targets = targets
+        self.targets = "targetable "+targets
         self.actions = actions # lambda self: [messages...]
     def list_actions(self):
         from actions import Act_HeroPower

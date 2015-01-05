@@ -85,17 +85,21 @@ class Board:
   def get_friendly_minions(self, player):
       return list(player.minions) # copy it !!
 
-  def get_enemy_minions(self, player):
+  def get_enemy_minions(self, player, targetable=False):
       # get targetables enemy minions
-      return [e for e in self.get_enemy_player(player).minions if not e.has_stealth()]
+      res = self.get_enemy_player(player).minions
+      if targetable:  res = [r for r in res if r.is_targetable(player)]
+      return res
 
-  def get_minions(self):
+  def get_minions(self, player, targetable=False):
       # get targetables characters
-      return self.players[0].minions + self.players[1].minions
+      res = self.players[0].minions + self.players[1].minions
+      if targetable:  res = [r for r in res if r.is_targetable(player)]
+      return res
   
-  def get_characters(self):
+  def get_characters(self, player, targetable=False):
       # get targetables characters
-      return self.everybody[:2] + self.get_minions()
+      return self.everybody[:2] + self.get_minions(player, targetable=targetable)
 
   def get_attackable_characters(self, player):
       enemies = self.get_enemy_minions(player)
@@ -106,22 +110,26 @@ class Board:
         return [self.get_enemy_player(player).hero] + enemies
 
   def list_targets(self, owner, targets):
-      if targets==None:
+      targetable = False
+      if targets.startswith("targetable"):
+        targetable = True
+        targets = targets[len("targetable "):]
+      if targets==None or targets=='none':
         res = None
       elif targets=='nobody':
         res = []
       elif targets=="owner":
         res = owner
       elif targets.startswith("character"):
-        res = self.get_characters()
+        res = self.get_characters(owner,targetable=targetable)
+      elif targets.startswith('minion'):
+        res = self.get_minions(owner, targetable=targetable)
       elif targets.startswith('friendly minion'):
         res = self.get_friendly_minions(owner)
       elif targets.startswith('friendly beast'):
         res = [b for b in self.get_friendly_minions(owner) if b.card.cat=="beast"]
-      elif targets.startswith('minion'):
-        res = self.get_minions()
       elif targets=='neighbors':
-        res = 'neighbors'
+        res = 'neighbors' # special target, resolved at popup time
       elif targets.startswith('enemy weapon'):
         res = self.get_enemy_player(owner).weapon
       else:
