@@ -259,11 +259,14 @@ class VizThing (object):
       assert False, debug()
     return res + (uc.A_STANDOUT if standout else 0)
 
-  def draw(self, pos=None, bkgd=0, highlight=0, **kwargs):
+  def draw(self, pos=None, y=None, bkgd=0, highlight=0, **kwargs):
     if not hasattr(self,'win'): return None # thing was already deleted
     win, panel = self.win, self.panel
-    if pos and pos!=uc.getbegyx(win):
-      uc.move_panel(panel,*pos)    
+    wpos = uc.getbegyx(win)
+    if pos and pos!=wpos:
+      uc.move_panel(panel,*pos)
+    elif y and y!=wpos[0]:
+      uc.move_panel(panel,y,wpos[1])
     
     if 'frozen' in self.effects or 'insensible' in self.effects:
       bkgd = uc.black_on_cyan
@@ -443,7 +446,9 @@ class Button:
       del self.panel
       del self.win
 
-  def draw(self, highlight=0, bkgd=0, box=True, ytext=None, coltext=0, **kwargs):
+  def draw(self, y=None, highlight=0, bkgd=0, box=True, ytext=None, coltext=0, **kwargs):
+      wpos = uc.getbegyx(self.win)
+      if y and y!=wpos[1]:  uc.move_panel(self.panel,y,wpos[1])
       uc.wbkgd(self.win,bkgd)
       if box:
         uc.wattron(self.win,highlight)
@@ -461,14 +466,14 @@ class HeroPowerButton (Button):
 
   def draw(self,blink=0,**kwargs):
       coltext = uc.yellow_on_black
+      if self.used: kwargs['bkgd'] = uc.black_on_yellow
+      Button.draw(self,ytext=1,coltext=coltext,**kwargs)
       if blink:
           for i in range(int(10*blink)):
             kwargs['bkgd'] = [uc.black_on_yellow,uc.yellow_on_black][i%2]
             Button.draw(self,ytext=1,coltext=coltext,**kwargs)
             show_panels()
             time.sleep(0.1)            
-      if self.used: kwargs['bkgd'] = uc.black_on_yellow
-      Button.draw(self,ytext=1,coltext=coltext,**kwargs)
       ty, tx = uc.getmaxyx(self.win)
       uc.mvwaddstr(self.win,0,tx/2-1,"(%d)"%self.cost,uc.cyan_on_black)
       print_longtext(self.win,2,1,ty-1,tx-1,self.subtext,coltext)
@@ -534,7 +539,12 @@ def draw_Slot(self, highlight=0, bkgd=0, **kwargs):
 ### Card -----------
 card_size = (14,15)
 
-def draw_Card(self, pos=None, highlight=0, cost=None, small=True, bkgd=0, **kwargs):
+def draw_Card(self, pos=None, highlight=0, cost=None, small=True, bkgd=0, hide=False, **kwargs):
+    if hide:
+      if hasattr(self, "panel"): uc.hide_panel(self.panel)
+      if hasattr(self, "small_panel"): uc.hide_panel(self.small_panel)
+      return
+    
     name = self.name_fr or self.name
     desc = self.desc_fr or self.desc
 
@@ -564,6 +574,8 @@ def draw_Card(self, pos=None, highlight=0, cost=None, small=True, bkgd=0, **kwar
         self.small_win = uc.newwin(ty,tx,pos[0],pos[1])
         self.small_panel = uc.new_panel(self.small_win)
         set_panel_userptr(self.small_panel, self)
+      elif uc.panel_hidden(self.small_panel):
+        uc.top_panel(self.small_panel)
       win, panel = self.small_win, self.small_panel
       ty, tx = uc.getmaxyx(win)
       if type(small)==int and small!=ty: # redo
@@ -869,7 +881,7 @@ class VizBoard:
         self.end_turn.draw()
         # draw hero power
         for pl in which:
-          self.hero_power_buttons[pl].draw()
+          self.hero_power_buttons[pl].draw(y=self.get_hero_pos(pl)[0])
       
       # draw decks on the right side
       if 'decks' in what:
@@ -888,13 +900,15 @@ class VizBoard:
       # draw heroes
       if 'hero' in what:
         for pl in which:
-          pl.hero.draw()
+          pl.hero.draw(y=self.get_hero_pos(pl)[0])
           if pl.viz.weapon:
-            pl.viz.weapon.draw()
+            pl.viz.weapon.draw(y=self.get_hero_pos(pl)[0])
 
       # draw cards
       if 'cards' in what:
         if adv in which:
+          for card in adv.viz.cards[:None if last_card else -1]:
+            card.draw(hide=True)  # hide adversary cards
           print_middle(stdscr, 0,0, NC, " Adversary has %d cards. "%len(adv.cards))
         if player in which:
           for card in player.viz.cards[:None if last_card else -1]:
@@ -912,12 +926,9 @@ class VizBoard:
       
       # draw minions
       if 'minions' in what:
-        if player in which:
-          for m in player.viz.minions:
-            m.draw(y=14)
-        if adv in which:
-          for m in adv.viz.minions:
-            m.draw(y=5)
+        for pl in which:
+          for m in pl.viz.minions:
+            m.draw(y=self.get_minion_pos(m)[0])
       
       show_panels()
 
@@ -1162,17 +1173,19 @@ if __name__=="__main__":
     from decks import fake_deck
     cardbook = build_cardbook()
     
-    cards = ["fake damage spell 8"]
+    cards = ["Worgen dechaine","archere elfe","ironbeak owl"]
     deck1 = fake_deck(cardbook,dbg,cards)
     hero1 = Hero(cardbook["Anduin Wrynn"])
     player1 = HumanPlayerAscii(hero1, 'jerome', deck1)
 
     deck2 = fake_deck(cardbook,dbg,cards)
     hero2 = Hero(cardbook["Jaina Proudmoore"])
-    if True:
+    if 1:
+      player2 = HumanPlayerAscii(hero2, 'mattis', deck2)
+    elif 1:
       from ai import SimpleAI
       player2 = SimpleAI(hero2, 'simpleAI', deck2)
-    elif True:
+    elif 1:
       from ai import VerySimpleAI
       player2 = VerySimpleAI(hero2, 'simpleAI', deck2)
     else:
@@ -1180,21 +1193,15 @@ if __name__=="__main__":
     
     stdscr = init_screen()
     engine = CursesHSEngine( player1, player2 )
-    engine.board.viz = VizBoard(engine.board, switch=False, animated=anim)
+    engine.board.viz = VizBoard(engine.board, switch=type(player2)==HumanPlayerAscii, animated=anim)
 
     if mana:
       player1.add_mana_crystal(mana)
       player2.add_mana_crystal(mana)  
 
     if setup:
-      dbg_add_minion(player2, cardbook["War Golem"])
-      dbg_add_minion(player2, cardbook["War Golem"])
-      dbg_add_minion(player2, cardbook["War Golem"])
-      dbg_add_minion(player2, cardbook["War Golem"])
-      dbg_add_minion(player2, cardbook["War Golem"])
-      dbg_add_minion(player1, cardbook["spider tank"])
-      dbg_add_minion(player1, cardbook["spider tank"])
-      dbg_add_minion(player1, cardbook["spider tank"])
+      dbg_add_minion(player1, cardbook["Worgen dechaine"])
+      dbg_add_minion(player2, cardbook["mage de dalaran"])
     
     # start playing
     #show_ACS()

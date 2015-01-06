@@ -24,6 +24,7 @@ class Thing (object):
       self.fresh = True # first turn
       self.n_atq = 0 # number of times we attacked already
       self.n_max_atq = 1 # number of times we can attack per turn
+      self.enraged = False
       self.dead = False
       self.status_id = 0
       self.saved = dict()
@@ -32,14 +33,15 @@ class Thing (object):
       self.action_filters = []  # reacting to actions [(Act_class, handler),...]
       self.modifiers = [] # modifying messages, list: [(Msg_Class, event),...]
       self.triggers = [] # reacting to messages, list: [(Msg_Class, event),...]
+      self.enraged_trigger = None
       self.effects = []  # list of effects without triggers: ['taunt','stealth',...]
       self.add_effects(deepcopy(card.effects), inform=False)
 
   def save_state(self, num=0):
-      self.saved[num] = dict(hp=self.hp, max_hp=self.max_hp, armor=self.armor, atq=self.atq, max_atq=self.max_atq, 
+      self.saved[num] = dict(hp=self.hp, max_hp=self.max_hp, armor=self.armor, atq=self.atq, max_atq=self.max_atq, enraged=self.enraged,
                              fresh=self.fresh, n_atq=self.n_atq, n_max_atq=self.n_max_atq, dead=self.dead, status_id=self.status_id, 
                              action_filters=list(self.action_filters), modifiers=list(self.modifiers),
-                             triggers=list(self.triggers), effects=list(self.effects))
+                             triggers=list(self.triggers), enraged_trigger=self.enraged_trigger, effects=list(self.effects))
   def restore_state(self, num=0):
       self.__dict__.update(self.saved[num])
       self.action_filters = list(self.action_filters)
@@ -72,7 +74,7 @@ class Thing (object):
         else:
           e.bind_to(self)
       if inform:
-        self.engine.send_message(Msg_Status(self,'effects'),immediate=True)
+        self.engine.send_status(Msg_Status(self,'effects'))
 
   def remove_effect(self,effect,inform=True):
       if effect not in self.effects:  return  # nothing to do
@@ -89,7 +91,7 @@ class Thing (object):
       else:
         self.popup()  # reset n_max_atq
       if inform:
-        self.engine.send_message(Msg_Status(self,'effects'),immediate=True)
+        self.engine.send_status(Msg_Status(self,'effects'))
 
   def __str__(self):
       return "%s %s (%X) %d/%d" %(type(self).__name__, self.card.name, id(self), self.atq, self.hp)
@@ -134,36 +136,43 @@ class Thing (object):
       absorbed = min(damage, self.armor)
       if absorbed:
         self.armor -= absorbed
-        self.engine.send_message(Msg_Status(self,'hp armor'),immediate=True)
+        self.engine.send_status(Msg_Status(self,'hp armor'))
         damage -= absorbed
       self.hp -= damage
-      self.engine.send_message(Msg_Status(self,'hp'),immediate=True)
+      if self.enraged_trigger: self.enraged_trigger.trigger(self)
+      self.engine.send_status(Msg_Status(self,'hp'))
       if caster and hasattr(caster,'effects') and caster.has_effect('freeze'):
         self.add_effects(('frozen',))
       self.check_dead()
 
+  def is_damaged(self):
+      return self.hp<self.max_hp
+
   def heal(self, hp):
       assert hp>0, pdb.set_trace()
       self.hp = min(self.max_hp, self.hp+hp)
-      self.engine.send_message(Msg_Status(self,'hp'),immediate=True)
+      if self.enraged_trigger: self.enraged_trigger.trigger(self)
+      self.engine.send_status(Msg_Status(self,'hp'))
 
   def change_hp(self, hp):
         self.max_hp += hp
         assert self.max_hp>=1, pdb.set_trace()
         self.hp += max(0,hp)  # only add if positive
         self.hp = min(self.hp, self.max_hp)
-        self.engine.send_message(Msg_Status(self,'hp max_hp'),immediate=True)
+        if self.enraged_trigger: self.enraged_trigger.trigger(self)
+        self.engine.send_status(Msg_Status(self,'hp max_hp'))
         self.check_dead()
 
   def change_atq(self, atq):
         self.atq += atq
         self.max_atq += atq
-        self.engine.send_message(Msg_Status(self,'atq max_atq'),immediate=True)
+        self.engine.send_status(Msg_Status(self,'atq max_atq'))
 
   def silence(self):
       self.action_filters = []
       self.modifiers = []
       self.triggers = []
+      self.enraged_trigger = None
       while self.effects:
         e = self.effects.pop()
         if type(e)!=str:  
@@ -172,7 +181,7 @@ class Thing (object):
           self.n_max_atq = 1  # undo windfury
       self.effects = ['silence']
       if not self.dead:
-        self.engine.send_message(Msg_Status(self,'hp max_hp atq max_atq effects'),immediate=True)
+        self.engine.send_status(Msg_Status(self,'hp max_hp atq max_atq effects'))
 
   def check_dead(self):
       if self.hp <= 0:
@@ -180,7 +189,7 @@ class Thing (object):
         self.engine.send_message( Msg_CheckDead(self) )
 
   def ask_for_death(self):
-      self.engine.send_message(Msg_Dead(self),immediate=True)
+      self.engine.send_message(Msg_Dead(self), immediate=True)
 
   def death(self):
       self.silence()
@@ -263,7 +272,7 @@ class Creature (Thing):
       assert self.n_atq<=self.n_max_atq
       if self.has_effect('stealth'):
         self.effects.remove('stealth')
-        self.engine.send_message(Msg_Status(self,'effects'),immediate=True)
+        self.engine.send_status(Msg_Status(self,'effects'))
       msgs = [Msg_Damage(self, target, self.atq)]
       if target.atq: msgs.append(Msg_Damage(target, self, target.atq))
       self.engine.send_message([Msg_StartAttack(self,target),
@@ -304,7 +313,7 @@ class Minion (Creature):
       assert damage>0, pdb.set_trace()
       if self.has_effect('divine_shield'):
         self.effects.remove('divine_shield')
-        self.engine.send_message(Msg_Status(self,'effects'),immediate=True)
+        self.engine.send_status(Msg_Status(self,'effects'))
       else:
         Creature.hurt(self,damage,caster)
 

@@ -46,7 +46,7 @@ class Hero (Creature):
 
   def add_armor(self, n):
       self.armor += n
-      self.engine.send_message(Msg_Status(self,"armor"), immediate=True)
+      self.engine.send_status(Msg_Status(self,"armor"))
 
   def hurt(self, damage, caster=None):
       if not self.has_effect('insensible'):

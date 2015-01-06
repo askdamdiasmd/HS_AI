@@ -347,25 +347,25 @@ class Eff_Enrage (Effect):
         Effect.__init__(self)
         self.atq = atq
         self.windfury = windfury
-        self.last_state = False
     def bind_to(self, owner, caster=None):
         self.owner = owner
         owner.effects.append(self)
-        owner.triggers.append((Msg_Status,self))
-    def trigger(self, msg):
-        if msg.caster is not self.owner: return
-        enraged = self.owner.hp<self.owner.max_hp
-        if enraged==self.last_state:  return
-        if enraged:
-          if self.atq:  self.owner.change_atq(self.atq)
-          if self.windfury: self.owner.add_effects(['windfury'])
-        else:
-          self.undo()
-        self.last_state = enraged
+        owner.enraged_trigger = self
+    def trigger(self, caster):
+        assert caster is self.owner, pdb.set_trace()
+        enraged = self.owner.is_damaged()
+        if enraged!=self.owner.enraged:
+          if enraged:
+            if self.atq:  self.owner.change_atq(self.atq)
+            if self.windfury: self.owner.add_effects(['windfury'])
+            self.owner.enraged = True
+          else:
+            self.undo()
     def undo(self):
-        if self.last_state: # owner is enraged
+        if self.owner.enraged: # owner is enraged
           if self.atq:  self.owner.change_atq(-self.atq)
           if self.windfury: self.owner.remove_effect('windfury')
+          self.owner.enraged = False
   
 
 class Eff_While (Effect):

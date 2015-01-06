@@ -529,7 +529,7 @@ def build_cardbook():
   #add( Card_Minion_BC(3, 5, 5, "King Mukla", name_fr="", 
         #desc="Battlecry: Give your opponent 2 Bananas.", cat="beast") )
   add( Card_Minion(3, 3, 5, "Laughing Sister", name_fr="Soeur rieuse", effects="untargetable",
-        desc="Can't be targeted by Spells or Hero Powers.") )
+        desc="Can't be targeted by Spells or Hero Powers.", collectible=False) )
   
   add( Card_Minion(3, 5, 1, "Magma Rager", name_fr="Enragee du magma") )
   

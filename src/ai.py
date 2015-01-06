@@ -34,8 +34,8 @@ class VerySimpleAI (Player):
       return res[:nmax] 
 
   def choose_actions(self, actions):
-      # select action with the best return
-      sim = self.engine.save_state(0) # open simulation
+      # select action with the best return    
+      sim = self.engine.launch_simulation() # open simulation
       best = sim.board.score_situation(self), actions[0], ()  # default = end turn !
       assert type(best[1]) == Act_EndTurn
 #      tmp = open("tmp.txt","a")
@@ -48,7 +48,7 @@ class VerySimpleAI (Player):
           sim.send_message(action)
           score = sim.board.score_situation( self )
 #          print >>tmp, 'action: ',action,' --> score: %g' % score
-          sim.restore_state(0) # reset simulation
+          sim.restore_state() # reset simulation
           if score >= best[0]: 
             best = score, action, choices
       

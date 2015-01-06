@@ -1,7 +1,7 @@
 import pdb
 from copy import deepcopy
 from creatures import Thing
-from messages import Message, Msg_StartTurn
+from messages import Message, Msg_StartTurn, Msg_Status
 from actions import Action, Act_EndTurn, Act_PlayMinionCard
 from effects import Effect
 from cards import Card
@@ -48,28 +48,7 @@ class HSEngine:
     Player.set_engine(self)
 
   def launch_simulation(self, num=0):
-    res = HSEngine(*self.players)
-    res.true_engine = self
-    res.board = self.board
-    res.turn = self.turn
-    res.saved = dict()
-    res.save_state(num)
-    return res
-  def save_state(self, num=0):
-    '''to run a simulation based on current state,
-       and see what happens if we take some action'''
-    self.saved[num] = dict(turn=self.turn)
-    self.board.save_state(num)
-  def restore_state(self, num=0):
-    self.__dict__.update(self.saved[num])
-    self.board.restore_state(num)
-  def hash_state(self):
-    return self.board.hash_state()
-  def end_simulation(self, num=0):
-    self.restore_state(num)
-    del self.saved
-    self.board.end_simulation()
-    self.true_engine.set_default()
+    return SimulationEngine(self, num)
 
   def send_message(self, messages, immediate=False ):
     if type(messages)!=list:
@@ -87,6 +66,10 @@ class HSEngine:
       deep_level += messages
 
     self.exec_messages()
+
+  def send_status(self, message):
+     assert type(message) == Msg_Status
+     self.send_message(message, immediate=True)
 
   def display_msg(self, msg):
     pass
@@ -139,7 +122,9 @@ class HSEngine:
 
   def start_game(self):
     self.players[0].draw_init_cards(3)
+    self.turn = 1
     self.players[1].draw_init_cards(4, coin=True)
+    self.turn = 0
 
   def list_player_actions(self, player):
     actions = player.list_actions()
@@ -170,6 +155,43 @@ class HSEngine:
       return p1
     return None
     
+
+class SimulationEngine (HSEngine):
+  def __init__(self, true_engine, num ):
+    HSEngine.__init__(self, *true_engine.players)
+    self.true_engine = true_engine
+    self.board = true_engine.board
+    self.turn = true_engine.turn
+    self.saved = dict()
+    self.save_state(num)
+  
+  def save_state(self, num=0):
+    '''to run a simulation based on current state,
+       and see what happens if we take some action'''
+    self.saved[num] = dict(turn=self.turn)
+    self.board.save_state(num)
+  
+  def restore_state(self, num=0):
+    self.__dict__.update(self.saved[num])
+    self.board.restore_state(num)
+
+  def hash_state(self):
+    return self.board.hash_state()
+
+  def end_simulation(self, num=0):
+    self.restore_state(num)
+    del self.saved
+    self.board.end_simulation()
+    self.true_engine.set_default()
+  
+  def send_status(self, message):
+     pass # we don't care
+
+  def display_msg(self, msg):
+    pass # we don't care 
+
+  def wait_for_display(self):
+    pass # we don't care
 
 
 
