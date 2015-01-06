@@ -44,17 +44,22 @@ class Hero (Creature):
         res.append(Act_HeroAttack(self, self.engine.board.get_attackable_characters(self.owner)))
       return res
 
-  def ask_for_death(self):
-      self.engine.send_message( Msg_DeadHero(self), immediate=True)
+  def add_armor(self, n):
+      self.armor += n
+      self.engine.send_message(Msg_Status(self,"armor"), immediate=True)
 
   def hurt(self, damage, caster=None):
       if not self.has_effect('insensible'):
         Creature.hurt(self, damage, caster)
 
-  def add_armor(self, n):
-      self.armor += n
-      self.engine.send_message(Msg_Status(self,"armor"), immediate=True)
+  def ask_for_death(self):
+      self.engine.send_message( Msg_DeadHero(self), immediate=True)
 
+  def death(self):
+      pass
+      #self.silence() # do nothing ?
+      # do not remove from board
+  
   def score_situation(self):
       # healthpoint: 1 at 0, 0.3 at 30
       # sum_i=1..hp max(0, 1-0.0233*i)

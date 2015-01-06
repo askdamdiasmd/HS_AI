@@ -1162,7 +1162,7 @@ if __name__=="__main__":
     from decks import fake_deck
     cardbook = build_cardbook()
     
-    cards = ["faerie dragon","fake damage spell 1","ironbeak owl"]
+    cards = ["fake damage spell 8"]
     deck1 = fake_deck(cardbook,dbg,cards)
     hero1 = Hero(cardbook["Anduin Wrynn"])
     player1 = HumanPlayerAscii(hero1, 'jerome', deck1)
@@ -1187,8 +1187,14 @@ if __name__=="__main__":
       player2.add_mana_crystal(mana)  
 
     if setup:
-      dbg_add_minion(player1, cardbook["chillwind yeti"])
-      dbg_add_minion(player2, cardbook["spectral spider"])
+      dbg_add_minion(player2, cardbook["War Golem"])
+      dbg_add_minion(player2, cardbook["War Golem"])
+      dbg_add_minion(player2, cardbook["War Golem"])
+      dbg_add_minion(player2, cardbook["War Golem"])
+      dbg_add_minion(player2, cardbook["War Golem"])
+      dbg_add_minion(player1, cardbook["spider tank"])
+      dbg_add_minion(player1, cardbook["spider tank"])
+      dbg_add_minion(player1, cardbook["spider tank"])
     
     # start playing
     #show_ACS()

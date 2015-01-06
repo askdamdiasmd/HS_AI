@@ -43,8 +43,11 @@ class Action (object):
 
   def select(self, choices):
       assert len(self.choices)==len(choices), pdb.set_trace()
-      self.choices = choices
+      self.choices = tuple(choices)
       return self
+
+  def has_chosen(self):
+      return type(self.choices)==tuple
 
   def randomness(self):
       # number of possible outcomes
@@ -69,7 +72,7 @@ class Act_PlayCard (Action):
         Action.__init__(self,card.owner,card.cost)
         self.card = card
     def __str__(self):
-        return "Card %s" % self.card
+        return "Play Card %s" % self.card
     def execute(self):
         self.engine.send_message([
             Msg_PlayCard(self.caster,self.card, self.cost)] )
@@ -125,7 +128,10 @@ class Act_Attack (Action):
         Action.__init__(self, caster)
         self.choices = [targets]
     def __str__(self):
-        return "Attack with %s" % self.caster
+        if self.has_chosen():
+          return "Attack with %s on %s" % (self.caster, self.choices[0])
+        else:
+          return "Attack with %s" % self.caster
     def execute(self):
         target = self.choices[0]
         assert type(target)!=list
@@ -223,7 +229,7 @@ class Act_HeroPower (Action):
         self.choices = [targets]
         self.actions = actions  # execution is defined by card
     def __str__(self):
-        if type(self.choices)==tuple and len(self.choices):
+        if self.has_chosen():
           return "Hero Power (%d): %s on %s" % (self.cost, self.caster.hero.card.desc, self.choices[0])
         else:    
           return "Hero Power (%d): %s" % (self.cost, self.caster.hero.card.desc)

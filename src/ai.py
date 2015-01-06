@@ -129,6 +129,12 @@ class SimpleAI (Player):
       
       sim.end_simulation(0)
       
+#      tmp = open("tmp.txt","a")
+#      print >>tmp, "\nprediction: "
+#      for action, choice in predictions:
+#        print >>tmp, str(action)
+#      print >>tmp, "final score: %g" % best
+      
       action, choice = predictions.pop(0)
       action.select(choice)
       return action

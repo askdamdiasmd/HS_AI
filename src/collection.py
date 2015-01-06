@@ -711,7 +711,9 @@ def build_cardbook():
         #desc="Stealth", effects="stealth") )
   #add( Card_Minion(7, 6, 6, "Stormwind Champion", name_fr="", 
         #desc="Your other minions have +1/+1.") )
-  #add( Card_Minion(7, 7, 7, "War Golem") )
+  
+  add( Card_Minion(7, 7, 7, "War Golem") )
+  
   #add( Card_Minion(8, 7, 7, "Gruul", name_fr="", 
         #desc="At the end of each turn, gain +1/+1 .") )
   #add( Card_Minion(8, 8, 8, "Ragnaros the Firelord", name_fr="", 
