@@ -103,8 +103,8 @@ class Act_PlayMinionCard_BC (Act_PlayMinionCard):
         Act_PlayMinionCard.___init___(self,card)
         self.choices = [self.engine.board.get_free_slots(card.owner)]
         self.hidden_target = None
-        if chosable_targets!=None:  self.choices += [chosable_targets]
-        elif hidden_target!=None:  self.hidden_target = hidden_target
+        if chosable_targets:  self.choices += [chosable_targets]
+        elif hidden_target:  self.hidden_target = hidden_target
         self.battlecry = battlecry
     def execute(self):
         Act_PlayCard.execute(self)
