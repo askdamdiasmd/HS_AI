@@ -109,7 +109,11 @@ class SimpleAI (Player):
         
         # try all possible actions
         for action in actions:
-          for choice in self.iter_choices(action.choices,10,pos_mode='left'): 
+          if action.neighbors():
+            pos_mode='full'
+          else:
+            pos_mode='left'
+          for choice in self.iter_choices(action.choices,10,pos_mode): 
             action.select(choice)
             sim.send_message(action)
             score = sim.board.score_situation( self )

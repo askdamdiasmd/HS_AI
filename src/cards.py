@@ -78,7 +78,7 @@ class Card_Minion_BC (Card_Minion):
         self.hidden_target = hidden_target
     def list_actions(self):
         targets = self.list_targets(self.targets) if self.targets else None
-        hidden_target = self.list_targets(self.hidden_target) if self.hidden_target else None
+        hidden_target = self.hidden_target #self.list_targets(self.hidden_target) if self.hidden_target else None
         return Act_PlayMinionCard_BC(self, self.battlecry, targets, hidden_target)
 
 

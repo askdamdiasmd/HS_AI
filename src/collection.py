@@ -407,7 +407,7 @@ def build_cardbook():
         #desc="Battlecry: Swap the Attack and Health of a minion.") )
 
   add( Card_Minion(2, 2, 2, "Dire Wolf Alpha", name_fr="Loup alpha redoutable", cat="beast",
-        effects=[Eff_BuffLeftRight(1,0)], 
+        effects=[Eff_BuffNeighbors(1,0)], 
         desc="Adjacent minions have +1 Attack.", desc_fr="Les serviteurs adjacents ont +1 ATQ") )
   
   #add( Card_Minion(2, 0, 7, "Doomsayer", name_fr="", 
@@ -518,8 +518,11 @@ def build_cardbook():
   
   #add( Card_Minion(3, 1, 5, "Imp Master", name_fr="", 
         #desc="At the end of your turn, deal 1 damage to this minion and summon a 1/1 Imp.") )
-  #add( Card_Minion_BC(3, 4, 7, "Injured Blademaster", name_fr="", 
-        #desc="Battlecry: Deal 4 damage to HIMSELF.") )
+  
+  add( Card_Minion_BC(3, 4, 7, "Injured Blademaster", 
+        Eff_Message(lambda self: Msg_Damage(self.caster,self.owner,4)), hidden_target="self", 
+        name_fr="Maitre-lame blesse", desc="Battlecry: Deal 4 damage to HIMSELF.") )
+        
   #add( Card_Minion_BC(3, 2, 2, "Ironforge Rifleman", name_fr="", 
         #desc="Battlecry: Deal 1 damage.") )
   #add( Card_Minion(3, 3, 3, "Ironfur Grizzly", name_fr="", 
@@ -626,7 +629,7 @@ def build_cardbook():
         #desc="Taunt. Deathrattle Deal 2 damage to ALL characters.", effects="taunt deathrattle") )
   
   add( Card_Minion_BC(5, 4, 4, "Azure Drake",
-        Eff_Message(lambda self: Msg_DrawCard(self.owner.owner)), "owner", 
+        Eff_Message(lambda self: Msg_DrawCard(self.owner.owner)), hidden_target="self", 
         name_fr="Drake azur", effects=[Eff_SpellDamage(1)], 
         desc="Spell Damage +1. Battlecry: Draw a card.", cat="dragon") )
   

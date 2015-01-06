@@ -35,6 +35,9 @@ class Action (object):
   def num_choices(self):
       return len(self.choices)
 
+  def neighbors(self):
+      return False # return True if self = minion with neighbor aura/battlecry
+
   def cardinality(self):
       res = 1
       for ch in self.choices:
@@ -89,6 +92,9 @@ class Act_PlayMinionCard (Act_PlayCard):
     def is_valid(self):
         player = self.caster
         return len(player.minions)<7
+    def neighbors(self):
+        from effects import Eff_BuffNeighbors
+        return any([type(e)==Eff_BuffNeighbors for e in self.card.effects])
     def execute(self):
         Act_PlayCard.execute(self)
         pos = self.choices[0]
@@ -106,6 +112,8 @@ class Act_PlayMinionCard_BC (Act_PlayMinionCard):
         if chosable_targets:  self.choices += [chosable_targets]
         elif hidden_target:  self.hidden_target = hidden_target
         self.battlecry = battlecry
+    def neighbors(self):
+        return self.hidden_target=='neighbors' or Act_PlayMinionCard.neighbors(self)
     def execute(self):
         Act_PlayCard.execute(self)
         pos = self.choices[0]

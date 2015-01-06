@@ -57,7 +57,7 @@ class Thing (object):
         not_self = True
         targets = targets[6:]
       if targets=="self":
-        res = [owner]
+        res = [self]
       else:
         res = self.engine.board.list_targets(self.owner, targets)
       if not_self and self in res:

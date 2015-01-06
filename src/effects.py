@@ -268,7 +268,7 @@ class Eff_Absorb (Effect):
         self.engine.send_message(Msg_CheckDead(owner))
 
 
-class Eff_BuffLeftRight (Effect):
+class Eff_BuffNeighbors (Effect):
     """ permanent buff of left and right minion's neighbors """ 
     def __init__(self, atq, hp):
         Effect.__init__(self)

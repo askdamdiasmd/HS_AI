@@ -810,8 +810,42 @@ def draw_Msg_StartHeroPower(self):
     player = self.caster
     button = self.engine.board.viz.hero_power_buttons[player]
     button.used = True
-    button.draw(blink=1)
-    
+    button.draw(blink=0.5)
+
+
+def get_center(viz):
+    pos = uc.getbegyx(viz.win)
+    size = uc.getmaxyx(viz.win)
+    return pos[0]+size[0]/2, pos[1]+size[1]/2
+
+def anim_magic_burst( engine, start, end, ch, color, tstep=0.03, erase=False ):
+    dis = int(sum([(start[i]-end[i])**2 for i in range(2)])**0.5)
+    pos = []
+    for t in range(int(0.5+dis)):
+      y,x = [int(0.5+start[i] + (end[i]-start[i])*t/dis) for i in range(2)]
+      pos.append((y,x))
+      oldch = uc.mvinch(y,x)
+      uc.mvaddch(y,x,ch,color)
+      show_panels()
+      time.sleep(tstep)
+      if erase and len(pos)>=3: 
+        y,x = pos.pop(-3)
+        uc.mvaddch(y,x,oldch&0xFF,oldch)
+    engine.board.viz.draw()
+
+
+def draw_Msg_HeroHeal(self):
+    if self.engine.board.viz.animated:
+      player = self.caster
+      button = self.engine.board.viz.hero_power_buttons[player]
+      anim_magic_burst(self.engine, get_center(button), get_center(self.target.viz), ord('+'), uc.black_on_green, erase=True)
+
+def draw_Msg_HeroDamage(self):
+    if self.engine.board.viz.animated:
+      player = self.caster
+      button = self.engine.board.viz.hero_power_buttons[player]
+      anim_magic_burst(self.engine, get_center(button), get_center(self.target.viz), ord('*'), uc.black_on_red, erase=True)
+
 
 
 ### Board --------
@@ -1173,7 +1207,7 @@ if __name__=="__main__":
     from decks import fake_deck
     cardbook = build_cardbook()
     
-    cards = ["Guerrier tauren"]
+    cards = ["Defender of Argus"]
     deck1 = fake_deck(cardbook,dbg,cards)
     hero1 = Hero(cardbook["Anduin Wrynn"])
     player1 = HumanPlayerAscii(hero1, 'jerome', deck1)
@@ -1200,8 +1234,8 @@ if __name__=="__main__":
       player2.add_mana_crystal(mana)  
 
     if setup:
-      dbg_add_minion(player1, cardbook["Worgen dechaine"])
-      dbg_add_minion(player2, cardbook["mage de dalaran"])
+      dbg_add_minion(player1, cardbook["injured blademaster"])
+      #dbg_add_minion(player2, cardbook["mage de dalaran"])
     
     # start playing
     #show_ACS()

@@ -118,8 +118,8 @@ class Board:
         res = None
       elif targets=='nobody':
         res = []
-      elif targets=="owner":
-        res = owner
+      elif targets=="owner":  # different from "self", see Creature.list_targets()
+        res = owner # = is a player
       elif targets.startswith("character"):
         res = self.get_characters(owner,targetable=targetable)
       elif targets.startswith('minion'):
