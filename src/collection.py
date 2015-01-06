@@ -560,7 +560,7 @@ def build_cardbook():
         #desc="Your other Pirates have +1/+1.", cat="pirate") )
 
   add( Card_Minion(3, 2, 3, "Tauren Warrior", name_fr="Guerrier tauren", 
-        desc="Taunt. Enrage: +3 Attack", effects=[Eff_Enrage(3)]) )
+        desc="Taunt. Enrage: +3 Attack", effects=['taunt',Eff_Enrage(3)]) )
 
   #add( Card_Minion(3, 2, 3, "Thrallmar Farseer", name_fr="", 
         #desc="Windfury", effects="windfury") )

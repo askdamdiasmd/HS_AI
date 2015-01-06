@@ -1173,14 +1173,14 @@ if __name__=="__main__":
     from decks import fake_deck
     cardbook = build_cardbook()
     
-    cards = ["Worgen dechaine","archere elfe","ironbeak owl"]
+    cards = ["Guerrier tauren"]
     deck1 = fake_deck(cardbook,dbg,cards)
     hero1 = Hero(cardbook["Anduin Wrynn"])
     player1 = HumanPlayerAscii(hero1, 'jerome', deck1)
 
     deck2 = fake_deck(cardbook,dbg,cards)
     hero2 = Hero(cardbook["Jaina Proudmoore"])
-    if 1:
+    if 0:
       player2 = HumanPlayerAscii(hero2, 'mattis', deck2)
     elif 1:
       from ai import SimpleAI
