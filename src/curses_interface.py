@@ -1207,7 +1207,7 @@ if __name__=="__main__":
     from decks import fake_deck
     cardbook = build_cardbook()
     
-    cards = ["fake weapon 1","Tundra Rhino","Hyena"]
+    cards = ["Tundra Rhino","Hyena"]
     deck1 = fake_deck(cardbook,dbg,cards)
     hero1 = Hero(cardbook["Anduin Wrynn"])
     player1 = HumanPlayerAscii(hero1, 'jerome', deck1)
@@ -1234,8 +1234,8 @@ if __name__=="__main__":
       player2.add_mana_crystal(mana)  
 
     if setup:
-      dbg_add_minion(player1, cardbook["injured blademaster"])
-      #dbg_add_minion(player2, cardbook["mage de dalaran"])
+      #dbg_add_minion(player1, cardbook["injured blademaster"])
+      dbg_add_minion(player2, cardbook["war golem"])
     
     # start playing
     #show_ACS()

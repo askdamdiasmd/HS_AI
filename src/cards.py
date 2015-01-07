@@ -40,7 +40,8 @@ class Card (object):
         self.desc = '. '.join(['%s%s'%(e[0].upper(),e[1:]) for e in self.effects if type(e)==str])
       if desc_fr=='':  
         fr = [eff_trad_fr[e] for e in self.effects if type(e)==str]
-        self.desc_fr = '. '.join([e for e in fr if e])
+        fr = '. '.join([e for e in fr if e])
+        if len(self.desc) < len(fr)+2:  self.desc_fr = fr # only if description is basic
 
     @classmethod
     def set_engine(cls, engine):

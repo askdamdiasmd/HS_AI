@@ -392,7 +392,7 @@ class Eff_While (Effect):
             targ.remove_effect(self.effect)
     def undo(self):
         self.owner.remove_effect(self.effect)
-      
+
 
 
 class Eff_DrawCard (Effect):
@@ -412,24 +412,36 @@ class Eff_DrawCard (Effect):
 
 
 class Eff_GiveCharge (Effect):
-    """ give charge to others minions on Msg_AddMinion trigger """
-    def __init__(self, condition, retroactive=False):
+    """ give charge to others minions while on the board """
+    def __init__(self, condition, retroactive=False, permanent=True):
         Effect.__init__(self)
         self.condition = condition
         self.retroactive = retroactive  # give charge to minions already on board
+        self.permanent = permanent
     def bind_to(self, owner, caster=None):
         self.owner = owner
         self.caster = caster
         owner.triggers.append((Msg_MinionPopup, self))
+    def non_permanent_effect(self):
+        card_id = self.owner.card.id # (tundra rhino) card id
+        return Eff_While((Msg_MinionPopup, Msg_DeadMinion),
+          lambda self,msg: any([m.card.id==card_id for m in self.owner.owner.minions if not m.dead]),  # while tundra rhino exists
+          'charge', prerequisite=lambda self,msg: self.owner.owner is msg.caster.owner) # check that msg is for same player
     def trigger(self, msg):
         if self.retroactive and msg.caster is self.owner:  
           for m in self.owner.owner.minions:
-            if self.condition(self,m):
+            if self.condition(self,m) and not m.has_effect('charge'):
               m.add_effects(['charge'])
+              if not self.permanent: # has charge while owner exist
+                charge = Msg_BindEffect(self.owner,m,self.non_permanent_effect())
+                self.engine.send_message(charge,immediate=True)
         elif msg.caster.owner is self.owner.owner and self.condition(self,msg.caster):
           if not msg.caster.has_effect("charge"):
-            charge = Msg_BindEffect(self.owner,msg.caster,Eff_BuffMinion(0,0,others='charge'))
-            self.engine.send_message(charge,immediate=True)
+            m = msg.caster
+            m.add_effects(['charge'])
+            if not self.permanent: # has charge while owner exist
+              charge = Msg_BindEffect(self.owner,m,self.non_permanent_effect())
+              self.engine.send_message(charge,immediate=True)
 
 
 

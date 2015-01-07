@@ -199,7 +199,7 @@ def build_cardbook():
         desc="Battlecry: Give a friendly Beast +2/+2 and Taunt.", cls="hunter") )
   
   add( Card_Minion(5, 2, 5, "Tundra Rhino", name_fr="Rhino de la toundra", effects=['charge', 
-        Eff_GiveCharge(lambda self,minion: minion.card.cat=='beast',retroactive=True)],
+        Eff_GiveCharge(lambda self,minion: minion.card.cat=='beast',retroactive=True,permanent=False)],
         desc="Your Beasts have Charge.", cls="hunter", cat="beast") )
 
   add( Card_Minion(6, 6, 5, "Savannah Highmane", name_fr="Grande Criniere des Savanes", 

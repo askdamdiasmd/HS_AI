@@ -216,7 +216,8 @@ class Msg_AddSecret (Msg_AddThing):
     def __str__(self):
         return "%s sets %s" %(self.caster, self.thing)
 
-class Msg_Popup (Message):
+class Msg_Popup (Message):  
+    # self.caster = minion/weapon/secret
     def execute(self):
         self.caster.popup()
     def __str__(self):
@@ -246,6 +247,7 @@ class Msg_CheckDead (Message):
 
 class Msg_Dead (Message):
     """ this thing just died, just for information """
+    # self.caster = minion/weapon/secret
     def __str__(self):
         return "%s dies." % self.caster
     def execute(self):
