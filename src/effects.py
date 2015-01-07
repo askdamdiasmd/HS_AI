@@ -420,8 +420,8 @@ class Eff_GiveCharge (Effect):
     def bind_to(self, owner, caster=None):
         self.owner = owner
         self.caster = caster
-        owner.triggers.append((Msg_Popup, self))
-    def trigger(self, msg):      
+        owner.triggers.append((Msg_MinionPopup, self))
+    def trigger(self, msg):
         if self.retroactive and msg.caster is self.owner:  
           for m in self.owner.owner.minions:
             if self.condition(self,m):
@@ -448,6 +448,21 @@ class Eff_Trigger (Effect):
     def trigger(self, msg):
         if self.condition(self,msg):
           self.engine.send_message(self.msg_func(self,msg),immediate=self.immediate)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
