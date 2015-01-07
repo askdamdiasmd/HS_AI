@@ -1207,7 +1207,7 @@ if __name__=="__main__":
     from decks import fake_deck
     cardbook = build_cardbook()
     
-    cards = ["Tundra Rhino","Hyena"]
+    cards = ["Shattered Sun Cleric"]
     deck1 = fake_deck(cardbook,dbg,cards)
     hero1 = Hero(cardbook["Anduin Wrynn"])
     player1 = HumanPlayerAscii(hero1, 'jerome', deck1)

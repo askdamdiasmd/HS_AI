@@ -194,7 +194,7 @@ def build_cardbook():
   add( Card_Minion(3, 4, 4, "Misha", name_fr="Misha", collectible=False, 
         desc="Taunt", cls="hunter", cat="beast", effects="taunt") )
 
-  add( Card_Minion_BC(4, 4, 3, "Houndmaster", Eff_BuffMinion(2,2,others="taunt"), 
+  add( Card_Minion_BC(4, 4, 3, "Houndmaster", lambda: Eff_BuffMinion(2,2,others="taunt"), 
         "friendly beasts", name_fr="Maitre des chiens", 
         desc="Battlecry: Give a friendly Beast +2/+2 and Taunt.", cls="hunter") )
   
@@ -273,7 +273,7 @@ def build_cardbook():
         desc="Divine Shield", effects="divine_shield") )
   
   add( Card_Minion_BC(1, 1, 2, "Bloodsail Corsair", 
-        Eff_BuffWeapon(damage=1), hidden_target="enemy weapon",
+        lambda: Eff_BuffWeapon(damage=1), hidden_target="enemy weapon",
         name_fr="Forban de la voile sanglante", 
         desc="Battlecry: Remove 1 Durability from your opponent's weapon.", cat="pirate") )
   
@@ -287,7 +287,7 @@ def build_cardbook():
   add( Card_Minion(1, 2, 1, "Damaged Golem", name_fr="Golem endommage", collectible=False) )
   
   add( Card_Minion_BC(1, 1, 1, "Elven Archer", 
-        Eff_Message(lambda self: Msg_Damage(self.caster,self.owner,1)), "characters", 
+        lambda: Eff_Message(lambda self: Msg_Damage(self.caster,self.owner,1)), "characters", 
         name_fr="Archere elfe", desc="Battlecry: Deal 1 damage.") )
         
   #add( Card_Minion(1, 0, 4, "Emboldener 3000", name_fr="", collectible=False, 
@@ -363,7 +363,7 @@ def build_cardbook():
         desc="Charge", cat="beast", effects="charge") )
   
   add( Card_Minion_BC(1, 2, 1, "Voodoo Doctor", 
-        Eff_Message(lambda self: Msg_Heal(self.caster,self.owner,2)), "characters", 
+        lambda: Eff_Message(lambda self: Msg_Heal(self.caster,self.owner,2)), "characters", 
         name_fr="Docteur Vaudou", desc="Battlecry: Restore 2 Health.") )
   
   add( Card_Minion(1, 1, 1, "Whelp", name_fr="Dragonnet", cat="dragon", collectible=False) )
@@ -380,7 +380,7 @@ def build_cardbook():
         desc="At the end of your turn, give another random friendly minion +1 Health.") )
   
   add( Card_Minion_BC(2, 3, 2, "Acidic Swamp Ooze", 
-        Eff_BuffWeapon(destroy=1), hidden_target="enemy weapon",
+        lambda: Eff_BuffWeapon(destroy=1), hidden_target="enemy weapon",
         name_fr="Limon des marais acides", 
         desc="Battlecry: Destroy your opponent's weapon.") )
   
@@ -427,7 +427,7 @@ def build_cardbook():
   #add( Card_Minion(2, 1, 3, "Hidden Gnome", name_fr="", 
         #desc="Was hiding in a barrel!") )
   
-  add( Card_Minion_BC(2, 2, 1, "Ironbeak Owl", Eff_Silence(), "minions", 
+  add( Card_Minion_BC(2, 2, 1, "Ironbeak Owl", lambda: Eff_Silence(), "minions", 
        name_fr="Chouette bec-de-fer", desc="Battlecry: Silence a minion.", cat="beast",
        desc_fr="Cri de guerre: reduit au silence un autre serviteur") )
   
@@ -466,7 +466,7 @@ def build_cardbook():
   
   #add( Card_Minion(2, 2, 2, "Shado-Pan Monk") )
   
-  add( Card_Minion_BC(2, 2, 3, "Sunfury Protector", Eff_BuffMinion(0,0,others='taunt'), hidden_target='neighbors',
+  add( Card_Minion_BC(2, 2, 3, "Sunfury Protector", lambda: Eff_BuffMinion(0,0,others='taunt'), hidden_target='neighbors',
        name_fr="Protectrice Solfury", desc="Battlecry: Give adjacent minions Taunt.",
        desc_fr="Cri de guerre: confere Provocation aux serviteurs adjacents") )
   
@@ -520,7 +520,7 @@ def build_cardbook():
         #desc="At the end of your turn, deal 1 damage to this minion and summon a 1/1 Imp.") )
   
   add( Card_Minion_BC(3, 4, 7, "Injured Blademaster", 
-        Eff_Message(lambda self: Msg_Damage(self.caster,self.owner,4)), hidden_target="self", 
+        lambda: Eff_Message(lambda self: Msg_Damage(self.caster,self.owner,4)), hidden_target="self", 
         name_fr="Maitre-lame blesse", desc="Battlecry: Deal 4 damage to HIMSELF.") )
         
   #add( Card_Minion_BC(3, 2, 2, "Ironforge Rifleman", name_fr="", 
@@ -553,7 +553,7 @@ def build_cardbook():
   #add( Card_Minion(3, 3, 1, "Scarlet Crusader", name_fr="", 
         #desc="Divine Shield", effects="divine_shield") )
 
-  add( Card_Minion_BC(3, 3, 2, "Shattered Sun Cleric", Eff_BuffMinion(1,1,False), 'friendly minions',
+  add( Card_Minion_BC(3, 3, 2, "Shattered Sun Cleric", lambda: Eff_BuffMinion(1,1,False), 'friendly minions',
        desc="Battlecry: Give a friendly minion +1/+1.", name_fr="Clerc du Soleil brise",
        desc_fr="Cri de guerre: confere +1/+1 a un serviteur allie") )
 
@@ -574,7 +574,7 @@ def build_cardbook():
   #add( Card_Minion_BC(4, 5, 4, "Ancient Brewmaster", name_fr="", 
         #desc="Battlecry: Return a friendly minion from the battlefield to your hand.") )
   
-  add( Card_Minion_BC(4, 2, 5, "Ancient Mage", Eff_SpellDamage(1), hidden_target="neighbors",
+  add( Card_Minion_BC(4, 2, 5, "Ancient Mage", lambda: Eff_SpellDamage(1), hidden_target="neighbors",
         name_fr="Mage ancien", desc="Battlecry: Give adjacent minions Spell Damage +1.") )
 
   add( Card_Minion(4, 4, 5, "Baine Bloodhoof") )
@@ -586,11 +586,11 @@ def build_cardbook():
   #add( Card_Minion(4, 4, 2, "Cult Master", name_fr="", 
         #desc="Whenever one of your other minions dies, draw a card.") )
 
-  add( Card_Minion_BC(4, 4, 4, "Dark Iron Dwarf", Eff_BuffMinion(2,0,True), "minions",
+  add( Card_Minion_BC(4, 4, 4, "Dark Iron Dwarf", lambda: Eff_BuffMinion(2,0,True), "minions",
        name_fr="Nain sombrefer", desc="Battlecry: Give a minion +2 Attack this turn.",
        desc_fr="Cri de guerre: confere +2 ATQ a un serviteur pendant ce tour") )
   
-  add( Card_Minion_BC(4, 2, 3, "Defender of Argus", Eff_BuffMinion(1,1,others='taunt'), hidden_target='neighbors',
+  add( Card_Minion_BC(4, 2, 3, "Defender of Argus", lambda: Eff_BuffMinion(1,1,others='taunt'), hidden_target='neighbors',
        name_fr="Defenseur d'Argus", desc="Battlecry: Give adjacent minions +1/+1 and Taunt.",
        desc_fr="Cri de guerre: donne aux serviteurs adjacents +1/+1 et Provocation") )
   
@@ -629,7 +629,7 @@ def build_cardbook():
         #desc="Taunt. Deathrattle Deal 2 damage to ALL characters.", effects="taunt deathrattle") )
   
   add( Card_Minion_BC(5, 4, 4, "Azure Drake",
-        Eff_Message(lambda self: Msg_DrawCard(self.owner.owner)), hidden_target="self", 
+        lambda: Eff_Message(lambda self: Msg_DrawCard(self.owner.owner)), hidden_target="self", 
         name_fr="Drake azur", effects=[Eff_SpellDamage(1)], 
         desc="Spell Damage +1. Battlecry: Draw a card.", cat="dragon") )
   
@@ -817,7 +817,7 @@ def build_cardbook():
   #add( Card_Minion_BC(3, 3, 5, "Felguard", name_fr="", 
         #desc="Taunt. Battlecry: Destroy one of your Mana Crystals.", cls="warlock", cat="demon", effects="taunt") )
 
-  add( Card_Minion_BC(3, 3, 3, "Void Terror", Eff_Absorb(), hidden_target='neighbors', 
+  add( Card_Minion_BC(3, 3, 3, "Void Terror", lambda: Eff_Absorb(), hidden_target='neighbors', 
        desc="Battlecry: Destroy adjacent minions and gain their Attack and Health.", 
        name_fr="Terreur du vide", cls="warlock", cat="demon",
        desc_fr="Cri de guerre: Detruit les serviteurs adjacents et gagne leur ATQ et Vie."))
