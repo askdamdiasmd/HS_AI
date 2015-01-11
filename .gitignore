@@ -38,3 +38,10 @@ ehthumbs.db
 Thumbs.db
 src/log.txt
 src/log.txt
+src/c++/hearthstone/hearthstone.opensdf
+*.sdf
+*.obj
+*.idb
+*.pdb
+*.tlog
+*.ilk
