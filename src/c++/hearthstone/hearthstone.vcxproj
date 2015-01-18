@@ -66,7 +66,24 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="collection.cpp" />
+    <ClCompile Include="engine.cpp" />
     <ClCompile Include="main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="actions.h" />
+    <ClInclude Include="Cards.h" />
+    <ClInclude Include="collection.h" />
+    <ClInclude Include="common.h" />
+    <ClInclude Include="creatures.h" />
+    <ClInclude Include="decks.h" />
+    <ClInclude Include="effects.h" />
+    <ClInclude Include="engine.h" />
+    <ClInclude Include="Board.h" />
+    <ClInclude Include="events.h" />
+    <ClInclude Include="heroes.h" />
+    <ClInclude Include="messages.h" />
+    <ClInclude Include="players.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

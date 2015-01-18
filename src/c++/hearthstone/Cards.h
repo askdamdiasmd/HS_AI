@@ -1,9 +1,13 @@
 #include "common.h"
-#include "engine.h"
+
 #include "players.h"
+#include "effects.h"
+#include "actions.h"
+
+class Engine;
 
 struct Card {
-  Player* owner;
+  Player* player;
   int cost;
   string name, name_fr;
   enum HeroClass {
@@ -14,49 +18,33 @@ struct Card {
   string desc, desc_fr;
   //ListEffects effects;
   bool collectible;
-  
-  Card(int cost, const string& name ) :
-    owner(nullptr), cost(cost), name(name), collectible(true), cls(Classes::None) {}
-  
-#define NAMED_PARAM(type, param)  Card& set_##param(type v) { param = v; return *this; }
-  NAMED_PARAM(HeroClass, cls);
-  NAMED_PARAM(bool, collectible);
-  NAMED_PARAM(string, desc);
-  NAMED_PARAM(string, desc);
-  NAMED_PARAM(string, name_fr);
-  NAMED_PARAM(string, desc_fr);
-#undef NAMED_PARAM
+  SET_ENGINE();
 
-  //  effects = tolist(effects) # list of effects : {'taunt', 'stealth', or buffs that can be silenced}
-  //score = 0 # estimated real mana cost, dependent on a specific deck it's in
-  //  if desc == '':
-  //#assert all([type(e) == str for e in effects]), "error: description is missing"
-  //desc = '. '.join(['%s%s' % (e[0].upper(), e[1:]) for e in effects if type(e) == str])
-  //  if desc_fr == '':
-  //fr = [eff_trad_fr[e] for e in effects if type(e) == str]
-  //  fr = '. '.join([e for e in fr if e])
-  //  if len(desc) < len(fr) + 2 : desc_fr = fr # only if description is basic
-
-  static Engine* e;
-  static void set_engine( Engine* en) {
-    engine = e;
-  }
+  Card(int cost, const string& name) :
+    player(nullptr), cost(cost), name(name), 
+    collectible(true), cls(HeroClass::None) {}
+  
+  NAMED_PARAM(Card, HeroClass, cls);
+  NAMED_PARAM(Card, bool, collectible);
+  NAMED_PARAM(Card, string, desc);
+  NAMED_PARAM(Card, string, desc);
+  NAMED_PARAM(Card, string, name_fr);
+  NAMED_PARAM(Card, string, desc_fr);
 
   virtual ListAction list_actions() const = 0;
 
-  ListCreatures list_targets(self, const string& targets) {
+  ListCreature list_targets(const string& targets) {
     return engine->board.list_targets(owner, targets);
   }
 };
 
 typedef shared_ptr<Card> PCard;
 
-class Card_Minion : public Card {
+struct Card_Minion : public Card {
   int hp, atq;
   enum Category {
     None, 
     Beast,
-
   } cat;
   struct StaticEffect {
     bool taunt;
@@ -64,11 +52,8 @@ class Card_Minion : public Card {
   } eff;
   ListEffect effects;
   
-  Card_Minion(int cost, int atq, int hp, string name, cat = Category::None )
-    Card.__init__(self, cost, name, **kwargs)
-    hp = hp    # health point = life
-    atq = atq  # attack
-    cat = cat  # category of minion = 'beast', ...
+  Card_Minion(int cost, int atq, int hp, string name, cat = Category::None ) :
+    Card(cost, name), hp(hp), atq(atq), cat(cat) {}
 
   string tostr() {
     return string_format("%s (%d): %d/%d %s", name_fr, cost, atq, hp, desc);
@@ -78,10 +63,21 @@ class Card_Minion : public Card {
     return Act_PlayMinionCard(self);
   }
 };
-//Properties props; // taunt and so on
+
+typedef shared_ptr<Card_Minion> PCardMinion;
 
 
 /*
+//  effects = tolist(effects) # list of effects : {'taunt', 'stealth', or buffs that can be silenced}
+//score = 0 # estimated real mana cost, dependent on a specific deck it's in
+//  if desc == '':
+//#assert all([type(e) == str for e in effects]), "error: description is missing"
+//desc = '. '.join(['%s%s' % (e[0].upper(), e[1:]) for e in effects if type(e) == str])
+//  if desc_fr == '':
+//fr = [eff_trad_fr[e] for e in effects if type(e) == str]
+//  fr = '. '.join([e for e in fr if e])
+//  if len(desc) < len(fr) + 2 : desc_fr = fr # only if description is basic
+
 
 ### --------------- Minion cards ----------------------
 

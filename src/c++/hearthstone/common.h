@@ -2,6 +2,7 @@
 
 #include <stdarg.h>  // For va_start, etc.
 #include <memory>    // For shared_ptr, unique_ptr
+#include <algorithm>
 
 #include <string>
 #include <vector>
@@ -37,4 +38,24 @@ inline string string_format(const string fmt_str, ...) {
       break;
   }
   return string(formatted.get());
+}
+
+#define SET_ENGINE()  \
+  static Engine* engine; \
+  static void set_engine(Engine* e) {engine = e;}
+
+#define NAMED_PARAM(cls, type, param)  cls* set_##param(type v) { param = v; return this; }
+
+#define UPDATE_STATUS(which) if(!engine->is_simulation) engine->send_status(Msg_Status(state,which))
+#define SEND_MSG(type, ...)  engine->send_message(NEWP(type,##__VA_ARGS__));
+
+inline bool startswith(string s, const char* comp) {
+  return !s.compare(0, strlen(comp), comp);
+}
+
+const float INF = 1.f / 0.f;
+
+template<typename T>
+inline int len(const T& container) {
+  return (int)container.size();
 }
