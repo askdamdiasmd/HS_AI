@@ -1,9 +1,9 @@
 #include "common.h"
 
 
-class Effect {};
+struct Effect {};
 
 
 typedef shared_ptr<Effect> PEffect;
 
-typedef list<PEffect> ListEffect;
+typedef vector<PEffect> ListEffect;

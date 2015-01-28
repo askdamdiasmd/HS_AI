@@ -3,7 +3,7 @@
 
 /* List of all possible cards
 */
-class Collection
+struct Collection
 {
   unordered_map<string, PCard> cardbook_by_name;
   vector<PCard> cardbook_by_id;

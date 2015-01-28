@@ -1,7 +1,7 @@
 #include "common.h"
 
 
-class Deck {};
+struct Deck {};
 
 
 typedef shared_ptr<Deck> PDeck;

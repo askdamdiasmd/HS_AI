@@ -1,10 +1,9 @@
-#include <stdlib.h>
-#include <curses.h>
-
-#include "collection.h"
-#include "decks.h"
+#include "curses_interface.h"
+//#include "collection.h"
+//#include "decks.h"
 
 int main(int argc, char** argv) {
+  /*
   bool anim, mana, dbg, setup;
 
   anim = mana = dbg = setup = false;
@@ -51,8 +50,11 @@ int main(int argc, char** argv) {
       dbg_add_minion(player2, cardbook["war golem"])
     
     # start playing
-    #show_ACS()
-    #show_unicode()
+    #show_ACS()*/
+
+  show_unicode();
+  
+  /*
     engine.start_game()
     while not engine.is_game_ended():
       engine.play_turn()
@@ -66,6 +68,5 @@ int main(int argc, char** argv) {
     uc.getch()    
     uc.endwin()
     uc.endwin()
-
 */
 }

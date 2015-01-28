@@ -1,10 +1,13 @@
+#ifndef __CARDS_H__
+#define __CARDS_H__
+
 #include "common.h"
 
 #include "players.h"
 #include "effects.h"
 #include "actions.h"
 
-class Engine;
+struct Engine;
 
 struct Card {
   Player* player;
@@ -36,6 +39,8 @@ struct Card {
   ListCreature list_targets(const string& targets) {
     return engine->board.list_targets(owner, targets);
   }
+
+  virtual string tostr() const = 0;
 };
 
 typedef shared_ptr<Card> PCard;
@@ -55,12 +60,12 @@ struct Card_Minion : public Card {
   Card_Minion(int cost, int atq, int hp, string name, cat = Category::None ) :
     Card(cost, name), hp(hp), atq(atq), cat(cat) {}
 
-  string tostr() {
+  virtual string tostr() const {
     return string_format("%s (%d): %d/%d %s", name_fr, cost, atq, hp, desc);
   }
 
   virtual ListAction list_actions() const {
-    return Act_PlayMinionCard(self);
+    return Act_PlayMinionCard(this);
   }
 };
 
@@ -82,32 +87,32 @@ typedef shared_ptr<Card_Minion> PCardMinion;
 ### --------------- Minion cards ----------------------
 
 
-class Card_Minion_BC(Card_Minion) :
+struct Card_Minion_BC(Card_Minion) :
   """ Minion with a battle cry """
-  def __init__(self, cost, atq, hp, name, battlecry, targets = None, hidden_target = None, **kwargs) :
-  Card_Minion.__init__(self, cost, atq, hp, name, **kwargs)
+  def __init__(cost, atq, hp, name, battlecry, targets = None, hidden_target = None, **kwargs) :
+  Card_Minion.__init__(cost, atq, hp, name, **kwargs)
   battlecry = battlecry
   targets = targets
   hidden_target = hidden_target
-  def list_actions(self) :
+  def list_actions() :
   targets = list_targets(targets) if targets else None
   hidden_target = hidden_target #list_targets(hidden_target) if hidden_target else None
-  return Act_PlayMinionCard_BC(self, battlecry, targets, hidden_target)
+  return Act_PlayMinionCard_BC(battlecry, targets, hidden_target)
 
 
 ### --------------- Weapon cards ----------------------
 
-class Card_Weapon(Card) :
-  def __init__(self, cost, atq, hp, name, **kwargs) :
-  Card.__init__(self, cost, name, **kwargs)
+struct Card_Weapon(Card) :
+  def __init__(cost, atq, hp, name, **kwargs) :
+  Card.__init__(cost, name, **kwargs)
   hp = hp    # health point = weapon durability
   atq = atq  # attack
 
-  def __str__(self) :
+  virtual string tostr() const
   return "Weapon %s (%d): %d/%d %s" % (name_fr, cost, atq, hp, desc)
 
-  def list_actions(self) :
-  return Act_PlayWeaponCard(self)
+  def list_actions() :
+  return Act_PlayWeaponCard()
 
 
 
@@ -115,51 +120,52 @@ class Card_Weapon(Card) :
 ### ----------------- Spell cards -------------------------
 
 
-class Card_Spell(Card) :
-  def __init__(self, cost, name, actions, targets = 'none', **kwargs) :
-  Card.__init__(self, cost, name, **kwargs)
+struct Card_Spell(Card) :
+  def __init__(cost, name, actions, targets = 'none', **kwargs) :
+  Card.__init__(cost, name, **kwargs)
   actions = actions # lambda self : [Msg_* list]
   assert type(targets) == str, pdb.set_trace()
   targets = "targetable " + targets # see list_targets()
-  def __str__(self) :
+  virtual string tostr() const
   return "%s (%d): %s" % (name_fr, cost, desc)
-  def list_actions(self) :
-  return Act_PlaySpellCard(self, list_targets(targets), actions)
+  def list_actions() :
+  return Act_PlaySpellCard(list_targets(targets), actions)
 
 
-class Card_Coin(Card_Spell) :
-  def __init__(self, owner) :
-  Card_Spell.__init__(self, 0, "The coin", lambda self : [Msg_GainMana(caster, 1)],
+struct Card_Coin(Card_Spell) :
+  def __init__(owner) :
+  Card_Spell.__init__(0, "The coin", lambda self : [Msg_GainMana(caster, 1)],
   desc = "Gain one mana crystal this turn only")
   owner = owner
 
   '''
-class Card_Wrath(Card_Spell) :
+struct Card_Wrath(Card_Spell) :
   """ Druid : Wrath (2 choices) """
-  def __init__(self) :
-  Card_Spell.__init__(self, 2, "Wrath", cls = "Druid", name_fr = "Colere")
-  def list_actions(self) :
+  def __init__() :
+  Card_Spell.__init__(2, "Wrath", cls = "Druid", name_fr = "Colere")
+  def list_actions() :
   targets = engine.board.get_characters()
-  first = Act_SingleSpellDamageCard(self, targets, damage = 3)
+  first = Act_SingleSpellDamageCard(targets, damage = 3)
   actions = lambda self : [Msg_SpellDamage(caster, choices[0], damage),
   Msg_DrawCard(owner)]
-  second = Act_SingleSpellDamageCard(self, targets, damage = 1, actions = actions)
+  second = Act_SingleSpellDamageCard(targets, damage = 1, actions = actions)
   return[first, second]
   '''
 
-class Card_DamageSpell(Card_Spell) :
-  def __init__(self, cost, damage, name, targets = "characters", name_fr = "", desc = "", cls = None) :
-  Card_Spell.__init__(self, cost, name, None, targets, name_fr = name_fr, desc = desc, cls = cls)
+struct Card_DamageSpell(Card_Spell) :
+  def __init__(cost, damage, name, targets = "characters", name_fr = "", desc = "", cls = None) :
+  Card_Spell.__init__(cost, name, None, targets, name_fr = name_fr, desc = desc, cls = cls)
   damage = damage
-  def list_actions(self) :
-  return Act_SingleSpellDamageCard(self, list_targets(targets), damage)
+  def list_actions() :
+  return Act_SingleSpellDamageCard(list_targets(targets), damage)
 
 
-class Card_FakeDamageSpell(Card_DamageSpell) :
-  def __init__(self, damage, targets = "characters") :
-  Card_DamageSpell.__init__(self, damage - 1, damage, "Fake Damage Spell %d"%damage, targets,
+struct Card_FakeDamageSpell(Card_DamageSpell) :
+  def __init__(damage, targets = "characters") :
+  Card_DamageSpell.__init__(damage - 1, damage, "Fake Damage Spell %d"%damage, targets,
   name_fr = "Faux Sort de dommage %d"%damage,
   desc = "Deal %d points of damage"%damage)
 
   */
 
+#endif

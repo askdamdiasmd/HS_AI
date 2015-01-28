@@ -1,3 +1,6 @@
+#ifndef __ENGINE_H__
+#define __ENGINE_H__
+
 #include "common.h"
 
 #include "board.h"
@@ -5,19 +8,18 @@
 #include "messages.h"
 
 
-class Engine {
+struct Engine {
 public:
   Board board;
   Player* players[2];
   int turn = 0;
-  const bool is_simulation;
+  bool is_simulation;
 
 public:
-  Engine(Player* player1, Player* player2, bool simulation = false) :
+  Engine(Player* player1, Player* player2) :
     players{ player1, player2 },
     board(player1, player2),
-    turn(0), executing(false), 
-    is_simulation(simulation) {
+    turn(0), is_simulation(false) {
     set_default();
   }
 
@@ -37,30 +39,22 @@ public:
 
   void play_turn();
 
-  virtual void display_status(PMsgStatus & message) = 0;
+  virtual void display_UPDATE_STATUS(PMsgUPDATE_STATUS & message) = 0;
 
   bool is_game_ended() {
     return  board.is_game_ended();
   }
 
   PPlayer get_winner();
-};
 
-
-class  SimulationEngine : public Engine {
-  Engine & true_engine;
-  Board & board;
-  int turn;
+private:
   unordered_map<htype, int> saved_turn;
 
 public:
-  SimulationEngine(Engine & true_engine, htype num) :
-    Engine(true_engine.players[0], true_engine.players[1], true),
-    true_engine(true_engine),
-    board(true_engine.board),
-    turn(true_engine.turn)
-  {
+  Engine* launch_simulation(htype num = 0) {
+    is_simulation = true;
     save_state(num);
+    return this;
   }
 
   void save_state(int num = 0);
@@ -78,20 +72,11 @@ public:
   //board.end_simulation()
   //true_engine.set_default()
 
-  //def  send_status(, message) :
+  //def  send_UPDATE_STATUS(, message) :
   //pass  //  we  don't  care
 
-  virtual void display_status(PStatus & msg);
-};
-
-
-
-class  PlayEngine : public Engine {
-  SimulationEngine launch_simulation( htype num = 0) {
-    return SimulationEngine(this, num);
-  }
-
-  virtual void display_status(PStatus & msg) {
+  virtual void display_status(Msg_Status & msg) {
+    assert(!is_simulation);
     // default behavior : just print on screen
     msg->print();
   }
@@ -104,3 +89,6 @@ class  PlayEngine : public Engine {
 
 
 
+
+
+#endif

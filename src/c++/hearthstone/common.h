@@ -1,10 +1,15 @@
+#ifndef __COMMON_H__
+#define __COMMON_H__
+
 #include <assert.h>
 
 #include <stdarg.h>  // For va_start, etc.
 #include <memory>    // For shared_ptr, unique_ptr
 #include <algorithm>
 
+#include <sstream>
 #include <string>
+#include <iterator>
 #include <vector>
 #include <list>
 #include <deque>
@@ -28,9 +33,9 @@ inline string string_format(const string fmt_str, ...) {
   va_list ap;
   while (1) {
     formatted.reset(new char[n]); /* Wrap the plain char array into the unique_ptr */
-    strcpy(&formatted[0], fmt_str.c_str());
+    strcpy_s(formatted.get(), fmt_str.size(), fmt_str.c_str());
     va_start(ap, fmt_str);
-    final_n = vsnprintf(&formatted[0], n, fmt_str.c_str(), ap);
+    final_n = vsnprintf(formatted.get(), n, fmt_str.c_str(), ap);
     va_end(ap);
     if (final_n < 0 || final_n >= n)
       n += abs(final_n - n + 1);
@@ -59,3 +64,25 @@ template<typename T>
 inline int len(const T& container) {
   return (int)container.size();
 }
+
+vector<string> split(string text) {
+  istringstream iss(text);
+  // no clue what is happening here but well
+  vector<string> tokens { istream_iterator<string>{iss},
+                          istream_iterator<string>{} };
+  // remove empty tokens
+  for (unsigned i = 0; i < tokens.size(); ++i) 
+    if (tokens[i].empty()) 
+      tokens.erase(tokens.begin()+i--);
+
+  return tokens;
+}
+
+template<typename Type>
+Type pop_front(vector<Type> & vec) {
+  Type res = vec[0];
+  vec.erase(vec.begin());
+  return vec;
+}
+
+#endif
