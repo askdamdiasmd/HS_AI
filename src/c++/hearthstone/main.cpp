@@ -1,11 +1,15 @@
+#include "collection.h"
+#include "decks.h"
+#include "players.h"
+#include "creatures.h"
+#include "heroes.h"
+
 #include "curses_interface.h"
-//#include "collection.h"
-//#include "decks.h"
+
 
 int main(int argc, char** argv) {
-  /*
-  bool anim, mana, dbg, setup;
 
+  bool anim, mana, dbg, setup;
   anim = mana = dbg = setup = false;
   for (int i = 0; i < argc; i++) {
     const char * a = argv[i];
@@ -16,28 +20,31 @@ int main(int argc, char** argv) {
   }
   
   // generate collection = all possible cards
-  Collection cardbook;
-
-  ArrayString cards { "ecuyere d'argent" };
+  const Collection cardbook;
+  
+  
+  ArrayString cards { "Windchill Yeti" };
 
   PDeck deck1 = fake_deck(cardbook, dbg, cards);
-    hero1 = Hero(cardbook["Anduin Wrynn"])
-    player1 = HumanPlayerAscii(hero1, 'jerome', deck1)
+  PHero hero1 = NEWP(Hero, dynamic_pointer_cast<Card_Hero>(cardbook.by_name.at("Anduin Wrynn")));
 
-    deck2 = fake_deck(cardbook,dbg,cards)
-    hero2 = Hero(cardbook["Jaina Proudmoore"])
-    if 0:
-      player2 = HumanPlayerAscii(hero2, 'mattis', deck2)
-    elif 1:
-      from ai import SimpleAI
-      player2 = SimpleAI(hero2, 'simpleAI', deck2)
-    elif 1:
-      from ai import VerySimpleAI
-      player2 = VerySimpleAI(hero2, 'simpleAI', deck2)
-    else:
-      player2 = RandomPlayer(hero2, 'IA', deck2)
-    
-    stdscr = init_screen()
+  HumanPlayerAscii player1(hero1, 'jerome', deck1);
+/*
+  deck2 = fake_deck(cardbook,dbg,cards)
+  hero2 = Hero(cardbook["Jaina Proudmoore"])
+  if 0:
+    player2 = HumanPlayerAscii(hero2, 'mattis', deck2)
+  elif 1:
+    from ai import SimpleAI
+    player2 = SimpleAI(hero2, 'simpleAI', deck2)
+  elif 1:
+    from ai import VerySimpleAI
+    player2 = VerySimpleAI(hero2, 'simpleAI', deck2)
+  else:
+    player2 = RandomPlayer(hero2, 'IA', deck2)
+    */
+  init_screen();
+    /*
     engine = CursesHSEngine( player1, player2 )
     engine.board.viz = VizBoard(engine.board, switch=type(player2)==HumanPlayerAscii, animated=anim)
 
@@ -52,7 +59,7 @@ int main(int argc, char** argv) {
     # start playing
     #show_ACS()*/
 
-  show_unicode();
+  //show_unicode();
   
   /*
     engine.start_game()
@@ -66,7 +73,7 @@ int main(int argc, char** argv) {
     button.draw(highlight=uc.black_on_yellow)
     show_panels()
     uc.getch()    
-    uc.endwin()
-    uc.endwin()
 */
+  endwin();
+  return 0;
 }

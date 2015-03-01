@@ -1,76 +1,71 @@
 #ifndef __CARDS_H__
 #define __CARDS_H__
-
 #include "common.h"
 
-#include "players.h"
-#include "effects.h"
-#include "actions.h"
-
-struct Engine;
-
 struct Card {
+  SET_ENGINE();
+
   Player* player;
-  int cost;
+  int cost, id;
   string name, name_fr;
   enum HeroClass {
     None = 0,
+    Chaman,
+    Hunter,
     Druid,
+    Mage,
+    Paladin,
     Priest,
+    Rogue,
+    Warrior,
+    Warlock,
   } cls;
   string desc, desc_fr;
-  //ListEffects effects;
   bool collectible;
-  SET_ENGINE();
 
   Card(int cost, const string& name) :
-    player(nullptr), cost(cost), name(name), 
+    player(nullptr), cost(cost), id(-1), name(name), name_fr(name),
     collectible(true), cls(HeroClass::None) {}
   
   NAMED_PARAM(Card, HeroClass, cls);
   NAMED_PARAM(Card, bool, collectible);
   NAMED_PARAM(Card, string, desc);
-  NAMED_PARAM(Card, string, desc);
   NAMED_PARAM(Card, string, name_fr);
   NAMED_PARAM(Card, string, desc_fr);
 
-  virtual ListAction list_actions() const = 0;
+  virtual PCard copy() const = 0; // copy itself
 
-  ListCreature list_targets(const string& targets) {
-    return engine->board.list_targets(owner, targets);
-  }
+  // helper function to resovle a target at runtime
+  ListCreature list_targets(const string& Target);
+
+  // what the player can do with this card ?
+  virtual void list_actions(ListAction& list) const = 0;
 
   virtual string tostr() const = 0;
 };
 
-typedef shared_ptr<Card> PCard;
+struct Card_Instance : public Card {
+  PInstance instance;
 
-struct Card_Minion : public Card {
-  int hp, atq;
-  enum Category {
-    None, 
-    Beast,
-  } cat;
-  struct StaticEffect {
-    bool taunt;
-    bool divine_shield;
-  } eff;
-  ListEffect effects;
-  
-  Card_Minion(int cost, int atq, int hp, string name, cat = Category::None ) :
-    Card(cost, name), hp(hp), atq(atq), cat(cat) {}
-
-  virtual string tostr() const {
-    return string_format("%s (%d): %d/%d %s", name_fr, cost, atq, hp, desc);
-  }
-
-  virtual ListAction list_actions() const {
-    return Act_PlayMinionCard(this);
-  }
+  Card_Instance(int cost, string name, PInstance instance) :
+    Card(cost, name), instance(instance) {}
 };
 
-typedef shared_ptr<Card_Minion> PCardMinion;
+struct Card_Minion : public Card_Instance {
+  Card_Minion(int cost, string name, PMinion minion) :
+    Card_Instance(cost, name, dynamic_pointer_cast<Instance>(minion)) {}
 
+  virtual string tostr() const;
+
+  virtual PCard copy() const {
+    return NEWP(Card_Minion, *this);
+  }
+
+  // what the player can do with this card ?
+  virtual void list_actions(ListAction& list) const;
+};
+
+// see heroes.h for Card_Hero and Card_HeroAbility
 
 /*
 //  effects = tolist(effects) # list of effects : {'taunt', 'stealth', or buffs that can be silenced}
@@ -89,15 +84,15 @@ typedef shared_ptr<Card_Minion> PCardMinion;
 
 struct Card_Minion_BC(Card_Minion) :
   """ Minion with a battle cry """
-  def __init__(cost, atq, hp, name, battlecry, targets = None, hidden_target = None, **kwargs) :
+  def __init__(cost, atq, hp, name, battlecry, Target = None, hidden_target = None, **kwargs) :
   Card_Minion.__init__(cost, atq, hp, name, **kwargs)
   battlecry = battlecry
-  targets = targets
+  Target = Target
   hidden_target = hidden_target
   def list_actions() :
-  targets = list_targets(targets) if targets else None
+  Target = list_targets(Target) if Target else None
   hidden_target = hidden_target #list_targets(hidden_target) if hidden_target else None
-  return Act_PlayMinionCard_BC(battlecry, targets, hidden_target)
+  return Act_PlayMinionCard_BC(battlecry, Target, hidden_target)
 
 
 ### --------------- Weapon cards ----------------------
@@ -121,15 +116,15 @@ struct Card_Weapon(Card) :
 
 
 struct Card_Spell(Card) :
-  def __init__(cost, name, actions, targets = 'none', **kwargs) :
+  def __init__(cost, name, actions, Target = 'none', **kwargs) :
   Card.__init__(cost, name, **kwargs)
   actions = actions # lambda self : [Msg_* list]
-  assert type(targets) == str, pdb.set_trace()
-  targets = "targetable " + targets # see list_targets()
+  assert type(Target) == str, pdb.set_trace()
+  Target = "targetable " + Target # see list_targets()
   virtual string tostr() const
   return "%s (%d): %s" % (name_fr, cost, desc)
   def list_actions() :
-  return Act_PlaySpellCard(list_targets(targets), actions)
+  return Act_PlaySpellCard(list_targets(Target), actions)
 
 
 struct Card_Coin(Card_Spell) :
@@ -144,25 +139,25 @@ struct Card_Wrath(Card_Spell) :
   def __init__() :
   Card_Spell.__init__(2, "Wrath", cls = "Druid", name_fr = "Colere")
   def list_actions() :
-  targets = engine.board.get_characters()
-  first = Act_SingleSpellDamageCard(targets, damage = 3)
+  Target = engine.board.get_characters()
+  first = Act_SingleSpellDamageCard(Target, damage = 3)
   actions = lambda self : [Msg_SpellDamage(caster, choices[0], damage),
   Msg_DrawCard(owner)]
-  second = Act_SingleSpellDamageCard(targets, damage = 1, actions = actions)
+  second = Act_SingleSpellDamageCard(Target, damage = 1, actions = actions)
   return[first, second]
   '''
 
 struct Card_DamageSpell(Card_Spell) :
-  def __init__(cost, damage, name, targets = "characters", name_fr = "", desc = "", cls = None) :
-  Card_Spell.__init__(cost, name, None, targets, name_fr = name_fr, desc = desc, cls = cls)
+  def __init__(cost, damage, name, Target = "characters", name_fr = "", desc = "", cls = None) :
+  Card_Spell.__init__(cost, name, None, Target, name_fr = name_fr, desc = desc, cls = cls)
   damage = damage
   def list_actions() :
-  return Act_SingleSpellDamageCard(list_targets(targets), damage)
+  return Act_SingleSpellDamageCard(list_targets(Target), damage)
 
 
 struct Card_FakeDamageSpell(Card_DamageSpell) :
-  def __init__(damage, targets = "characters") :
-  Card_DamageSpell.__init__(damage - 1, damage, "Fake Damage Spell %d"%damage, targets,
+  def __init__(damage, Target = "characters") :
+  Card_DamageSpell.__init__(damage - 1, damage, "Fake Damage Spell %d"%damage, Target,
   name_fr = "Faux Sort de dommage %d"%damage,
   desc = "Deal %d points of damage"%damage)
 

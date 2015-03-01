@@ -1,33 +1,29 @@
 #ifndef __ACTIONS_H__
 #define __ACTIONS_H__
 #include "common.h"
-#include "messages.h"
-#include "creatures.h"
-#include "Cards.h"
-#include "Board.h"
-
 
 // ---------- Actions ---------------
 
 struct Action {
   SET_ENGINE();
-  Instance* const caster;
   const int cost;
+  const bool need_slot;
+  Target target;
 
-  Action(Thing* caster, int cost = 0) : 
-    caster(caster), cost(cost), num_choices(0) {}
+  Action(int cost = 0, bool need_slot = false, Target target = Target()) : 
+    cost(cost), need_slot(need_slot), target(target) {}
   
-  virtual bool is_valid() {
-    return true;
-  }
+  //virtual bool is_valid() {
+  //  return true;
+  //}
 
-  virtual bool neighbors() {
-    return false;  // return True if self = minion with neighbor aura / battlecry
-  }
+  //virtual bool neighbors() {
+  //  return false;  // return True if self = minion with neighbor aura / battlecry
+  //}
 
-  int get_cost() const {
-    return cost;
-  }
+  //int get_cost() const {
+  //  return cost;
+  //}
 
   //int cardinality() {
   //  int res = 1;
@@ -55,31 +51,28 @@ struct Action {
 
   virtual string tostr() const = 0;
 
-  virtual void execute() = 0;
+  virtual void execute(PInstance caster, PInstance choice, Slot slot) = 0;
 };
-
-typedef shared_ptr<Action> PAction;
-typedef vector<PAction> ListAction;
 
 
 
 /// Basic game actions
 
 struct Act_EndTurn : public Action {
-  virtual string tostr() const {
-    return "End turn";
-  }
-  
-  virtual void execute() {
-    engine->board.end_turn(caster);
-  }
+  //virtual string tostr() const {
+  //  return "End turn";
+  //}
+  //
+  //virtual void execute() {
+  //  engine->board.end_turn(caster);
+  //}
 };
 
 
 /// Play card
 
 struct Act_PlayCard : public Action { 
-  PCard card;
+  /*PCard card;
   Act_PlayCard(PCard card) :
     Action(card->player, card->cost), card(card) {}
 
@@ -89,7 +82,7 @@ struct Act_PlayCard : public Action {
 
   virtual void execute() {
     engine->PlayCard(caster, card, get_cost());
-  }
+  }*/
 };
 
 
@@ -97,28 +90,28 @@ struct Act_PlayCard : public Action {
 // -------- Minions -----------------
 
 struct Act_PlayMinionCard : public Act_PlayCard {
-  Board::ListSlot slots;
-  Board::Slot sel_slot;
+  //Board::ListSlot slots;
+  //Board::Slot sel_slot;
 
-  Act_PlayMinionCard(PCard card) :
-    Act_PlayCard(card), slots(engine->board.get_free_slots(card->player)) {}
+  //Act_PlayMinionCard(PCard card) :
+  //  Act_PlayCard(card), slots(engine->board.get_free_slots(card->player)) {}
 
-  virtual bool is_valid() const {
-    return !slots.empty();  // no more free slots
-  }
-
-  void select_slot(Board::Slot slot) {
-    sel_slot = slot;
-  }
-
-  //virtual bool neighbors() {
-  //  from effects import Eff_BuffNeighbors
-  //    return any([type(e) == Eff_BuffNeighbors for e in self.card.effects])
+  //virtual bool is_valid() const {
+  //  return !slots.empty();  // no more free slots
   //}
 
-  virtual void execute() {
-    engine->board.add_thing(caster, Minion(card), sel_slot);
-  }
+  //void select_slot(Board::Slot slot) {
+  //  sel_slot = slot;
+  //}
+
+  ////virtual bool neighbors() {
+  ////  from effects import Eff_BuffNeighbors
+  ////    return any([type(e) == Eff_BuffNeighbors for e in self.card.effects])
+  ////}
+
+  //virtual void execute() {
+  //  engine->board.add_thing(caster, Minion(card), sel_slot);
+  //}
 };
 
 
@@ -146,35 +139,35 @@ actions.append(Msg_BindEffect(minion, target, self.battlecry()))
 elif len(self.choices)>1 or self.hidden_target:
 target = self.hidden_target or self.choices[1]
 actions.append(Msg_BindEffect(minion, target, self.battlecry()))
-self.engine.send_message(ac*/tions)
+self.engine.send_message(actions)*/
 
-
-struct Act_Attack(Action) :
-  ''' when something attacks something'''
-  def __init__(caster, targets) :
-  Action.__init__(caster)
-  self.choices = [targets]
-  virtual string tostr() const
-  if self.has_chosen() :
-    return "Attack with %s on %s" % (self.caster, self.choices[0])
-  else :
-  return "Attack with %s" % self.caster
-  def execute() :
-  target = self.choices[0]
-  assert type(target) != list
-  self.caster.attacks(target)
-
-struct Act_MinionAttack(Act_Attack) :
-  ''' when one minion attacks something'''
-  pass
-
-struct Act_HeroAttack(Act_Attack) :
-  ''' when the hero (druid) attacks something'''
-  pass
-
-struct Act_WeaponAttack(Act_Attack) :
-  ''' when a hero attacks something'''
-  pass
+//
+//struct Act_Attack(Action) :
+//  ''' when something attacks something'''
+//  def __init__(caster, Target) :
+//  Action.__init__(caster)
+//  self.choices = [Target]
+//  virtual string tostr() const
+//  if self.has_chosen() :
+//    return "Attack with %s on %s" % (self.caster, self.choices[0])
+//  else :
+//  return "Attack with %s" % self.caster
+//  def execute() :
+//  target = self.choices[0]
+//  assert type(target) != list
+//  self.caster.attacks(target)
+//
+//struct Act_MinionAttack(Act_Attack) :
+//  ''' when one minion attacks something'''
+//  pass
+//
+//struct Act_HeroAttack(Act_Attack) :
+//  ''' when the hero (druid) attacks something'''
+//  pass
+//
+//struct Act_WeaponAttack(Act_Attack) :
+//  ''' when a hero attacks something'''
+//  pass
 
 
 // ------------- Weapon cards ------------------------
@@ -190,13 +183,13 @@ struct Act_WeaponAttack(Act_Attack) :
 //  self.engine.send_message(Msg_AddWeapon(self.caster, Weapon(self.card)))
 
 
-### ------------- Card Spells ------------------------
+/// ------------- Card Spells ------------------------
 
 //struct Act_PlaySpellCard(Act_PlayCard) :
 //  ''' hero plays a generic spell card, specified using "actions" '''
-//  def __init__(card, targets, actions) :
+//  def __init__(card, Target, actions) :
 //  Act_PlayCard.___init___(card)
-//  self.choices = [targets] if targets != None else[]
+//  self.choices = [Target] if Target != None else[]
 //  self.actions = actions  # execution is defined by card
 //  def is_valid() :
 //  return all([bool(ch) for ch in self.choices]) # choices cannot be empty for a spell
@@ -210,18 +203,18 @@ struct Act_WeaponAttack(Act_Attack) :
 //
 //struct Act_SingleSpellDamageCard(Act_PlaySpellCard) :
 //  ''' inflict damage to a single target'''
-//  def __init__(card, targets, damage) :
+//  def __init__(card, Target, damage) :
 //  def actions() :
 //  target = self.choices[0]
 //  assert type(target) != list
 //  return[Msg_SpellDamage(self.caster, target, self.damage)]
-//  Act_PlaySpellCard.__init__(card, targets, actions)
+//  Act_PlaySpellCard.__init__(card, Target, actions)
 //  self.damage = damage
 //
 //struct Act_MultiSpellDamageCard(Act_PlaySpellCard) :
-//  ''' inflict damage to multiple targets'''
+//  ''' inflict damage to multiple Target'''
 //  def __init__(target, card, damage) :
-//  Act_PlaySpellCard.__init__(card, targets, damage = damage)
+//  Act_PlaySpellCard.__init__(card, Target, damage = damage)
 //  def execute() :
 //  Act_PlayCard.execute()
 //  self.engine.send_message([
@@ -231,7 +224,7 @@ struct Act_WeaponAttack(Act_Attack) :
 //  ])
 //
 //struct Act_RandomSpellDamageCard(Act_PlaySpellCard) :
-//  ''' inflict damage to random targets'''
+//  ''' inflict damage to random Target'''
 //  def __init__(card, target, damage) :
 //  Act_PlaySpellCard.__init__(card, target, damage = damage)
 //  def execute() :
@@ -245,29 +238,20 @@ struct Act_WeaponAttack(Act_Attack) :
 //
 //struct Act_PlaySecretCard(Act_PlaySpellCard) :
 //  pass
-//
-//
-//### ------------------- Hero powers -----------------
-//
-//struct Act_HeroPower(Action) :
-//  '''hero power applied to something'''
-//  def __init__(caster, cost, targets, actions) :
-//  Action.__init__(caster, cost)
-//  self.choices = [targets]
-//  self.actions = actions  # execution is defined by card
-//  virtual string tostr() const
-//  if self.has_chosen() :
-//    return "Hero Power (%d): %s on %s" % (self.cost, self.caster.hero.card.desc, self.choices[0])
-//  else :
-//  return "Hero Power (%d): %s" % (self.cost, self.caster.hero.card.desc)
-//  def execute() :
-//  self.engine.send_message([
-//    Msg_UseMana(self.caster, self.cost),
-//      Msg_StartHeroPower(self.caster),
-//      self.actions(),
-//      Msg_EndHeroPower(self.caster),
-//  ])
 
+//### ------------------- Hero powers -----------------
+
+struct Act_HeroPower : public Action {
+  Card_HeroAbility * const card;
+  FuncAction action;
+
+  Act_HeroPower(Card_HeroAbility* card, int cost, FuncAction action, Target target) :
+    Action(cost, false, target), card(card), action(action) {}
+
+  virtual string tostr() const;
+
+  virtual void execute(PInstance caster, PInstance choice, Slot slot);
+};
 
 
 #endif

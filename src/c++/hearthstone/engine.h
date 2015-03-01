@@ -1,29 +1,20 @@
 #ifndef __ENGINE_H__
 #define __ENGINE_H__
-
 #include "common.h"
-
-#include "board.h"
-#include "players.h"
-#include "messages.h"
+#include "Board.h"
 
 
 struct Engine {
 public:
   Board board;
   Player* players[2];
-  int turn = 0;
+  int turn;
   bool is_simulation;
 
 public:
-  Engine(Player* player1, Player* player2) :
-    players{ player1, player2 },
-    board(player1, player2),
-    turn(0), is_simulation(false) {
-    set_default();
-  }
+  Engine(Player* player1, Player* player2);
 
-  static void set_default();
+  void set_default();
 
   Player* get_current_player() {
     return players[turn % 2];
@@ -35,29 +26,38 @@ public:
 
   void start_game();
 
-  ListAction list_player_actions(PPlayer & player);
+  ListAction list_player_actions(Player* player);
 
   void play_turn();
 
-  virtual void display_UPDATE_STATUS(PMsgUPDATE_STATUS & message) = 0;
-
-  bool is_game_ended() {
-    return  board.is_game_ended();
+  void send_status(PMsgStatus msg) {
+    if (!is_simulation)
+      display_status(msg);
   }
+  
+  void display_status(PMsgStatus msg);
 
-  PPlayer get_winner();
+  bool is_game_ended();
+
+  Player* get_winner();
+
+  // game functions
+  void signal(Event event, PInstance from);
+
+  void heal(PInstance from, int hp, PInstance to);
+  void damage(PInstance from, int hp, PInstance to);
 
 private:
-  unordered_map<htype, int> saved_turn;
+  //unordered_map<htype, int> saved_turn;
 
 public:
-  Engine* launch_simulation(htype num = 0) {
+  /*Engine* launch_simulation(htype num = 0) {
     is_simulation = true;
     save_state(num);
     return this;
-  }
+  }*/
 
-  void save_state(int num = 0);
+  //void save_state(int num = 0);
 
   //def  restore_state(, num = 0) :
   //__dict__.update(saved[num])
@@ -74,12 +74,6 @@ public:
 
   //def  send_UPDATE_STATUS(, message) :
   //pass  //  we  don't  care
-
-  virtual void display_status(Msg_Status & msg) {
-    assert(!is_simulation);
-    // default behavior : just print on screen
-    msg->print();
-  }
 };
 
 

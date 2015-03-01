@@ -1,9 +1,11 @@
+#ifndef __EFFECTS_H__
+#define __EFFECTS_H__
 #include "common.h"
 
 
-struct Effect {};
+struct Effect {
+};
 
 
-typedef shared_ptr<Effect> PEffect;
 
-typedef vector<PEffect> ListEffect;
+#endif

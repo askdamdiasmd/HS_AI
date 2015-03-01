@@ -1,9 +1,7 @@
 #ifndef __MESSAGES_H__
 #define __MESSAGES_H__
 #include "common.h"
-#include "players.h"
 #include "creatures.h"
-#include "Board.h"
 
 
 struct Message {
@@ -25,13 +23,13 @@ struct TargetedMessage : public Message {
     Message(caster), target(target) {}
 };
 
-
-struct CardMessage : public Message {
-  const PCard card;
-
-  CardMessage(PInstance caster, PCard card) :
-    Message(caster), card(card) {}
-};
+//
+//struct CardMessage : public Message {
+//  const PCard card;
+//
+//  CardMessage(PInstance caster, PCard card) :
+//    Message(caster), card(card) {}
+//};
 
 //struct Msg_Debug(Message) :
 //  def __init__(caster, msg) :
@@ -48,9 +46,9 @@ struct Msg_StartTurn : public Message {
     assert(0);
     // display code
   }
-  virtual string tostr() const {
-    return string_format("Start of turn for %s ", caster->controller->tostr());
-  }
+  //virtual string tostr() const {
+  //  return string_format("Start of turn for %s ", caster->controller->tostr());
+  //}
 };
 
 struct Msg_EndTurn : public Message {
@@ -58,9 +56,9 @@ struct Msg_EndTurn : public Message {
     assert(0);
     // display code
   }
-  virtual string tostr() const {
-    return string_format("End of turn for %s ", caster->controller->tostr());
-  }
+  //virtual string tostr() const {
+  //  return string_format("End of turn for %s ", caster->controller->tostr());
+  //}
 };
 
 
@@ -73,43 +71,48 @@ struct Msg_Status : public Message {
     Message(caster), state(caster->state), attrs(attrs) {
     caster->state.status_id++;
   }
-    
+  
   virtual string tostr() const {
     return string_format("Change of status for %s", caster->tostr());/* ,
       ', '.join(['%s=%s' % (a, getattr(a)) for a in attrs]))*/
+  }
+
+  virtual void execute()
+  {
+    assert(0);
   }
 };
 
 
 // play card messages
 
-struct Msg_GiveCard : public CardMessage {
-  const PCard card;
-  Player* const target;
+//struct Msg_GiveCard : public CardMessage {
+  //const PCard card;
+  //Player* const target;
 
-  /// give a defined card to player
-  Msg_GiveCard(PInstance caster, PCard card, Player* target) :
-    CardMessage(caster, card), card(card), target(target) {}
+  ///// give a defined card to player
+  //Msg_GiveCard(PInstance caster, PCard card, Player* target) :
+  //  CardMessage(caster, card), card(card), target(target) {}
 
-  virtual string tostr() const {
-    return string_format("%s gives %s to %s", caster->tostr(), card->tostr(), target->tostr());
-  }
+  //virtual string tostr() const {
+  //  return string_format("%s gives %s to %s", caster->tostr(), card->tostr(), target->tostr());
+  //}
 
-  virtual void execute() {}
-};
+  //virtual void execute() {}
+//};
 
-struct Msg_CardDrawn : public CardMessage {
-  const PInstance origin;
-
-  // just to inform that caster drew a card
-  Msg_CardDrawn(Player* player, PCard card, PInstance origin = nullptr) :
-    CardMessage(player->state.hero, card), origin(origin) {}
-
-  virtual string tostr() const {
-    string from = origin ? origin->tostr() : "the deck";
-    return string_format("%s draw %s from %s", caster->controller->tostr(), card->tostr(), from);
-  }
-};
+//struct Msg_CardDrawn : public CardMessage {
+//  const PInstance origin;
+//
+//  // just to inform that caster drew a card
+//  Msg_CardDrawn(Player* player, PCard card, PInstance origin = nullptr) :
+//    CardMessage(player->state.hero, card), origin(origin) {}
+//
+//  virtual string tostr() const {
+//    string from = origin ? origin->tostr() : "the deck";
+//    return string_format("%s draw %s from %s", caster->controller->tostr(), card->tostr(), from);
+//  }
+//};
 
 //struct Msg_DrawBurnCard(CardMessage) :
 //  '''a card was burned because hand is too full'''
@@ -341,14 +344,14 @@ struct Msg_CardDrawn : public CardMessage {
 //  pass
 //
 //struct Msg_RandomHeal(Message) :
-//  ''' heal a random target, see targets definition in Card::list_targets '''
-//  def __init__(caster, targets, heal) :
-//  Message.__init__(caster, targets)
+//  ''' heal a random target, see Target definition in Card::list_targets '''
+//  def __init__(caster, Target, heal) :
+//  Message.__init__(caster, Target)
 //  heal = heal
 //  def execute() :
-//  targets = caster.list_targets(target)
-//  if targets : # enough targets
-//    target = targets[random.randint(0, len(targets) - 1)]
+//  Target = caster.list_targets(target)
+//  if Target : # enough Target
+//    target = Target[random.randint(0, len(Target) - 1)]
 //    engine.send_message(Msg_Heal(caster, target, heal), immediate = True)
 //    virtual string tostr() const
 //    return "%s heal by %d a random %s" % (caster, heal, target)
