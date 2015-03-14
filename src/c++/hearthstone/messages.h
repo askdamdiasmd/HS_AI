@@ -10,9 +10,10 @@ struct Message {
   Message(PInstance caster) :
     caster(caster) {}
 
-  virtual void execute() = 0;
-
+  virtual const char* cls_name() const = 0;
   virtual string tostr() const = 0;
+
+  virtual void draw(Engine* engine) = 0;
 };
 
 
@@ -23,27 +24,20 @@ struct TargetedMessage : public Message {
     Message(caster), target(target) {}
 };
 
-//
-//struct CardMessage : public Message {
-//  const PCard card;
-//
-//  CardMessage(PInstance caster, PCard card) :
-//    Message(caster), card(card) {}
-//};
 
-//struct Msg_Debug(Message) :
-//  def __init__(caster, msg) :
-//  Message.__init__(caster)
-//  msg = msg
-//  virtual string tostr() const
-//  return "from %s: %s" % (caster, msg)
+struct CardMessage : public Message {
+  const PCard card;
+
+  CardMessage(PInstance caster, PCard card) :
+    Message(caster), card(card) {}
+};
 
 
 // game messages
 
 struct Msg_StartTurn : public Message {
-  virtual void execute() {
-    assert(0);
+  virtual void draw(Engine* engine) {
+    NI;
     // display code
   }
   //virtual string tostr() const {
@@ -52,8 +46,8 @@ struct Msg_StartTurn : public Message {
 };
 
 struct Msg_EndTurn : public Message {
-  virtual void execute() {
-    assert(0);
+  virtual void draw(Engine* engine) {
+    NI;
     // display code
   }
   //virtual string tostr() const {
@@ -64,55 +58,40 @@ struct Msg_EndTurn : public Message {
 
 struct Msg_Status : public Message {
   // just to tell the interface that something happened 
-  const Thing::State state;
-  const string attrs;
+  int VizThing::* attr;
+  const int val;
+  const string desc;
 
-  Msg_Status(PThing caster, string attrs) :
-    Message(caster), state(caster->state), attrs(attrs) {
-    caster->state.status_id++;
+  Msg_Status(PThing caster, int VizThing::*what, int val, string desc ) :
+    Message(caster), attr(what), val(val), desc(desc) {
   }
-  
+
+  virtual const char* cls_name() const {return "Msg_Status";}
   virtual string tostr() const {
     return string_format("Change of status for %s", caster->tostr());/* ,
       ', '.join(['%s=%s' % (a, getattr(a)) for a in attrs]))*/
   }
 
-  virtual void execute()
-  {
-    assert(0);
+  virtual void draw(Engine* engine) {
+    NI;
   }
 };
 
 
 // play card messages
 
-//struct Msg_GiveCard : public CardMessage {
-  //const PCard card;
-  //Player* const target;
+struct Msg_CardDrawn : public CardMessage {
+  const PCard card;
+  Player* const player;
 
-  ///// give a defined card to player
-  //Msg_GiveCard(PInstance caster, PCard card, Player* target) :
-  //  CardMessage(caster, card), card(card), target(target) {}
+  /// give a defined card to player
+  Msg_CardDrawn(PInstance caster, PCard card, Player* target) :
+    CardMessage(caster, card), card(card), player(target) {}
 
-  //virtual string tostr() const {
-  //  return string_format("%s gives %s to %s", caster->tostr(), card->tostr(), target->tostr());
-  //}
-
-  //virtual void execute() {}
-//};
-
-//struct Msg_CardDrawn : public CardMessage {
-//  const PInstance origin;
-//
-//  // just to inform that caster drew a card
-//  Msg_CardDrawn(Player* player, PCard card, PInstance origin = nullptr) :
-//    CardMessage(player->state.hero, card), origin(origin) {}
-//
-//  virtual string tostr() const {
-//    string from = origin ? origin->tostr() : "the deck";
-//    return string_format("%s draw %s from %s", caster->controller->tostr(), card->tostr(), from);
-//  }
-//};
+  virtual const char* cls_name() const { return "Msg_CardDrawn"; }
+  virtual string tostr() const;
+  virtual void draw(Engine* engine);
+};
 
 //struct Msg_DrawBurnCard(CardMessage) :
 //  '''a card was burned because hand is too full'''
@@ -122,14 +101,14 @@ struct Msg_Status : public Message {
 //struct Msg_ThrowCard(CardMessage) :
 //  virtual string tostr() const
 //  return "Player %s loses %s" % (caster, card)
-//  def execute() :
+//  def draw(Engine* engine) :
 //  caster.throw_card(card)
 
 //struct Msg_UseMana(Message) :
 //  def __init__(caster, cost) :
 //  Message.__init__(caster)
 //  cost = cost
-//  def execute() :
+//  def draw(Engine* engine) :
 //  caster.use_mana(cost)
 //  virtual string tostr() const
 //  return "Player %s loses %d mana crystal" % (caster, cost)
@@ -138,7 +117,7 @@ struct Msg_Status : public Message {
 //  def __init__(caster, gain) :
 //  Message.__init__(caster)
 //  gain = gain
-//  def execute() :
+//  def draw(Engine* engine) :
 //  caster.gain_mana(gain)
 //  virtual string tostr() const
 //  return "Player %s gain %d mana crystal" % (caster, gain)
@@ -149,7 +128,7 @@ struct Msg_Status : public Message {
 //  cost = cost
 //  virtual string tostr() const
 //  return "%s plays %s" % (caster, card)
-//  def execute() :
+//  def draw(Engine* engine) :
 //  engine.send_message(
 //  [Msg_UseMana(caster, cost),
 //  Msg_ThrowCard(caster, card)], immediate = True)
@@ -162,7 +141,7 @@ struct Msg_Status : public Message {
 //  damage = damage
 //  virtual string tostr() const
 //  return "%s takes %d points of fatigue" % (caster, damage)
-//  def execute() :
+//  def draw(Engine* engine) :
 //  caster.hero.hurt(damage)
 
 
@@ -190,7 +169,7 @@ struct Msg_Status : public Message {
 //  return "End of spell."
 //
 //struct Msg_StartHeroPower(Message) :
-//  def execute() :
+//  def draw(Engine* engine) :
 //  caster.hero.use_hero_power()
 //  virtual string tostr() const
 //  return "[%s] uses its hero power" % caster
@@ -207,7 +186,7 @@ struct Msg_Status : public Message {
 //  assert thing != None, pdb.set_trace()
 //  thing = thing
 //  pos = pos
-//  def execute() :
+//  def draw(Engine* engine) :
 //  engine.board.add_thing(thing, pos)
 //  virtual string tostr() const
 //  return "New %s on the board for %s" % (thing, caster)
@@ -223,7 +202,7 @@ struct Msg_Status : public Message {
 //
 //struct Msg_Popup(Message) :
 //  # caster = minion / weapon / secret
-//  def execute() :
+//  def draw(Engine* engine) :
 //  caster.popup()
 //  virtual string tostr() const
 //  return "%s pops up" % (caster)
@@ -242,7 +221,7 @@ struct Msg_Status : public Message {
 
 //struct Msg_CheckDead(Message) :
 //  """ as soon as a minion dies, it asks for its cleaning """
-//  def execute() :
+//  def draw(Engine* engine) :
 //  for i in engine.board.everybody :
 //    if i.dead :
 //      i.ask_for_death()
@@ -255,7 +234,7 @@ struct Msg_Status : public Message {
 //  # caster = minion / weapon / secret
 //  virtual string tostr() const
 //  return "%s dies." % caster
-//  def execute() :
+//  def draw(Engine* engine) :
 //  caster.death()
 //struct Msg_DeadMinion(Msg_Dead) :
 //  pass
@@ -277,7 +256,7 @@ struct Msg_Status : public Message {
 //  virtual string tostr() const
 //  return "Death rattle casted by %s: %s%s" % (caster, msg,
 //  immediate and ' (immediate)' or '')
-//  def execute() :
+//  def draw(Engine* engine) :
 //  engine.send_message(msg, immediate = immediate)
 
 
@@ -287,7 +266,7 @@ struct Msg_Status : public Message {
 //  def __init__(caster, target, damage) :
 //  TargetedMessage.__init__(caster, target)
 //  damage = damage
-//  def execute() :
+//  def draw(Engine* engine) :
 //  target.hurt(damage, caster)
 //  virtual string tostr() const
 //  return "%s takes %d damage from %s." % (target, damage, caster)
@@ -305,7 +284,7 @@ struct Msg_Status : public Message {
 //  def __init__(caster, target, damage) :
 //  Message.__init__(caster, target)
 //  damage = damage
-//  def execute() :
+//  def draw(Engine* engine) :
 //  while True :
 //    r = random.randint(len(target))
 //    target = target[r]
@@ -319,7 +298,7 @@ struct Msg_Status : public Message {
 //  def __init__(caster, target, damage, each = 1) :
 //  Msg_Damage.__init__(caster, target, damage)
 //  each = each  # amount of damage of each hit
-//  def execute() :
+//  def draw(Engine* engine) :
 //  # breaks down into new messages as time passes by
 //  engine.send_message(
 //  [Msg_RandomDamage(caster, target, each),
@@ -335,7 +314,7 @@ struct Msg_Status : public Message {
 //  def __init__(caster, target, heal) :
 //  TargetedMessage.__init__(caster, target)
 //  heal = heal
-//  def execute() :
+//  def draw(Engine* engine) :
 //  target.heal(heal)
 //  virtual string tostr() const
 //  return "%s heals %s by %dHP." % (caster, target, heal)
@@ -348,7 +327,7 @@ struct Msg_Status : public Message {
 //  def __init__(caster, Target, heal) :
 //  Message.__init__(caster, Target)
 //  heal = heal
-//  def execute() :
+//  def draw(Engine* engine) :
 //  Target = caster.list_targets(target)
 //  if Target : # enough Target
 //    target = Target[random.randint(0, len(Target) - 1)]
@@ -365,7 +344,7 @@ struct Msg_Status : public Message {
 //  TargetedMessage.__init__(caster, target)
 //  virtual string tostr() const
 //  return "%s gets silenced by %s." % (target, caster)
-//  def execute() :
+//  def draw(Engine* engine) :
 //  target.silence()
 //
 //
@@ -376,7 +355,7 @@ struct Msg_Status : public Message {
 //  virtual string tostr() const
 //  random = 'random 'if type(target) == str else ''
 //  return "%s binds effect [%s] to %s%s." % (caster, effect, random, target)
-//  def execute() :
+//  def draw(Engine* engine) :
 //  target = resolve_target()
 //  if target :
 //    effect.bind_to(target, caster = caster)

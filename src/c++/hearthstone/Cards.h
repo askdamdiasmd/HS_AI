@@ -1,11 +1,14 @@
 #ifndef __CARDS_H__
 #define __CARDS_H__
 #include "common.h"
+#include "actions.h"
+
+struct VizCard;
+typedef shared_ptr<VizCard> PVizCard;
 
 struct Card {
   SET_ENGINE();
 
-  Player* player;
   int cost, id;
   string name, name_fr;
   enum HeroClass {
@@ -22,9 +25,10 @@ struct Card {
   } cls;
   string desc, desc_fr;
   bool collectible;
+  PVizCard viz;
 
   Card(int cost, const string& name) :
-    player(nullptr), cost(cost), id(-1), name(name), name_fr(name),
+    cost(cost), id(-1), name(name), name_fr(name),
     collectible(true), cls(HeroClass::None) {}
   
   NAMED_PARAM(Card, HeroClass, cls);
@@ -35,25 +39,38 @@ struct Card {
 
   virtual PCard copy() const = 0; // copy itself
 
+  string get_name_fr() const { return name_fr.size() ? name_fr : name; }
+  string get_desc_fr() const { return desc_fr.size() ? desc_fr : desc; }
+
+  virtual string tostr() const = 0;
+
   // helper function to resovle a target at runtime
   ListCreature list_targets(const string& Target);
 
   // what the player can do with this card ?
   virtual void list_actions(ListAction& list) const = 0;
-
-  virtual string tostr() const = 0;
 };
 
 struct Card_Instance : public Card {
-  PInstance instance;
+  const PConstInstance instance;  // exemplar is copied when card is actionned
 
   Card_Instance(int cost, string name, PInstance instance) :
     Card(cost, name), instance(instance) {}
 };
 
-struct Card_Minion : public Card_Instance {
-  Card_Minion(int cost, string name, PMinion minion) :
+
+struct Card_Thing : public Card_Instance {
+  const PConstThing thing() const { return dynamic_pointer_cast<const Thing>(instance); }
+
+  Card_Thing(int cost, string name, PThing minion) :
     Card_Instance(cost, name, dynamic_pointer_cast<Instance>(minion)) {}
+};
+
+struct Card_Minion : public Card_Thing {
+  const PConstMinion minion() const { return issubclassP(instance, const Minion); }
+
+  Card_Minion(int cost, string name, PMinion minion) :
+    Card_Thing(cost, name, dynamic_pointer_cast<Thing>(minion)) {}
 
   virtual string tostr() const;
 
@@ -65,7 +82,37 @@ struct Card_Minion : public Card_Instance {
   virtual void list_actions(ListAction& list) const;
 };
 
-// see heroes.h for Card_Hero and Card_HeroAbility
+struct Card_HeroAbility : public Card {
+  const Act_HeroPower action;
+
+  Card_HeroAbility(int cost, string name, FuncAction actions, Target target);
+
+  virtual string tostr() const {
+    return string_format("Card Hero Ability: %s %s", name.c_str(), desc.c_str());
+  }
+
+  virtual PCard copy() const {
+    return NEWP(Card_HeroAbility, *this);
+  }
+
+  virtual void list_actions(ListAction& list) const;
+};
+
+struct Card_Hero : public Card_Thing {
+  PCardHeroAbility ability;
+
+  PConstHero hero() const { return issubclassP(instance, const Hero); }
+
+  Card_Hero(string name, HeroClass cls, PHero hero, PCardHeroAbility ability);
+
+  virtual string tostr() const;
+
+  virtual PCard copy() const {
+    return NEWP(Card_Hero, *this);
+  }
+
+  virtual void list_actions(ListAction& list) const;
+};
 
 /*
 //  effects = tolist(effects) # list of effects : {'taunt', 'stealth', or buffs that can be silenced}
@@ -108,45 +155,52 @@ struct Card_Weapon(Card) :
 
   def list_actions() :
   return Act_PlayWeaponCard()
+*/
 
 
 
-
-### ----------------- Spell cards -------------------------
-
-
-struct Card_Spell(Card) :
-  def __init__(cost, name, actions, Target = 'none', **kwargs) :
-  Card.__init__(cost, name, **kwargs)
-  actions = actions # lambda self : [Msg_* list]
-  assert type(Target) == str, pdb.set_trace()
-  Target = "targetable " + Target # see list_targets()
-  virtual string tostr() const
-  return "%s (%d): %s" % (name_fr, cost, desc)
-  def list_actions() :
-  return Act_PlaySpellCard(list_targets(Target), actions)
+// ### ----------------- Spell cards -------------------------
 
 
-struct Card_Coin(Card_Spell) :
-  def __init__(owner) :
-  Card_Spell.__init__(0, "The coin", lambda self : [Msg_GainMana(caster, 1)],
-  desc = "Gain one mana crystal this turn only")
-  owner = owner
+struct Card_Spell : public Card {
 
-  '''
-struct Card_Wrath(Card_Spell) :
-  """ Druid : Wrath (2 choices) """
-  def __init__() :
-  Card_Spell.__init__(2, "Wrath", cls = "Druid", name_fr = "Colere")
-  def list_actions() :
-  Target = engine.board.get_characters()
-  first = Act_SingleSpellDamageCard(Target, damage = 3)
-  actions = lambda self : [Msg_SpellDamage(caster, choices[0], damage),
-  Msg_DrawCard(owner)]
-  second = Act_SingleSpellDamageCard(Target, damage = 1, actions = actions)
-  return[first, second]
-  '''
+  Card_Spell(int cost, string name) :
+    Card(cost, name) {}
+  
+  virtual string tostr() const {
+    return string_format("[SpellCard] %s (%d): %s", get_name_fr().c_str(), cost, get_desc_fr().c_str());
+  }
+};
 
+struct Card_TargetedSpell : public Card_Spell {
+  const Act_TargetedSpellCard action;
+
+  Card_TargetedSpell(int cost, string name, FuncAction actions, Target targets = 0) :
+    Card_Spell(cost, name), action(this, actions, targets) {}
+
+  virtual void list_actions(ListAction& list) const {
+    list.push_back(&action);
+  }
+};
+
+struct Card_AreaSpell : public Card_Spell {
+  const Act_AreaSpellCard action;
+
+  Card_AreaSpell(int cost, string name, FuncAction actions, Target targets = 0) :
+    Card_Spell(cost, name), action(this, actions, targets) {}
+
+  virtual void list_actions(ListAction& list) const {
+    list.push_back(&action);
+  }
+};
+
+struct Card_Coin : public Card_AreaSpell {
+  Card_Coin();
+
+  virtual PCard copy() const;
+};
+
+/*
 struct Card_DamageSpell(Card_Spell) :
   def __init__(cost, damage, name, Target = "characters", name_fr = "", desc = "", cls = None) :
   Card_Spell.__init__(cost, name, None, Target, name_fr = name_fr, desc = desc, cls = cls)

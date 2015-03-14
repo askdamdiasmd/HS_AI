@@ -7,7 +7,6 @@
 #include "effects.h"
 #include "engine.h"
 #include "events.h"
-#include "heroes.h"
 #include "messages.h"
 #include "players.h"
 
@@ -23,22 +22,20 @@ Engine::Engine(Player* player1, Player* player2) :
 void Engine::set_default()  {
   // init global variables: everyone  can  access  board  or  send  messages
   Board::set_engine(this);
-  //Board::Slot::set_engine(this);
-  //Thing::set_engine(this);
-  //Action::set_engine(this);
+  Instance::set_engine(this);
+  Action::set_engine(this);
   //Effect::set_engine(this);
   Card::set_engine(this);
   Deck::set_engine(this);
   //Message::set_engine(this);
-  //Player::set_engine(this);
+  Player::set_engine(this);
 }
 
 void Engine::start_game() {
-  assert(0);
-  //players[0]->draw_init_cards(3);
-  //turn = 1;
-  //players[1]->draw_init_cards(4, coin = true);
-  //turn = 0;
+  players[0]->draw_init_cards(3, false);
+  turn = 1;
+  players[1]->draw_init_cards(4, true);
+  turn = 0;
 }
 
 ListAction Engine::list_player_actions(Player* player) {
@@ -112,16 +109,24 @@ void Engine::display_status(PMsgStatus msg) {
   assert(!"display_status should never be called for SimulationEngine");
 }
 
-void Engine::heal(PInstance from, int hp, PInstance to) {
+bool Engine::play_card(const Card* _card, PInstance caster) {
+  PCard card = indexP(caster->player->state.cards, _card);  
   NI;
+  return true;
 }
 
 void Engine::signal(Event event, PInstance from) {
   NI;
 }
 
-void Engine::damage(PInstance from, int hp, PInstance to) {
+bool Engine::heal(PInstance from, int hp, PInstance to) {
   NI;
+  return true;
+}
+
+bool Engine::damage(PInstance from, int hp, PInstance to) {
+  NI;
+  return true;
 }
 
 

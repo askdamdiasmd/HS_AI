@@ -42,10 +42,11 @@ public:
   Player* get_winner();
 
   // game functions
+  bool play_card(const Card* card, PInstance caster);
   void signal(Event event, PInstance from);
 
-  void heal(PInstance from, int hp, PInstance to);
-  void damage(PInstance from, int hp, PInstance to);
+  bool heal(PInstance from, int hp, PInstance to);
+  bool damage(PInstance from, int hp, PInstance to);
 
 private:
   //unordered_map<htype, int> saved_turn;
@@ -72,8 +73,14 @@ public:
   //board.end_simulation()
   //true_engine.set_default()
 
-  //def  send_UPDATE_STATUS(, message) :
-  //pass  //  we  don't  care
+  // display section
+
+  list<PMessage> display;
+  void send_display_message(PMessage msg) {
+    if (!is_simulation) // useless if it's a simulation
+      display.push_back(msg);
+  }
+  virtual void wait_for_display() = 0;
 };
 
 

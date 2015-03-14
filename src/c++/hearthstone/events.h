@@ -7,6 +7,8 @@ enum Event {
   EndTurn,
   StartHeroPower,
   EndHeroPower,
+  StartSpell,
+  EndSpell,
 };
 
 

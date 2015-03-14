@@ -7,21 +7,31 @@
 
 Engine* Instance::engine = nullptr;
 
-PHero Instance::hero() const { 
-  assert(0); return PHero();
-  //return controller->hero; 
+PHero Instance::hero() { 
+  return player->state.hero; // shortcut
 }
 
-Thing::Thing() :
+//Thing::Thing() :
+//  Instance() {
+//  assert(card);
+//  memset(&state, , sizeof(state));
+//  state.atq = state.max_atq = .atq;
+//  state.hp = state.max_hp = card->hp;
+//  add_static_effect(StaticEffect::fresh);
+//  state.n_max_atq = 1; // number of times we can attack per turn
+//
+//  //state.add_effects(deepcopy(card.effects), inform = False)
+//}*/
+
+PConstCardThing Thing::card_thing() const { 
+  return issubclassP(card, const Card_Thing); 
+}
+
+Thing::Thing(int atq, int hp) :
   Instance() {
   memset(&state, 0, sizeof(state));
-  assert(0);
-  //state.atq = state.max_atq = card->atq;
-  //state.hp = state.max_hp = card->hp;
-  //add_static_effect(StaticEffect::fresh);
-  state.n_max_atq = 1; // number of times we can attack per turn
-
-  //state.add_effects(deepcopy(card.effects), inform = False)
+  state.hp = state.max_hp = hp;
+  state.atq = state.max_atq = atq;
 }
 
 void Thing::hurt(int damage, Thing* caster) {
@@ -113,9 +123,13 @@ ListAction Minion::list_actions() {
   assert(0); return{};
 }
 
-Minion::Minion(PCardMinion card) :
-  Minion(*dynamic_pointer_cast<Minion>(card->instance)) {
-  init(card, card->player);
+PConstCardMinion Minion::card_minion() const { 
+  return issubclassP(card, const Card_Minion); 
+}
+
+Minion::Minion(PConstCardMinion  card, Player* player) :
+  Minion(*card->minion()) {
+  init(card, player);
 }
 
 //PInstance Minion::copy() const {

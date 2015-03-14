@@ -4,66 +4,43 @@
 
 /// ------------ generalistic thing (hero, weapon, minon, secret) -------
 
+struct VizInstance;
+typedef shared_ptr<VizInstance> PVizInstance;
+struct VizSecret;
+typedef shared_ptr<VizSecret> PVizSecret;
+struct VizThing;
+typedef shared_ptr<VizThing> PVizThing;
+struct VizWeapon;
+typedef shared_ptr<VizWeapon> PVizWeapon;
+struct VizMinion;
+typedef shared_ptr<VizMinion> PVizMinion;
+struct VizHero;
+typedef shared_ptr<VizHero> PVizHero;
+
 struct Instance {
   SET_ENGINE();
-  const PCardInstance card; // card from which it was instanciated
+  PConstCardInstance card; // card from which it was instanciated
   Player* player; // owner
-  PHero hero() const; // helper function
+  PVizInstance viz; // vizualization object
+
+  PHero hero(); // helper function
 
   Instance() {} // default = empty
 
-  void init(PCardInstance card, Player* p) {
-    card = card;
-    set_controller(p);
-  }
-
   void set_controller(Player* p) {
     player = p;
+  }
+  void init(PConstCardInstance card, Player* p) {
+    this->card = card;
+    set_controller(p);
   }
 
   virtual string tostr() const = 0;
 
   //virtual PInstance copy() const = 0;
 
-  shared_ptr<VizInstance> viz;
-
   virtual float score_situation() = 0;
 };
-
-
-
-////// ------------ Secret ----------
-
-struct Secret : public Instance {
-
-    //def __init__(card, hero) :
-    //  Thing.__init__(card)
-    //  state.hero = hero
-    //  //      state.active = False
-
-    //  //  def save_state(num = 0) :
-    //  //      Thing.save_state(num)
-    //  //      state.saved[num]['active'] = state.active
-
-    //  def list_actions() :
-    //  return None
-
-    //  def ask_for_death() :
-    //  state.engine.send_message(Msg_DeadSecret(), immediate = True)
-
-    //  def score_situation() :
-    //  if state.dead : return 0
-    //    assert 0
-  //virtual PInstance copy() const { NI; return nullptr; }
-  virtual float score_situation() {
-    NI;  return 0;
-  }
-  virtual string tostr() const {
-    assert(0);
-    return "Secret";
-  }
-};
-
 
 
 /// ------------ physical object (hero, weapon, minon) -------
@@ -84,15 +61,15 @@ struct Thing : public Instance {
     insensible    = 0x00000800,
     death_rattle  = 0x00001000, // minion has a death_rattle
     trigger       = 0x00002000, // minion contains some triggers
+    silenced      = 0x00004000,
   };
 
   struct State {
     int hp, max_hp, armor;
     int atq, max_atq;
     int n_atq, n_max_atq, n_remaining_power;  // number of remaining hero power (for hero)
-    int status_id;  // for display purpose
 
-    unsigned int static_effects; // bit-OR combination of StaticEffect
+    int static_effects; // bit-OR combination of StaticEffect
     int spell_power;
 
     /*List .action_filters = []  // reacting to actions[(Act_class, handler), ...]
@@ -102,14 +79,13 @@ struct Thing : public Instance {
     state.effects = []  // list of effects without triggers : ['taunt', 'stealth', ...]*/
   } state;
 
-  Thing();  // proper init to zero
+  PVizThing viz_thing();
 
-  Thing(int atq, int hp) : 
-    Thing() {
-    state.hp = state.max_hp = hp;
-    state.atq = state.max_atq = atq;
-    state.status_id = 0;
-  }
+  PConstCardThing card_thing() const;
+
+  //Thing();  // proper init to zero
+
+  Thing(int atq, int hp);
 
 //  /*def save_state(num = 0) :
 //    state.saved[num] = dict(hp = state.hp, max_hp = state.max_hp, armor = state.armor, atq = state.atq, max_atq = state.max_atq, enraged = state.enraged,
@@ -230,17 +206,21 @@ struct Creature : public Thing {
 
 ////// ------------ Minion ----------
 
-
 struct Minion : public Creature {
   enum Category {
     None = 0,
     Beast,
     Demon,
   } category;
+
+  PVizMinion viz_minion();
+
+  PConstCardMinion card_minion() const;
+
   Minion(int atq, int hp, Category cat = Category::None) :
     Creature(atq, hp), category(cat) {}
   
-  Minion(PCardMinion card);
+  Minion(PConstCardMinion card, Player* player);
 
   //virtual PInstance copy() const;
 
@@ -316,14 +296,15 @@ struct Minion : public Creature {
 };
 
 
-
 ////// ------------ Hero ----------
 
 struct Hero : public Creature {
-  Hero(int hp);
-  //Hero(PCardHero hero, Player* controller = nullptr);
+  PVizHero viz_hero();
 
-  void set_controller(Player* pl);
+  PConstCardHero card_hero() const;
+
+  Hero(int hp); // creator for collection
+  Hero(PConstCardHero hero); 
 
   //virtual PInstance copy() const { NI; return nullptr; }
 
@@ -360,7 +341,9 @@ struct Hero : public Creature {
 ////// ------------ Weapon ----------
 
 struct Weapon : public Thing {
-  //Weapon(const PCardMinion card, Player* owner = nullptr) :
+  PVizWeapon viz_weapon();
+
+  //Weapon(const PCardWeapon card, Player* player) :
   //  Thing(card, controller) {}
 
   virtual PInstance copy() const { NI; return nullptr; }
@@ -386,6 +369,40 @@ struct Weapon : public Thing {
   //}
 
   virtual float score_situation();
+};
+
+
+////// ------------ Secret ----------
+
+struct Secret : public Instance {
+  //PVizSecret viz_secret() { return issubclassP(viz, PVizSecret); }
+
+  //def __init__(card, hero) :
+  //  Thing.__init__(card)
+  //  state.hero = hero
+  //  //      state.active = False
+
+  //  //  def save_state(num = 0) :
+  //  //      Thing.save_state(num)
+  //  //      state.saved[num]['active'] = state.active
+
+  //  def list_actions() :
+  //  return None
+
+  //  def ask_for_death() :
+  //  state.engine.send_message(Msg_DeadSecret(), immediate = True)
+
+  //  def score_situation() :
+  //  if state.dead : return 0
+  //    assert 0
+  //virtual PInstance copy() const { NI; return nullptr; }
+  virtual float score_situation() {
+    NI;  return 0;
+  }
+  virtual string tostr() const {
+    assert(0);
+    return "Secret";
+  }
 };
 
 

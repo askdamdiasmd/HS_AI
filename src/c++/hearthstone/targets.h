@@ -11,17 +11,21 @@ struct Target {
     heroes =      0x0002,
     characters =  0x0003,
     weapon =      0x0004,
-    targetable =  0x0008,
+    targetable =  0x0008, // means that player must select target manually
     friendly =    0x0010,
     enemy =       0x0020,
   }; 
   unsigned int tags;
 
-  Target() : tags(0) {}
+  Target() : Target(0) {}
   Target(unsigned int tags) : tags(tags) {}
 
   Target operator | (unsigned int tag) {
     return Target(tags | tag);
+  }
+
+  bool is_targetable() const {
+    return (tags & targetable)!=0;
   }
 
   //struct ResolvedTargets {

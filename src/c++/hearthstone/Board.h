@@ -5,7 +5,7 @@
 
 struct Slot {
   /* a position on the board (insertion index in players.minions[]) */
-  const Player* player;
+  Player* const player;
   int pos;  // in [0..6]
   float fpos; // float position for smart insertion
 
@@ -19,6 +19,8 @@ struct Slot {
   }
 };
 
+struct VizBoard;
+typedef shared_ptr<VizBoard> PVizBoard;
 
 struct Board {
   SET_ENGINE();

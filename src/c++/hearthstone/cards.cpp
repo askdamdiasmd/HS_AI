@@ -7,7 +7,6 @@
 #include "effects.h"
 #include "engine.h"
 #include "events.h"
-#include "heroes.h"
 #include "messages.h"
 #include "players.h"
 
@@ -24,6 +23,17 @@ void Card_Minion::list_actions(ListAction& list) const {
 }
 
 string Card_Minion::tostr() const {
-  const auto& s = dynamic_pointer_cast<Minion>(instance)->state;
+  const auto& s = minion()->state;
   return string_format("%s (%d): %d/%d %s", name_fr.c_str(), cost, s.atq, s.hp, desc.c_str());
+}
+
+Card_Coin::Card_Coin() :
+  Card_AreaSpell(0, "The coin", [](const Action* a, PInstance from, PInstance target) {from->player->gain_mana(1); return true; }) {
+  set_collectible(false);
+  set_name_fr("La piece");
+  set_desc("Gain one mana crystal this turn only");
+}
+
+PCard Card_Coin::copy() const {
+  return NEWP(Card_Coin);
 }

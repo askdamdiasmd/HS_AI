@@ -1,6 +1,7 @@
 #ifndef __ACTIONS_H__
 #define __ACTIONS_H__
 #include "common.h"
+//#include "targets.h"
 
 // ---------- Actions ---------------
 
@@ -8,22 +9,26 @@ struct Action {
   SET_ENGINE();
   const int cost;
   const bool need_slot;
-  Target target;
+  const Target target;
 
-  Action(int cost = 0, bool need_slot = false, Target target = Target()) : 
+  Action(int cost = 0, bool need_slot = false, Target target = 0) : 
     cost(cost), need_slot(need_slot), target(target) {}
   
-  //virtual bool is_valid() {
-  //  return true;
-  //}
+  bool need_target() const {
+    return target.is_targetable();
+  }
+
+  virtual bool is_valid() {
+    return true;
+  }
 
   //virtual bool neighbors() {
   //  return false;  // return True if self = minion with neighbor aura / battlecry
   //}
 
-  //int get_cost() const {
-  //  return cost;
-  //}
+  virtual int get_cost() const {
+    return cost;
+  }
 
   //int cardinality() {
   //  int res = 1;
@@ -32,18 +37,6 @@ struct Action {
   //  return res;
   //}
   
-  //Action* select(int ch_num, int instance_num) {
-  //  assert(ch_num < num_choices);
-  //  selection[ch_num] = choices[ch_num][instance_num];
-  //}
-
-  //bool has_chosen() const {
-  //  bool all = true;
-  //  for (int i = 0; i < num_choices; i++)
-  //     all &= selection[i]!=nullptr;  // non null
-  //  return all;
-  //}
-
   //int randomness() {
   //  # number of possible outcomes
   //  return 1   # default = 1 = no randomness
@@ -51,7 +44,7 @@ struct Action {
 
   virtual string tostr() const = 0;
 
-  virtual void execute(PInstance caster, PInstance choice, Slot slot) = 0;
+  virtual bool execute(PInstance caster, PInstance choice, const Slot& slot) = 0;
 };
 
 
@@ -72,19 +65,13 @@ struct Act_EndTurn : public Action {
 /// Play card
 
 struct Act_PlayCard : public Action { 
-  /*PCard card;
-  Act_PlayCard(PCard card) :
-    Action(card->player, card->cost), card(card) {}
+  const Card * const card;
+  const FuncAction actions;
 
-  virtual string tostr() const {
-    return string_format("Play Card %s", self.card);
-  }
+  Act_PlayCard(const Card* card, const bool need_slot, FuncAction actions, Target targets = 0);
 
-  virtual void execute() {
-    engine->PlayCard(caster, card, get_cost());
-  }*/
+  virtual bool execute(PInstance caster, PInstance choice, const Slot& slot);
 };
-
 
 
 // -------- Minions -----------------
@@ -185,22 +172,37 @@ self.engine.send_message(actions)*/
 
 /// ------------- Card Spells ------------------------
 
-//struct Act_PlaySpellCard(Act_PlayCard) :
-//  ''' hero plays a generic spell card, specified using "actions" '''
-//  def __init__(card, Target, actions) :
-//  Act_PlayCard.___init___(card)
-//  self.choices = [Target] if Target != None else[]
-//  self.actions = actions  # execution is defined by card
-//  def is_valid() :
-//  return all([bool(ch) for ch in self.choices]) # choices cannot be empty for a spell
-//  def execute() :
-//  Act_PlayCard.execute()
-//  self.engine.send_message([
-//    Msg_StartSpell(self.caster, self.card),
-//      self.actions(),
-//      Msg_EndSpell(self.caster, self.card)])
-//
-//
+struct Act_SpellCard : public Act_PlayCard {
+  /// hero plays a generic spell card, specified using "actions"
+
+  Act_SpellCard(const Card_Spell* card, FuncAction actions, Target targets = 0);
+
+  virtual bool execute(PInstance caster, PInstance choice, const Slot& slot);
+};
+
+struct Act_TargetedSpellCard : public Act_SpellCard {
+  Act_TargetedSpellCard(const Card_TargetedSpell* card, FuncAction actions, Target targets);
+
+  virtual string tostr() const;
+
+  virtual bool execute(PInstance caster, PInstance choice, const Slot& slot) {
+    assert(choice);
+    return Act_SpellCard::execute(caster, choice, slot);
+  }
+};
+
+struct Act_AreaSpellCard : public Act_SpellCard {
+  Act_AreaSpellCard(const Card_AreaSpell* card, FuncAction actions, Target targets);
+
+  virtual string tostr() const;
+
+  virtual bool execute(PInstance caster, PInstance choice, const Slot& slot) {
+    assert(!choice);
+    return Act_SpellCard::execute(caster, choice, slot);
+  }
+};
+
+
 //struct Act_SingleSpellDamageCard(Act_PlaySpellCard) :
 //  ''' inflict damage to a single target'''
 //  def __init__(card, Target, damage) :
@@ -242,15 +244,15 @@ self.engine.send_message(actions)*/
 //### ------------------- Hero powers -----------------
 
 struct Act_HeroPower : public Action {
-  Card_HeroAbility * const card;
+  const Card_HeroAbility * const card;
   FuncAction action;
 
-  Act_HeroPower(Card_HeroAbility* card, int cost, FuncAction action, Target target) :
+  Act_HeroPower(const Card_HeroAbility* card, int cost, FuncAction action, Target target) :
     Action(cost, false, target), card(card), action(action) {}
 
   virtual string tostr() const;
 
-  virtual void execute(PInstance caster, PInstance choice, Slot slot);
+  virtual bool execute(PInstance caster, PInstance choice, const Slot& slot);
 };
 
 

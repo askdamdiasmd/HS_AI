@@ -2,8 +2,8 @@
 #define __PLAYERS_H__
 #include "common.h"
 
-typedef vector<float> ArrFloat;
-
+struct VizPlayer;
+typedef shared_ptr<VizPlayer> PVizPlayer;
 
 struct Player {
   SET_ENGINE();
@@ -15,17 +15,18 @@ struct Player {
     PHero hero;
     PWeapon weapon;
     ListMinion minions;
-    ArrFloat minions_pos;
+    vector<float> minions_pos;
     ListSecret secrets;
   } state;
+  PVizPlayer viz;
 
   Player(PHero hero, string name, Deck* deck);
 
   // shortcuts
-  PHero hero() { return state.hero; }
+  /*PHero hero() { return state.hero; }
   PWeapon weapon() { return state.weapon; }
   ListMinion minions() { return state.minions; }
-  ListSecret secrets() { return state.secrets; }
+  ListSecret secrets() { return state.secrets; }*/
 
   /*def save_state(num = 0) :
   state.deck.save_state(num)
@@ -67,11 +68,11 @@ struct Player {
     remove(state.cards,card);
   }
 
-  virtual void mulligan(ListCard cards) = 0;
+  virtual ListCard mulligan(ListCard & cards) const = 0;
 
   void draw_init_cards(int nb, bool coin = false);
 
-  virtual Action* choose_actions(ListAction actions) = 0;
+  virtual const Action* choose_actions(ListAction actions) const = 0;
 
   float score_situation();
 };
@@ -79,13 +80,14 @@ struct Player {
 
 // ----------- Manual (human) player -----------
 
+/* to be defined in your interface 
 struct HumanPlayer : public Player {
   // human player : ask the player what to do
 
   HumanPlayer(PHero hero, string name, Deck* deck) :
     Player(hero, name, deck) {} 
 };
-
+*/
 
 
 // ------ stupidest player ever ------------
@@ -93,22 +95,15 @@ struct HumanPlayer : public Player {
 struct RandomPlayer : public Player {
   //// random player : just do random things
 
-  //virtual ListPCard mulligan(ListPCard cards) {
-  //  // keep everything without changing
-  //  return{};
-  //}
+  RandomPlayer(PHero hero, string name, Deck* deck) :
+    Player(hero, name, deck) {}
 
-  //virtual PAction choose_actions(ListPAction actions) {
-  //  // select one action in the list
-  //  int r = randint(0, len(actions) - 1);
-  //  PAction action = actions[r];
-  //  // select one target for this action
-  //  for (ch : action.choices) {
-  //    if ch :
-  //    action.select(i, random.randint(0, len(ch) - 1));
-  //  }
-  //  return action;
-  //}
+  virtual ListCard mulligan(ListCard & cards) const {
+    // keep everything without changing
+    return{};
+  }
+
+  virtual const Action* choose_actions(ListAction actions) const;
 };
 
 

@@ -45,6 +45,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>C:\Users\jere\src\HS_AI\src\c++\hearthstone\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -76,6 +77,7 @@
     <ClCompile Include="engine.cpp" />
     <ClCompile Include="hero.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="messages.cpp" />
     <ClCompile Include="players.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -90,7 +92,6 @@
     <ClInclude Include="engine.h" />
     <ClInclude Include="Board.h" />
     <ClInclude Include="events.h" />
-    <ClInclude Include="heroes.h" />
     <ClInclude Include="messages.h" />
     <ClInclude Include="players.h" />
     <ClInclude Include="targets.h" />

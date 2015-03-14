@@ -14,7 +14,6 @@
 Engine* Board::engine = nullptr;
 
 Board::Board() {
-  assert(0);//everybody = { player1->hero, player2->hero };
 }
 
 void Board::add_thing(PInstance thing, Slot pos) {

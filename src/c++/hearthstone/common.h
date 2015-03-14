@@ -12,20 +12,21 @@
 #include <iterator>
 #include <vector>
 #include <list>
-#include <deque>
+//#include <deque>
+//#include <set>
 #include <unordered_map>
 
 using namespace std;
 
-typedef long htype;
+//typedef long htype;
 typedef vector<string> ArrayString;
 
-#define issubclass( obj, cls)   dynamic_cast<cls>(obj)
+//#define forlen(iter, vec)   for(int __it__=0; __it__<len(vec); ++__it__) { auto& iter = vec[__it__];
+
+#define issubclass( obj, cls)   dynamic_cast<cls*>(obj)
 #define issubclassP( obj, cls)   dynamic_pointer_cast<cls>(obj)
-#define in(el, set) (set.find(el) != set.end())
 
 #define NEWP(type, ...) make_shared<type>(##__VA_ARGS__)
-
 
 inline string string_format(const char* format, ...) {
   va_list args;
@@ -38,14 +39,23 @@ inline string string_format(const char* format, ...) {
 
 #define NI  assert(!"not implemented!")
 
+#ifdef _WIN32
+#ifdef _DEBUG
+#include <windows.h>
+#define TRACE(fmt,...) OutputDebugString(string_format(fmt,##__VA_ARGS__).c_str());
+#else
+#define TRACE false && _trace
+#endif
+#endif
+
 #define SET_ENGINE()  \
   static Engine* engine; \
   static void set_engine(Engine* e) {engine = e;}
 
 #define NAMED_PARAM(cls, type, param)  cls* set_##param(type v) { param = v; return this; }
 
-#define UPDATE_STATUS(which) engine->send_status(NEWP(Msg_Status,PThing(this),which))
-#define SEND_MSG(type, ...)  engine->send_message(NEWP(type,##__VA_ARGS__));
+#define UPDATE_STATUS(which) NI //engine->send_status(NEWP(Msg_Status,PThing(this),which))
+#define SEND_MSG(type, ...)  engine->send_display_message(NEWP(type,##__VA_ARGS__));
 
 inline bool startswith(string s, const char* comp) {
   return !s.compare(0, strlen(comp), comp);
@@ -95,15 +105,32 @@ inline Type pop_back(vector<Type> & vec) {
   return pop_at(vec, vec.size()-1);
 }
 template<typename Type>
-inline int index(vector<Type> & vec, const Type& ref) {
+inline int index(const vector<Type> & vec, const Type& ref) {
   for (int i = 0; i < (signed)vec.size(); ++i)
     if (vec[i] == ref) 
       return i;
-  throw exception("no such element in list");
+  return -1;
+}
+template<typename Type>
+inline shared_ptr<Type> indexP(const vector<shared_ptr<Type> > & vec, const Type* ptr) {
+  for (auto c : vec)
+    if (c.get() == ptr)
+      return c;
+  return shared_ptr<Type>();
 }
 template<typename Type>
 inline void remove(vector<Type> & vec, const Type& ref) {
-  vec.erase(vec.begin() + index(vec,ref));
+  int i = index(vec, ref);
+  assert(i >= 0);
+  vec.erase(vec.begin() + i);
+}
+template <typename T>
+inline bool in(const T& el, const vector<T>& vec) { 
+  return index(vec, el) >= 0; 
+}
+template <typename T, typename T2>
+inline bool in(const T& el, const unordered_map<T,T2>& vec) { 
+  return vec.find(el) != vec.end();
 }
 
 inline int randint(int min, int max) {
@@ -116,10 +143,10 @@ inline int randint(int min, int max) {
 // declarations of classes and subtypes
 
 struct Engine;
+typedef shared_ptr<Engine> PEngine;
 struct Player;
+typedef shared_ptr<Player> PPlayer;
 struct Board;
-struct VizBoard;
-typedef shared_ptr<VizBoard> PVizBoard;
 struct Slot;
 typedef vector<Slot> ListSlot;
 //struct Target;
@@ -127,15 +154,31 @@ typedef vector<Slot> ListSlot;
 
 struct Card;
 typedef shared_ptr<Card> PCard;
+typedef shared_ptr<const Card> PConstCard;
+typedef vector<PConstCard> ListConstCard;
 typedef vector<PCard> ListCard;
 struct Card_Instance;
 typedef shared_ptr<Card_Instance> PCardInstance;
+typedef shared_ptr<const Card_Instance> PConstCardInstance;
+struct Card_Thing;
+typedef shared_ptr<Card_Thing> PCardThing;
+typedef shared_ptr<const Card_Thing> PConstCardThing;
 struct Card_Minion;
 typedef shared_ptr<Card_Minion> PCardMinion;
+typedef shared_ptr<const Card_Minion> PConstCardMinion;
 struct Card_Hero;
 typedef shared_ptr<Card_Hero> PCardHero;
+typedef shared_ptr<const Card_Hero> PConstCardHero;
 struct Card_HeroAbility;
 typedef shared_ptr<Card_HeroAbility> PCardHeroAbility;
+typedef shared_ptr<const Card_HeroAbility> PConstCardHeroAbility;
+struct Card_Spell;
+typedef shared_ptr<Card_Spell> PCardSpell;
+typedef shared_ptr<const Card_Spell> PConstCardSpell;
+struct Card_TargetedSpell;
+typedef shared_ptr<Card_TargetedSpell> PCardTargetedSpell;
+struct Card_AreaSpell;
+typedef shared_ptr<Card_AreaSpell> PCardAreaSpell;
 
 struct Deck;
 typedef shared_ptr<Deck> PDeck;
@@ -150,32 +193,39 @@ typedef vector<PEffect> ListEffect;
 
 struct Instance;
 typedef shared_ptr<Instance> PInstance;
+typedef shared_ptr<const Instance> PConstInstance;
 typedef vector<PInstance> ListInstance;
 struct Thing;
 typedef shared_ptr<Thing> PThing;
+typedef shared_ptr<const Thing> PConstThing;
 typedef vector<PThing> ListThing;
 struct Secret;
 typedef shared_ptr<Secret> PSecret;
 typedef vector<PSecret> ListSecret;
 struct Weapon;
 typedef shared_ptr<Weapon> PWeapon;
+typedef shared_ptr<const Weapon> PConstWeapon;
 struct Creature;
 typedef shared_ptr<Creature> PCreature;
 typedef vector<PCreature> ListCreature;
 struct Minion;
 typedef shared_ptr<Minion> PMinion;
+typedef shared_ptr<const Minion> PConstMinion;
 typedef vector<PMinion> ListMinion;
 struct Hero;
 typedef shared_ptr<Hero> PHero;
+typedef shared_ptr<const Hero> PConstHero;
 
 struct VizInstance;
 
 struct Message;
+typedef shared_ptr<Message> PMessage;
 struct Msg_Status;
 typedef shared_ptr<Msg_Status> PMsgStatus;
 
 //typedef ListAction(*FuncListAction)(Engine* e, PInstance from, PInstance target);
-typedef void(*FuncAction)(Engine* e, PInstance from, PInstance target);
+typedef bool (*FuncAction)(const Action* a, PInstance from, PInstance target);
+typedef ListCard (Player::*FuncMulligan)(ListCard&) const;
 
 #include "targets.h"
 #include "events.h"

@@ -1,26 +1,21 @@
 #include "creatures.h"
 #include "Cards.h"
 #include "players.h"
-#include "heroes.h"
 #include "actions.h"
+
+PConstCardHero Hero::card_hero() const { 
+  return issubclassP(card, const Card_Hero); 
+}
 
 Hero::Hero(int hp):
   Creature(0, hp) {
-  NI; //popup();
 }
 
-//Hero::Hero(PCardHero hero, Player* controller) :
-//  Hero(*dynamic_pointer_cast<Hero>(hero->instance)) {
-//  init(hero, controller);
-//  assert(0);//popup();
-//}
-
-void Hero::set_controller(Player* pl) {
-  player = pl;
-  card->player = pl;
-  assert(0);//dynamic_cast<Card_Hero*>(card.get())->ability.controller = pl;
+Hero::Hero(PConstCardHero hero) :
+  Hero(*hero->hero()) {
+  init(hero, nullptr);
+  popup();
 }
-
 
 string Hero::tostr() const {
   return string_format("[%s (%s) %dHP]", player->name, card->name, state.hp);
@@ -57,7 +52,7 @@ void Card_HeroAbility::list_actions(ListAction& list) const {
 
 
 Card_Hero::Card_Hero(string name, HeroClass cls, PHero hero, PCardHeroAbility ability) :
-  Card_Instance(0, name, dynamic_pointer_cast<Instance>(hero)), ability(ability) {
+  Card_Thing(0, name, hero), ability(ability) { //issubclassP(hero, Thing)
   collectible = false;
   cls = cls;
   hero->add_static_effect(Thing::charge);

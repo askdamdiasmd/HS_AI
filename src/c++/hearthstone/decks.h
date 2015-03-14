@@ -5,13 +5,16 @@
 struct Deck {
   SET_ENGINE();
   Player* player;
-  typedef vector<PCard> ListCard;
   ListCard cards;
   int fatigue;
 
   Deck( ListCard cards ) :
     player(nullptr), cards(cards), fatigue(0) {
     assert(cards.size() == 30);
+  }
+
+  int size() const {
+    return len(cards);
   }
 
   void set_owner(Player* owner);
@@ -24,15 +27,13 @@ struct Deck {
   //def end_simulation(self) :
   //saved = dict()
 
-  int size() const {
-    return len(cards);
-  }
-
   // pop one random card from deck and return it (if null : fatigue)
   PCard draw_one_card();
 
   // draw initial cards in starting hands and do mulligan
-  ListCard draw_init_cards(int nb, ListCard(*mulligan)(const ListCard&));
+  ListCard draw_init_cards(int nb, FuncMulligan mulligan);
+
+  void print() const;
 };
 
 

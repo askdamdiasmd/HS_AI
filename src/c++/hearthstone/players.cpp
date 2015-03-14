@@ -3,12 +3,14 @@
 #include "creatures.h"
 #include "Cards.h"
 #include "decks.h"
+#include "messages.h"
 
 
 Engine* Player::engine = nullptr;
 
 Player::Player(PHero hero, string name, Deck* deck) :
   name(name), deck(deck) {
+  memset(&state, 0, sizeof(state));
   state.hero = hero;
   state.minions_pos = { 0.f, 1000.f };
 
@@ -150,12 +152,12 @@ void Player::give_card(PCard card, Instance* origin) {
 }
 
 void Player::draw_init_cards(int nb, bool coin) {
-  assert(0);
-  //state.cards = deck->draw_init_cards(nb, mulligan);
-  //if (coin)
-  //  state.cards.puh_back(NEWP(Card_Coin, this));
-  //for (c : state.cards)
-  //  SEND_MSG(Msg_CardDrawn, this, c);
+  state.cards = deck->draw_init_cards(nb, &Player::mulligan);
+  if (coin) {
+    PCard coin = NEWP(Card_Coin);
+    SEND_MSG(Msg_CardDrawn, PInstance(), coin, this);
+    state.cards.push_back(coin);
+  }
 }
 
 float Player::score_situation() {
@@ -170,4 +172,17 @@ float Player::score_situation() {
   //  res += m->score_situation();
   //return res;
   assert(0); return 0;
+}
+
+const Action* RandomPlayer::choose_actions(ListAction actions) const {
+  // select one action in the list
+  int r = randint(0, len(actions) - 1);
+  const Action* action = actions[r];
+  // select one target for this action
+  NI;
+  //for (ch : action.choices) {
+  //  if ch :
+  //  action.select(i, random.randint(0, len(ch) - 1));
+  //}
+  return action;
 }
