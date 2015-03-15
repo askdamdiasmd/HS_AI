@@ -113,14 +113,14 @@ void Creature::attack(Creature* target) {
   if (target->state.atq) hurt(target->state.atq, target);
 }
 
-ListAction Minion::list_actions() {
+void Minion::list_actions(ListAction& actions) const {
   //if (state.n_atq >= state.n_max_atq ||
   //  state.atq <= 0 || is_frozen() ||
   //  (is_fresh() && !is_charge()) )
   //  return {};
   //else 
   //  return { Act_MinionAttack(this, engine->board.get_attackable_characters(controller)) };
-  assert(0); return{};
+  NI; 
 }
 
 PConstCardMinion Minion::card_minion() const { 

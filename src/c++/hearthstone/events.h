@@ -9,6 +9,11 @@ enum Event {
   EndHeroPower,
   StartSpell,
   EndSpell,
+  StartAttack,
+  EndAttack,
+  AddMinion,
+  AddWeapon,
+  AddSecret,
 };
 
 

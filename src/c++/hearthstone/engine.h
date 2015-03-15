@@ -16,37 +16,30 @@ public:
 
   void set_default();
 
-  Player* get_current_player() {
-    return players[turn % 2];
-  }
+  Player* get_current_player() { return players[turn % 2]; }
+  Player* get_enemy_player(){ return players[(turn+1) % 2]; }
+  Player* get_other_player(Player* p) { return p==players[0] ? players[1] : players[0]; }
 
-  Player* get_other_player() {
-    return  players[(turn + 1) % 2];
-  }
-
+  // general game functions
   void start_game();
-
   ListAction list_player_actions(Player* player);
-
   void play_turn();
 
-  void send_status(PMsgStatus msg) {
-    if (!is_simulation)
-      display_status(msg);
-  }
-  
-  void display_status(PMsgStatus msg);
-
-  bool is_game_ended();
-
+  bool is_game_ended() { return board.is_game_ended(); }
   Player* get_winner();
 
-  // game functions
+  // game actions
+  bool start_turn();
+  bool end_turn();
+
+  bool draw_card(PInstance caster, Player* player, int nb = 1);
   bool play_card(const Card* card, PInstance caster);
   void signal(Event event, PInstance from);
 
   bool heal(PInstance from, int hp, PInstance to);
   bool damage(PInstance from, int hp, PInstance to);
+
+  bool attack(PInstance from, PInstance target);
 
 private:
   //unordered_map<htype, int> saved_turn;
@@ -76,11 +69,14 @@ public:
   // display section
 
   list<PMessage> display;
-  void send_display_message(PMessage msg) {
-    if (!is_simulation) // useless if it's a simulation
-      display.push_back(msg);
-  }
+  void send_display_message(PMessage msg);
   virtual void wait_for_display() = 0;
+
+  void send_status(PMsgStatus msg) {
+    if (!is_simulation)
+      display_status(msg);
+  }
+  virtual void display_status(PMsgStatus msg);
 };
 
 

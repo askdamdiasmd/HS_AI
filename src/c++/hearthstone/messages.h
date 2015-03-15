@@ -2,6 +2,7 @@
 #define __MESSAGES_H__
 #include "common.h"
 #include "creatures.h"
+#include "players.h"
 
 
 struct Message {
@@ -36,25 +37,25 @@ struct CardMessage : public Message {
 // game messages
 
 struct Msg_StartTurn : public Message {
-  virtual void draw(Engine* engine) {
-    NI;
-    // display code
-  }
-  //virtual string tostr() const {
-  //  return string_format("Start of turn for %s ", caster->controller->tostr());
-  //}
+  //const Player::State state;
+  //Msg_StartTurn(PInstance caster, const Player::State& state) :
+  //  Message(caster), state(state) {}
+  Msg_StartTurn(PInstance caster) :
+    Message(caster) {}
+
+  virtual const char* cls_name() const { return "Msg_StartTurn"; }
+  virtual string tostr() const;
+  virtual void draw(Engine* engine);
 };
 
 struct Msg_EndTurn : public Message {
-  virtual void draw(Engine* engine) {
-    NI;
-    // display code
-  }
-  //virtual string tostr() const {
-  //  return string_format("End of turn for %s ", caster->controller->tostr());
-  //}
-};
+  Msg_EndTurn(PInstance caster) :
+    Message(caster) {}
 
+  virtual const char* cls_name() const { return "Msg_EndTurn"; }
+  virtual string tostr() const;
+  virtual void draw(Engine* engine);
+};
 
 struct Msg_Status : public Message {
   // just to tell the interface that something happened 
@@ -80,15 +81,36 @@ struct Msg_Status : public Message {
 
 // play card messages
 
-struct Msg_CardDrawn : public CardMessage {
-  const PCard card;
+struct Msg_NewCard : public CardMessage {
+  /// allocate a new VizCard 
+
+  Msg_NewCard(PInstance caster, PCard card) :
+    CardMessage(caster, card) {}
+
+  virtual const char* cls_name() const { return "Msg_NewCard"; }
+  virtual string tostr() const;
+  virtual void draw(Engine* engine);
+};
+
+struct Msg_ReceiveCard : public CardMessage {
+  // this player receives a new card in his hand
   Player* const player;
 
   /// give a defined card to player
-  Msg_CardDrawn(PInstance caster, PCard card, Player* target) :
-    CardMessage(caster, card), card(card), player(target) {}
+  Msg_ReceiveCard(PInstance caster, PCard card, Player* target) :
+    CardMessage(caster, card), player(target) {}
 
-  virtual const char* cls_name() const { return "Msg_CardDrawn"; }
+  virtual const char* cls_name() const { return "Msg_ReceiveCard"; }
+  virtual string tostr() const;
+  virtual void draw(Engine* engine);
+};
+
+struct Msg_BurnCard : public Msg_ReceiveCard {
+  // this card get burned
+  Msg_BurnCard(PInstance caster, PCard card, Player* target) :
+    Msg_ReceiveCard(caster, card, target) {}
+
+  virtual const char* cls_name() const { return "Msg_DrawBurnCard"; }
   virtual string tostr() const;
   virtual void draw(Engine* engine);
 };
@@ -133,7 +155,6 @@ struct Msg_CardDrawn : public CardMessage {
 //  [Msg_UseMana(caster, cost),
 //  Msg_ThrowCard(caster, card)], immediate = True)
 //
-//
 //struct Msg_Fatigue(Message) :
 //  """ fatigue damage points (no more cards) """
 //  def __init__(caster, damage) :
@@ -144,55 +165,25 @@ struct Msg_CardDrawn : public CardMessage {
 //  def draw(Engine* engine) :
 //  caster.hero.hurt(damage)
 
-
-// start / end messages
-
-//struct Msg_StartAttack(TargetedMessage) :
-//  virtual string tostr() const
-//  return "Minion %s attacks enemy %s" % (caster, target)
-//struct Msg_EndAttack(Message) :
-//  virtual string tostr() const
-//  return "End of attack."
-//
-//struct Msg_StartCard(CardMessage) :
-//  virtual string tostr() const
-//  return "Player %s plays [%s]" % (caster, card)
-//struct Msg_EndCard(CardMessage) :
-//  virtual string tostr() const
-//  return "[%s] finishes." % card
-//
-//struct Msg_StartSpell(Msg_StartCard) :
-//  virtual string tostr() const
-//  return "Player %s plays spell [%s]" % (caster, card)
-//struct Msg_EndSpell(Msg_EndCard) :
-//  virtual string tostr() const
-//  return "End of spell."
-//
-//struct Msg_StartHeroPower(Message) :
-//  def draw(Engine* engine) :
-//  caster.hero.use_hero_power()
-//  virtual string tostr() const
-//  return "[%s] uses its hero power" % caster
-//struct Msg_EndHeroPower(Message) :
-//  virtual string tostr() const
-//  return "End of hero power effect"
-
-
 // minion messages
 
-//struct Msg_AddThing(Message) :
-//  def __init__(caster, thing, pos = None) :
-//  Message.__init__(caster)
-//  assert thing != None, pdb.set_trace()
-//  thing = thing
-//  pos = pos
-//  def draw(Engine* engine) :
-//  engine.board.add_thing(thing, pos)
-//  virtual string tostr() const
-//  return "New %s on the board for %s" % (thing, caster)
-//
-//struct Msg_AddMinion(Msg_AddThing) :
-//  pass
+struct Msg_AddInstance : public Message {
+  Msg_AddInstance(PInstance caster) :
+    Message(caster) {}
+};
+
+struct Msg_AddMinion : public Msg_AddInstance {
+  const int pos;
+  PMinion minion() { return issubclassP(caster, Minion); }
+
+  Msg_AddMinion(PInstance caster, int pos) :
+    Msg_AddInstance(caster), pos(pos) {}
+
+  virtual const char* cls_name() const { return "Msg_AddMinion"; }
+  virtual string tostr() const;
+  virtual void draw(Engine* engine);
+};
+
 //struct Msg_AddWeapon(Msg_AddThing) :
 //  virtual string tostr() const
 //  return "%s equipped a %s" % (caster, thing)

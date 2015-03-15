@@ -7,7 +7,6 @@
 
 
 int main(int argc, char** argv) {
-
   bool anim, mana, dbg, setup;
   anim = mana = dbg = setup = false;
   for (int i = 0; i < argc; i++) {

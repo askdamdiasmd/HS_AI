@@ -6,17 +6,21 @@
 
 Engine* Action::engine = nullptr;
 
+bool Act_EndTurn::execute(PInstance caster, PInstance choice, const Slot& slot) const {
+  return engine->end_turn();
+}
+
 Act_PlayCard::Act_PlayCard(const Card* card, const bool need_slot, FuncAction actions, Target targets ) :
   Action(card->cost, need_slot, targets), card(card), actions(actions) {}
 
-bool Act_PlayCard::execute(PInstance caster, PInstance choice, const Slot& slot) {
+bool Act_PlayCard::execute(PInstance caster, PInstance choice, const Slot& slot) const {
   return engine->play_card(card, caster);
 }
 
 Act_SpellCard::Act_SpellCard(const Card_Spell* card, FuncAction actions, Target targets ) :
   Act_PlayCard(card, false, actions, targets) {}
 
-bool Act_SpellCard::execute(PInstance caster, PInstance choice, const Slot& slot) {
+bool Act_SpellCard::execute(PInstance caster, PInstance choice, const Slot& slot) const {
   if (Act_PlayCard::execute(caster, choice, slot)) {
     engine->signal(Event::StartSpell, caster);
     bool res = actions(this, caster, choice);
@@ -49,9 +53,14 @@ string Act_HeroPower::tostr() const {
   return string_format("Hero Power (%d): %s", cost, card->name);
 }
 
-bool Act_HeroPower::execute(PInstance caster, PInstance choice, const Slot& slot) {
+bool Act_HeroPower::execute(PInstance caster, PInstance choice, const Slot& slot) const {
   engine->signal(Event::StartHeroPower, caster);
   bool res = action(this, caster, choice);
   engine->signal(Event::EndHeroPower, caster);
   return res;
+}
+
+bool Act_Attack::execute(PInstance caster, PInstance choice, const Slot& slot) const {
+  assert(choice);
+  return engine->attack(caster, choice);
 }

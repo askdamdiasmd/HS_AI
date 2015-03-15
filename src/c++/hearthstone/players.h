@@ -1,6 +1,7 @@
 #ifndef __PLAYERS_H__
 #define __PLAYERS_H__
 #include "common.h"
+#include "actions.h"
 
 struct VizPlayer;
 typedef shared_ptr<VizPlayer> PVizPlayer;
@@ -19,6 +20,8 @@ struct Player {
     ListSecret secrets;
   } state;
   PVizPlayer viz;
+
+  const Act_EndTurn act_end_turn;
 
   Player(PHero hero, string name, Deck* deck);
 
@@ -62,7 +65,7 @@ struct Player {
 
   void draw_card();
 
-  void give_card(PCard card, Instance* origin);
+  void give_card(PCard card, PInstance origin);
 
   void throw_card(PCard card) {
     remove(state.cards,card);
@@ -72,7 +75,7 @@ struct Player {
 
   void draw_init_cards(int nb, bool coin = false);
 
-  virtual const Action* choose_actions(ListAction actions) const = 0;
+  virtual const Action* choose_actions(ListAction actions, PInstance& choice, Slot& slot) const = 0;
 
   float score_situation();
 };
@@ -103,7 +106,7 @@ struct RandomPlayer : public Player {
     return{};
   }
 
-  virtual const Action* choose_actions(ListAction actions) const;
+  virtual const Action* choose_actions(ListAction actions, PInstance& choice, Slot& slot) const;
 };
 
 

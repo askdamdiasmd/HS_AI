@@ -21,18 +21,12 @@ string Hero::tostr() const {
   return string_format("[%s (%s) %dHP]", player->name, card->name, state.hp);
 }
 
-ListAction Hero::list_actions() {
-  //  ListAction res;
-  //  if (state.n_remaining_power)
-  //    res += card->ability.list_actions();
+void Hero::list_actions(ListAction& actions) const {
+  if (state.n_remaining_power)
+    card_hero()->ability->list_actions(actions);
 
-  //  if (state.n_atq < state.n_max_atq && state.atq>0 && not is_frozen()) {
-  //    res.push_back(make_shared<Act_HeroAttack>(this, engine->board.get_attackable_characters(player)));
-  //  }
-  //  return res;
-  //}
-  NI;
-  return{};
+  if (state.n_atq < state.n_max_atq && state.atq>0 && !is_frozen())
+    actions.push_back(&act_attack);
 }
 
 float Hero::score_situation() {

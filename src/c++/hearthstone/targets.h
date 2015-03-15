@@ -14,6 +14,7 @@ struct Target {
     targetable =  0x0008, // means that player must select target manually
     friendly =    0x0010,
     enemy =       0x0020,
+    attackable =  0x0040, // things that can be attacked from the player viewpoint
   }; 
   unsigned int tags;
 
@@ -37,7 +38,7 @@ struct Target {
   //  //ResolvedTargets(ListMinion l, PHero h0 = nullptr, PHero h1 = nullptr, bool(*cond)(Minion*) = nullptr);
   //};
 
-  //ResolvedTargets resolve_targets(Player* owner, Minion* me = nullptr);
+  ListInstance resolve(Player* owner, Instance* me = nullptr) const;
 };
 
 //inline Target operator | (unsigned int tag, Target target) {

@@ -17,7 +17,7 @@ PCard Deck::draw_one_card() {
   if (!cards.empty()) {
     int r = randint(0, size() - 1);
     card = pop_at(cards, r);
-    SEND_MSG(Msg_CardDrawn, PInstance(), card, player);
+    SEND_MSG(Msg_NewCard, nullptr, card);
   }
   else {
     fatigue++;
@@ -29,17 +29,17 @@ PCard Deck::draw_one_card() {
 // draw initial cards in starting hands and do mulligan
 ListCard Deck::draw_init_cards(int nb, FuncMulligan mulligan) {
   ListCard keep;
-  for (int i = 0; i < nb; ++i)
+  while (len(keep) < nb)
     keep.push_back(draw_one_card());
   ListCard discarded = player->mulligan(keep);
 
   // draw replacement cards
-  int n_replace = nb - keep.size();
-  for (int c = 0; c < n_replace; ++c)
+  while (len(keep) < nb)
     keep.push_back(draw_one_card());
 
   // put back discarded cards in deck
-  cards.insert(cards.end(), discarded.begin(), discarded.end());
+  for (auto c : discarded)
+    cards.push_back(c);
 
   return keep;
 }

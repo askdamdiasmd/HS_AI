@@ -1,6 +1,7 @@
 #ifndef __CREATURES_H__
 #define __CREATURES_H__
 #include "common.h"
+#include "actions.h"
 
 /// ------------ generalistic thing (hero, weapon, minon, secret) -------
 
@@ -158,7 +159,7 @@ struct Thing : public Instance {
     state.static_effects &= ~eff;
   }
 
-  virtual ListAction list_actions() = 0;
+  virtual void list_actions(ListAction& actions) const = 0;
 
   virtual void popup() { // executed when created
     state.n_max_atq = is_windfury() ? 2 : 1;
@@ -197,6 +198,8 @@ struct Thing : public Instance {
 ////// ------------ Creature (hero or minion) ----------
 
 struct Creature : public Thing {
+  const Act_Attack act_attack;
+
   Creature(int atq, int hp) :
     Thing(atq, hp) {}
 
@@ -234,7 +237,7 @@ struct Minion : public Creature {
   //  return true;
   //}
 
-  ListAction list_actions();
+  virtual void list_actions(ListAction& actions) const;
 
   //void hurt(int damage, Thing* caster = nullptr) {
   //  assert(damage > 0);
@@ -310,7 +313,7 @@ struct Hero : public Creature {
 
   virtual string tostr() const;
 
-  virtual ListAction list_actions();
+  virtual void list_actions(ListAction& actions) const;
 
   //virtual void start_turn() {
   //  Creature::start_turn();
@@ -348,7 +351,7 @@ struct Weapon : public Thing {
 
   virtual PInstance copy() const { NI; return nullptr; }
 
-  //ListAction list_actions() {
+  //virtual void list_actions(ListAction& actions) const {
   //  Player* hero = controller->hero;
   //  if (hero->state.n_atq >= hero->state.n_max_atq || hero->is_frozen())
   //    return{};
@@ -386,8 +389,7 @@ struct Secret : public Instance {
   //  //      Thing.save_state(num)
   //  //      state.saved[num]['active'] = state.active
 
-  //  def list_actions() :
-  //  return None
+  virtual void list_actions(ListAction& actions) const {}
 
   //  def ask_for_death() :
   //  state.engine.send_message(Msg_DeadSecret(), immediate = True)

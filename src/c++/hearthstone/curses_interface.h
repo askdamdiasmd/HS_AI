@@ -52,6 +52,8 @@ struct VizPanel {
   virtual WINDOW* draw(const ArgMap& args) = 0;
 };
 
+typedef shared_ptr<VizPanel> PVizPanel;
+
 //### Button -----------
 
 struct VizButton : public VizPanel {
@@ -191,9 +193,9 @@ struct VizPlayer {
 //### Slot -----------
 
 struct VizSlot : public VizPanel {
-  const Slot * const slot;
+  const Slot slot;  // copy it
 
-  VizSlot(Slot* slot) :
+  VizSlot(Slot slot) :
     VizPanel(), slot(slot) {}
 
   // return position, space
@@ -219,218 +221,14 @@ struct VizCard : public VizPanel {
   virtual WINDOW* draw(const ArgMap& args);
 };
 
-
-//# Messages-------- -
-//
-//def interp(i, max, start, end) :
-//""" func to interpolate, i varies in [0,m-1] """
-//assert 0 <= i<max, debug()
-//return start + (end - start)*i / (max - 1)
-//
-//def draw_Message(self) :
-//pass
-//
-//def draw_Action(self) :
-//pass
-//
-//def draw_Msg_StartTurn(self) :
-//player = self.caster
-//player.viz.check()  # check consistency with real data
-//NC = getmaxyx(stdscr)[1]
-//button = Button(10, NC / 2 - 3, " %s's turn! "%player.name, tx = 20, ty = 5)
-//button.draw(highlight = BLACK_on_YELLOW)
-//show_panels()
-//time.sleep(1 if self.engine.board.viz.animated else 0.1)
-//button.delete()
-//self.engine.board.viz.hero_power_buttons[player].used = False
-//self.engine.board.draw()
-//
-//def draw_Msg_CardDrawn(self) :
-//card = self.card
-//self.caster.viz.cards.append(card)
-//bottom_player = self.engine.board.viz.get_top_bottom_players()[1]
-//if self.engine.board.viz.animated and bottom_player == self.caster :
-//self.engine.board.draw('cards', which = self.caster, last_card = False)
-//NR, NC = getmaxyx(stdscr)
-//ty, tx = card_size
-//sy, sx = 12, NC - tx
-//ey, ex = self.engine.board.viz.get_card_pos(card)
-//for y in range(sy, ey + 1) :
-//x = int(0.5 + sx + (ex - sx)*(y - sy) / float(ey - sy))
-//h = max(0, NR - y)
-//card.draw(highlight = BLACK_on_YELLOW, pos = (y, x), small = 0 if h >= ty else h)
-//show_panels()
-//time.sleep(0.05 + 0.6*(y == sy))
-//self.engine.board.draw('cards', which = self.caster)
-//
-//def draw_Msg_EndTurn(self) :
-//pass
-//
-//def draw_Msg_UseMana(self) :
-//self.engine.board.draw('mana', self.caster)
-//
-//def draw_Msg_ThrowCard(self) :
-//card = self.card
-//card.owner.viz.cards.remove(card)
-//card.delete()
-//self.engine.board.draw('cards', which = self.caster)
-//
-//def draw_Msg_PlayCard(self) :
-//top, bot = self.engine.board.viz.get_top_bottom_players()
-//if self.caster is top :
-//sx = (getmaxyx(stdscr)[1] - card_size[1]) / 2
-//kwargs = dict(small = False, cost = self.cost)
-//self.card.draw(pos = (0, sx), highlight = BLACK_on_YELLOW, **kwargs)
-//show_panels()
-//time.sleep(1)
-//if self.engine.board.viz.animated:
-//for i in range(sx - 1, -1, -2) :
-//self.card.draw(pos = (0, i), **kwargs)
-//show_panels()
-//time.sleep(0.05*(i) / sx)
-//time.sleep(0.2)
-//self.card.delete()
-//show_panels()
-//
-//def draw_Msg_MinionPopup(self) :
-//new_minion = self.caster
-//owner = new_minion.owner
-//if self.engine.board.viz.animated :
-//old_pos = {}
-//for i, m in enumerate(owner.viz.minions) :
-//old_pos[m] = Slot(owner, i).get_screen_pos()[0]
-//owner.viz.minions.insert(self.pos, new_minion)
-//new_minion.viz = VizMinion(new_minion)
-//if self.engine.board.viz.animated and old_pos :
-//new_pos = {}
-//for i, m in enumerate(owner.viz.minions) :
-//new_pos[m] = Slot(owner, i).get_screen_pos()[0]
-//r = VizMinion.size[1] / 2 + 1
-//hide_panel(new_minion.viz.panel)
-//for i in range(1, r) :
-//for m, (oy, ox) in old_pos.items() :
-//ny, nx = new_pos[m]
-//m.draw(pos = (interp(i, r, oy, ny), interp(i, r, ox, nx)))
-//show_panels()
-//time.sleep(0.1)
-//show_panel(new_minion.viz.panel)
-//self.engine.board.draw('minions', which = owner)
-//
-//def draw_Msg_WeaponPopup(self) :
-//weapon = self.caster
-//weapon.owner.viz.set_weapon(weapon)
-//self.engine.board.draw('heroes', which = weapon.owner)
-//
-//def draw_Msg_SecretPopup(self) :
-//secret = self.caster
-//weapon.owner.viz.secrets.append(secret)
-//self.engine.board.draw('secrets', which = secret.owner)
-//
-//def draw_Msg_DeadMinion(self) :
-//dead_minion = self.caster
-//if dead_minion not in dead_minion.owner.viz.minions :
-//return # sometimes, it is already dead
-//dead_minion.viz.delete()
-//if self.engine.board.viz.animated:
-//pl = dead_minion.owner
-//old_pos = {}
-//for i, m in enumerate(pl.viz.minions) :
-//old_pos[m] = Slot(pl, i).get_screen_pos()[0]
-//dead_minion.owner.viz.minions.remove(dead_minion)
-//if self.engine.board.viz.animated :
-//new_pos = {}
-//for i, m in enumerate(pl.viz.minions) :
-//new_pos[m] = Slot(pl, i).get_screen_pos()[0]
-//r = VizMinion.size[1] / 2 + 1
-//for i in range(1, r) :
-//for m, (ny, nx) in new_pos.items() :
-//oy, ox = old_pos[m]
-//m.draw(pos = (interp(i, r, oy, ny), interp(i, r, ox, nx)))
-//show_panels()
-//time.sleep(0.1)
-//self.engine.board.draw('minions', which = dead_minion.owner)
-//
-//def draw_Msg_DeadWeapon(self) :
-//dead_weapon = self.caster
-//dead_weapon.owner.viz.unset_weapon(dead_weapon)
-//dead_weapon.viz.delete()
-//self.engine.board.draw('heroes', which = dead_weapon.owner)
-//
-//def draw_Msg_Status(self) :
-//if hasattr(self.caster, 'viz') :
-//if not self.caster.viz.update_stats(self) :
-//return False
-//show_panels()
-//
-//def draw_Msg_StartAttack(self) :
-//if self.engine.board.viz.animated :
-//if issubclass(type(self.caster), Weapon) :
-//caster = self.caster.hero
-//else :
-//caster = self.caster
-//oy, ox = getbegyx(caster.viz.win)
-//oty, otx = getmaxyx(caster.viz.win)
-//top_panel(caster.viz.panel) # set assailant as top panel
-//ny, nx = getbegyx(self.target.viz.win)
-//nty, ntx = getmaxyx(self.target.viz.win)
-//nx += (ntx - otx) / 2
-//m = abs(oy - ny)
-//t = 0.5 / (m + 2)
-//for i in range(1, m - (nty + 1) / 2) + range(m - (nty + 1) / 2, -1, -1) :
-//caster.draw(pos = (interp(i, m, oy, ny), interp(i, m, ox, nx)))
-//show_panels()
-//time.sleep(t)
-//
-//def draw_Msg_StartHeroPower(self) :
-//player = self.caster
-//button = self.engine.board.viz.hero_power_buttons[player]
-//button.used = True
-//button.draw(blink = 0.5)
-//
-//
-//def get_center(viz) :
-//pos = getbegyx(viz.win)
-//size = getmaxyx(viz.win)
-//return pos[0] + size[0] / 2, pos[1] + size[1] / 2
-//
-//def anim_magic_burst(engine, start, end, ch, color, tstep = 0.03, erase = False) :
-//dis = int(sum([(start[i] - end[i])**2 for i in range(2)])**0.5)
-//pos = []
-//for t in range(int(0.5 + dis)) :
-//y, x = [int(0.5 + start[i] + (end[i] - start[i])*t / dis) for i in range(2)]
-//pos.append((y, x))
-//oldch = mvinch(y, x)
-//mvaddch(y, x, ch, color)
-//show_panels()
-//time.sleep(tstep)
-//if erase and len(pos) >= 3:
-//y, x = pos.pop(-3)
-//mvaddch(y, x, oldch & 0xFF, oldch)
-//engine.board.viz.draw()
-//
-//
-//def draw_Msg_HeroHeal(self) :
-//if self.engine.board.viz.animated :
-//player = self.caster
-//button = self.engine.board.viz.hero_power_buttons[player]
-//anim_magic_burst(self.engine, get_center(button), get_center(self.target.viz), ord('+'), black_on_green, erase = True)
-//
-//def draw_Msg_HeroDamage(self) :
-//if self.engine.board.viz.animated :
-//player = self.caster
-//button = self.engine.board.viz.hero_power_buttons[player]
-//anim_magic_burst(self.engine, get_center(button), get_center(self.target.viz), ord('*'), BLACK_on_RED, erase = True)
-//
-//
-//
 //### Board --------
 
 struct VizBoard {
   Board* board;
   const bool switch_heroes;
   const bool animated;
-  VizButton end_turn;
-  unordered_map<Player*, PVizHeroPowerButton> hero_power_buttons;
+  PVizButton end_turn;
+  unordered_map<const Player*, PVizHeroPowerButton> hero_power_buttons;
 
   VizBoard(Board* board, bool switch_heroes = false, bool animated = true);
 
@@ -465,7 +263,7 @@ struct HumanPlayer : public Player {
 
   virtual ListCard mulligan(ListCard & cards) const;
 
-  virtual const Action* choose_actions(ListAction actions) const;
+  virtual const Action* choose_actions(ListAction actions, PInstance& choice, Slot& slot) const;
 };
 
 

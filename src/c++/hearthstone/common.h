@@ -55,7 +55,7 @@ inline string string_format(const char* format, ...) {
 #define NAMED_PARAM(cls, type, param)  cls* set_##param(type v) { param = v; return this; }
 
 #define UPDATE_STATUS(which) NI //engine->send_status(NEWP(Msg_Status,PThing(this),which))
-#define SEND_MSG(type, ...)  engine->send_display_message(NEWP(type,##__VA_ARGS__));
+#define SEND_MSG(type, ...)  if(!engine->is_simulation) engine->send_display_message(NEWP(type,##__VA_ARGS__));
 
 inline bool startswith(string s, const char* comp) {
   return !s.compare(0, strlen(comp), comp);
@@ -132,6 +132,10 @@ template <typename T, typename T2>
 inline bool in(const T& el, const unordered_map<T,T2>& vec) { 
   return vec.find(el) != vec.end();
 }
+
+// perform dest += src
+#define append(dest,src) copy(src.begin(), src.end(), back_inserter(dest))
+#define append_if(dest,src,cond) copy_if(src.begin(), src.end(), back_inserter(dest), cond)
 
 inline int randint(int min, int max) {
   // max is included in range

@@ -79,6 +79,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="messages.cpp" />
     <ClCompile Include="players.cpp" />
+    <ClCompile Include="targets.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="actions.h" />

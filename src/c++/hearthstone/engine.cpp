@@ -22,6 +22,7 @@ Engine::Engine(Player* player1, Player* player2) :
 void Engine::set_default()  {
   // init global variables: everyone  can  access  board  or  send  messages
   Board::set_engine(this);
+  Target::set_engine(this);
   Instance::set_engine(this);
   Action::set_engine(this);
   //Effect::set_engine(this);
@@ -39,30 +40,31 @@ void Engine::start_game() {
 }
 
 ListAction Engine::list_player_actions(Player* player) {
-  assert(0); return{};
-  //ListAction actions = player->list_actions();
-  ////actions = filter_actions(actions);  //  filter  actions
-  ////actions = [a  for  a  in  actions  if  a  and  a.is_valid()  and  a.cost <= player.mana];
-  //return  actions;
+  ListAction actions = player->list_actions();
+  //actions = filter_actions(actions);  //  filter  actions
+  ListAction res; 
+  for (auto a : actions)
+    if (a->is_valid() && a->get_cost() <= player->state.mana)
+      res.push_back(a);
+  return res;
 }
 
 void Engine::play_turn() {
-  assert(0);
-  //PPlayer & player = get_current_player();
-  ////board.onEvent(Event::StartTurn, player);
-  //player->onStartTurn();
+  Player* player = get_current_player();
+  //board.onEvent(Event::StartTurn, player);
+  player->start_turn();
+  wait_for_display();
 
-  //PAction action;
-  //while (!is_game_ended() && !issubclass(action, Act_EndTurn)) {
-  //  ListAction actions = list_player_actions(player);
-  //  action = player->choose_actions(actions);    //  action  can  be  Msg_EndTurn
-  //  action->execute();
-  //}
-  //turn += 1;
-}
-
-bool Engine::is_game_ended() {
-  return board.is_game_ended();
+  const Action* action = nullptr;
+  PInstance choice;
+  Slot slot;
+  while (!is_game_ended() && !issubclass(action, const Act_EndTurn)) {
+    ListAction actions = list_player_actions(player);
+    action = player->choose_actions(actions, choice, slot);    //  action  can  be  Msg_EndTurn
+    action->execute(player->state.hero, choice, slot);
+    wait_for_display();
+  }
+  turn += 1;
 }
 
 Player* Engine::get_winner() {
@@ -75,12 +77,6 @@ Player* Engine::get_winner() {
   //  return  p1;
   return nullptr; // match nul
 }
-
-//void Engine::display_status(PMsg_Status & msg) {
-//  assert(!is_simulation);
-//  // default behavior : just print on screen
-//  msg->print();
-//}
 
 //void SimulationEngine::save_state(int num = 0) {
 //  /*to  run  a  simulation  based  on  current  state,
@@ -105,8 +101,23 @@ Player* Engine::get_winner() {
   //def  send_status(, message) :
   //pass  //  we  don't  care
 
-void Engine::display_status(PMsgStatus msg) {
-  assert(!"display_status should never be called for SimulationEngine");
+bool Engine::start_turn() {
+  Player* player = get_current_player();
+  signal(Event::StartTurn, player->state.hero);
+  player->start_turn();
+  return true;
+}
+bool Engine::end_turn() {
+  Player* player = get_current_player();
+  player->end_turn();
+  signal(Event::EndTurn, player->state.hero);
+  return true;
+}
+
+bool Engine::draw_card(PInstance caster, Player* player, int nb ) {
+  while (nb-->0)
+    player->draw_card();
+  return true;
 }
 
 bool Engine::play_card(const Card* _card, PInstance caster) {
@@ -129,5 +140,19 @@ bool Engine::damage(PInstance from, int hp, PInstance to) {
   return true;
 }
 
+bool Engine::attack(PInstance from, PInstance target) {
+  assert(from && target);
+  NI;
+  return true;
+}
+
+void Engine::send_display_message(PMessage msg) {
+  //assert(!issubclassP(msg, Msg_ReceiveCard));
+  if (!is_simulation) // useless if it's a simulation
+    display.push_back(msg);
+}
+void Engine::display_status(PMsgStatus msg) {
+  assert(!"display_status should never be called for SimulationEngine");
+}
 
 
