@@ -1,19 +1,19 @@
-Msg_NewCard $ card 5A1B6C [Windchill Yeti (4): 4/5 ] is created by the deck.
-Msg_NewCard $ card 5A248C [Windchill Yeti (4): 4/5 ] is created by the deck.
-Msg_NewCard $ card 5A17FC [Windchill Yeti (4): 4/5 ] is created by the deck.
+Msg_NewCard $ card 861B6C [Windchill Yeti (4): 4/5 ] is created by the deck.
+Msg_NewCard $ card 86248C [Windchill Yeti (4): 4/5 ] is created by the deck.
+Msg_NewCard $ card 8617FC [Windchill Yeti (4): 4/5 ] is created by the deck.
 Msg_ReceiveCard $ jerome receives card [Windchill Yeti (4): 4/5 ] obtained from the deck
 Msg_ReceiveCard $ jerome receives card [Windchill Yeti (4): 4/5 ] obtained from the deck
 Msg_ReceiveCard $ jerome receives card [Windchill Yeti (4): 4/5 ] obtained from the deck
-Msg_NewCard $ card 5A553C [Windchill Yeti (4): 4/5 ] is created by the deck.
-Msg_NewCard $ card 5A75CC [Windchill Yeti (4): 4/5 ] is created by the deck.
-Msg_NewCard $ card 5A489C [Windchill Yeti (4): 4/5 ] is created by the deck.
-Msg_NewCard $ card 5A6DCC [Windchill Yeti (4): 4/5 ] is created by the deck.
-Msg_NewCard $ card 5AA89C [[SpellCard] La piece (0): Gain one mana crystal this turn only] is created by the deck.
+Msg_NewCard $ card 86553C [Windchill Yeti (4): 4/5 ] is created by the deck.
+Msg_NewCard $ card 8675CC [Windchill Yeti (4): 4/5 ] is created by the deck.
+Msg_NewCard $ card 86489C [Windchill Yeti (4): 4/5 ] is created by the deck.
+Msg_NewCard $ card 866DCC [Windchill Yeti (4): 4/5 ] is created by the deck.
+Msg_NewCard $ card 86A89C [[SpellCard] La piece (0): Gain one mana crystal this turn only] is created by the deck.
 Msg_ReceiveCard $ IA receives card [Windchill Yeti (4): 4/5 ] obtained from the deck
 Msg_ReceiveCard $ IA receives card [Windchill Yeti (4): 4/5 ] obtained from the deck
 Msg_ReceiveCard $ IA receives card [Windchill Yeti (4): 4/5 ] obtained from the deck
 Msg_ReceiveCard $ IA receives card [Windchill Yeti (4): 4/5 ] obtained from the deck
 Msg_ReceiveCard $ IA receives card [[SpellCard] La piece (0): Gain one mana crystal this turn only] obtained from the deck
-Msg_NewCard $ card 5A04CC [Windchill Yeti (4): 4/5 ] is created by the deck.
+Msg_NewCard $ card 8604CC [Windchill Yeti (4): 4/5 ] is created by the deck.
 Msg_ReceiveCard $ jerome receives card [Windchill Yeti (4): 4/5 ] obtained from the deck
 Msg_StartTurn $ Start of turn for jerome 

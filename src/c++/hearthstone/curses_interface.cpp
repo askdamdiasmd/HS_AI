@@ -736,7 +736,7 @@ WINDOW* VizCard::draw(const ArgMap& args) {
 
   WINDOW* win = nullptr;
   PANEL* panel = nullptr;
-  if (!petit) {
+  if (!petit || petit_size>=card_size.y) {
     int ty = card_size.y, tx = card_size.x;
     if (this->small_panel) {
       // set position based on petit card
@@ -879,9 +879,10 @@ void Msg_ReceiveCard::draw(Engine* engine) {
     int sy = 12, sx = NC - tx;
     pos_t e = engine->board.viz->get_card_pos(card, player);
     for (int y = sy; y <= e.y; y++) {
-      int x = interp(y - sy, e.x + 1 - sy, sx, e.y); // int(0.5 + sx + (ex - sx)*(y - sy) / float(ey - sy))
+      int x = int(0.5 + sx + (e.x - sx)*(y - sy) / float(e.y - sy));
       int h = max(0, NR - y);
-      card->viz->draw({ KEYINT("highlight", BLACK_on_YELLOW), KEYPOS2("pos", y, x), KEYINT("petit_size", h >= ty ? 0 : h) });
+      card->viz->draw({ KEYINT("highlight", BLACK_on_YELLOW), KEYPOS2("pos", y, x), 
+                        KEYBOOL("petit", h<ty), KEYINT("petit_size", h >= ty ? 0 : h) });
       show_panels();
       my_sleep(0.05 + 0.6*(y == sy));
     }
@@ -1183,12 +1184,12 @@ void VizBoard::draw(int what, Player* which_, bool last_card) {
       for (auto card : cards)
         card->viz->draw({ KEYBOOL("hide", true) }); // hide adversary cards
       print_middle(stdscr, 0, 0, NC, string_format(" Adversary has %d cards. ", len(adv->viz->state.cards)));
-      if (in(player, which)) {
-        ListCard cards = player->viz->state.cards;
-        if (!last_card) cards.pop_back();
-        for (auto card : cards)
-          card->viz->draw({ KEYPOS1("pos", get_card_pos(card, player)), KEYBOOL("petit",true), KEYINT("petit_size", NR - 24) });
-      }
+    }
+    if (in(player, which)) {
+      ListCard cards = player->viz->state.cards;
+      if (!last_card) cards.pop_back();
+      for (auto card : cards)
+        card->viz->draw({ KEYPOS1("pos", get_card_pos(card, player)), KEYBOOL("petit", true), KEYINT("petit_size", NR - 24) });
     }
   }
 
