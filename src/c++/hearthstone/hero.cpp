@@ -18,7 +18,7 @@ Hero::Hero(PConstCardHero hero) :
 }
 
 string Hero::tostr() const {
-  return string_format("[%s (%s) %dHP]", player->name, card->name, state.hp);
+  return string_format("[%s (%s) %dHP]", player->name.c_str(), card->name.c_str(), state.hp);
 }
 
 void Hero::list_actions(ListAction& actions) const {
@@ -49,7 +49,7 @@ Card_Hero::Card_Hero(string name, HeroClass cls, PHero hero, PCardHeroAbility ab
   Card_Thing(0, name, hero), ability(ability) { //issubclassP(hero, Thing)
   collectible = false;
   cls = cls;
-  hero->add_static_effect(Thing::charge);
+  hero->add_static_effect(Thing::charge, false);
 }
 
 string Card_Hero::tostr() const {

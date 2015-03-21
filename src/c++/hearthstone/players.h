@@ -12,12 +12,13 @@ struct Player {
   Deck* const deck;
   struct State {
     int mana, max_mana;
-    ListCard cards;
+    int n_dead;
+    ListPCard cards;
     PHero hero;
     PWeapon weapon;
-    ListMinion minions;
+    ListPMinion minions;
     vector<float> minions_pos;
-    ListSecret secrets;
+    ListPSecret secrets;
   } state;
   PVizPlayer viz;
 
@@ -65,17 +66,15 @@ struct Player {
 
   void draw_card();
 
-  void give_card(PCard card, PInstance origin);
+  void give_card(PCard card, Instance* origin);
 
-  void throw_card(PCard card) {
-    remove(state.cards,card);
-  }
+  void throw_card(PCard card);
 
-  virtual ListCard mulligan(ListCard & cards) const = 0;
+  virtual ListPCard mulligan(ListPCard & cards) const = 0;
 
   void draw_init_cards(int nb, bool coin = false);
 
-  virtual const Action* choose_actions(ListAction actions, PInstance& choice, Slot& slot) const = 0;
+  virtual const Action* choose_actions(ListAction actions, Instance*& choice, Slot& slot) const = 0;
 
   float score_situation();
 };
@@ -101,12 +100,12 @@ struct RandomPlayer : public Player {
   RandomPlayer(PHero hero, string name, Deck* deck) :
     Player(hero, name, deck) {}
 
-  virtual ListCard mulligan(ListCard & cards) const {
+  virtual ListPCard mulligan(ListPCard & cards) const {
     // keep everything without changing
     return{};
   }
 
-  virtual const Action* choose_actions(ListAction actions, PInstance& choice, Slot& slot) const;
+  virtual const Action* choose_actions(ListAction actions, Instance*& choice, Slot& slot) const;
 };
 
 

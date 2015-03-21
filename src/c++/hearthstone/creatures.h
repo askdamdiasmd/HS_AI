@@ -25,6 +25,7 @@ struct Instance {
   PVizInstance viz; // vizualization object
 
   PHero hero(); // helper function
+  PConstHero hero() const;
 
   Instance() {} // default = empty
 
@@ -86,7 +87,7 @@ struct Thing : public Instance {
 
   //Thing();  // proper init to zero
 
-  Thing(int atq, int hp);
+  Thing(int atq, int hp, int static_effects = 0);
 
 //  /*def save_state(num = 0) :
 //    state.saved[num] = dict(hp = state.hp, max_hp = state.max_hp, armor = state.armor, atq = state.atq, max_atq = state.max_atq, enraged = state.enraged,
@@ -152,12 +153,8 @@ struct Thing : public Instance {
   IS_EFFECT(trigger);
 #undef IS_EFFECT
 
-  void add_static_effect(StaticEffect eff) {
-    state.static_effects |= eff;
-  }
-  void remove_static_effect(StaticEffect eff) {
-    state.static_effects &= ~eff;
-  }
+  void add_static_effect(StaticEffect eff, bool inform=true);
+  void remove_static_effect(StaticEffect eff, bool inform=true);
 
   virtual void list_actions(ListAction& actions) const = 0;
 
@@ -179,9 +176,9 @@ struct Thing : public Instance {
     return state.hp < state.max_hp;
   }
 
-  void hurt(int damage, Thing* caster = nullptr);
+  int hurt(int damage, Thing* caster = nullptr);
 
-  void heal(int hp);
+  int heal(int hp, Thing* caster = nullptr);
 
   void change_hp(int hp);
 
@@ -200,8 +197,8 @@ struct Thing : public Instance {
 struct Creature : public Thing {
   const Act_Attack act_attack;
 
-  Creature(int atq, int hp) :
-    Thing(atq, hp) {}
+  Creature(int atq, int hp, int static_effects = 0) :
+    Thing(atq, hp, static_effects), act_attack(this) {}
 
   void attack(Creature* target);
 };
@@ -220,16 +217,14 @@ struct Minion : public Creature {
 
   PConstCardMinion card_minion() const;
 
-  Minion(int atq, int hp, Category cat = Category::None) :
-    Creature(atq, hp), category(cat) {}
+  Minion(int atq, int hp, int static_effects = 0, Category cat = Category::None) :
+    Creature(atq, hp,static_effects), category(cat) {}
   
-  Minion(PConstCardMinion card, Player* player);
+  Minion(const Minion& copy, Player* player);
 
   //virtual PInstance copy() const;
 
-  virtual string tostr() const {
-    NI;  return "minion";
-  }
+  virtual string tostr() const;
 
   //bool is_targetable(Player* by_who) {
   //  if (is_untargetable()) return false;
@@ -344,6 +339,7 @@ struct Hero : public Creature {
 ////// ------------ Weapon ----------
 
 struct Weapon : public Thing {
+  //const Act_WeaponAttack act_attack;
   PVizWeapon viz_weapon();
 
   //Weapon(const PCardWeapon card, Player* player) :

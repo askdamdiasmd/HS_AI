@@ -45,7 +45,7 @@ struct Card {
   virtual string tostr() const = 0;
 
   // helper function to resovle a target at runtime
-  ListCreature list_targets(const string& Target);
+  ListPCreature list_targets(const string& Target);
 
   // what the player can do with this card ?
   virtual void list_actions(ListAction& list) const = 0;
@@ -60,23 +60,25 @@ struct Card_Instance : public Card {
 
 
 struct Card_Thing : public Card_Instance {
-  const PConstThing thing() const { return dynamic_pointer_cast<const Thing>(instance); }
+  const PConstThing thing() const { return issubclassP(instance, const Thing); }
 
   Card_Thing(int cost, string name, PThing minion) :
     Card_Instance(cost, name, dynamic_pointer_cast<Instance>(minion)) {}
 };
 
 struct Card_Minion : public Card_Thing {
+  const Act_PlayMinionCard act_play;
   const PConstMinion minion() const { return issubclassP(instance, const Minion); }
 
   Card_Minion(int cost, string name, PMinion minion) :
-    Card_Thing(cost, name, dynamic_pointer_cast<Thing>(minion)) {}
+    Card_Thing(cost, name, dynamic_pointer_cast<Thing>(minion)), act_play(this) {}
+
+  Card_Minion(const Card_Minion& m) :
+    Card_Thing(m), act_play(this) {}
 
   virtual string tostr() const;
 
-  virtual PCard copy() const {
-    return NEWP(Card_Minion, *this);
-  }
+  virtual PCard copy() const { return NEWP(Card_Minion, *this); }
 
   // what the player can do with this card ?
   virtual void list_actions(ListAction& list) const;

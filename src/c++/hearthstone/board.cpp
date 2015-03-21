@@ -13,30 +13,34 @@
 
 Engine* Board::engine = nullptr;
 
-void Board::add_thing(PInstance thing, Slot pos) {
+void Board::add_thing(PInstance thing, const Slot& pos) {
   if (thing->player->add_thing(thing, pos))
-    everybody.push_back(thing);
+    state.everybody.push_back(thing);
 }
 
 void Board::remove_thing(PInstance m) {
-  remove(everybody,m);
+  remove(state.everybody,m);
   m->player->remove_thing(m);
 }
 
-bool Board::is_game_ended() const {
-  Player** players = engine->players;
-  return players[0]->state.hero->is_dead() || players[1]->state.hero->is_dead();
+void Board::clean_deads() {
+  assert(state.n_dead == 0);
 }
 
-ListSlot Board::get_free_slots(Player* player) {
+ListSlot Board::get_free_slots(Player* player) const {
   ListSlot res;
   if (player->state.minions.size() < 7) {
-    float* mp = player->state.minions_pos.data();
-    for (int i = 0; i < len(player->state.minions); ++i)
+    const auto& mp = player->state.minions_pos;
+    for (int i = 0; i < len(mp) - 1; ++i)
       res.emplace_back(player, i, (mp[i] + mp[i + 1]) / 2);
   }
   return res;
 }
+
+int Board::get_nb_free_slots(const Player* player) const {
+  return 7 - len(player->state.minions);
+}
+
 
 Slot Board::get_minion_pos(PInstance i) {
   PMinion m = issubclassP(i, Minion);
@@ -62,18 +66,18 @@ float Board::score_situation(Player* player) {
 }
 
 //def save_state(num = 0)) {
-//self.saved[num] = dict(minions = list(self.minions), everybody = list(self.everybody))
+//self.saved[num] = dict(minions = list(self.minions), state.everybody = list(self.state.everybody))
 //for pl in self.players) {
 //  pl.save_state(num)
-//  for obj in self.everybody) {
+//  for obj in self.state.everybody) {
 //    obj.save_state(num)
 //    def restore_state(num = 0)) {
 //    self.__dict__.update(self.saved[num])
-//    self.everybody = list(self.everybody)
+//    self.state.everybody = list(self.state.everybody)
 //    self.minions = list(self.minions)
 //    for pl in self.players) {
 //      pl.restore_state(num)
-//      for obj in self.everybody) {
+//      for obj in self.state.everybody) {
 //        obj.restore_state(num)
 //        def hash_state()) {
 //        return 0 # todo
@@ -81,5 +85,5 @@ float Board::score_situation(Player* player) {
 //        self.saved = dict()
 //        for pl in self.players) {
 //          pl.end_simulation()
-//          for obj in self.everybody) {
+//          for obj in self.state.everybody) {
 //            obj.end_simulation()

@@ -41,6 +41,7 @@ typedef unordered_map<string, AllTypes> ArgMap;
 // ### Panel viz object = root viz class -------
 
 struct VizPanel {
+  SET_ENGINE();
   WINDOW* win;
   PANEL* panel;
 
@@ -84,22 +85,36 @@ typedef shared_ptr<VizHeroPowerButton> PVizHeroPowerButton;
 void wait_delete(float duration, PVizButton button, VizThing* viz);
 void temp_panel(VizThing* viz, string text, int color, float duration = 2);
 
+//### Slot -----------
+
+struct VizSlot : public VizPanel {
+  const Slot slot;  // copy it
+
+  VizSlot(Slot slot) :
+    VizPanel(), slot(slot) {}
+
+  // return position, space
+  pos_t get_screen_pos() const;
+  int get_screen_space() const;
+
+  virtual WINDOW* draw(const ArgMap& args);
+};
+
 
 //### General thing (minion, weapon, hero...)------
 
 struct VizInstance : public VizPanel {
-  const PInstance obj;
+  const Instance* obj;
+  PConstCardInstance card;
 
-  VizInstance(PInstance obj);
+  VizInstance(const Instance* obj);
 };
 
 struct VizThing : public VizInstance {
-  int hp, max_hp, max_card_hp;
-  int atq, max_atq, max_card_atq;
-  int effects;
+  Thing::State state;
   volatile int wait;
 
-#define IS_EFFECT(eff)  bool is_##eff() const {return (effects & Thing::StaticEffect::##eff)!=0;}
+#define IS_EFFECT(eff)  bool is_##eff() const {return (state.static_effects & Thing::StaticEffect::##eff)!=0;}
   IS_EFFECT(taunt);
   IS_EFFECT(windfury);
   IS_EFFECT(frozen);
@@ -117,9 +132,10 @@ struct VizThing : public VizInstance {
   IS_EFFECT(silenced);
 #undef IS_EFFECT
 
-  PThing thing()  { return dynamic_pointer_cast<Thing>(obj); }
+  const Thing* thing() const { return CAST(obj, const Thing); }
+  PConstCardThing card_thing() const;
 
-  VizThing(PThing obj, int ty, int tx, int y, int x);
+  VizThing(const Thing* obj, int ty, int tx, int y, int x);
 
   bool check();
 
@@ -127,50 +143,44 @@ struct VizThing : public VizInstance {
 
   int buff_color(int val, bool highlight = false, bool standout = false) const;
   int buff_color(const int* val, bool highlight = false, bool standout = false) const;
+  void update_state(const Thing::State& state, bool show_diff=true);
 
   virtual WINDOW* draw(const ArgMap& args);
-
-  int& getattr(int VizThing::*what) {
-    return (*this).*what;
-  }
-
-  bool update_stats(const Msg_Status& msg, bool show_hp = true);
 };
 
 //### Hero -----------
 
 struct VizHero : public VizThing {
-  int armor;
-  PHero hero(){ return dynamic_pointer_cast<Hero>(obj); }
+  const Hero* hero() const { return CAST(obj, const Hero); }
+  PConstCardHero card_thing() const;
 
-  VizHero(PHero hero, pos_t pos);
-
-  bool check();
-
-  virtual WINDOW* draw(const ArgMap& args);
+  VizHero(const Hero* hero, pos_t pos);
 
   PVizHeroPowerButton create_hero_power_button();
+
+  virtual WINDOW* draw(const ArgMap& args);
 };
 
 
 //### Minion -----------
 
 struct VizMinion : public VizThing {
-  PMinion minion(){ return dynamic_pointer_cast<Minion>(obj); }
+  const Minion* minion() const { return CAST(obj, const Minion); }
 
-  VizMinion(PMinion minion);
+  VizMinion(const Minion* minion, VizSlot pos);
 
   virtual WINDOW* draw(const ArgMap& args);
 };
 
 struct VizWeapon : public VizThing {
-  PWeapon weapon(){ return dynamic_pointer_cast<Weapon>(obj); }
+  const Weapon* weapon() const { return CAST(obj, const Weapon); }
+  //const Card_Weapon* card_thing() const { return CAST(card.get(), const Card_Weapon); }
 
-  VizWeapon(PWeapon weapon);
+  VizWeapon(const Weapon* weapon);
 
   virtual WINDOW* draw(const ArgMap & args);
   
-  bool update_stats(const Msg_Status& msg);
+  void update_state(const Thing::State& from);
 };
 
 
@@ -183,26 +193,7 @@ struct VizPlayer {
   VizPlayer(Player* player);
 
   bool check() const;
-
-  void set_weapon(PWeapon weapon);
-
-  void unset_weapon(PWeapon weapon);
-};
-
-
-//### Slot -----------
-
-struct VizSlot : public VizPanel {
-  const Slot slot;  // copy it
-
-  VizSlot(Slot slot) :
-    VizPanel(), slot(slot) {}
-
-  // return position, space
-  pos_t get_screen_pos() const;
-  int get_screen_space() const;
-
-  virtual WINDOW* draw(const ArgMap& args);
+  void update_state(const Player::State& from);
 };
 
 
@@ -234,7 +225,7 @@ struct VizBoard {
 
   Player* get_top_bottom_player(bool top);
 
-  pos_t get_minion_pos(PMinion minion);
+  pos_t get_minion_pos(const Minion* minion);
 
   pos_t get_card_pos(PCard card, Player* player);
 
@@ -261,9 +252,9 @@ struct HumanPlayer : public Player {
 
   static bool mouse_in_win(WINDOW* win, int y, int x);
 
-  virtual ListCard mulligan(ListCard & cards) const;
+  virtual ListPCard mulligan(ListPCard & cards) const;
 
-  virtual const Action* choose_actions(ListAction actions, PInstance& choice, Slot& slot) const;
+  virtual const Action* choose_actions(ListAction actions, Instance*& choice, Slot& slot) const;
 };
 
 

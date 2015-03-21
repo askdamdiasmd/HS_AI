@@ -10,6 +10,10 @@ Engine* Instance::engine = nullptr;
 PHero Instance::hero() { 
   return player->state.hero; // shortcut
 }
+PConstHero Instance::hero() const {
+  return player->state.hero; // shortcut
+}
+
 
 //Thing::Thing() :
 //  Instance() {
@@ -27,35 +31,50 @@ PConstCardThing Thing::card_thing() const {
   return issubclassP(card, const Card_Thing); 
 }
 
-Thing::Thing(int atq, int hp) :
+Thing::Thing(int atq, int hp, int static_effects) :
   Instance() {
   memset(&state, 0, sizeof(state));
   state.hp = state.max_hp = hp;
   state.atq = state.max_atq = atq;
+  state.static_effects = static_effects;
 }
 
-void Thing::hurt(int damage, Thing* caster) {
+void Thing::add_static_effect(StaticEffect eff, bool inform) {
+  state.static_effects |= eff;
+  if (inform)
+    UPDATE_THING_STATE("static_effects");
+}
+
+void Thing::remove_static_effect(StaticEffect eff, bool inform) {
+  state.static_effects &= ~eff;
+  if (inform)
+    UPDATE_THING_STATE("static_effects");
+}
+
+int Thing::hurt(int damage, Thing* caster) {
   assert(damage > 0);
-  if (is_insensible())  return;
+  if (is_insensible())  return 0;
   int absorbed = min(damage, state.armor);
-  if (absorbed) {
+  if (absorbed)
     state.armor -= absorbed;
-    UPDATE_STATUS("armor");
-  }
   damage -= absorbed;
+  damage -= max(0, damage - state.hp);
   state.hp -= damage;
   //if( state.enraged_trigger ) state.enraged_trigger.trigger()
-  UPDATE_STATUS("hp");
-  if (caster && caster->is_freezer())
+  if (damage && caster && caster->is_freezer())
     add_static_effect(StaticEffect::frozen);
+  UPDATE_THING("hp armor", Msg_Damage, caster, this, damage+absorbed);
   check_dead();
+  return damage + absorbed;
 }
 
-void Thing::heal(int hp) {
+int Thing::heal(int hp, Thing* caster) {
   assert(hp>0);
-  state.hp = min(state.max_hp, state.hp + hp);
+  hp -= max(0, state.hp + hp - state.max_hp);
+  state.hp += hp;
   //if( state.enraged_trigger ) state.enraged_trigger.trigger()
-  UPDATE_STATUS("hp");
+  UPDATE_THING("hp", Msg_Heal, caster, this, hp);
+  return hp;
 }
 
 void Thing::change_hp(int hp) {
@@ -64,17 +83,18 @@ void Thing::change_hp(int hp) {
   state.hp += max(0, hp);  // only add if positive
   state.hp = min(state.hp, state.max_hp);
   //if state.enraged_trigger: state.enraged_trigger.trigger()
-  UPDATE_STATUS("hp max_hp");
+  UPDATE_THING_STATE("hp max_hp");
   check_dead();
 }
 
 void Thing::change_atq(int atq) {
   state.atq += atq;
   state.max_atq += atq;
-  UPDATE_STATUS("atq max_atq");
+  UPDATE_THING_STATE("atq max_atq");
 }
 
 void Thing::silence() {
+  NI;
   //state.action_filters = {};
   //state.modifiers = []
   //state.triggers = []
@@ -88,13 +108,13 @@ void Thing::silence() {
   //    state.effects = ['silence']
   //    if not state.dead :
   //      state.engine.send_UPDATE_STATUS(Msg_UPDATE_STATUS('hp max_hp atq max_atq effects'))
-  assert(0);
 }
 
 void Thing::check_dead() {
-  if (state.hp <= 0)
+  if (state.hp <= 0) {
     add_static_effect(StaticEffect::dead);
-  assert(0);//engine->board.signal_dead(this);
+    player->state.n_dead++;
+  }
 }
 
 void Thing::kill_me() {
@@ -105,31 +125,31 @@ void Thing::kill_me() {
 void Creature::attack(Creature* target) {
   state.n_atq += 1;
   assert(state.n_atq <= state.n_max_atq);
-  if (is_stealth()) {
+  if (is_stealth())
     remove_static_effect(StaticEffect::stealth);
-    UPDATE_STATUS("static_effects");
-  }
   target->hurt(state.atq, this);
-  if (target->state.atq) hurt(target->state.atq, target);
+  if (target->state.atq) 
+    hurt(target->state.atq, target);
+}
+
+string Minion::tostr() const {
+  return string_format("%s (%X): %d/%d", card_minion()->name_fr.c_str(), this, state.atq, state.hp);
 }
 
 void Minion::list_actions(ListAction& actions) const {
-  //if (state.n_atq >= state.n_max_atq ||
-  //  state.atq <= 0 || is_frozen() ||
-  //  (is_fresh() && !is_charge()) )
-  //  return {};
-  //else 
-  //  return { Act_MinionAttack(this, engine->board.get_attackable_characters(controller)) };
-  NI; 
+  if (state.n_atq < state.n_max_atq && 
+      state.atq > 0 && !is_frozen() &&
+      (!is_fresh() || is_charge()) )
+    actions.push_back( &act_attack );
 }
 
 PConstCardMinion Minion::card_minion() const { 
   return issubclassP(card, const Card_Minion); 
 }
 
-Minion::Minion(PConstCardMinion  card, Player* player) :
-  Minion(*card->minion()) {
-  init(card, player);
+Minion::Minion(const Minion& copy, Player* player) :
+  Minion(copy) {
+  init(issubclassP(copy.card, const Card_Minion), player);
 }
 
 //PInstance Minion::copy() const {

@@ -13,22 +13,22 @@
 Engine* Card::engine = nullptr;
 
 // helper function to resovle a target at runtime
-ListCreature Card::list_targets(const string& Target) {
+ListPCreature Card::list_targets(const string& Target) {
   assert(0);
   return{};// engine->board.list_targets(owner, Target);
 }
 
 void Card_Minion::list_actions(ListAction& list) const {
-  NI;// Act_PlayMinionCard(this);
+  list.push_back(&act_play);
 }
 
 string Card_Minion::tostr() const {
   const auto& s = minion()->state;
-  return string_format("%s (%d): %d/%d %s", name_fr.c_str(), cost, s.atq, s.hp, desc.c_str());
+  return string_format("%s (%d): %d/%d", name_fr.c_str(), cost, s.atq, s.hp);
 }
 
 Card_Coin::Card_Coin() :
-  Card_AreaSpell(0, "The coin", [](const Action* a, PInstance from, PInstance target) {from->player->gain_mana(1); return true; }) {
+  Card_AreaSpell(0, "The coin", FUNCACTION {from->player->gain_mana(1); return true; }) {
   set_collectible(false);
   set_name_fr("La piece");
   set_desc("Gain one mana crystal this turn only");

@@ -1,19 +1,67 @@
-Msg_NewCard $ card 861B6C [Windchill Yeti (4): 4/5 ] is created by the deck.
-Msg_NewCard $ card 86248C [Windchill Yeti (4): 4/5 ] is created by the deck.
-Msg_NewCard $ card 8617FC [Windchill Yeti (4): 4/5 ] is created by the deck.
-Msg_ReceiveCard $ jerome receives card [Windchill Yeti (4): 4/5 ] obtained from the deck
-Msg_ReceiveCard $ jerome receives card [Windchill Yeti (4): 4/5 ] obtained from the deck
-Msg_ReceiveCard $ jerome receives card [Windchill Yeti (4): 4/5 ] obtained from the deck
-Msg_NewCard $ card 86553C [Windchill Yeti (4): 4/5 ] is created by the deck.
-Msg_NewCard $ card 8675CC [Windchill Yeti (4): 4/5 ] is created by the deck.
-Msg_NewCard $ card 86489C [Windchill Yeti (4): 4/5 ] is created by the deck.
-Msg_NewCard $ card 866DCC [Windchill Yeti (4): 4/5 ] is created by the deck.
-Msg_NewCard $ card 86A89C [[SpellCard] La piece (0): Gain one mana crystal this turn only] is created by the deck.
-Msg_ReceiveCard $ IA receives card [Windchill Yeti (4): 4/5 ] obtained from the deck
-Msg_ReceiveCard $ IA receives card [Windchill Yeti (4): 4/5 ] obtained from the deck
-Msg_ReceiveCard $ IA receives card [Windchill Yeti (4): 4/5 ] obtained from the deck
-Msg_ReceiveCard $ IA receives card [Windchill Yeti (4): 4/5 ] obtained from the deck
+Msg_NewCard $ card 58248C [Yeti Noroit (4): 4/5] is created by the deck.
+Msg_NewCard $ card 582ECC [Yeti Noroit (4): 4/5] is created by the deck.
+Msg_NewCard $ card 5820EC [Yeti Noroit (4): 4/5] is created by the deck.
+Msg_NewCard $ card 580D34 [Ecuyere d'argent (1): 1/1] is created by the deck.
+Msg_NewCard $ card 5803AC [Ecuyere d'argent (1): 1/1] is created by the deck.
+Msg_NewCard $ card 581264 [Ecuyere d'argent (1): 1/1] is created by the deck.
+Msg_ReceiveCard $ jerome receives card [Ecuyere d'argent (1): 1/1] obtained from the deck
+Msg_PlayerUpdate $ Change of cards for player jerome
+Msg_ReceiveCard $ jerome receives card [Ecuyere d'argent (1): 1/1] obtained from the deck
+Msg_PlayerUpdate $ Change of cards for player jerome
+Msg_ReceiveCard $ jerome receives card [Ecuyere d'argent (1): 1/1] obtained from the deck
+Msg_PlayerUpdate $ Change of cards for player jerome
+Msg_NewCard $ card 58615C [Yeti Noroit (4): 4/5] is created by the deck.
+Msg_NewCard $ card 58632C [Yeti Noroit (4): 4/5] is created by the deck.
+Msg_NewCard $ card 584964 [Yeti Noroit (4): 4/5] is created by the deck.
+Msg_NewCard $ card 5882EC [Yeti Noroit (4): 4/5] is created by the deck.
+Msg_NewCard $ card 58C5EC [[SpellCard] La piece (0): Gain one mana crystal this turn only] is created by the deck.
+Msg_PlayerUpdate $ Change of cards for player IA
+Msg_ReceiveCard $ IA receives card [Yeti Noroit (4): 4/5] obtained from the deck
+Msg_PlayerUpdate $ Change of cards for player IA
+Msg_ReceiveCard $ IA receives card [Yeti Noroit (4): 4/5] obtained from the deck
+Msg_PlayerUpdate $ Change of cards for player IA
+Msg_ReceiveCard $ IA receives card [Yeti Noroit (4): 4/5] obtained from the deck
+Msg_PlayerUpdate $ Change of cards for player IA
+Msg_ReceiveCard $ IA receives card [Yeti Noroit (4): 4/5] obtained from the deck
+Msg_PlayerUpdate $ Change of cards for player IA
 Msg_ReceiveCard $ IA receives card [[SpellCard] La piece (0): Gain one mana crystal this turn only] obtained from the deck
-Msg_NewCard $ card 8604CC [Windchill Yeti (4): 4/5 ] is created by the deck.
-Msg_ReceiveCard $ jerome receives card [Windchill Yeti (4): 4/5 ] obtained from the deck
+Msg_PlayerUpdate $ Change of cards for player IA
+Msg_ThingUpdate $ Change of static_effects for [[jerome (Anduin Wrynn) 30HP]]
+Msg_PlayerUpdate $ Change of mana max_mana for player jerome
+Msg_NewCard $ card 582B34 [Ecuyere d'argent (1): 1/1] is created by the deck.
+Msg_ReceiveCard $ jerome receives card [Ecuyere d'argent (1): 1/1] obtained from the deck
+Msg_PlayerUpdate $ Change of cards for player jerome
+Msg_PlayerUpdate $ Change of cards for player jerome
 Msg_StartTurn $ Start of turn for jerome 
+Msg_PlayerUpdate $ Change of all for player jerome
+Msg_PlayerUpdate $ Change of mana for player jerome
+Msg_ThrowCard $ Player [jerome] plays card [Ecuyere d'argent (1): 1/1]
+Msg_PlayerUpdate $ Change of cards for player jerome
+Msg_AddMinion $ New Ecuyere d'argent (58DBA4): 1/1 on the board for jerome at [Slot 0 (500.000000)]
+Msg_PlayerUpdate $ Change of minions for player jerome
+Msg_EndTurn $ End of turn for jerome 
+Msg_PlayerUpdate $ Change of all for player jerome
+Msg_ThingUpdate $ Change of static_effects for [[IA (Jaina Proudmoore) 30HP]]
+Msg_PlayerUpdate $ Change of mana max_mana for player IA
+Msg_NewCard $ card 5872DC [Yeti Noroit (4): 4/5] is created by the deck.
+Msg_ReceiveCard $ IA receives card [Yeti Noroit (4): 4/5] obtained from the deck
+Msg_PlayerUpdate $ Change of cards for player IA
+Msg_PlayerUpdate $ Change of cards for player IA
+Msg_StartTurn $ Start of turn for IA 
+Msg_PlayerUpdate $ Change of all for player IA
+Msg_EndTurn $ End of turn for IA 
+Msg_PlayerUpdate $ Change of all for player IA
+Msg_ThingUpdate $ Change of static_effects for [[jerome (Anduin Wrynn) 30HP]]
+Msg_ThingUpdate $ Change of static_effects for [Ecuyere d'argent (58DBA4): 1/1]
+Msg_PlayerUpdate $ Change of mana max_mana for player jerome
+Msg_NewCard $ card 5840A4 [Ecuyere d'argent (1): 1/1] is created by the deck.
+Msg_ReceiveCard $ jerome receives card [Ecuyere d'argent (1): 1/1] obtained from the deck
+Msg_PlayerUpdate $ Change of cards for player jerome
+Msg_PlayerUpdate $ Change of cards for player jerome
+Msg_StartTurn $ Start of turn for jerome 
+Msg_PlayerUpdate $ Change of all for player jerome
+Msg_PlayerUpdate $ Change of mana for player jerome
+Msg_ThrowCard $ Player [jerome] plays card [Ecuyere d'argent (1): 1/1]
+Msg_PlayerUpdate $ Change of cards for player jerome
+Msg_AddMinion $ New Ecuyere d'argent (58DCDC): 1/1 on the board for jerome at [Slot 0 (250.000000)]
+Msg_PlayerUpdate $ Change of minions for player jerome

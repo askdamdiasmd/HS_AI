@@ -44,39 +44,108 @@ ListAction Engine::list_player_actions(Player* player) {
   //actions = filter_actions(actions);  //  filter  actions
   ListAction res; 
   for (auto a : actions)
-    if (a->is_valid() && a->get_cost() <= player->state.mana)
+    if (a->is_valid(player) && a->get_cost() <= player->state.mana)
       res.push_back(a);
   return res;
 }
 
 void Engine::play_turn() {
   Player* player = get_current_player();
-  //board.onEvent(Event::StartTurn, player);
   player->start_turn();
   wait_for_display();
 
-  const Action* action = nullptr;
-  PInstance choice;
-  Slot slot;
-  while (!is_game_ended() && !issubclass(action, const Act_EndTurn)) {
+  bool exit = false;
+  while (!is_game_ended() && !exit) {
     ListAction actions = list_player_actions(player);
-    action = player->choose_actions(actions, choice, slot);    //  action  can  be  Msg_EndTurn
-    action->execute(player->state.hero, choice, slot);
+    Instance* choice = nullptr;
+    Slot slot;
+    const Action* action = player->choose_actions(actions, choice, slot); // can be Act_EndTurn
+    action->execute(player->state.hero.get(), choice, slot);
+    exit = issubclass(action, const Act_EndTurn); // do it before action is destroyed
     wait_for_display();
   }
   turn += 1;
 }
 
+bool Engine::is_game_ended() const {
+  return players[0]->state.hero->is_dead() || players[1]->state.hero->is_dead();
+}
+
 Player* Engine::get_winner() {
-  assert(0);
-  //PPlayer p1 = players[0];
-  //PPlayer p2 = players[1];
-  //if (p1.hero.dead and  !p2.hero.dead)
-  //  return  p2;
-  //if (!p1.hero.dead and  p2.hero.dead)
-  //  return  p1;
+  bool dead0 = players[0]->state.hero->is_dead();
+  bool dead1 = players[1]->state.hero->is_dead();
+  if (dead0 && !dead1)  return players[1];
+  if (!dead0 && dead1)  return players[0];
   return nullptr; // match nul
 }
+
+
+// Game actions ----------------------------
+
+bool Engine::start_turn() {
+  Player* player = get_current_player();
+  signal(player->state.hero.get(), Event::StartTurn);
+  player->start_turn();
+  return true;
+}
+bool Engine::end_turn() {
+  Player* player = get_current_player();
+  player->end_turn();
+  signal(player->state.hero.get(), Event::EndTurn);
+  return true;
+}
+
+bool Engine::draw_card(Instance* caster, Player* player, int nb ) {
+  while (nb-->0)
+    player->draw_card();
+  return true;
+}
+
+bool Engine::play_card(Instance* caster, const Card* _card, int cost) {
+  Player* player = caster->player;
+  PCard card = findP(player->state.cards, _card);  
+  player->use_mana(cost);
+  player->throw_card(card);
+  return true;
+}
+
+bool Engine::add_minion(Instance* caster, PMinion minion, const Slot& slot) {
+  Player* pl = minion->player;
+  if (board.get_nb_free_slots(pl))
+    board.add_thing(minion, slot);
+  return false;
+}
+
+void Engine::signal(Instance* caster, Event event) {
+  board.clean_deads();
+}
+
+bool Engine::heal(Instance* _from, int hp, Instance* _to) {
+  Thing* from = CAST(_from, Thing);
+  Thing* to = CAST(_to, Thing);
+  int n = to->heal(hp, from);
+  return n>0;
+}
+
+bool Engine::damage(Instance* _from, int hp, Instance* _to) {
+  Thing* from = CAST(_from, Thing);
+  Thing* to = CAST(_to, Thing);
+  int n = to->hurt(hp, from);
+  return n>0;
+}
+
+bool Engine::attack(Instance* from, Instance* target) {
+  assert(from && target);
+  NI;
+  return true;
+}
+
+//void Engine::send_display_message(PMessage msg) {
+//  //assert(!issubclassP(msg, Msg_ReceiveCard));
+//  if (!is_simulation) // useless if it's a simulation
+//    display.push_back(msg);
+//}
+
 
 //void SimulationEngine::save_state(int num = 0) {
 //  /*to  run  a  simulation  based  on  current  state,
@@ -85,74 +154,17 @@ Player* Engine::get_winner() {
 //  board.save_state(num);
 //}
 
-  //def  restore_state(, num = 0) :
-  //__dict__.update(saved[num])
-  //board.restore_state(num)
+//def  restore_state(, num = 0) :
+//__dict__.update(saved[num])
+//board.restore_state(num)
 
-  //def  hash_state() :
-  //return  board.hash_state()
+//def  hash_state() :
+//return  board.hash_state()
 
-  //def  end_simulation(, num = 0) :
-  //restore_state(num)
-  //del  saved
-  //board.end_simulation()
-  //true_engine.set_default()
-
-  //def  send_status(, message) :
-  //pass  //  we  don't  care
-
-bool Engine::start_turn() {
-  Player* player = get_current_player();
-  signal(Event::StartTurn, player->state.hero);
-  player->start_turn();
-  return true;
-}
-bool Engine::end_turn() {
-  Player* player = get_current_player();
-  player->end_turn();
-  signal(Event::EndTurn, player->state.hero);
-  return true;
-}
-
-bool Engine::draw_card(PInstance caster, Player* player, int nb ) {
-  while (nb-->0)
-    player->draw_card();
-  return true;
-}
-
-bool Engine::play_card(const Card* _card, PInstance caster) {
-  PCard card = indexP(caster->player->state.cards, _card);  
-  NI;
-  return true;
-}
-
-void Engine::signal(Event event, PInstance from) {
-  NI;
-}
-
-bool Engine::heal(PInstance from, int hp, PInstance to) {
-  NI;
-  return true;
-}
-
-bool Engine::damage(PInstance from, int hp, PInstance to) {
-  NI;
-  return true;
-}
-
-bool Engine::attack(PInstance from, PInstance target) {
-  assert(from && target);
-  NI;
-  return true;
-}
-
-void Engine::send_display_message(PMessage msg) {
-  //assert(!issubclassP(msg, Msg_ReceiveCard));
-  if (!is_simulation) // useless if it's a simulation
-    display.push_back(msg);
-}
-void Engine::display_status(PMsgStatus msg) {
-  assert(!"display_status should never be called for SimulationEngine");
-}
+//def  end_simulation(, num = 0) :
+//restore_state(num)
+//del  saved
+//board.end_simulation()
+//true_engine.set_default()
 
 

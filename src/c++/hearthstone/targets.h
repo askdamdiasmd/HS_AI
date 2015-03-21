@@ -38,7 +38,7 @@ struct Target {
   //  //ResolvedTargets(ListMinion l, PHero h0 = nullptr, PHero h1 = nullptr, bool(*cond)(Minion*) = nullptr);
   //};
 
-  ListInstance resolve(Player* owner, Instance* me = nullptr) const;
+  ListPInstance resolve(Player* owner, Instance* me = nullptr) const;
 };
 
 //inline Target operator | (unsigned int tag, Target target) {

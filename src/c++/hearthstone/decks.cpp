@@ -17,21 +17,22 @@ PCard Deck::draw_one_card() {
   if (!cards.empty()) {
     int r = randint(0, size() - 1);
     card = pop_at(cards, r);
-    SEND_MSG(Msg_NewCard, nullptr, card);
+    SEND_DISPLAY_MSG(Msg_NewCard, nullptr, card);
   }
   else {
     fatigue++;
-    engine->damage(PInstance(), fatigue, player->state.hero);
+    engine->damage(nullptr, fatigue, player->state.hero.get());
   }
   return card;
 }
 
 // draw initial cards in starting hands and do mulligan
-ListCard Deck::draw_init_cards(int nb, FuncMulligan mulligan) {
-  ListCard keep;
+ListPCard Deck::draw_init_cards(int nb, FuncMulligan mulligan) {
+  ListPCard keep;
   while (len(keep) < nb)
     keep.push_back(draw_one_card());
-  ListCard discarded = player->mulligan(keep);
+  ListPCard discarded = player->mulligan(keep);
+  assert(len(discarded) + len(keep) == nb);
 
   // draw replacement cards
   while (len(keep) < nb)
@@ -52,7 +53,7 @@ void Deck::print() const {
 }
 
 PDeck fake_deck(const Collection& cardbook, bool debug, ArrayString fake_cards) {
-  ListCard cards;
+  ListPCard cards;
   if (debug) {
     assert(fake_cards.size());
     int mul = 30 / len(fake_cards);
@@ -61,7 +62,7 @@ PDeck fake_deck(const Collection& cardbook, bool debug, ArrayString fake_cards) 
         cards.push_back(cardbook.get_by_name(c)->copy());
   }
   else {
-    const ListConstCard& coll = cardbook.get_collectibles();
+    const ListPConstCard& coll = cardbook.get_collectibles();
     for (int i = 0; i < 30; i++)
       cards.push_back(coll[randint(0, coll.size() - 1)]->copy());
   }

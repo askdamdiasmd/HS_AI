@@ -25,21 +25,23 @@ public:
   ListAction list_player_actions(Player* player);
   void play_turn();
 
-  bool is_game_ended() { return board.is_game_ended(); }
+  bool is_game_ended() const;
   Player* get_winner();
 
   // game actions
   bool start_turn();
   bool end_turn();
 
-  bool draw_card(PInstance caster, Player* player, int nb = 1);
-  bool play_card(const Card* card, PInstance caster);
-  void signal(Event event, PInstance from);
+  bool draw_card(Instance* caster, Player* player, int nb = 1);
+  bool play_card(Instance* caster, const Card* card, const int cost);
+  bool add_minion(Instance* caster, PMinion minion, const Slot& slot);
 
-  bool heal(PInstance from, int hp, PInstance to);
-  bool damage(PInstance from, int hp, PInstance to);
+  void signal(Instance* from, Event event);
 
-  bool attack(PInstance from, PInstance target);
+  bool heal(Instance* from, int hp, Instance* to);
+  bool damage(Instance* from, int hp, Instance* to);
+
+  bool attack(Instance* from, Instance* target);
 
 private:
   //unordered_map<htype, int> saved_turn;
@@ -69,14 +71,12 @@ public:
   // display section
 
   list<PMessage> display;
-  void send_display_message(PMessage msg);
-  virtual void wait_for_display() = 0;
-
-  void send_status(PMsgStatus msg) {
-    if (!is_simulation)
-      display_status(msg);
+  void send_display_message(PMessage msg) {
+    //assert(!issubclassP(msg, Msg_ReceiveCard));
+    if (!is_simulation) // useless if it's a simulation
+      display.push_back(msg);
   }
-  virtual void display_status(PMsgStatus msg);
+  virtual void wait_for_display() = 0;
 };
 
 

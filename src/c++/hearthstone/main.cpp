@@ -18,7 +18,7 @@ int main(int argc, char** argv) {
   }
   
   // generate collection = all possible cards
-  const Collection& cardbook = Collection::Instance();  
+  const Collection& cardbook = Collection::CardBook();  
   
   ArrayString cards { "Windchill Yeti" };
 

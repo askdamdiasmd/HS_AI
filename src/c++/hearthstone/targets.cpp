@@ -17,10 +17,10 @@ Engine* Target::engine = nullptr;
     attackable =  0x0040, // things that can be attacked from the player viewpoint
 */
 
-ListInstance Target::resolve(Player* owner, Instance* me) const {
+ListPInstance Target::resolve(Player* owner, Instance* me) const {
   assert(!(tags & (friendly | enemy)));  // cannot be both
   Player* other = engine->get_other_player(owner);
-  ListInstance res;
+  ListPInstance res;
   const auto if_targetable = [](const PThing& i){ return !i->is_untargetable(); };
 
   if (tags & minions) {
@@ -50,9 +50,9 @@ ListInstance Target::resolve(Player* owner, Instance* me) const {
     // remove everything behind a taunt, if any
     assert(!(tags & weapon)); // cannot be both
     assert(tags & enemy); // useless otherwise
-    ListInstance res2;
+    ListPInstance res2;
     for (auto& p : res)
-      if (((Thing*)p.get())->is_taunt())
+      if (CAST(p.get(),Thing)->is_taunt())
         res2.push_back(p);
     if (res2.size()) 
       swap(res,res2);  // optimized by STL

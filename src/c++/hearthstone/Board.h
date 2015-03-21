@@ -15,7 +15,7 @@ struct Slot {
     player(owner), pos(index), fpos(fpos) {}
 
   string tostr() const {
-    return string_format("Position %d", pos);
+    return string_format("[Slot %d (%f)]", pos, fpos);
   }
 
   int insert_after_pos(const vector<float>& minion_pos) const {
@@ -38,20 +38,26 @@ typedef shared_ptr<VizBoard> PVizBoard;
 
 struct Board {
   SET_ENGINE();
-  ListInstance everybody;
-
+  struct State {
+    ListPInstance everybody;
+    int n_dead;
+  } state;
   PVizBoard viz;
 
 public:
-  Board() {}
+  Board() {
+    state.n_dead = 0;
+  }
 
-  void add_thing(PInstance thing, Slot pos = Slot());
+  void add_thing(PInstance thing, const Slot& pos = Slot());
 
   void remove_thing(PInstance m);
 
-  bool is_game_ended() const;
-  
-  ListSlot get_free_slots(Player* player);
+  void clean_deads();
+
+  ListSlot get_free_slots(Player* player) const;
+
+  int get_nb_free_slots(const Player* player) const;
 
   Slot get_minion_pos(PInstance m);
 

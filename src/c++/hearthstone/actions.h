@@ -1,7 +1,6 @@
 #ifndef __ACTIONS_H__
 #define __ACTIONS_H__
 #include "common.h"
-//#include "targets.h"
 
 // ---------- Actions ---------------
 
@@ -16,7 +15,7 @@ struct Action {
   
   bool need_target() const { return target.is_targetable(); }
 
-  virtual bool is_valid() const { return true; }
+  virtual bool is_valid(const Player* pl) const { return true; }
 
   //virtual bool neighbors() { return false; } // return True if minion with neighbor aura / battlecry involved
 
@@ -27,7 +26,7 @@ struct Action {
 
   virtual string tostr() const = 0;
 
-  virtual bool execute(PInstance caster, PInstance choice, const Slot& slot) const = 0;
+  virtual bool execute(Instance* caster, Instance* choice, const Slot& slot) const = 0;
 };
 
 
@@ -38,8 +37,7 @@ struct Act_EndTurn : public Action {
   Act_EndTurn() : Action(0) {}
 
   virtual string tostr() const { return "End turn"; }
-
-  virtual bool execute(PInstance caster, PInstance choice, const Slot& slot) const;
+  virtual bool execute(Instance* caster, Instance* choice, const Slot& slot) const;
 };
 
 
@@ -48,38 +46,24 @@ struct Act_EndTurn : public Action {
 struct Act_PlayCard : public Action { 
   const Card * const card;
   const FuncAction actions;
-
   Act_PlayCard(const Card* card, const bool need_slot, FuncAction actions, Target targets = 0);
 
-  virtual bool execute(PInstance caster, PInstance choice, const Slot& slot) const;
+  virtual bool execute(Instance* caster, Instance* choice, const Slot& slot) const;
 };
 
 
 // -------- Minions -----------------
 
 struct Act_PlayMinionCard : public Act_PlayCard {
-  //Board::ListSlot slots;
-  //Board::Slot sel_slot;
+  const Card_Minion* card_minion() const;
 
-  //Act_PlayMinionCard(PCard card) :
-  //  Act_PlayCard(card), slots(engine->board.get_free_slots(card->player)) {}
+  Act_PlayMinionCard(const Card_Minion* card);
 
-  //virtual bool is_valid() const {
-  //  return !slots.empty();  // no more free slots
-  //}
+  virtual string tostr() const;
 
-  //void select_slot(Board::Slot slot) {
-  //  sel_slot = slot;
-  //}
+  virtual bool is_valid(const Player* pl) const;
 
-  ////virtual bool neighbors() {
-  ////  from effects import Eff_BuffNeighbors
-  ////    return any([type(e) == Eff_BuffNeighbors for e in self.card.effects])
-  ////}
-
-  //virtual void execute() {
-  //  engine->board.add_thing(caster, Minion(card), sel_slot);
-  //}
+  virtual bool execute(Instance* caster, Instance* choice, const Slot& slot) const;
 };
 
 
@@ -111,13 +95,13 @@ self.engine.send_message(actions)*/
 
 
 struct Act_Attack : public Action {
-  Act_Attack() :
-    Action(0, false, Target::attackable | Target::enemy | Target::characters) {}
+  Thing* const thing;
+  Act_Attack(Thing* thing) :
+    Action(0, false, Target::attackable | Target::enemy | Target::characters), thing(thing) {}
 
-  virtual string tostr() const { return "Attack action"; }
-  virtual bool execute(PInstance caster, PInstance choice, const Slot& slot) const;
+  virtual string tostr() const;
+  virtual bool execute(Instance* caster, Instance* choice, const Slot& slot) const;
 };
-
 
 // ------------- Weapon cards ------------------------
 
@@ -136,10 +120,9 @@ struct Act_Attack : public Action {
 
 struct Act_SpellCard : public Act_PlayCard {
   /// hero plays a generic spell card, specified using "actions"
-
   Act_SpellCard(const Card_Spell* card, FuncAction actions, Target targets = 0);
 
-  virtual bool execute(PInstance caster, PInstance choice, const Slot& slot) const;
+  virtual bool execute(Instance* caster, Instance* choice, const Slot& slot) const;
 };
 
 struct Act_TargetedSpellCard : public Act_SpellCard {
@@ -147,7 +130,7 @@ struct Act_TargetedSpellCard : public Act_SpellCard {
 
   virtual string tostr() const;
 
-  virtual bool execute(PInstance caster, PInstance choice, const Slot& slot) const {
+  virtual bool execute(Instance* caster, Instance* choice, const Slot& slot) const {
     assert(choice);
     return Act_SpellCard::execute(caster, choice, slot);
   }
@@ -158,7 +141,7 @@ struct Act_AreaSpellCard : public Act_SpellCard {
 
   virtual string tostr() const;
 
-  virtual bool execute(PInstance caster, PInstance choice, const Slot& slot) const {
+  virtual bool execute(Instance* caster, Instance* choice, const Slot& slot) const {
     assert(!choice);
     return Act_SpellCard::execute(caster, choice, slot);
   }
@@ -214,7 +197,7 @@ struct Act_HeroPower : public Action {
 
   virtual string tostr() const;
 
-  virtual bool execute(PInstance caster, PInstance choice, const Slot& slot) const;
+  virtual bool execute(Instance* caster, Instance* choice, const Slot& slot) const;
 };
 
 

@@ -319,6 +319,8 @@ static void manual_box(WINDOW* win, int y, int x, int h, int w) {
 
 //# Viz classes = copy object specs --------------------
 
+Engine* VizPanel::engine = nullptr;
+
 VizPanel::~VizPanel() {
   if (win && panel) {
     delete_panel(panel);
@@ -329,24 +331,17 @@ VizPanel::~VizPanel() {
 
 //### General thing (minion, weapon, hero...)------
 
-VizInstance::VizInstance(PInstance obj) :
-  VizPanel(), obj(obj) {}
+VizInstance::VizInstance(const Instance* obj) :
+  VizPanel(), obj(obj), card(obj->card) {}
 
-PVizThing Thing::viz_thing() { return issubclassP(viz, VizThing); }
+PVizThing Thing::viz_thing() { return CASTP(viz, VizThing); }
 
-VizThing::VizThing(PThing obj, int ty, int tx, int y, int x) :
-  VizInstance(dynamic_pointer_cast<Instance>(obj)) {
-  hp = obj->state.hp;
-  max_hp = obj->state.max_hp;
-  max_card_hp = 0; //max_card_hp = dynamic_pointer_cast<Card_Minion>(obj->card)->state.max_hp;
-  assert(&max_hp == &hp + 1);
-  assert(&max_card_hp == &hp + 2);
-  atq = obj->state.atq;
-  max_atq = obj->state.max_atq;
-  max_card_atq = 0;
-  assert(&max_atq == &atq + 1);
-  assert(&max_card_atq == &atq + 2);
-  effects = obj->state.static_effects;
+PConstCardThing VizThing::card_thing() const { 
+  return CASTP(card, const Card_Thing); 
+}
+
+VizThing::VizThing(const Thing* obj, int ty, int tx, int y, int x) :
+  VizInstance(obj), state(obj->state) {
   wait = 0;
   // create panel
   win = newwin(ty, tx, y, x);
@@ -356,11 +351,12 @@ VizThing::VizThing(PThing obj, int ty, int tx, int y, int x) :
 }
 
 bool VizThing::check() {
-  PThing obj = thing();
-  assert(hp == obj->state.hp);
-  assert(max_hp == obj->state.max_hp);
-  assert(atq == obj->state.atq);
-  assert(max_atq == obj->state.max_atq);
+  const Thing* obj = thing();
+  assert(state.hp == obj->state.hp);
+  assert(state.max_hp == obj->state.max_hp);
+  assert(state.atq == obj->state.atq);
+  assert(state.max_atq == obj->state.max_atq);
+  assert(state.static_effects == obj->state.static_effects);
   return true;
 }
 
@@ -380,15 +376,26 @@ int VizThing::buff_color(int val, bool highlight, bool standout) const {
     res = highlight ? WHITE_on_GREEN : GREEN_on_BLACK;
   else if (val == 0)
     res = highlight ? WHITE_on_BLACK : 0;
-  else
+  else if (val < 0)
     res = highlight ? WHITE_on_RED : RED_on_BLACK;
   return res | (standout ? A_STANDOUT : 0);
 }
 
 int VizThing::buff_color(const int* val, bool highlight, bool standout) const {
+  int max_val, max_card_val;
+  if (val == &state.hp) {
+    max_val = state.max_hp;
+    max_card_val = card_thing()->thing()->state.max_hp;
+  }
+  else if (val == &state.atq) {
+    max_val = state.max_atq;
+    max_card_val = card_thing()->thing()->state.max_atq;
+  }
+  else if (val == &state.armor) {
+    max_val = max_card_val = 999999;
+  }
+  else assert(!"error: unrecognized val");
   int res;
-  int max_val = *(val + 1);
-  int max_card_val = *(val + 2);
   if (*val < max_val)
     res = highlight ? WHITE_on_RED : RED_on_BLACK;
   else if (*val < max_card_val)
@@ -396,6 +403,23 @@ int VizThing::buff_color(const int* val, bool highlight, bool standout) const {
   else
     res = highlight ? WHITE_on_BLACK : 0;
   return res | (standout ? A_STANDOUT : 0);
+}
+
+void VizThing::update_state(const Thing::State& from, bool show_diff) {
+  const bool anim = show_diff && engine->board.viz->animated;
+  // update attribute
+  int* can_change[] = { &state.hp, &state.atq, &state.armor };
+  for (int* val : can_change) {
+    int oldval = *val;
+    int newval = *(((int*)&from) + (val - (int*)&state));
+    int diff = newval - oldval;
+    // animation if change
+    if (anim && diff) 
+        temp_panel(this, string_format("%+d", diff), buff_color(diff, true, false), 1.5);
+  }
+  // copy everything
+  state = from;
+  draw({});
 }
 
 WINDOW* VizThing::draw(const ArgMap& args) {
@@ -426,38 +450,22 @@ WINDOW* VizThing::draw(const ArgMap& args) {
   wattroff(win, highlight);
   // show just HP
   get_win_size(win, ty, tx);
-  string thp = string_format(" %d ", hp);
-  mvwaddstr_ex(win, ty - 1, tx - 1 - len(thp), thp.c_str(), highlight | buff_color(&hp));
+  string thp = string_format(" %d ", state.hp);
+  mvwaddstr_ex(win, ty - 1, tx - 1 - len(thp), thp.c_str(), highlight | buff_color(&state.hp));
   return win;
 }
 
-bool VizThing::update_stats(const Msg_Status& msg, bool show_hp) {
-  const bool anim = thing()->engine->board.viz->animated;
-  // update attribute
-  int oldval = getattr(msg.attr);
-  int newval = getattr(msg.attr) = msg.val;
-  // animation if hp changed
-  if (anim && show_hp && msg.attr == &VizThing::hp) {
-    int diff = newval - oldval;
-    if (diff)
-      temp_panel(this, string_format("%+d", diff), buff_color(diff, true, false), 1.5);
-  }
-  draw({});
-  return true;
-}
 
 //### Hero -----------
 
 PVizHero Hero::viz_hero() { return issubclassP(viz, VizHero); }
 
-VizHero::VizHero(PHero hero, pos_t pos) :
-  VizThing(hero, 4, 13, pos.y, pos.x) {
-  armor = hero->state.armor;
+PConstCardHero VizHero::card_thing() const { 
+  return CASTP(card, const Card_Hero);
 }
 
-bool VizHero::check() {
-  assert(armor == hero()->state.armor);
-  return VizThing::check();
+VizHero::VizHero(const Hero* hero, pos_t pos) :
+  VizThing(hero, 4, 13, pos.y, pos.x) {
 }
 
 WINDOW* VizHero::draw(const ArgMap& args) {
@@ -468,15 +476,15 @@ WINDOW* VizHero::draw(const ArgMap& args) {
   print_middle(win, 1, 1, tx - 2, hero()->player->name);
   string hero_name = split(hero()->card->name)[0];
   print_middle(win, 2, 1, tx - 2, "(" + hero_name + ")", BLUE_on_BLACK);
-  if (armor) {
-    string tar = string_format("[%d]", armor);
+  if (state.armor) {
+    string tar = string_format("[%d]", state.armor);
     mvwaddstr(win, ty - 2, tx - 1 - len(tar), tar.c_str());
   }
   VizPlayer* pl = hero()->player->viz.get();
-  int attack = (pl->state.weapon ? pl->state.weapon->state.atq : 0) + atq;
+  int attack = (pl->state.weapon ? pl->state.weapon->state.atq : 0) + state.atq;
   if (attack) {
-    int hh = pl->state.weapon ? pl->state.weapon->viz_weapon()->buff_color(&pl->state.weapon->viz_weapon()->atq) : 
-                                buff_color(&atq);
+    int hh = pl->state.weapon ? pl->state.weapon->viz_weapon()->buff_color(&pl->state.weapon->viz_weapon()->state.atq) : 
+                                buff_color(&state.atq);
     mvwaddstr_ex(win, ty - 1, 1, string_format(" %d ", attack).c_str(), highlight | hh);
   }
   return win;
@@ -495,12 +503,10 @@ PVizHeroPowerButton VizHero::create_hero_power_button() {
 
 //### Minion -----------
 
-PVizMinion Minion::viz_minion() { return issubclassP(viz, VizMinion); }
+PVizMinion Minion::viz_minion() { return CASTP(viz, VizMinion); }
 
-VizMinion::VizMinion(PMinion minion) :
-  VizThing(minion, 5, 11,
-  minion->engine->board.viz->get_minion_pos(minion).y,
-  minion->engine->board.viz->get_minion_pos(minion).x) {}
+VizMinion::VizMinion(const Minion* minion, VizSlot pos) :
+  VizThing(minion, 5, 11, pos.get_screen_pos().y, pos.get_screen_pos().x) {}
 
 WINDOW* VizMinion::draw(const ArgMap& args) {
   DEFARG(int, x, minion()->engine->board.viz->get_minion_pos(minion()).x);
@@ -511,7 +517,7 @@ WINDOW* VizMinion::draw(const ArgMap& args) {
   get_win_size(win, ty, tx);
   string name = minion()->card->get_name_fr();
   print_longtext(win, 1, 1, ty - 1, tx - 1, name, YELLOW_on_BLACK);
-  mvwaddstr_ex(win, ty - 1, 1, string_format(" %d ", atq).c_str(), highlight | buff_color(&atq));
+  mvwaddstr_ex(win, ty - 1, 1, string_format(" %d ", state.atq).c_str(), highlight | buff_color(&state.atq));
   if (is_death_rattle())
     mvwaddstr_ex(win, ty - 1, tx / 2, "D", highlight);
   else if (is_trigger())
@@ -527,7 +533,7 @@ WINDOW* VizMinion::draw(const ArgMap& args) {
 
 PVizWeapon Weapon::viz_weapon() { return issubclassP(viz, VizWeapon); }
 
-VizWeapon::VizWeapon(PWeapon weapon) :
+VizWeapon::VizWeapon(const Weapon* weapon) :
 VizThing(weapon, 4, 11, getbegy(weapon->hero()->viz->win), 
                         getbegx(weapon->hero()->viz->win) - 18) {}
 
@@ -539,12 +545,12 @@ WINDOW* VizWeapon::draw(const ArgMap & args) {
   string name = weapon()->card->get_name_fr();
   print_longtext(win, 1, 1, ty - 1, tx - 1, name, GREEN_on_BLACK);
   NI;//  int ref_atq = min(weapon()->card_weapon()->weapon->state.atq, max_atq);
-  mvwaddstr_ex(win, ty - 1, 1, string_format(" %d ", atq).c_str(), highlight | buff_color(&atq));
+  mvwaddstr_ex(win, ty - 1, 1, string_format(" %d ", state.atq).c_str(), highlight | buff_color(&state.atq));
   return win;
 }
 
-bool VizWeapon::update_stats(const Msg_Status& msg) {
-  return VizThing::update_stats(msg, false);
+void VizWeapon::update_state(const Thing::State& from) {
+  VizThing::update_state(from, false);
 }
 
 //### Player -----------
@@ -554,7 +560,10 @@ VizPlayer::VizPlayer(Player* player) :
 
 bool VizPlayer::check() const {
   const Player::State& pl_state = player->state;
+  assert(state.mana == pl_state.mana);
+  assert(state.max_mana == pl_state.max_mana);
   assert(state.cards == pl_state.cards);
+  assert(state.hero == pl_state.hero);
   if (pl_state.weapon || state.weapon) {
     assert(pl_state.weapon == state.weapon);
     state.weapon->viz_weapon()->check();
@@ -566,16 +575,9 @@ bool VizPlayer::check() const {
   return true;
 }
 
-void VizPlayer::set_weapon(PWeapon weapon) {
-  unset_weapon(state.weapon);
-  weapon->viz = NEWP(VizWeapon, weapon);
-  state.weapon = weapon;
-}
-
-void VizPlayer::unset_weapon(PWeapon weapon) {
-  assert(weapon == state.weapon);
-  if (state.weapon)
-    state.weapon->viz.reset();
+void VizPlayer::update_state(const Player::State& from) {
+  state = from; // copy
+  player->engine->board.viz->draw(0xFF,player);
 }
 
 
@@ -863,6 +865,10 @@ static inline int interp(int i, int Max, int start, int end) {
   return int(0.5+ start + (end - start)*i / float(Max - 1));
 }
 
+void Msg_PlayerUpdate::draw(Engine* engine) {
+  caster->player->viz->update_state(state);
+}
+
 void Msg_NewCard::draw(Engine* engine) {
   if (!card->viz)
     card->viz = NEWP(VizCard, card);
@@ -894,6 +900,29 @@ void Msg_BurnCard::draw(Engine* engine) {
   NI;
 }
 
+void Msg_ThrowCard::draw(Engine* engine) {
+  Player* player = caster->player;
+  const Player* top = engine->board.viz->get_top_bottom_player(true);
+  if (player == top) {
+    int sx = (getmaxx(stdscr) - VizCard::card_size.x) / 2;
+    ArgMap kwargs = { KEYBOOL("small", false), KEYPOS2("pos", 0, sx), KEYINT("highlight", BLACK_on_YELLOW) };
+    card->viz->draw(kwargs);
+    show_panels();
+    my_sleep(1);
+    if (engine->board.viz->animated) {
+      for (int i = sx - 1; i >= 0; i -= 2) {
+        kwargs["pos"]._pos_t.x = i;
+        card->viz->draw(kwargs);
+        show_panels();
+        my_sleep(0.05*(i) / sx);
+      }
+      my_sleep(0.2);
+    }
+  }
+  card->viz.reset();
+  show_panels();
+}
+
 void Msg_StartTurn::draw(Engine* engine) {
   Player* player = caster->player;
   player->viz->check();
@@ -911,34 +940,18 @@ void Msg_StartTurn::draw(Engine* engine) {
 void Msg_EndTurn::draw(Engine* engine) {
 }
 
-//def draw_Msg_UseMana(self) :
-//self.engine.board.draw('mana', self.caster)
-//
-//def draw_Msg_ThrowCard(self) :
-//card = self.card
-//card.owner.viz.cards.remove(card)
-//card.delete()
-//self.engine.board.draw('cards', which = self.caster)
-//
-//def draw_Msg_PlayCard(self) :
-//top, bot = self.engine.board.viz.get_top_bottom_players()
-//if self.caster is top :
-//sx = (getmaxyx(stdscr)[1] - card_size[1]) / 2
-//kwargs = dict(small = False, cost = self.cost)
-//self.card.draw(pos = (0, sx), highlight = BLACK_on_YELLOW, **kwargs)
-//show_panels()
-//my_sleep(1)
-//if self.engine.board.viz.animated:
-//for i in range(sx - 1, -1, -2) :
-//self.card.draw(pos = (0, i), **kwargs)
-//show_panels()
-//my_sleep(0.05*(i) / sx)
-//my_sleep(0.2)
-//self.card.delete()
-//show_panels()
-
 void Msg_AddMinion::draw(Engine* engine) {
-  NI;
+  minion()->viz = NEWP(VizMinion, minion(), VizSlot(pos));
+}
+
+void Msg_ThingUpdate::draw(Engine* engine) {
+  CAST(caster,Thing)->viz_thing()->update_state(state);
+}
+
+void Msg_Damage::draw(Engine* engine) {
+}
+
+void Msg_Heal::draw(Engine* engine) {
 }
 
 //void Msg_MinionPopup::draw(Engine* engine) {
@@ -1009,7 +1022,7 @@ void Msg_AddMinion::draw(Engine* engine) {
 //
 //def draw_Msg_Status(self) :
 //if hasattr(self.caster, 'viz') :
-//if not self.caster.viz.update_stats(self) :
+//if not self.caster.viz.update_state(self) :
 //return False
 //show_panels()
 //
@@ -1080,10 +1093,11 @@ void Msg_AddMinion::draw(Engine* engine) {
 VizBoard::VizBoard(Board* board, bool switch_heroes, bool animated) :
   board(board), switch_heroes(switch_heroes), animated(animated),
   end_turn(NEWP(VizButton,11, getmaxx(stdscr), "End turn", VizButton::right)) {
+  VizPanel::set_engine(board->engine);
   for (int i = 0; i < 2; i++) {
     Player* pl = board->engine->players[i];
     pl->viz = NEWP(VizPlayer, board->engine->players[i]);
-    pl->state.hero->viz = NEWP(VizHero, pl->state.hero, get_hero_pos(pl));
+    pl->state.hero->viz = NEWP(VizHero, pl->state.hero.get(), get_hero_pos(pl));
     hero_power_buttons[pl] = pl->state.hero->viz_hero()->create_hero_power_button();
   }
 }
@@ -1097,8 +1111,8 @@ Player* VizBoard::get_top_bottom_player(bool top) {
     return top ? adv : player;
 }
 
-pos_t VizBoard::get_minion_pos(PMinion minion) {
-  int i = index(minion->player->viz->state.minions, minion);
+pos_t VizBoard::get_minion_pos(const Minion* minion) {
+  const int i = indexP(minion->player->viz->state.minions, minion);
   assert(i >= 0);
   Slot slot(minion->player, i, -1);
   return VizSlot(slot).get_screen_pos();
@@ -1179,14 +1193,14 @@ void VizBoard::draw(int what, Player* which_, bool last_card) {
   // draw cards
   if (cards & what) {
     if (in(adv, which)) {
-      ListCard cards = adv->viz->state.cards;
+      ListPCard cards = adv->viz->state.cards;
       if (!last_card) cards.pop_back();
       for (auto card : cards)
         card->viz->draw({ KEYBOOL("hide", true) }); // hide adversary cards
       print_middle(stdscr, 0, 0, NC, string_format(" Adversary has %d cards. ", len(adv->viz->state.cards)));
     }
     if (in(player, which)) {
-      ListCard cards = player->viz->state.cards;
+      ListPCard cards = player->viz->state.cards;
       if (!last_card) cards.pop_back();
       for (auto card : cards)
         card->viz->draw({ KEYPOS1("pos", get_card_pos(card, player)), KEYBOOL("petit", true), KEYINT("petit_size", NR - 24) });
@@ -1211,7 +1225,7 @@ void VizBoard::draw(int what, Player* which_, bool last_card) {
   if (minions & what) {
     for (Player* pl : which)
       for (auto m : pl->viz->state.minions)
-        m->viz->draw({ KEYINT("y", get_minion_pos(m).y) });
+        m->viz->draw({ KEYINT("y", get_minion_pos(m.get()).y) });
   }
 
   show_panels();
@@ -1226,9 +1240,9 @@ bool HumanPlayer::mouse_in_win(WINDOW* win, int y, int x) {
   return wx <= x && x < wx + width && wy <= y && y < wy + height;
 }
 
-ListCard HumanPlayer::mulligan(ListCard & cards) const {
-  engine->board.viz->draw();
+ListPCard HumanPlayer::mulligan(ListPCard & cards) const {
   engine->wait_for_display();
+  engine->board.viz->draw();
 
   int NR, NC; getmaxyx(stdscr,NR,NC);
   int nc = len(cards);
@@ -1247,7 +1261,7 @@ ListCard HumanPlayer::mulligan(ListCard & cards) const {
                                  KEYINT("highlight", BLACK_on_GREEN) } });
   }
   
-  ListCard discarded;
+  ListPCard discarded;
   while (true) {
     // draw elements in show list
     for (auto sl : showlist) 
@@ -1297,15 +1311,18 @@ ListCard HumanPlayer::mulligan(ListCard & cards) const {
   }
   
   //clean up
-  for (auto card : cards ) 
+  for (auto& card : cards ) 
     hide_panel(card->viz->panel);
   end_button.~VizButton();
   show_panels();
-
+  
+  // remove cards
+  for (auto& card : discarded)
+    remove(cards, card);
   return discarded;
 }
 
-const Action* HumanPlayer::choose_actions(ListAction actions, PInstance& choice, Slot& slot) const {
+const Action* HumanPlayer::choose_actions(ListAction actions, Instance*& choice, Slot& slot) const {
   // split actions
   struct ShowElem {
     const Action* action;
@@ -1315,7 +1332,7 @@ const Action* HumanPlayer::choose_actions(ListAction actions, PInstance& choice,
   const Action* end_turn_action = nullptr;
   typedef vector<ShowElem> ShowList;
   ShowList showlist; // [(action, object, draw_kwargs)]
-  ListCard remaining_cards = state.cards; // copy
+  ListPCard remaining_cards = state.cards; // copy
   for (auto a : actions) {
     if (issubclass(a, const Act_HeroPower)) {
       showlist.push_back({ a, engine->board.viz->hero_power_buttons[this], {} });
@@ -1323,8 +1340,8 @@ const Action* HumanPlayer::choose_actions(ListAction actions, PInstance& choice,
     else if (issubclass(a, const Act_PlayCard)) {
       const Act_PlayCard* act = issubclass(a, const Act_PlayCard);
       showlist.push_back({ a, act->card->viz, { KEYBOOL("petit", true), KEYINT("cost", a->get_cost()) } });
-      if (indexP(remaining_cards, act->card))
-        remove(remaining_cards, indexP(remaining_cards, act->card));
+      if (findP(remaining_cards, act->card))
+        remove(remaining_cards, findP(remaining_cards, act->card));
     }/*
     else if (issubclass(a, const Act_MinionAttack)) {
       showlist.push_back((a, a->caster, {}));
@@ -1423,13 +1440,13 @@ const Action* HumanPlayer::choose_actions(ListAction actions, PInstance& choice,
 
         // acknowledged choice
         if (act == fake_act_slot) 
-          slot = issubclass(sel, VizSlot)->slot;
+          slot = CAST(sel, VizSlot)->slot;
         else if (act == fake_act_target) 
-          choice = issubclass(sel, VizThing)->obj;
+          choice = const_cast<Instance*>(CAST(sel, VizThing)->obj);
         else {
           action = act;
           active = sel;
-          choice = PInstance();  // reset choices
+          choice = nullptr;  // reset choices
           slot.pos = -1;
         }
 
@@ -1438,7 +1455,7 @@ const Action* HumanPlayer::choose_actions(ListAction actions, PInstance& choice,
         if (action->need_slot && slot.pos < 0) {
           showlist.clear();
           for (auto& sl : engine->board.get_free_slots(const_cast<HumanPlayer*>(this)))
-            showlist.push_back({ fake_act_target, NEWP(VizSlot, sl), {} });
+            showlist.push_back({ fake_act_slot, NEWP(VizSlot, sl), {} });
         } 
         else if (action->need_target() && !choice) {
           showlist.clear();

@@ -21,12 +21,22 @@ using namespace std;
 //typedef long htype;
 typedef vector<string> ArrayString;
 
-//#define forlen(iter, vec)   for(int __it__=0; __it__<len(vec); ++__it__) { auto& iter = vec[__it__];
+#define NEWP(type, ...) make_shared<type>(##__VA_ARGS__)
 
 #define issubclass( obj, cls)   dynamic_cast<cls*>(obj)
 #define issubclassP( obj, cls)   dynamic_pointer_cast<cls>(obj)
-
-#define NEWP(type, ...) make_shared<type>(##__VA_ARGS__)
+#ifdef _DEBUG
+template <typename T>
+inline T check_ptr(T ptr) {
+  assert(ptr != nullptr);
+  return ptr;
+}
+#define CAST(obj, cls)  check_ptr(dynamic_cast<cls*>(obj))
+#define CASTP(obj, cls)  check_ptr(dynamic_pointer_cast<cls>(obj))
+#else
+#define CAST(obj, cls)  static_cast<cls>(obj)
+#define CASTP(obj, cls)  static_pointer_cast<cls>(obj)
+#endif
 
 inline string string_format(const char* format, ...) {
   va_list args;
@@ -36,6 +46,7 @@ inline string string_format(const char* format, ...) {
   vsprintf_s(buffer.get(), len, format, args);
   return string(buffer.get());
 }
+#define cstr(s) (s)->tostr().c_str()
 
 #define NI  assert(!"not implemented!")
 
@@ -54,8 +65,16 @@ inline string string_format(const char* format, ...) {
 
 #define NAMED_PARAM(cls, type, param)  cls* set_##param(type v) { param = v; return this; }
 
-#define UPDATE_STATUS(which) NI //engine->send_status(NEWP(Msg_Status,PThing(this),which))
-#define SEND_MSG(type, ...)  if(!engine->is_simulation) engine->send_display_message(NEWP(type,##__VA_ARGS__));
+//#define ENGINE Engine* engine = this;
+#define SEND_DISPLAY_MSG(type, ...)  if(!engine->is_simulation) engine->send_display_message(NEWP(type,##__VA_ARGS__))
+#define UPDATE_THING_STATE(what)  SEND_DISPLAY_MSG(Msg_ThingUpdate, this, this->state, what)
+#define UPDATE_PLAYER_STATE(what) SEND_DISPLAY_MSG(Msg_PlayerUpdate, this->state.hero.get(), this->state, what)
+#define UPDATE_THING(what, type, ...) \
+  SEND_DISPLAY_MSG(type, ##__VA_ARGS__); \
+  UPDATE_THING_STATE(what)
+#define UPDATE_PLAYER(what, type, ...) \
+  SEND_DISPLAY_MSG(type, ##__VA_ARGS__); \
+  UPDATE_PLAYER_STATE(what)
 
 inline bool startswith(string s, const char* comp) {
   return !s.compare(0, strlen(comp), comp);
@@ -112,11 +131,16 @@ inline int index(const vector<Type> & vec, const Type& ref) {
   return -1;
 }
 template<typename Type>
-inline shared_ptr<Type> indexP(const vector<shared_ptr<Type> > & vec, const Type* ptr) {
-  for (auto c : vec)
-    if (c.get() == ptr)
-      return c;
-  return shared_ptr<Type>();
+inline int indexP(const vector<shared_ptr<Type> > & vec, const Type* ptr) {
+  for (int i = 0; i < len(vec); ++i)
+    if (vec[i].get() == ptr)
+      return i;
+  return -1;
+}
+template<typename Type>
+inline shared_ptr<Type> findP(const vector<shared_ptr<Type> > & vec, const Type* ptr) {
+  int i = indexP(vec, ptr);
+  return i < 0 ? nullptr : vec[i];
 }
 template<typename Type>
 inline void remove(vector<Type> & vec, const Type& ref) {
@@ -153,14 +177,12 @@ typedef shared_ptr<Player> PPlayer;
 struct Board;
 struct Slot;
 typedef vector<Slot> ListSlot;
-//struct Target;
-//typedef vector<Target> ListTarget;
 
 struct Card;
 typedef shared_ptr<Card> PCard;
 typedef shared_ptr<const Card> PConstCard;
-typedef vector<PConstCard> ListConstCard;
-typedef vector<PCard> ListCard;
+typedef vector<PConstCard> ListPConstCard;
+typedef vector<PCard> ListPCard;
 struct Card_Instance;
 typedef shared_ptr<Card_Instance> PCardInstance;
 typedef shared_ptr<const Card_Instance> PConstCardInstance;
@@ -193,29 +215,30 @@ typedef vector<const Action* const> ListAction;
 
 struct Effect;
 typedef shared_ptr<Effect> PEffect;
-typedef vector<PEffect> ListEffect;
+typedef vector<PEffect> ListPEffect;
 
 struct Instance;
+typedef vector<Instance*> ListInstance;
 typedef shared_ptr<Instance> PInstance;
 typedef shared_ptr<const Instance> PConstInstance;
-typedef vector<PInstance> ListInstance;
+typedef vector<PInstance> ListPInstance;
 struct Thing;
 typedef shared_ptr<Thing> PThing;
 typedef shared_ptr<const Thing> PConstThing;
-typedef vector<PThing> ListThing;
+typedef vector<PThing> ListPThing;
 struct Secret;
 typedef shared_ptr<Secret> PSecret;
-typedef vector<PSecret> ListSecret;
+typedef vector<PSecret> ListPSecret;
 struct Weapon;
 typedef shared_ptr<Weapon> PWeapon;
 typedef shared_ptr<const Weapon> PConstWeapon;
 struct Creature;
 typedef shared_ptr<Creature> PCreature;
-typedef vector<PCreature> ListCreature;
+typedef vector<PCreature> ListPCreature;
 struct Minion;
 typedef shared_ptr<Minion> PMinion;
 typedef shared_ptr<const Minion> PConstMinion;
-typedef vector<PMinion> ListMinion;
+typedef vector<PMinion> ListPMinion;
 struct Hero;
 typedef shared_ptr<Hero> PHero;
 typedef shared_ptr<const Hero> PConstHero;
@@ -227,9 +250,9 @@ typedef shared_ptr<Message> PMessage;
 struct Msg_Status;
 typedef shared_ptr<Msg_Status> PMsgStatus;
 
-//typedef ListAction(*FuncListAction)(Engine* e, PInstance from, PInstance target);
-typedef bool (*FuncAction)(const Action* a, PInstance from, PInstance target);
-typedef ListCard (Player::*FuncMulligan)(ListCard&) const;
+#define FUNCACTION    [] (const Action* a, Instance* from, Instance* target, const Slot& slot)
+typedef bool(*FuncAction)(const Action* a, Instance* from, Instance* target, const Slot& slot);
+typedef ListPCard(Player::*FuncMulligan)(ListPCard&) const;
 
 #include "targets.h"
 #include "events.h"

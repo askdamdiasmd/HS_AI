@@ -8,8 +8,8 @@ struct Collection
 {
 private:
   unordered_map<string, PConstCard> by_name;
-  ListConstCard by_id;
-  ListConstCard  collectibles;
+  ListPConstCard by_id;
+  ListPConstCard  collectibles;
 
   Collection(); // add all possible cards to cardbook
 
@@ -18,7 +18,7 @@ private:
   static Collection only_instance;
 
 public:
-  static const Collection& Instance() {
+  static const Collection& CardBook() {
     return only_instance;
   }
 
@@ -30,7 +30,7 @@ public:
     assert(0 <= id && id < len(by_id));
     return by_id[id];
   }
-  const ListConstCard& get_collectibles() const {
+  const ListPConstCard& get_collectibles() const {
     return collectibles;
   }
 };

@@ -5,10 +5,10 @@
 struct Deck {
   SET_ENGINE();
   Player* player;
-  ListCard cards;
+  ListPCard cards;
   int fatigue;
 
-  Deck( ListCard cards ) :
+  Deck( ListPCard cards ) :
     player(nullptr), cards(cards), fatigue(0) {
     assert(cards.size() == 30);
   }
@@ -31,7 +31,7 @@ struct Deck {
   PCard draw_one_card();
 
   // draw initial cards in starting hands and do mulligan
-  ListCard draw_init_cards(int nb, FuncMulligan mulligan);
+  ListPCard draw_init_cards(int nb, FuncMulligan mulligan);
 
   void print() const;
 };

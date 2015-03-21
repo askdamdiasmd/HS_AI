@@ -55,16 +55,22 @@ bool Player::add_thing(PInstance thing, Slot pos) {
     //engine->send_message(Msg_SecretPopup(state.secrets.back()));
   }
   else if (state.minions.size() < 7 && (m = issubclassP(thing, Minion))) {
-    auto n = state.minions_pos.size();
+    const int n = state.minions_pos.size();
     if (pos.fpos >= 1000)  // helper
       pos.fpos = (state.minions_pos[n - 2] + state.minions_pos[n - 1]) / 2;
-    int i = pos.insert_after_pos(state.minions_pos);
+    const int i = pos.insert_after_pos(state.minions_pos);
     if (state.minions_pos[i - 1] == pos.fpos) // already exist, so create new number
       pos.fpos = (pos.fpos + state.minions_pos[i]) / 2;
+    pos.pos = i - 1;
     state.minions_pos.insert(state.minions_pos.begin()+i, pos.fpos);
-    state.minions.insert(state.minions.begin() + i - 1, m);
-    SEND_MSG(Msg_AddMinion, m, i - 1);
-    engine->signal(Event::AddMinion, m);
+    if (len(state.minions))
+      state.minions.insert(state.minions.begin() + i - 1, m);
+    else {
+      assert(i == 1);
+      state.minions.push_back(m);
+    }
+    UPDATE_PLAYER("minions", Msg_AddMinion, m.get(), pos);
+    engine->signal(m.get(), Event::AddMinion);
   }
   else
     return false;
@@ -86,48 +92,53 @@ void Player::remove_thing(PInstance thing) {
 }
 
 void Player::draw_init_cards(int nb, bool coin) {
-  ListCard kept = deck->draw_init_cards(nb, &Player::mulligan);
+  ListPCard kept = deck->draw_init_cards(nb, &Player::mulligan);
   if (coin) {
     PCard coin = NEWP(Card_Coin);
-    SEND_MSG(Msg_NewCard, nullptr, coin);
+    UPDATE_PLAYER("cards", Msg_NewCard, nullptr, coin);
     kept.push_back(coin);
   }
   for (auto& card : kept) {
     state.cards.push_back(card);
-    SEND_MSG(Msg_ReceiveCard, nullptr, card, this);
+    UPDATE_PLAYER("cards", Msg_ReceiveCard, nullptr, card, this);
   }
 }
 
 void Player::draw_card() {
   PCard card = deck->draw_one_card();
-  if (card) {
-    if (state.cards.size() < 10) {
-      state.cards.push_back(card);
-      SEND_MSG(Msg_ReceiveCard, nullptr, card, this);
-    }
-    else
-      SEND_MSG(Msg_BurnCard, nullptr, card, this);
-  }
+  if (card) give_card(card, nullptr);
 }
 
-void Player::give_card(PCard card, PInstance origin) {
-  state.cards.push_back(card);
-  SEND_MSG(Msg_ReceiveCard, origin, card, this);
+void Player::give_card(PCard card, Instance* origin) {
+  if (len(state.cards) < 10) {
+    state.cards.push_back(card);
+    UPDATE_PLAYER("cards",  Msg_ReceiveCard, origin, card, this);
+  }
+  else 
+    UPDATE_PLAYER("cards", Msg_BurnCard, origin, card, this);
+}
+
+void Player::throw_card(PCard card) {
+  remove(state.cards, card);
+  UPDATE_PLAYER("cards", Msg_ThrowCard, state.hero.get(), card);
 }
 
 void Player::add_mana_crystal(int nb, bool useit) {
   state.mana = min(10, state.mana + nb);
   state.max_mana = min(10, state.max_mana + nb);
   if (useit) use_mana(nb);
+  UPDATE_PLAYER_STATE("mana max_mana");
 }
 
 void Player::use_mana(int nb) {
   state.mana -= nb;
   assert(state.mana >= 0);
+  UPDATE_PLAYER_STATE("mana");
 }
 
 void Player::gain_mana(int nb) {
   state.mana = min(10, state.mana + nb);
+  UPDATE_PLAYER_STATE("mana");
 }
 
 void Player::start_turn() {
@@ -142,7 +153,7 @@ void Player::start_turn() {
   state.mana = state.max_mana;
   engine->draw_card(nullptr, this);
   // inform interface = last thing !
-  SEND_MSG(Msg_StartTurn, state.hero);
+  UPDATE_PLAYER("all",Msg_StartTurn, state.hero.get());
 }
 
 void Player::end_turn() {
@@ -151,22 +162,22 @@ void Player::end_turn() {
   for (auto m : state.minions)
     m->end_turn();
   // inform interface
-  SEND_MSG(Msg_EndTurn, state.hero);
+  UPDATE_PLAYER("all", Msg_EndTurn, state.hero.get());
 }
 
 ListAction Player::list_actions() {
   ListAction res = { &act_end_turn };
   // first, hero power
   state.hero->list_actions(res);
-//  // then, all card's actions
-//  for (card : state.cards)
-//    res.push_back(card->list_action());
-//  // then, weapon / hero's attack (if any)
-//  if (state.weapon)
-//    res.push_back(state.weapon->list_action());
-//  // then, all minions actions
-//  for (m : state.minions)
-//    res.push_back(m.list_action());
+  // then, all card's actions
+  for (auto& card : state.cards)
+    card->list_actions(res);
+  // then, weapon / hero's attack (if any)
+  if (state.weapon)
+    state.weapon->list_actions(res);
+  // then, all minions actions
+  for (auto& m : state.minions)
+    m->list_actions(res);
   return res;
 }
 
@@ -184,15 +195,20 @@ float Player::score_situation() {
   assert(0); return 0;
 }
 
-const Action* RandomPlayer::choose_actions(ListAction actions, PInstance& choice, Slot& slot) const {
+const Action* RandomPlayer::choose_actions(ListAction actions, Instance*& choice, Slot& slot) const {
   // select one action in the list
   int r = randint(0, len(actions) - 1);
   const Action* action = actions[r];
+
   // select one target for this action
-  NI;
-  //for (ch : action.choices) {
-  //  if ch :
-  //  action.select(i, random.randint(0, len(ch) - 1));
-  //}
+  if (action->need_slot) {
+    ListSlot slots = engine->board.get_free_slots(const_cast<RandomPlayer*>(this));
+    slot = slots[randint(0, len(slots))];
+  }
+
+  if (action->need_target()) {
+    ListPInstance choices = action->target.resolve(const_cast<RandomPlayer*>(this));
+    choice = choices[randint(0, len(choices)-1)].get();
+  }
   return action;
 }
