@@ -15,18 +15,6 @@ PConstHero Instance::hero() const {
 }
 
 
-//Thing::Thing() :
-//  Instance() {
-//  assert(card);
-//  memset(&state, , sizeof(state));
-//  state.atq = state.max_atq = .atq;
-//  state.hp = state.max_hp = card->hp;
-//  add_static_effect(StaticEffect::fresh);
-//  state.n_max_atq = 1; // number of times we can attack per turn
-//
-//  //state.add_effects(deepcopy(card.effects), inform = False)
-//}*/
-
 PConstCardThing Thing::card_thing() const { 
   return issubclassP(card, const Card_Thing); 
 }
@@ -49,6 +37,22 @@ void Thing::remove_static_effect(StaticEffect eff, bool inform) {
   state.static_effects &= ~eff;
   if (inform)
     UPDATE_THING_STATE("static_effects");
+}
+
+void Thing::popup() { // executed when created
+  add_static_effect(StaticEffect::fresh);
+  state.n_max_atq = is_windfury() ? 2 : 1;
+  UPDATE_THING_STATE("n_max_atq");
+}
+
+void Thing::start_turn() {
+  remove_static_effect(StaticEffect::fresh); // we were here before
+  state.n_atq = 0;  // didn't attack yet this turn
+}
+
+void Thing::end_turn() {
+  if (is_frozen() && state.n_atq == 0)
+    remove_static_effect(StaticEffect::frozen);
 }
 
 int Thing::hurt(int damage, Thing* caster) {
@@ -132,8 +136,22 @@ void Creature::attack(Creature* target) {
     hurt(target->state.atq, target);
 }
 
+Minion::Minion(const Minion& copy, Player* player) :
+Minion(copy) {
+  init(issubclassP(copy.card, const Card_Minion), player);
+}
+
+PConstCardMinion Minion::card_minion() const {
+  return issubclassP(card, const Card_Minion);
+}
+
 string Minion::tostr() const {
   return string_format("%s (%X): %d/%d", card_minion()->name_fr.c_str(), this, state.atq, state.hp);
+}
+
+void Minion::popup() { // executed when created
+  Thing::popup();
+  engine->signal(this, Event::MinionPopup);
 }
 
 void Minion::list_actions(ListAction& actions) const {
@@ -143,14 +161,6 @@ void Minion::list_actions(ListAction& actions) const {
     actions.push_back( &act_attack );
 }
 
-PConstCardMinion Minion::card_minion() const { 
-  return issubclassP(card, const Card_Minion); 
-}
-
-Minion::Minion(const Minion& copy, Player* player) :
-  Minion(copy) {
-  init(issubclassP(copy.card, const Card_Minion), player);
-}
 
 //PInstance Minion::copy() const {
 //  return NEWP(Minion, *this);

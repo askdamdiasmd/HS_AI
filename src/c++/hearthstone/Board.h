@@ -49,7 +49,7 @@ public:
     state.n_dead = 0;
   }
 
-  void add_thing(PInstance thing, const Slot& pos = Slot());
+  bool add_thing(PInstance thing, const Slot& pos = Slot());
 
   void remove_thing(PInstance m);
 

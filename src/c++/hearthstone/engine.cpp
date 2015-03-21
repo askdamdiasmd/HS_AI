@@ -13,9 +13,7 @@
 
 Engine::Engine(Player* player1, Player* player2) :
   board(),
-  turn(0), is_simulation(false) {
-  players[0] = player1;
-  players[1] = player2;
+  turn(0), is_simulation(false), player1(player1), player2(player2) {
   set_default();
 }
 
@@ -61,7 +59,7 @@ void Engine::play_turn() {
     Slot slot;
     const Action* action = player->choose_actions(actions, choice, slot); // can be Act_EndTurn
     action->execute(player->state.hero.get(), choice, slot);
-    exit = issubclass(action, const Act_EndTurn); // do it before action is destroyed
+    exit = issubclass(action, const Act_EndTurn)!=nullptr; // do it before action is destroyed
     wait_for_display();
   }
   turn += 1;
@@ -111,8 +109,8 @@ bool Engine::play_card(Instance* caster, const Card* _card, int cost) {
 
 bool Engine::add_minion(Instance* caster, PMinion minion, const Slot& slot) {
   Player* pl = minion->player;
-  if (board.get_nb_free_slots(pl))
-    board.add_thing(minion, slot);
+  if (board.get_nb_free_slots(pl)) 
+    return board.add_thing(minion, slot);
   return false;
 }
 

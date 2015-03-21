@@ -7,7 +7,13 @@
 struct Engine {
 public:
   Board board;
-  Player* players[2];
+  union {
+    struct{
+      Player* const player1;
+      Player* const player2;
+    };
+    Player* const players[2];
+  };
   int turn;
   bool is_simulation;
 

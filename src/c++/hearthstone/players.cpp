@@ -63,12 +63,7 @@ bool Player::add_thing(PInstance thing, Slot pos) {
       pos.fpos = (pos.fpos + state.minions_pos[i]) / 2;
     pos.pos = i - 1;
     state.minions_pos.insert(state.minions_pos.begin()+i, pos.fpos);
-    if (len(state.minions))
-      state.minions.insert(state.minions.begin() + i - 1, m);
-    else {
-      assert(i == 1);
-      state.minions.push_back(m);
-    }
+    state.minions.insert(state.minions.begin() + (i - 1), m);
     UPDATE_PLAYER("minions", Msg_AddMinion, m.get(), pos);
     engine->signal(m.get(), Event::AddMinion);
   }

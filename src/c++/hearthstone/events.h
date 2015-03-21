@@ -5,15 +5,25 @@
 enum Event {
   StartTurn,
   EndTurn,
+
   StartHeroPower,
   EndHeroPower,
+  
   StartSpell,
   EndSpell,
+  
   StartAttack,
   EndAttack,
+  
   AddMinion,
   AddWeapon,
   AddSecret,
+  AddHero,
+
+  MinionPopup,
+  WeaponPopup,
+  SecretPopup,
+  HeroPopup,
 };
 
 

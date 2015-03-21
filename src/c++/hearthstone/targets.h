@@ -11,10 +11,11 @@ struct Target {
     heroes =      0x0002,
     characters =  0x0003,
     weapon =      0x0004,
-    targetable =  0x0008, // means that player must select target manually
-    friendly =    0x0010,
-    enemy =       0x0020,
-    attackable =  0x0040, // things that can be attacked from the player viewpoint
+    secret =      0x0008,
+    targetable =  0x0010, // means that player must select target manually
+    friendly =    0x0020,
+    enemy =       0x0040,
+    attackable =  0x0080, // things that can be attacked from the player viewpoint
   }; 
   unsigned int tags;
 
@@ -29,21 +30,9 @@ struct Target {
     return (tags & targetable)!=0;
   }
 
-  //struct ResolvedTargets {
-  //  const char* special_target;
-  //  ListInstance objs;
-
-  //  ResolvedTargets(const char* special) :
-  //    special_target(special) {}
-  //  //ResolvedTargets(ListMinion l, PHero h0 = nullptr, PHero h1 = nullptr, bool(*cond)(Minion*) = nullptr);
-  //};
-
   ListPInstance resolve(Player* owner, Instance* me = nullptr) const;
 };
 
-//inline Target operator | (unsigned int tag, Target target) {
-//  return Target(target.tags | tag);
-//}
 
 
 

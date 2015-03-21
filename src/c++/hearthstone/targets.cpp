@@ -11,29 +11,30 @@ Engine* Target::engine = nullptr;
     heroes =      0x0002,
     characters =  0x0003, // minions + heroes
     weapon =      0x0004,
-    targetable =  0x0008, // means that player can select target manually
-    friendly =    0x0010,
-    enemy =       0x0020,
-    attackable =  0x0040, // things that can be attacked from the player viewpoint
+    secrets =     0x0008
+    targetable =  0x0010, // means that player can select target manually
+    friendly =    0x0020,
+    enemy =       0x0040,
+    attackable =  0x0080, // things that can be attacked from the player viewpoint
 */
 
-ListPInstance Target::resolve(Player* owner, Instance* me) const {
+ListPInstance Target::resolve(Player* by_who, Instance* me) const {
   assert(!(tags & (friendly | enemy)));  // cannot be both
-  Player* other = engine->get_other_player(owner);
+  Player* other = engine->get_other_player(by_who);
   ListPInstance res;
-  const auto if_targetable = [](const PThing& i){ return !i->is_untargetable(); };
+  const auto if_targetable = [by_who](const PThing& i){ return i->is_targetable(by_who); };
 
   if (tags & minions) {
     if (tags & targetable) {
       assert(!(tags & weapon)); // cannot be both
       if (!(tags & enemy))  // not enemy
-        append_if(res, owner->state.minions, if_targetable);
+        append_if(res, by_who->state.minions, if_targetable);
       if (!(tags & friendly)) // not friendly
         append_if(res, other->state.minions, if_targetable);
     }
     else {
       if (!(tags & enemy))  // not enemy
-        append(res, owner->state.minions);
+        append(res, by_who->state.minions);
       if (!(tags & friendly)) // not friendly
         append(res, other->state.minions);
     }
@@ -41,7 +42,7 @@ ListPInstance Target::resolve(Player* owner, Instance* me) const {
 
   if (tags & heroes) {
     if (!(tags & enemy))  // not enemy
-      res.push_back(owner->state.hero);
+      res.push_back(by_who->state.hero);
     if (!(tags & friendly)) // not friendly
       res.push_back(other->state.hero);
   }
@@ -61,10 +62,17 @@ ListPInstance Target::resolve(Player* owner, Instance* me) const {
   if (tags & weapon) {
     assert(!(tags & (attackable | targetable)));
     if (!(tags & enemy))  // not enemy
-      if(owner->state.weapon) res.push_back(owner->state.weapon);
+      if (by_who->state.weapon) res.push_back(by_who->state.weapon);
     if (!(tags & friendly)) // not friendy
       if (other->state.weapon) res.push_back(other->state.hero);
   }
+
+  // remove dead stuff
+  for (int i = 0; i < len(res); ++i)
+    if (CAST(res[i].get(), Thing)->is_dead())
+      fast_remove(res, i);
+
+  assert(!(tags & secret)); // NI
 
   return res;
 }

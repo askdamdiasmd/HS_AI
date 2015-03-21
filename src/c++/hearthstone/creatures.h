@@ -37,6 +37,8 @@ struct Instance {
     set_controller(p);
   }
 
+  virtual void popup() { NI; }
+
   virtual string tostr() const = 0;
 
   //virtual PInstance copy() const = 0;
@@ -84,8 +86,6 @@ struct Thing : public Instance {
   PVizThing viz_thing();
 
   PConstCardThing card_thing() const;
-
-  //Thing();  // proper init to zero
 
   Thing(int atq, int hp, int static_effects = 0);
 
@@ -152,29 +152,24 @@ struct Thing : public Instance {
   IS_EFFECT(death_rattle);
   IS_EFFECT(trigger);
 #undef IS_EFFECT
+  bool is_targetable(Player* by_who) const {
+    if (is_untargetable()) return false;
+    if (player != by_who && is_stealth())  return false;
+    return true;
+  }
 
   void add_static_effect(StaticEffect eff, bool inform=true);
   void remove_static_effect(StaticEffect eff, bool inform=true);
 
   virtual void list_actions(ListAction& actions) const = 0;
 
-  virtual void popup() { // executed when created
-    state.n_max_atq = is_windfury() ? 2 : 1;
-  }
+  virtual void popup(); // init when created
 
-  virtual void start_turn() {
-    remove_static_effect(StaticEffect::fresh); // we were here before
-    state.n_atq = 0;  // didn't attack yet this turn
-  }
+  virtual void start_turn();
 
-  virtual void end_turn() {
-    if (is_frozen() && state.n_atq == 0)
-      remove_static_effect(StaticEffect::frozen);
-  }
+  virtual void end_turn();
 
-  bool is_damaged() const {
-    return state.hp < state.max_hp;
-  }
+  bool is_damaged() const { return state.hp < state.max_hp; }
 
   int hurt(int damage, Thing* caster = nullptr);
 
@@ -226,11 +221,7 @@ struct Minion : public Creature {
 
   virtual string tostr() const;
 
-  //bool is_targetable(Player* by_who) {
-  //  if (is_untargetable()) return false;
-  //  if (controller != by_who && is_stealth())  return false;
-  //  return true;
-  //}
+  virtual void popup();
 
   virtual void list_actions(ListAction& actions) const;
 

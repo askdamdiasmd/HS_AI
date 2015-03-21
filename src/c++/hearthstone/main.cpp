@@ -38,7 +38,7 @@ int main(int argc, char** argv) {
   //deck2->print();
 
   init_screen();
-  
+
   PEngine engine = NEWP(CursesEngine, player1.get(), player2.get());
   engine->board.viz = NEWP(VizBoard, &engine->board, bool(issubclassP(player2, HumanPlayer)), anim); 
 

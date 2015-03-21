@@ -506,11 +506,10 @@ PVizHeroPowerButton VizHero::create_hero_power_button() {
 PVizMinion Minion::viz_minion() { return CASTP(viz, VizMinion); }
 
 VizMinion::VizMinion(const Minion* minion, VizSlot pos) :
-  VizThing(minion, 5, 11, pos.get_screen_pos().y, pos.get_screen_pos().x) {}
+  VizThing(minion, 5, 11, pos.get_screen_pos().y, pos.get_screen_pos().x-6) {}
 
 WINDOW* VizMinion::draw(const ArgMap& args) {
   DEFARG(int, x, minion()->engine->board.viz->get_minion_pos(minion()).x);
-  //DEFARG(int, y, 0);
   WINDOW* win = VizThing::draw(args);
   if (!win) return win;
   DEFARG(int, highlight, 0);
@@ -945,7 +944,7 @@ void Msg_AddMinion::draw(Engine* engine) {
 }
 
 void Msg_ThingUpdate::draw(Engine* engine) {
-  CAST(caster,Thing)->viz_thing()->update_state(state);
+  CAST(caster, Thing)->viz_thing()->update_state(state);
 }
 
 void Msg_Damage::draw(Engine* engine) {
@@ -1225,7 +1224,7 @@ void VizBoard::draw(int what, Player* which_, bool last_card) {
   if (minions & what) {
     for (Player* pl : which)
       for (auto m : pl->viz->state.minions)
-        m->viz->draw({ KEYINT("y", get_minion_pos(m.get()).y) });
+        m->viz->draw({ KEYPOS1("pos", get_minion_pos(m.get())) });
   }
 
   show_panels();

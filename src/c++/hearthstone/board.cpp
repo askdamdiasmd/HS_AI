@@ -13,9 +13,13 @@
 
 Engine* Board::engine = nullptr;
 
-void Board::add_thing(PInstance thing, const Slot& pos) {
-  if (thing->player->add_thing(thing, pos))
+bool Board::add_thing(PInstance thing, const Slot& pos) {
+  if (thing->player->add_thing(thing, pos)) {
     state.everybody.push_back(thing);
+    thing->popup();
+    return true;
+  }
+  return false;
 }
 
 void Board::remove_thing(PInstance m) {
