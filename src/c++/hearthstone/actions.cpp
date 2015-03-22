@@ -36,7 +36,7 @@ bool Act_PlayMinionCard::execute(Instance* caster, Instance* choice, const Slot&
   if (Act_PlayCard::execute(caster, choice, slot)) {
     if (actions)  actions(this, caster, choice, slot);
     PMinion m = NEWP(Minion, *card_minion()->minion(), slot.player);
-    return engine->add_minion(caster, m, slot);
+    return engine->add_thing(caster, m, slot);
   }
   return false;
 }
@@ -47,7 +47,7 @@ string Act_Attack::tostr() const {
 
 bool Act_Attack::execute(Instance* caster, Instance* choice, const Slot& slot) const {
   assert(choice);
-  return engine->attack(caster, choice);
+  return engine->attack(thing, CAST(choice, Thing));
 }
 
 

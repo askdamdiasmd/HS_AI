@@ -44,7 +44,7 @@ string Msg_AddMinion::tostr() const {
 }
 
 string Msg_Damage::tostr() const {
-  return string_format("[%s] inflicts %d damages to [%s] ", cstr(caster), cstr(target), amount);
+  return string_format("[%s] inflicts %d damages to [%s] ", cstr(caster), amount, cstr(target));
 }
 
 string Msg_Heal::tostr() const {

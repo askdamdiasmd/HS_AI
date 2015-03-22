@@ -7,25 +7,35 @@
 Engine* Target::engine = nullptr;
 
 /*  None = 0,
-    minions =     0x0001,
-    heroes =      0x0002,
-    characters =  0x0003, // minions + heroes
-    weapon =      0x0004,
-    secrets =     0x0008
-    targetable =  0x0010, // means that player can select target manually
-    friendly =    0x0020,
-    enemy =       0x0040,
-    attackable =  0x0080, // things that can be attacked from the player viewpoint
+    minions =         0x0001,
+    heroes =          0x0002,
+    characters =      0x0003,
+    weapon =          0x0004,
+    secret =          0x0008,
+    friendly =        0x0010,
+    enemy =           0x0020,
+    targetable =      0x0040, // can be targeted by player (= not stealth)
+    attackable =      0x00C0, // can be attacked (= not stealth or behind taunt)
+    spell_targetable= 0x0140, // can be targeted by spell (=not stealth and not spell_untargetable)
 */
 
 ListPInstance Target::resolve(Player* by_who, Instance* me) const {
-  assert(!(tags & (friendly | enemy)));  // cannot be both
+  assert(!((tags & friendly) && (tags & enemy)));  // cannot be both
   Player* other = engine->get_other_player(by_who);
   ListPInstance res;
-  const auto if_targetable = [by_who](const PThing& i){ return i->is_targetable(by_who); };
-
+  
   if (tags & minions) {
+    if (tags & spell_targetable) {
+      const auto if_spell_targetable = [by_who](const PThing& i){ return i->is_spell_targetable(by_who); };
+      assert(!(tags & weapon)); // cannot be both
+      if (!(tags & enemy))  // not enemy
+        append_if(res, by_who->state.minions, if_spell_targetable);
+      if (!(tags & friendly)) // not friendly
+        append_if(res, other->state.minions, if_spell_targetable);
+    }
+    else  
     if (tags & targetable) {
+      const auto if_targetable = [by_who](const PThing& i){ return i->is_targetable(by_who); };
       assert(!(tags & weapon)); // cannot be both
       if (!(tags & enemy))  // not enemy
         append_if(res, by_who->state.minions, if_targetable);
@@ -67,7 +77,7 @@ ListPInstance Target::resolve(Player* by_who, Instance* me) const {
       if (other->state.weapon) res.push_back(other->state.hero);
   }
 
-  // remove dead stuff
+  // remove dead instances
   for (int i = 0; i < len(res); ++i)
     if (CAST(res[i].get(), Thing)->is_dead())
       fast_remove(res, i);

@@ -48,8 +48,7 @@ ListAction Engine::list_player_actions(Player* player) {
 }
 
 void Engine::play_turn() {
-  Player* player = get_current_player();
-  player->start_turn();
+  Player* player = start_turn();
   wait_for_display();
 
   bool exit = false;
@@ -80,16 +79,18 @@ Player* Engine::get_winner() {
 
 // Game actions ----------------------------
 
-bool Engine::start_turn() {
+Player* Engine::start_turn() {
   Player* player = get_current_player();
+  board.start_turn(player);
   signal(player->state.hero.get(), Event::StartTurn);
   player->start_turn();
-  return true;
+  return player;
 }
 bool Engine::end_turn() {
   Player* player = get_current_player();
-  player->end_turn();
+  board.end_turn(player);
   signal(player->state.hero.get(), Event::EndTurn);
+  player->end_turn();
   return true;
 }
 
@@ -107,11 +108,12 @@ bool Engine::play_card(Instance* caster, const Card* _card, int cost) {
   return true;
 }
 
-bool Engine::add_minion(Instance* caster, PMinion minion, const Slot& slot) {
-  Player* pl = minion->player;
-  if (board.get_nb_free_slots(pl)) 
-    return board.add_thing(minion, slot);
-  return false;
+bool Engine::add_thing(Instance* caster, PThing thing, const Slot& slot) {
+  return board.add_thing(thing, slot);
+}
+bool add_secret(Instance* caster, PSecret secret){
+  NI;
+  return true;
 }
 
 void Engine::signal(Instance* caster, Event event) {
@@ -132,9 +134,9 @@ bool Engine::damage(Instance* _from, int hp, Instance* _to) {
   return n>0;
 }
 
-bool Engine::attack(Instance* from, Instance* target) {
+bool Engine::attack(Thing* from, Thing* target) {
   assert(from && target);
-  NI;
+  from->attack(target);
   return true;
 }
 

@@ -1,7 +1,9 @@
 #include "creatures.h"
+#include "engine.h"
 #include "Cards.h"
 #include "players.h"
 #include "actions.h"
+#include "messages.h"
 
 PConstCardHero Hero::card_hero() const { 
   return issubclassP(card, const Card_Hero); 
@@ -18,7 +20,7 @@ Hero::Hero(PConstCardHero hero) :
 }
 
 string Hero::tostr() const {
-  return string_format("[%s (%s) %dHP]", player->name.c_str(), card->name.c_str(), state.hp);
+  return string_format("[%s (%s) %d/%d]", player->name.c_str(), card->name.c_str(), state.atq, state.hp);
 }
 
 void Hero::list_actions(ListAction& actions) const {
@@ -29,10 +31,20 @@ void Hero::list_actions(ListAction& actions) const {
     actions.push_back(&act_attack);
 }
 
+void Hero::use_hero_power() {
+  state.n_remaining_power -= 1;
+  assert(state.n_remaining_power >= 0);
+}
+
+void Hero::add_armor(int n) {
+  state.armor += n;
+  UPDATE_THING_STATE("armor");
+}
+
 float Hero::score_situation() {
   // healthpoint : 1 at 0, 0.3 at 30
   // sum_i = 1..hp max(0, 1 - 0.0233*i)
-  int life = min(42, state.armor + state.hp);
+  int life = min(42, state.hp + state.armor);
   return ((19767 - 233 * life)*life) / 20000.f;
 }
 

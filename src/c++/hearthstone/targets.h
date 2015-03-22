@@ -7,15 +7,16 @@ struct Target {
   SET_ENGINE();
   enum {
     None = 0,
-    minions =     0x0001,
-    heroes =      0x0002,
-    characters =  0x0003,
-    weapon =      0x0004,
-    secret =      0x0008,
-    targetable =  0x0010, // means that player must select target manually
-    friendly =    0x0020,
-    enemy =       0x0040,
-    attackable =  0x0080, // things that can be attacked from the player viewpoint
+    minions =         0x0001,
+    heroes =          0x0002,
+    characters =      0x0003,
+    weapon =          0x0004,
+    secret =          0x0008,
+    friendly =        0x0010,
+    enemy =           0x0020,
+    targetable =      0x0040, // can be targeted by player (= not stealth)
+    attackable =      0x00C0, // can be attacked (= not stealth or behind taunt)
+    spell_targetable= 0x0140, // can be targeted by spell (=not stealth and not spell_untargetable)
   }; 
   unsigned int tags;
 

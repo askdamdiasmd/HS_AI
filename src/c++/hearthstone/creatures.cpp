@@ -28,31 +28,47 @@ Thing::Thing(int atq, int hp, int static_effects) :
 }
 
 void Thing::add_static_effect(StaticEffect eff, bool inform) {
+  inform &= (state.static_effects & eff)!=eff; // don't inform if no change
   state.static_effects |= eff;
-  if (inform)
-    UPDATE_THING_STATE("static_effects");
+  if (inform) UPDATE_THING_STATE("static_effects");
 }
 
 void Thing::remove_static_effect(StaticEffect eff, bool inform) {
+  inform &= (state.static_effects | eff)!=0; // don't inform if no change
   state.static_effects &= ~eff;
-  if (inform)
-    UPDATE_THING_STATE("static_effects");
+  if (inform) UPDATE_THING_STATE("static_effects");
 }
 
 void Thing::popup() { // executed when created
-  add_static_effect(StaticEffect::fresh);
+  add_static_effect(StaticEffect::fresh, false);
   state.n_max_atq = is_windfury() ? 2 : 1;
-  UPDATE_THING_STATE("n_max_atq");
 }
 
-void Thing::start_turn() {
-  remove_static_effect(StaticEffect::fresh); // we were here before
-  state.n_atq = 0;  // didn't attack yet this turn
+void Thing::start_turn(Player* current) {
+  if (player == current) {
+    remove_static_effect(StaticEffect::fresh, false); // we were here before
+    state.n_atq = 0;  // didn't attack yet this turn
+    // for heroes
+    state.n_remaining_power = 1;
+    remove_static_effect(StaticEffect::insensible);
+  }
 }
 
-void Thing::end_turn() {
-  if (is_frozen() && state.n_atq == 0)
-    remove_static_effect(StaticEffect::frozen);
+void Thing::end_turn(Player* current) {
+  if (state.tmp_atq) {
+    state.atq -= state.tmp_atq;
+    state.tmp_atq = 0;
+    UPDATE_THING_STATE("atq");
+  }
+  if (state.tmp_hp) {
+    state.hp -= state.tmp_hp;
+    state.tmp_hp = 0;
+    UPDATE_THING_STATE("hp");
+  }
+  if (player == current) {
+    if (is_frozen() && state.n_atq == 0)
+      remove_static_effect(StaticEffect::frozen);
+  }
 }
 
 int Thing::hurt(int damage, Thing* caster) {
@@ -123,17 +139,18 @@ void Thing::check_dead() {
 
 void Thing::kill_me() {
   silence();
-  engine->board.remove_thing(PInstance(dynamic_cast<Instance*>(this)));
+  PThing me = findP(engine->board.state.everybody, this);
+  engine->board.remove_thing(me);
 }
 
-void Creature::attack(Creature* target) {
+void Creature::attack(Thing* target) {
   state.n_atq += 1;
   assert(state.n_atq <= state.n_max_atq);
-  if (is_stealth())
-    remove_static_effect(StaticEffect::stealth);
+  remove_static_effect(StaticEffect::stealth);
   target->hurt(state.atq, this);
-  if (target->state.atq) 
-    hurt(target->state.atq, target);
+  int target_atq = target->state.atq;
+  if (target_atq)
+    hurt(target_atq, target);
 }
 
 Minion::Minion(const Minion& copy, Player* player) :
@@ -165,6 +182,7 @@ void Minion::list_actions(ListAction& actions) const {
 //PInstance Minion::copy() const {
 //  return NEWP(Minion, *this);
 //}
+
 
 float Weapon::score_situation() {
   if (is_dead()) return 0;

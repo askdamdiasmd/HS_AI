@@ -137,12 +137,6 @@ void Player::gain_mana(int nb) {
 }
 
 void Player::start_turn() {
-  // then activate things's start_turn() manually
-  state.hero->start_turn();
-  for (auto m : state.minions)
-    m->start_turn();
-  if (state.weapon)
-    state.weapon->start_turn();
   // then add mana crystal and draw a card
   add_mana_crystal(1);
   state.mana = state.max_mana;
@@ -152,11 +146,7 @@ void Player::start_turn() {
 }
 
 void Player::end_turn() {
-  // activate thing's end_turn() manually
-  state.hero->end_turn();
-  for (auto m : state.minions)
-    m->end_turn();
-  // inform interface
+  // inform interface (kinda useless)
   UPDATE_PLAYER("all", Msg_EndTurn, state.hero.get());
 }
 

@@ -39,7 +39,8 @@ typedef shared_ptr<VizBoard> PVizBoard;
 struct Board {
   SET_ENGINE();
   struct State {
-    ListPInstance everybody;
+    ListPThing everybody;
+    ListPSecret secrets;
     int n_dead;
   } state;
   PVizBoard viz;
@@ -49,9 +50,11 @@ public:
     state.n_dead = 0;
   }
 
-  bool add_thing(PInstance thing, const Slot& pos = Slot());
+  bool add_thing(PThing thing, const Slot& pos = Slot());
+  void remove_thing(PThing m);
 
-  void remove_thing(PInstance m);
+  void start_turn(Player* current);
+  void end_turn(Player* current);
 
   void clean_deads();
 

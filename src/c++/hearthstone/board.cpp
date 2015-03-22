@@ -13,18 +13,26 @@
 
 Engine* Board::engine = nullptr;
 
-bool Board::add_thing(PInstance thing, const Slot& pos) {
-  if (thing->player->add_thing(thing, pos)) {
+bool Board::add_thing(PThing thing, const Slot& pos) {
+  if (thing->player->add_thing(thing, pos)) { // will send signal
     state.everybody.push_back(thing);
-    thing->popup();
+    thing->popup(); // will send signal
     return true;
   }
   return false;
 }
-
-void Board::remove_thing(PInstance m) {
-  remove(state.everybody,m);
+void Board::remove_thing(PThing m) {
+  remove(state.everybody, m);
   m->player->remove_thing(m);
+}
+
+void Board::start_turn(Player* current) {
+  for (auto& i : state.everybody)
+    i->start_turn(current);
+}
+void Board::end_turn(Player* current) {
+  for (auto& i : state.everybody)
+    i->end_turn(current);
 }
 
 void Board::clean_deads() {

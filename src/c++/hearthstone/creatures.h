@@ -39,6 +39,10 @@ struct Instance {
 
   virtual void popup() { NI; }
 
+  //virtual void start_turn(Player* current) { NI; }
+
+  //virtual void end_turn(Player* current) { NI; }
+
   virtual string tostr() const = 0;
 
   //virtual PInstance copy() const = 0;
@@ -69,18 +73,16 @@ struct Thing : public Instance {
   };
 
   struct State {
-    int hp, max_hp, armor;
-    int atq, max_atq;
-    int n_atq, n_max_atq, n_remaining_power;  // number of remaining hero power (for hero)
+    int hp, max_hp, armor;  // BY CONVENTION: hp always reprensent current actual hp
+    int atq, max_atq;       // BY CONVENTION: atq always represent current actual atq
+    int tmp_hp, tmp_atq;    // get canceled at the end of the turn
+    //int aura_hp, aura_atq;  // get canceled when aura creature dies. Should not be taken into account sometimes.
+    
+    int n_atq, n_max_atq;   // number of remaining attacks
+    int n_remaining_power;  // number of remaining hero power (for hero)
 
     int static_effects; // bit-OR combination of StaticEffect
     int spell_power;
-
-    /*List .action_filters = []  // reacting to actions[(Act_class, handler), ...]
-    state.modifiers = [] // modifying messages, list: [(Msg_Class, event), ...]
-    state.triggers = [] // reacting to messages, list: [(Msg_Class, event), ...]
-    state.enraged_trigger = None
-    state.effects = []  // list of effects without triggers : ['taunt', 'stealth', ...]*/
   } state;
 
   PVizThing viz_thing();
@@ -88,53 +90,6 @@ struct Thing : public Instance {
   PConstCardThing card_thing() const;
 
   Thing(int atq, int hp, int static_effects = 0);
-
-//  /*def save_state(num = 0) :
-//    state.saved[num] = dict(hp = state.hp, max_hp = state.max_hp, armor = state.armor, atq = state.atq, max_atq = state.max_atq, enraged = state.enraged,
-//    fresh = state.fresh, n_atq = state.n_atq, n_max_atq = state.n_max_atq, dead = state.dead, UPDATE_STATUS_id = state.UPDATE_STATUS_id,
-//    action_filters = list(state.action_filters), modifiers = list(state.modifiers),
-//    triggers = list(state.triggers), enraged_trigger = state.enraged_trigger, effects = list(state.effects))
-//    def restore_state(num = 0) :
-//    state.__dict__.update(state.saved[num])
-//    state.action_filters = list(state.action_filters)
-//    state.modifiers = list(state.modifiers)
-//    state.triggers = list(state.triggers)
-//    state.effects = list(state.effects)
-//    def end_simulation() :
-//    state.saved = dict()*/
-//
-//  //def add_effects(effects, inform = True) :
-//  //for e in effects : // we have to initalize effects
-//  //if type(e) == str:
-//  //if e not in state.effects : // useless otherwise
-//  //state.effects.append(e)
-//  //if e in('charge', 'windfury') :
-//  //state.popup()  // redo popup to set n_atq / n_max_atq
-//  //else:
-//  //e.bind_to()
-//  //if inform :
-//  //state.engine.send_UPDATE_STATUS(Msg_UPDATE_STATUS('effects'))
-//
-//  //def remove_effect(effect, inform = True) :
-//  //if effect not in state.effects : return  // nothing to do
-//  //state.effects.remove(effect)
-//  //if type(effect) != str:
-//  //effect.undo()
-//  //// verify that nothing remains...
-//  //for _, eff in state.triggers:
-//  //assert effect is not eff, pdb.set_trace()
-//  //for _, eff in state.action_filters :
-//  //assert effect is not eff, pdb.set_trace()
-//  //for _, eff in state.modifiers :
-//  //assert effect is not eff, pdb.set_trace()
-//  //else:
-//  //state.popup()  // reset n_max_atq
-//  //if inform:
-//  //state.engine.send_UPDATE_STATUS(Msg_UPDATE_STATUS('effects'))
-//
-//  virtual string tostr() const {
-//    return string_format("%s (%X) %d/%d", card->name, this, state.atq, state.hp);
-//  }
 
 #define IS_EFFECT(eff)  bool is_##eff() const {return (state.static_effects & StaticEffect::##eff)!=0;}
   IS_EFFECT(taunt);
@@ -153,9 +108,12 @@ struct Thing : public Instance {
   IS_EFFECT(trigger);
 #undef IS_EFFECT
   bool is_targetable(Player* by_who) const {
-    if (is_untargetable()) return false;
     if (player != by_who && is_stealth())  return false;
     return true;
+  }
+  bool is_spell_targetable(Player* by_who) const {
+    if (is_untargetable()) return false;
+    return is_targetable(by_who);
   }
 
   void add_static_effect(StaticEffect eff, bool inform=true);
@@ -165,11 +123,13 @@ struct Thing : public Instance {
 
   virtual void popup(); // init when created
 
-  virtual void start_turn();
+  void start_turn(Player* current);  // auto trigger at start of MY turn
 
-  virtual void end_turn();
+  void end_turn(Player* current);  // auto trigger at end of MY turn
 
   bool is_damaged() const { return state.hp < state.max_hp; }
+
+  virtual void attack(Thing* target) = 0;
 
   int hurt(int damage, Thing* caster = nullptr);
 
@@ -193,9 +153,12 @@ struct Creature : public Thing {
   const Act_Attack act_attack;
 
   Creature(int atq, int hp, int static_effects = 0) :
-    Thing(atq, hp, static_effects), act_attack(this) {}
+    Thing(atq, hp, static_effects), act_attack(nullptr) {}
 
-  void attack(Creature* target);
+  Creature(const Creature& copy) :
+    Thing(copy), act_attack(this) {}
+
+  virtual void attack(Thing* target);
 };
 
 
@@ -301,27 +264,11 @@ struct Hero : public Creature {
 
   virtual void list_actions(ListAction& actions) const;
 
-  //virtual void start_turn() {
-  //  Creature::start_turn();
-  //  state.n_remaining_power = 1;
-  //  if( is_insensible() )
-  //    remove_static_effect(StaticEffect::insensible);
-  //}
+  //virtual void start_turn();  // done in Thing::
 
-  //void use_hero_power() {
-  //  state.n_remaining_power -= 1;
-  //  assert(state.n_remaining_power >= 0);
-  //}
+  void use_hero_power();
 
-  //void add_armor(int n) {
-  //  state.armor += n;
-  //  UPDATE_STATUS("armor");
-  //}
-
-  ////void death() {
-  ////  //state.silence() # do nothing ?
-  ////  // do not remove from board
-  ////}
+  void add_armor(int n);
 
   virtual float score_situation();
 };
@@ -336,27 +283,11 @@ struct Weapon : public Thing {
   //Weapon(const PCardWeapon card, Player* player) :
   //  Thing(card, controller) {}
 
-  virtual PInstance copy() const { NI; return nullptr; }
+  //virtual PInstance copy() const { return ; }
 
-  //virtual void list_actions(ListAction& actions) const {
-  //  Player* hero = controller->hero;
-  //  if (hero->state.n_atq >= hero->state.n_max_atq || hero->is_frozen())
-  //    return{};
-  //  else
-  //    return{ make_shared<Act_WeaponAttack>(this, engine->board.get_attackable_characters(controller)) };
-  //}
+  virtual void list_actions(ListAction& actions) const{ NI; }
 
-  //virtual void attack(Creature* target) {
-  //  Hero* hero = controller->hero;
-  //  hero->state.atq += state.atq;
-  //  hero->attack(target);
-  //  hero->state.atq -= state.atq;
-  //}
-
-  //virtual void ask_for_death() {
-  //  assert(0);
-  //  //state.engine.send_message(Msg_DeadWeapon(), immediate = True)
-  //}
+  virtual void attack(Thing* target);
 
   virtual float score_situation();
 };

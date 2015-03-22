@@ -66,7 +66,7 @@ inline string string_format(const char* format, ...) {
 #define NAMED_PARAM(cls, type, param)  cls* set_##param(type v) { param = v; return this; }
 
 //#define ENGINE Engine* engine = this;
-#define SEND_DISPLAY_MSG(type, ...)  if(engine && !engine->is_simulation) engine->send_display_message(NEWP(type,##__VA_ARGS__))
+#define SEND_DISPLAY_MSG(type, ...)  if(!engine->is_simulation) engine->send_display_message(NEWP(type,##__VA_ARGS__))
 #define UPDATE_THING_STATE(what)  SEND_DISPLAY_MSG(Msg_ThingUpdate, this, this->state, what)
 #define UPDATE_PLAYER_STATE(what) SEND_DISPLAY_MSG(Msg_PlayerUpdate, this->state.hero.get(), this->state, what)
 #define UPDATE_THING(what, type, ...) \

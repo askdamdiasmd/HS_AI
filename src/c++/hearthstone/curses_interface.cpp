@@ -1337,19 +1337,17 @@ const Action* HumanPlayer::choose_actions(ListAction actions, Instance*& choice,
       showlist.push_back({ a, engine->board.viz->hero_power_buttons[this], {} });
     }
     else if (issubclass(a, const Act_PlayCard)) {
-      const Act_PlayCard* act = issubclass(a, const Act_PlayCard);
+      const Act_PlayCard* act = CAST(a, const Act_PlayCard);
       showlist.push_back({ a, act->card->viz, { KEYBOOL("petit", true), KEYINT("cost", a->get_cost()) } });
       if (findP(remaining_cards, act->card))
         remove(remaining_cards, findP(remaining_cards, act->card));
+    }
+    else if (issubclass(a, const Act_Attack)) {
+      const Act_Attack* act = CAST(a, const Act_Attack);
+      showlist.push_back({ a, act->thing->viz, {} });
     }/*
-    else if (issubclass(a, const Act_MinionAttack)) {
-      showlist.push_back((a, a->caster, {}));
-    }
     else if (issubclass(a, Act_WeaponAttack)){
-      showlist.push_back((a, this->state.hero->viz, {}));
-    }
-    else if (issubclass(a, Act_HeroAttack)) {
-      showlist.push_back((a, this->state.hero->viz, {}));
+      showlist.push_back({a, this->state.hero->viz, {}});
     }*/
     else if (issubclass(a, const Act_EndTurn)) {
       end_turn_action = a;

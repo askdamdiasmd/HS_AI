@@ -35,19 +35,22 @@ public:
   Player* get_winner();
 
   // game actions
-  bool start_turn();
+  Player* start_turn();
   bool end_turn();
+
+  // politic: signal are send at the deepest stack level, 
+  // i.e. right when action is accomplished 
+  void signal(Instance* from, Event event);
 
   bool draw_card(Instance* caster, Player* player, int nb = 1);
   bool play_card(Instance* caster, const Card* card, const int cost);
-  bool add_minion(Instance* caster, PMinion minion, const Slot& slot);
-
-  void signal(Instance* from, Event event);
+  bool add_thing(Instance* caster, PThing thing, const Slot& slot);
+  bool add_secret(Instance* caster, PSecret secret);
 
   bool heal(Instance* from, int hp, Instance* to);
   bool damage(Instance* from, int hp, Instance* to);
 
-  bool attack(Instance* from, Instance* target);
+  bool attack(Thing* from, Thing* target);
 
 private:
   //unordered_map<htype, int> saved_turn;
