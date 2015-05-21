@@ -14,6 +14,8 @@ Player::Player(PHero hero, string name, Deck* deck) :
   state.mana = state.max_mana = 0;
   state.hero = hero;
   state.minions_pos = { 0.f, 1000.f };
+  state.spell_power = 0;
+  state.auchenai = state.velen = false;
 
   state.hero->set_controller(this);
   deck->set_owner(this);
@@ -39,15 +41,16 @@ string Player::tostr() const {
 
 bool Player::add_thing(PInstance thing, Slot pos) {
   PMinion m;
+  PWeapon w;
   if (issubclassP(thing, Hero)) {
     NI;
   }
-  else if (issubclassP(thing, Weapon)) {
-    NI;
-    //if (state.weapon) // kill it
-    //  state.weapon.ask_for_death();
-    //state.weapon = dynamic_pointer_cast<Weapon>(thing);
-    //engine->send_message(Msg_WeaponPopup(state.weapon));
+  else if (w=issubclassP(thing, Weapon)) {
+    if (state.weapon) // destroy it
+      state.weapon->destroy();
+    state.weapon = w;
+    UPDATE_PLAYER("weapon", Msg_AddWeapon, w);
+    engine->signal(w.get(), Event::AddWeapon);
   }
   else if (issubclassP(thing, Secret)) {
     NI;
@@ -64,7 +67,7 @@ bool Player::add_thing(PInstance thing, Slot pos) {
     pos.pos = i - 1;
     state.minions_pos.insert(state.minions_pos.begin()+i, pos.fpos);
     state.minions.insert(state.minions.begin() + (i - 1), m);
-    UPDATE_PLAYER("minions", Msg_AddMinion, m.get(), pos);
+    UPDATE_PLAYER("minions", Msg_AddMinion, m, pos);
     engine->signal(m.get(), Event::AddMinion);
   }
   else
@@ -72,68 +75,81 @@ bool Player::add_thing(PInstance thing, Slot pos) {
   return true;
 }
 
-void Player::remove_thing(PInstance thing) {
+Slot Player::remove_thing(PInstance thing) {
+  PWeapon weapon;
   PSecret secret;
   PMinion minion;
-  if (thing == state.weapon)
+  if (weapon = issubclassP(thing, Weapon)) {
+    assert(weapon == state.weapon);
+    state.hero->unequip_weapon();
     state.weapon = nullptr;
-  else if (minion=issubclassP(thing, Minion)) {
-    int i = index(state.minions, minion);
-    state.minions_pos.erase(state.minions_pos.begin() + i + 1);
-    state.minions.erase(state.minions.begin() + i);
+    UPDATE_PLAYER("remove weapon", Msg_RemoveWeapon, weapon);
+    engine->signal(weapon.get(), Event::RemoveWeapon);
   }
-  else if (secret = issubclassP(thing, Secret))
+  else if (minion = issubclassP(thing, Minion)) {
+    Slot pos = engine->board.get_minion_pos(minion.get());
+    state.minions_pos.erase(state.minions_pos.begin() + pos.pos + 1);
+    state.minions.erase(state.minions.begin() + pos.pos);
+    UPDATE_PLAYER("remove minions", Msg_RemoveMinion, minion, pos);
+    engine->signal(minion.get(), Event::RemoveMinion);
+    return pos;
+  }
+  else if (secret = issubclassP(thing, Secret)) {
+    NI;
     remove(state.secrets, secret);
+    engine->signal(secret.get(), Event::RemoveSecret);
+  }
+  return Slot();
 }
 
 void Player::draw_init_cards(int nb, bool coin) {
   ListPCard kept = deck->draw_init_cards(nb, &Player::mulligan);
   if (coin) {
     PCard coin = NEWP(Card_Coin);
-    UPDATE_PLAYER("cards", Msg_NewCard, nullptr, coin);
+    UPDATE_PLAYER("draw_init_cards coin", Msg_NewCard, nullptr, coin);
     kept.push_back(coin);
   }
   for (auto& card : kept) {
     state.cards.push_back(card);
-    UPDATE_PLAYER("cards", Msg_ReceiveCard, nullptr, card, this);
+    UPDATE_PLAYER("draw_init_cards", Msg_ReceiveCard, nullptr, card, this, engine->board.state.turn);
   }
 }
 
-void Player::draw_card() {
+void Player::draw_card(Instance* origin) {
   PCard card = deck->draw_one_card();
-  if (card) give_card(card, nullptr);
+  if (card) give_card(card, origin);
 }
 
 void Player::give_card(PCard card, Instance* origin) {
   if (len(state.cards) < 10) {
     state.cards.push_back(card);
-    UPDATE_PLAYER("cards",  Msg_ReceiveCard, origin, card, this);
+    UPDATE_PLAYER("give_card", Msg_ReceiveCard, GETP(origin), card, this, engine->board.state.turn);
   }
   else 
-    UPDATE_PLAYER("cards", Msg_BurnCard, origin, card, this);
+    UPDATE_PLAYER("give_card", Msg_BurnCard, GETP(origin), card, this);
 }
 
 void Player::throw_card(PCard card) {
   remove(state.cards, card);
-  UPDATE_PLAYER("cards", Msg_ThrowCard, state.hero.get(), card);
+  UPDATE_PLAYER("throw_card", Msg_ThrowCard, state.hero, card);
 }
 
 void Player::add_mana_crystal(int nb, bool useit) {
   state.mana = min(10, state.mana + nb);
   state.max_mana = min(10, state.max_mana + nb);
   if (useit) use_mana(nb);
-  UPDATE_PLAYER_STATE("mana max_mana");
+  UPDATE_PLAYER_STATE("add_mana_crystal");
 }
 
 void Player::use_mana(int nb) {
   state.mana -= nb;
   assert(state.mana >= 0);
-  UPDATE_PLAYER_STATE("mana");
+  UPDATE_PLAYER_STATE("use_mana");
 }
 
 void Player::gain_mana(int nb) {
   state.mana = min(10, state.mana + nb);
-  UPDATE_PLAYER_STATE("mana");
+  UPDATE_PLAYER_STATE("gain_mana");
 }
 
 void Player::start_turn() {
@@ -142,12 +158,12 @@ void Player::start_turn() {
   state.mana = state.max_mana;
   engine->draw_card(nullptr, this);
   // inform interface = last thing !
-  UPDATE_PLAYER("all",Msg_StartTurn, state.hero.get());
+  UPDATE_PLAYER("start_turn",Msg_StartTurn, state.hero);
 }
 
 void Player::end_turn() {
   // inform interface (kinda useless)
-  UPDATE_PLAYER("all", Msg_EndTurn, state.hero.get());
+  UPDATE_PLAYER("end_turn", Msg_EndTurn, state.hero);
 }
 
 ListAction Player::list_actions() {
@@ -188,12 +204,13 @@ const Action* RandomPlayer::choose_actions(ListAction actions, Instance*& choice
   // select one target for this action
   if (action->need_slot) {
     ListSlot slots = engine->board.get_free_slots(const_cast<RandomPlayer*>(this));
-    slot = slots[randint(0, len(slots))];
+    slot = slots[randint(0, len(slots)-1)];
   }
 
   if (action->need_target()) {
     ListPInstance choices = action->target.resolve(const_cast<RandomPlayer*>(this));
-    choice = choices[randint(0, len(choices)-1)].get();
+    if (len(choices))
+      choice = choices[randint(0, len(choices)-1)].get();
   }
   return action;
 }

@@ -33,6 +33,8 @@ inline T check_ptr(T ptr) {
 }
 #define CAST(obj, cls)  check_ptr(dynamic_cast<cls*>(obj))
 #define CASTP(obj, cls)  check_ptr(dynamic_pointer_cast<cls>(obj))
+#define CONSTCAST(obj, cls)  const_cast<cls*>(obj)
+#define CONSTCASTP(obj,cls)  const_pointer_cast<cls>(obj)
 #else
 #define CAST(obj, cls)  static_cast<cls>(obj)
 #define CASTP(obj, cls)  static_pointer_cast<cls>(obj)
@@ -46,9 +48,11 @@ inline string string_format(const char* format, ...) {
   vsprintf_s(buffer.get(), len, format, args);
   return string(buffer.get());
 }
-#define cstr(s) (s)->tostr().c_str()
+#define cstr(s) ((s) ? (s)->tostr().c_str() : "nullptr")
 
+#define elif else if
 #define NI  assert(!"not implemented!")
+#define error(msg, ...)  {fprintf(stderr, string_format(msg, ##__VA_ARGS__).c_str()); assert(0);}
 
 #ifdef _WIN32
 #ifdef _DEBUG
@@ -66,9 +70,11 @@ inline string string_format(const char* format, ...) {
 #define NAMED_PARAM(cls, type, param)  cls* set_##param(type v) { param = v; return this; }
 
 //#define ENGINE Engine* engine = this;
+#define GETP(ptr) engine->board.getP(ptr)
+#define GETPTHING(ptr)  engine->board.getPThing(ptr)
 #define SEND_DISPLAY_MSG(type, ...)  if(!engine->is_simulation) engine->send_display_message(NEWP(type,##__VA_ARGS__))
-#define UPDATE_THING_STATE(what)  SEND_DISPLAY_MSG(Msg_ThingUpdate, this, this->state, what)
-#define UPDATE_PLAYER_STATE(what) SEND_DISPLAY_MSG(Msg_PlayerUpdate, this->state.hero.get(), this->state, what)
+#define UPDATE_THING_STATE(what)  SEND_DISPLAY_MSG(Msg_ThingUpdate, GETPTHING(this), this->state, what)
+#define UPDATE_PLAYER_STATE(what) SEND_DISPLAY_MSG(Msg_PlayerUpdate, this->state.hero, this->state, what)
 #define UPDATE_THING(what, type, ...) \
   SEND_DISPLAY_MSG(type, ##__VA_ARGS__); \
   UPDATE_THING_STATE(what)
@@ -82,24 +88,34 @@ inline bool startswith(string s, const char* comp) {
 
 const float INF = 9e9f; // 1.f / 0.f;
 
+inline double pow2(double x) {
+  return x*x;
+}
+
 template<typename T>
 inline int len(const T& container) {
   return (int)container.size();
 }
 
-inline vector<string> split(string text) {
-  istringstream iss(text);
-  // no clue what is happening here but well
-  vector<string> tokens { istream_iterator<string>{iss},
-                          istream_iterator<string>{} };
-  // remove empty tokens
-  for (unsigned i = 0; i < tokens.size(); ++i) 
-    if (tokens[i].empty()) 
-      tokens.erase(tokens.begin()+i--);
+typedef vector<string> ListString;
 
+inline string lower(const string& str) {
+  string res;
+  for (char c : str)
+    res += char(tolower(c));
+  return res;
+}
+inline ListString split(string text, string sep = " ") {
+  ListString tokens;
+  size_t pos;
+  while ((pos = text.find(sep)) != string::npos) {
+    if (pos > 0) tokens.push_back(text.substr(0, pos));
+    text = text.substr(pos + sep.length());
+  }
+  tokens.push_back(text); // remainder
   return tokens;
 }
-inline string join(string chr, vector<string> words) {
+inline string join(string chr, const ListString& words) {
   string res;
   for (int i = 0; i < len(words); ++i) {
     res += words[i];
@@ -149,6 +165,12 @@ inline void remove(vector<Type> & vec, const Type& ref) {
   vec.erase(vec.begin() + i);
 }
 template<typename Type>
+inline void removeP(vector<shared_ptr<Type> > & vec, const Type* ref) {
+  int i = indexP(vec, ref);
+  assert(i >= 0);
+  vec.erase(vec.begin() + i);
+}
+template<typename Type>
 inline void fast_remove(vector<Type> & vec, int index) {
   swap(vec[index], vec[len(vec) - 1]);
   vec.pop_back();
@@ -160,6 +182,11 @@ inline bool in(const T& el, const vector<T>& vec) {
 template <typename T, typename T2>
 inline bool in(const T& el, const unordered_map<T,T2>& vec) { 
   return vec.find(el) != vec.end();
+}
+template <typename T, typename T2>
+inline const T2& getdefault(const unordered_map<T, T2>& vec, const T& el, const T2& def) {
+  auto it = vec.find(el);
+  return (it == vec.end()) ? def : it->second;
 }
 
 // perform dest += src
@@ -174,6 +201,8 @@ inline int randint(int min, int max) {
 
 
 // declarations of classes and subtypes
+
+struct Collection;
 
 struct Engine;
 typedef shared_ptr<Engine> PEngine;
@@ -203,9 +232,15 @@ typedef shared_ptr<const Card_Hero> PConstCardHero;
 struct Card_HeroAbility;
 typedef shared_ptr<Card_HeroAbility> PCardHeroAbility;
 typedef shared_ptr<const Card_HeroAbility> PConstCardHeroAbility;
+struct Card_Weapon;
+typedef shared_ptr<Card_Weapon> PCardWeapon;
+typedef shared_ptr<const Card_Weapon> PConstCardWeapon;
 struct Card_Spell;
 typedef shared_ptr<Card_Spell> PCardSpell;
 typedef shared_ptr<const Card_Spell> PConstCardSpell;
+struct Card_Secret;
+typedef shared_ptr<Card_Secret> PCardSecret;
+typedef shared_ptr<const Card_Secret> PConstCardSecret;
 struct Card_TargetedSpell;
 typedef shared_ptr<Card_TargetedSpell> PCardTargetedSpell;
 struct Card_AreaSpell;
@@ -217,10 +252,20 @@ typedef shared_ptr<Deck> PDeck;
 struct Action;
 //typedef shared_ptr<Action> PAction;
 typedef vector<const Action* const> ListAction;
+struct Act_Battlecry;
+typedef shared_ptr<Act_Battlecry> PAct_Battlecry;
+typedef vector<PAct_Battlecry> ListPAct_Battlecry;
 
 struct Effect;
 typedef shared_ptr<Effect> PEffect;
 typedef vector<PEffect> ListPEffect;
+typedef vector<Effect*> ListEffect;
+struct Eff_Presence;
+typedef shared_ptr<Eff_Presence> PEff_Presence;
+typedef vector<PEff_Presence> ListPEff_Presence;
+struct Eff_DeathRattle;
+typedef shared_ptr<Eff_DeathRattle> PEff_DeathRattle;
+typedef vector<PEff_DeathRattle> ListPEff_DeathRattle;
 
 struct Instance;
 typedef vector<Instance*> ListInstance;
@@ -231,6 +276,7 @@ struct Thing;
 typedef shared_ptr<Thing> PThing;
 typedef shared_ptr<const Thing> PConstThing;
 typedef vector<PThing> ListPThing;
+#define EFF Thing::StaticEffect
 struct Secret;
 typedef shared_ptr<Secret> PSecret;
 typedef vector<PSecret> ListPSecret;
@@ -260,6 +306,10 @@ typedef bool(*FuncAction)(const Action* a, Instance* from, Instance* target, con
 typedef ListPCard(Player::*FuncMulligan)(ListPCard&) const;
 
 #include "targets.h"
+#define TGT Target
+
 #include "events.h"
+#define FUNCEFFECT    [] (const Effect* eff, Event ev, Instance* caster)
+typedef bool(*FuncEffect)(const Effect* eff, Event ev, Instance* caster);
 
 #endif

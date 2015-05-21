@@ -8,6 +8,9 @@ struct Deck {
   ListPCard cards;
   int fatigue;
 
+  Deck() :
+    player(nullptr), fatigue(0) {}
+
   Deck( ListPCard cards ) :
     player(nullptr), cards(cards), fatigue(0) {
     assert(cards.size() == 30);
@@ -40,7 +43,7 @@ struct Deck {
 
 struct Collection;
 
-PDeck fake_deck(const Collection& cardbook, bool debug = false, ArrayString fake_cards = {});
+PDeck fake_deck(const Collection& cardbook, bool debug = false, ArrayString fake_cards = {}, int nb = 30);
 
 
 

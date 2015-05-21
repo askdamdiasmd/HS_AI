@@ -7,26 +7,24 @@
 struct Action {
   SET_ENGINE();
   const int cost;
-  const bool need_slot;
+  const char need_slot;
   const Target target;
 
-  Action(int cost = 0, bool need_slot = false, Target target = 0) : 
+  Action(int cost = 0, char need_slot = false, Target target = 0) :
     cost(cost), need_slot(need_slot), target(target) {}
   
-  bool need_target() const { return target.is_targetable(); }
+  virtual string tostr() const = 0;
 
+  bool need_target() const { return target.is_targetable(); }
   virtual bool is_valid(const Player* pl) const { return true; }
 
   //virtual bool neighbors() { return false; } // return True if minion with neighbor aura / battlecry involved
-
   virtual int get_cost() const { return cost; }
   
   //  # number of possible outcomes
   virtual int randomness() { return 1; }
 
-  virtual string tostr() const = 0;
-
-  virtual bool execute(Instance* caster, Instance* choice, const Slot& slot) const = 0;
+  virtual bool execute(Instance* caster, Instance* choice, const Slot& slot) const;
 };
 
 
@@ -46,6 +44,7 @@ struct Act_EndTurn : public Action {
 struct Act_PlayCard : public Action { 
   const Card * const card;
   const FuncAction actions;
+
   Act_PlayCard(const Card* card, const bool need_slot, FuncAction actions, Target targets = 0);
 
   virtual bool execute(Instance* caster, Instance* choice, const Slot& slot) const;
@@ -60,12 +59,51 @@ struct Act_PlayMinionCard : public Act_PlayCard {
   Act_PlayMinionCard(const Card_Minion* card);
 
   virtual string tostr() const;
-
   virtual bool is_valid(const Player* pl) const;
-
   virtual bool execute(Instance* caster, Instance* choice, const Slot& slot) const;
 };
 
+// battlecry are actions!--------------
+
+struct Act_Battlecry : public Action {
+  const FuncAction action;
+
+  Act_Battlecry(FuncAction action, Target target, char need_slot=0) :
+    Action(0, need_slot, target), action(action) {}
+
+  virtual void execute(Instance* from, Instance* target, const Slot& slot) {
+    action(this, from, target, slot);
+  }
+};
+
+struct Act_BC_Damage : public Act_Battlecry {
+  const int damage;
+  Act_BC_Damage(Target target, int damage);
+  virtual string tostr() const;
+};
+
+struct Act_BC_Buff : public Act_Battlecry {
+  const string desc;
+  const int atq, hp;
+  const int static_effects;
+
+  Act_BC_Buff(string desc, Target target, int atq, int hp, int static_eff=0);
+
+  virtual string tostr() const;
+};
+
+struct Act_BC_Ngh : public Act_BC_Buff {
+  Act_BC_Ngh(string desc, int atq, int hp, int static_eff = 0):
+    Act_BC_Buff(desc, Target::neighbors, atq, hp, static_eff) {}
+};
+
+struct Act_BC_DrawCard : public Act_Battlecry {
+  const int nb_card;
+
+  Act_BC_DrawCard(Target target, int nb);
+
+  virtual string tostr() const;
+};
 
 /*struct Act_PlayMinionCard_BC(Act_PlayMinionCard) :
   ''' hero plays a minion card with battlecry '''
@@ -95,9 +133,10 @@ self.engine.send_message(actions)*/
 
 
 struct Act_Attack : public Action {
-  Thing* const thing;
-  Act_Attack(Thing* thing) :
-    Action(0, false, Target::attackable | Target::enemy | Target::characters), thing(thing) {}
+  Creature* const creature;
+  Act_Attack(Creature* creature) :
+    Action(0, false, Target::attackable | Target::enemy | Target::characters), 
+    creature(creature) {}
 
   virtual string tostr() const;
   virtual bool execute(Instance* caster, Instance* choice, const Slot& slot) const;
@@ -105,15 +144,16 @@ struct Act_Attack : public Action {
 
 // ------------- Weapon cards ------------------------
 
-//struct Act_PlayWeaponCard(Act_PlayCard) :
-//  ''' hero plays a weapon card '''
-//  def __init__(card) :
-//  Act_PlayCard.___init___(card)
-//  self.choices = []
-//  def execute() :
-//  Act_PlayCard.execute()
-//  from creatures import Weapon
-//  self.engine.send_message(Msg_AddWeapon(self.caster, Weapon(self.card)))
+struct Act_PlayWeaponCard : public Act_PlayCard {
+  const Card_Weapon* card_weapon() const;
+
+  /// hero plays a weapon card 
+  Act_PlayWeaponCard(const Card_Weapon* card);
+
+  virtual string tostr() const;
+  virtual bool is_valid(const Player* pl) const { return true; }
+  virtual bool execute(Instance* caster, Instance* choice, const Slot& slot) const;
+};
 
 
 /// ------------- Card Spells ------------------------
@@ -196,7 +236,6 @@ struct Act_HeroPower : public Action {
     Action(cost, false, target), card(card), action(action) {}
 
   virtual string tostr() const;
-
   virtual bool execute(Instance* caster, Instance* choice, const Slot& slot) const;
 };
 

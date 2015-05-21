@@ -9,6 +9,30 @@
 #include "Board.h"
 #include "decks.h"
 
+// Thread definition and handling
+#ifdef _WIN32
+#define DECLARE_THREAD(name, params)  \
+  struct name##_args_t { params; }; \
+  DWORD WINAPI name(LPVOID lpParam) { \
+    name##_args_t* args = (name##_args_t*)lpParam;
+#ifndef DONT_USE_THREADS
+#define CLOSE_THREAD(ret_value) \
+  delete args; \
+  return ret_value;}
+#define START_THREAD(name,...) \
+    {name##_args_t* name##args = new name##_args_t {##__VA_ARGS__}; \
+  CreateThread(NULL,0,name,name##args,0,NULL);}
+#else
+#define CLOSE_THREAD(ret_value) \
+  return ret_value;}
+#define START_THREAD(name,...) \
+  {name##_args_t name##args = { ##__VA_ARGS__ }; \
+  name(&name##args);}
+#endif
+#else
+#error
+#endif
+
 #define SETWATTR(win,attr) \
   int oldattr = 0; \
   if (attr) {\
@@ -28,6 +52,12 @@ static pos_t nullpos{ -1, -1 };
 
 #define UInt(i) {i}
 #define KEYINT(key, val)    { key, UInt(val) } // only works if val is int
+static inline AllTypes Ufloat(float pos) {
+  AllTypes res;
+  res._float = pos;
+  return res;
+}
+#define KEYFLOAT(key, val)    { key, Ufloat(val) } // only works if val is int
 
 static inline AllTypes UPos(pos_t pos) {
   AllTypes res;
@@ -45,23 +75,44 @@ static inline AllTypes UBool(bool b) {
 #define KEYBOOL(key, b)  { key, UBool(b) }
 
 #ifdef _WIN32
-static HANDLE show_panel_lock = CreateMutex(NULL, FALSE, NULL);
-void lock_panels() {
-  WaitForSingleObject(show_panel_lock, INFINITE);
+// Mutex are BAD because they can't block the same thread
+static HANDLE draw_panel_lock = CreateSemaphore(NULL, 1, 1, NULL);
+void lock_panels(HANDLE lock) {
+  WaitForSingleObject(lock, INFINITE);
 }
-void release_panels() {
-  ReleaseMutex(show_panel_lock);
-}
-void show_panels() {
-  lock_panels();
-  update_panels();
-  doupdate();
-  release_panels();
+void unlock_panels(HANDLE lock) {
+  ReleaseSemaphore(lock, 1, NULL);
 }
 #else
 todo...
 #endif
 
+// draw panel lock
+//#define LOCKP {TRACE("LOCKD at line %d in func %s\n",__LINE__,__FUNCDNAME__); lock_panels(draw_panel_lock);}
+//#define UNLOCKP {unlock_panels(draw_panel_lock);TRACE("UNLOCKD at line %d in func %s\n",__LINE__,__FUNCDNAME__);}
+#define LOCKP   lock_panels(draw_panel_lock)
+#define UNLOCKP unlock_panels(draw_panel_lock)
+// delete panel lock
+#define LOCKD LOCKP //{LOCKP; lock_panels(del_panel_lock);}
+#define UNLOCKD UNLOCKP //{unlock_panels(del_panel_lock); UNLOCKP;}
+
+void show_panels(bool lock=true) {
+  if(lock)  LOCKP;
+  update_panels();
+  doupdate();
+  if (lock)  UNLOCKP;
+}
+
+#define DELETE_PANEL(win, panel) { \
+  LOCKD;  \
+  del_panel(panel); \
+  panel = nullptr;  \
+  delwin(win);  \
+  win = nullptr;  \
+  UNLOCKD;  \
+}
+
+/*
 static void extend_console(int min_NR, int min_NC) {
   HANDLE console = GetStdHandle(STD_OUTPUT_HANDLE);
   CONSOLE_SCREEN_BUFFER_INFO info;
@@ -74,22 +125,29 @@ static void extend_console(int min_NR, int min_NC) {
     rect.Right = min_NC - 1;
   SetConsoleWindowInfo(console, TRUE, &rect);
 }
+*/
+
+static unordered_map<string, int> str_to_color;
 
 void init_screen() {
-  extend_console(30, 80);
+  //extend_console(30, 80);
   initscr();
 
   int NR, NC;
+  getmaxyx(stdscr, NR, NC);
+  resize_term(max(NR,30), max(NC,80));
   getmaxyx(stdscr, NR, NC);
 
   if (NR < 30) {
     endwin();
     fprintf(stderr, "error: screen not high enough (min 30 lines)");
+    assert(0);
     exit(-1);
   }
   else if (NC < 80) {
     endwin();
     fprintf(stderr, "error: screen not wide enough (min 80 columns)");
+    assert(0);
     exit(-1);
   }
 
@@ -100,9 +158,12 @@ void init_screen() {
   keypad(stdscr, true);
   mouseinterval(0);
   mousemask(ALL_MOUSE_EVENTS | REPORT_MOUSE_POSITION, nullptr);
+  timeout(10); // check every 10 ms
 
   // init color pairs
-#define create_color_pair(num, col_fg,col_bg)  init_pair(num, COLOR_##col_fg, COLOR_##col_bg);
+#define create_color_pair(num, col_fg,col_bg)  \
+  init_pair(num, COLOR_##col_fg, COLOR_##col_bg); \
+  str_to_color[#col_fg "_on_" #col_bg] = COLOR_PAIR(num)
   create_color_pair(1, CYAN, BLACK);
 #define CYAN_on_BLACK     COLOR_PAIR(1)
   create_color_pair(2, YELLOW, BLACK);
@@ -136,24 +197,23 @@ void init_screen() {
 #undef create_color_pair
 }
 
-void congratulate_winner(Player* winner, int turn) {
+int my_getch() {
+  // because we use a non-blocking getch()
+  int ch;
+  while ((ch = getch()) == ERR);
+  return ch;
+}
+
+void congratulate_winner(const Player* winner, int turn) {
   int NC = getmaxx(stdscr);
   VizButton button(10, NC / 2 - 3, string_format("  %s wins after %d turns!  ", winner->name.c_str(), (turn + 1) / 2), VizButton::center, 5);
   button.draw({ KEYINT("highlight", BLACK_on_YELLOW) });
   show_panels();
-  getch();
+  my_getch();
 }
 
 void end_screen() {
   endwin();
-}
-
-static void my_sleep(double seconds) {
-#ifdef _WIN32
-  Sleep(int(1000*seconds));
-#else
-  NI;
-#endif
 }
 
 static int mvwaddstr_ex(WINDOW* scr_id, int y, int x, const char* cstr, int attr = 0) {
@@ -180,36 +240,49 @@ static void addwch_ex(chtype ch, int attr = 0, int nb = 1, WINDOW* win = nullptr
   wmove(win, y, x + nb);
 }
 
-static int mvwchgat_ex(WINDOW* scr_id, int y, int x, int num, attr_t attr, int color) {
+static void clear_rect(WINDOW* win, int y, int x, int h, int w) {
+  for (int j = 0; j < h; ++j)
+    addwch_ex(getbkgd(stdscr), 0, w, stdscr, y + j, x);
+}
+
+static void mvwchgat_ex(WINDOW* scr_id, int y, int x, int num, attr_t attr, int color) {
 #ifdef _WIN32
-  return mvwchgat(scr_id, y, x, num, attr, color, nullptr);
+  mvwchgat(scr_id, y, x, num, attr, color, nullptr);
 #else
-  return scr_id.chgat(y, x, num, attr | color_pair(color));
+  scr_id.chgat(y, x, num, attr | color_pair(color));
+#endif
+}
+
+static void mvwaddch_ex(WINDOW* scr_id, int y, int x, chtype ch, attr_t attr = A_NORMAL) {
+#ifdef _WIN32
+  mvwaddch(scr_id, y, x, ch | attr);
+#else
+  scr_id.addch(y, x, ch, attr);
 #endif
 }
 
 static int getmouse_ex(MEVENT* event) {
 #ifdef _WIN32
-  return nc_getmouse(event);
+  int res = nc_getmouse(event);
 #else
+  todo
 #endif
+  return res;
 }
 
-static int print_middle(WINDOW* win, int y, int x, int width, string text, int attr = 0) {
+static void print_middle(WINDOW* win, int y, int x, int width, string text, int attr = 0) {
   if (!win) win = stdscr;
   x = max(x, x + (width - len(text) + 1) / 2);
   if (len(text) > width)  text = text.substr(0, width);
 
   SETWATTR(win, attr);
-  int ret = mvwaddstr(win, y, x, text.c_str());
+  mvwaddstr(win, y, x, text.c_str());
   UNSETWATTR(win, attr);
-  return ret;
 }
 
 static int print_longtext(WINDOW* win, int y, int x, int endy, int endx, string text, int attr = 0) {
   if (!win) win = stdscr;
   //assert(x >= 0 && y >= 0 && endx > x && endy > y);
-
   vector<string> words = split(text);
 
   int width = endx - x;
@@ -228,12 +301,6 @@ static int print_longtext(WINDOW* win, int y, int x, int endy, int endx, string 
     y++;
   }
   return 0;
-}
-
-static void delete_panel(PANEL* panel) {
-  WINDOW* win = panel_window(panel);
-  del_panel(panel);
-  delwin(win);
 }
 
 static PANEL* my_top_panel() {
@@ -256,11 +323,11 @@ static void show_ACS() {
   i += 1;
   if i == NR :
   refresh();
-  getch();
+  my_getch();
   clear();
   i = 0;
   refresh();
-  getch();
+  my_getch();
   clear();*/
 }
 
@@ -272,12 +339,12 @@ static void show_unicode() {
     waddch(stdscr, i);
     if ((i + 1) % (NR*NC) == 0) {
       refresh();
-      getch();
+      my_getch();
       clear();
     }
   }
   refresh();
-  getch();
+  my_getch();
   clear();
 }
 
@@ -301,7 +368,7 @@ static void strong_box(WINDOW* win, int attr = 0) {
 }
 
 static void weak_box(WINDOW* win, int attr = 0) {
-wborder(win, ':', ':', '-', '-', ACS_ULCORNER, ACS_URCORNER, ACS_LLCORNER, ACS_LRCORNER);
+  wborder(win, ':', ':', '-', '-', ACS_ULCORNER, ACS_URCORNER, ACS_LLCORNER, ACS_LRCORNER);
 }
 
 static void manual_box(WINDOW* win, int y, int x, int h, int w) {
@@ -321,18 +388,25 @@ static void manual_box(WINDOW* win, int y, int x, int h, int w) {
 
 Engine* VizPanel::engine = nullptr;
 
-VizPanel::~VizPanel() {
-  if (win && panel) {
-    delete_panel(panel);
-    win = nullptr;
-    panel = nullptr;
+void VizPanel::hide() {
+  if (panel) {
+    LOCKP;
+    bottom_panel(panel);
+    hide_panel(panel);
+    UNLOCKP;
   }
+}
+
+VizPanel::~VizPanel() {
+  if (win && panel)
+    DELETE_PANEL(win, panel);
 }
 
 //### General thing (minion, weapon, hero...)------
 
-VizInstance::VizInstance(const Instance* obj) :
-  VizPanel(), obj(obj), card(obj->card) {}
+VizInstance::VizInstance(const PInstance obj) :
+  VizPanel(), obj(obj), card(obj->card), 
+  name(obj->card->get_name_fr()) {}
 
 PVizThing Thing::viz_thing() { return CASTP(viz, VizThing); }
 
@@ -340,9 +414,8 @@ PConstCardThing VizThing::card_thing() const {
   return CASTP(card, const Card_Thing); 
 }
 
-VizThing::VizThing(const Thing* obj, int ty, int tx, int y, int x) :
+VizThing::VizThing(const PThing obj, int ty, int tx, int y, int x) :
   VizInstance(obj), state(obj->state) {
-  wait = 0;
   // create panel
   win = newwin(ty, tx, y, x);
   assert(win);
@@ -350,27 +423,25 @@ VizThing::VizThing(const Thing* obj, int ty, int tx, int y, int x) :
   set_panel_userptr(panel, this);
 }
 
-bool VizThing::check() {
-  const Thing* obj = thing();
-  assert(state.hp == obj->state.hp);
-  assert(state.max_hp == obj->state.max_hp);
-  assert(state.atq == obj->state.atq);
-  assert(state.max_atq == obj->state.max_atq);
-  assert(state.static_effects == obj->state.static_effects);
-  return true;
+//bool VizThing::check() {
+//  const Thing* obj = thing();
+//  assert(state.hp == obj->state.hp);
+//  assert(state.max_hp == obj->state.max_hp);
+//  assert(state.atq == obj->state.atq);
+//  assert(state.max_atq == obj->state.max_atq);
+//  const int nocare = ~(Thing::StaticEffect::fresh); // don't care about these
+//  assert((nocare&state.static_effects) == (nocare&obj->state.static_effects));
+//  return true;
+//}
+
+int VizThing::get_hgh(const hgh_time_out* hgh) const {
+  if (VizBoard::now() < hgh->expire)
+    return hgh->hgh;
+  else
+    return 0;
 }
 
-VizThing::~VizThing() {
-  double t = 0;
-  while (wait && t < 5) {
-    my_sleep(0.1);
-    t += 0.1;
-    wait = 0;
-  }
-  assert(t < 5);
-}
-
-int VizThing::buff_color(int val, bool highlight, bool standout) const {
+int VizThing::buff_color(int val, bool highlight) const {
   int res;
   if (val>0)
     res = highlight ? WHITE_on_GREEN : GREEN_on_BLACK;
@@ -378,48 +449,75 @@ int VizThing::buff_color(int val, bool highlight, bool standout) const {
     res = highlight ? WHITE_on_BLACK : 0;
   else if (val < 0)
     res = highlight ? WHITE_on_RED : RED_on_BLACK;
-  return res | (standout ? A_STANDOUT : 0);
+  return res;
 }
 
-int VizThing::buff_color(const int* val, bool highlight, bool standout) const {
-  int max_val, max_card_val;
+int VizThing::buff_color(const int* val, int max_card_val, bool highlight) const {
+  int max_val;
   if (val == &state.hp) {
     max_val = state.max_hp;
-    max_card_val = card_thing()->thing()->state.max_hp;
+    if(max_card_val<0)  max_card_val = card_thing()->thing()->state.max_hp;
   }
   else if (val == &state.atq) {
     max_val = state.max_atq;
-    max_card_val = card_thing()->thing()->state.max_atq;
+    if (max_card_val<0)  max_card_val = card_thing()->thing()->state.max_atq;
   }
   else if (val == &state.armor) {
-    max_val = max_card_val = 999999;
+    if (max_card_val<0)  max_card_val = 999999;
   }
   else assert(!"error: unrecognized val");
   int res;
   if (*val < max_val)
     res = highlight ? WHITE_on_RED : RED_on_BLACK;
-  else if (*val < max_card_val)
+  else if (*val > max_card_val)
     res = highlight ? WHITE_on_GREEN : GREEN_on_BLACK;
   else
-    res = highlight ? WHITE_on_BLACK : 0;
-  return res | (standout ? A_STANDOUT : 0);
+    res = highlight ? BLACK_on_WHITE : 0;
+  return res;
 }
 
-void VizThing::update_state(const Thing::State& from, bool show_diff) {
-  const bool anim = show_diff && engine->board.viz->animated;
+DECLARE_THREAD(wait_and_draw, PVizInstance thing; float duration)
+  VizBoard::sleep(args->duration);
+  args->thing->draw({});
+  ungetch(1); // refresh actions if needed
+CLOSE_THREAD(0)
+
+void VizThing::update_state(const Thing::State& copy, bool show_diff) {  
+  const float duration = 1;
+  Thing::State before = state;  // remember so that we can compare later
+
   // update attribute
-  int* can_change[] = { &state.hp, &state.atq, &state.armor };
-  for (int* val : can_change) {
-    int oldval = *val;
-    int newval = *(((int*)&from) + (val - (int*)&state));
+  state = copy;
+
+  int* can_change[] = { &state.max_hp, &state.hp, &state.atq, &state.armor };
+  hgh_time_out* hgh_tags[] = { &hgh_hp, &hgh_hp, &hgh_atq, &hgh_armor };
+  const bool anim = show_diff && engine->board.viz->animated;
+  bool changed = false, change_max_hp = false;
+  for (int i = 0; i < sizeof(can_change) / sizeof(*can_change); i++) {
+    int* val = can_change[i];
+    int oldval = *(((int*)&before) + (val - (int*)&state));
+    int newval = *val;
     int diff = newval - oldval;
     // animation if change
-    if (anim && diff) 
-        temp_panel(this, string_format("%+d", diff), buff_color(diff, true, false), 1.5);
+    if (anim && diff) {
+      if (val == &state.max_hp) 
+        change_max_hp = true;
+      else {
+        if (val == &state.hp && !change_max_hp) 
+          temp_panel(this, string_format("%+d", diff), buff_color(diff, true), 1.5);
+        changed = true;
+        hgh_tags[i]->hgh = A_BOLD;
+        hgh_tags[i]->expire = VizBoard::now() + duration;
+      }
+    }
   }
-  // copy everything
-  state = from;
-  draw({});
+  if (anim && changed) {
+    draw({}); // highlight some stuffs
+    show_panels();  // show them
+    START_THREAD(wait_and_draw, obj->viz, duration+0.1f); // and wait a bit
+  }
+  else
+    draw({});
 }
 
 WINDOW* VizThing::draw(const ArgMap& args) {
@@ -427,7 +525,8 @@ WINDOW* VizThing::draw(const ArgMap& args) {
   DEFARG(int, y, 0);
   DEFARG(int, bkgd, 0);
   DEFARG(int, highlight, 0);
-  if (!win) return win;
+  LOCKP;
+  if (!win) {UNLOCKP;  return win;}
   get_win_pos(win, py, px);
   if (pos != nullpos && pos != pos_t(py, px))
     move_panel(panel, pos.y, pos.x);
@@ -451,7 +550,8 @@ WINDOW* VizThing::draw(const ArgMap& args) {
   // show just HP
   get_win_size(win, ty, tx);
   string thp = string_format(" %d ", state.hp);
-  mvwaddstr_ex(win, ty - 1, tx - 1 - len(thp), thp.c_str(), highlight | buff_color(&state.hp));
+  mvwaddstr_ex(win, ty - 1, tx - 1 - len(thp), thp.c_str(), get_hgh(&hgh_hp) | buff_color(&state.hp));
+  UNLOCKP;
   return win;
 }
 
@@ -464,29 +564,27 @@ PConstCardHero VizHero::card_thing() const {
   return CASTP(card, const Card_Hero);
 }
 
-VizHero::VizHero(const Hero* hero, pos_t pos) :
-  VizThing(hero, 4, 13, pos.y, pos.x) {
-}
+VizHero::VizHero(const PHero hero, pos_t pos) :
+  VizThing(hero, 4, 13, pos.y, pos.x), 
+  player_name(hero->player->name), hero_name(split(hero->card->name)[0]) {}
 
 WINDOW* VizHero::draw(const ArgMap& args) {
-  WINDOW* win = VizThing::draw(args);
-  if (!win) return win;
+  VizThing::draw(args);
   DEFARG(int, highlight, 0);
+  LOCKP;
+  if (!win) { UNLOCKP;  return win; }
   get_win_size(win, ty, tx);
-  print_middle(win, 1, 1, tx - 2, hero()->player->name);
-  string hero_name = split(hero()->card->name)[0];
+  print_middle(win, 1, 1, tx - 2, player_name);
   print_middle(win, 2, 1, tx - 2, "(" + hero_name + ")", BLUE_on_BLACK);
   if (state.armor) {
-    string tar = string_format("[%d]", state.armor);
+    string tar = string_format("[%d]", get_hgh(&hgh_armor) | state.armor);
     mvwaddstr(win, ty - 2, tx - 1 - len(tar), tar.c_str());
   }
-  VizPlayer* pl = hero()->player->viz.get();
-  int attack = (pl->state.weapon ? pl->state.weapon->state.atq : 0) + state.atq;
-  if (attack) {
-    int hh = pl->state.weapon ? pl->state.weapon->viz_weapon()->buff_color(&pl->state.weapon->viz_weapon()->state.atq) : 
-                                buff_color(&state.atq);
-    mvwaddstr_ex(win, ty - 1, 1, string_format(" %d ", attack).c_str(), highlight | hh);
+  if (state.atq) {
+    mvwaddstr_ex(win, ty - 1, 1, string_format(" %d ", state.atq).c_str(), 
+                 get_hgh(&hgh_atq) | buff_color(&state.atq, w_max_atq));
   }
+  UNLOCKP;
   return win;
 }
 
@@ -498,25 +596,30 @@ PVizHeroPowerButton VizHero::create_hero_power_button() {
     name = { name[0].substr(0, 4), name[0].substr(4, 999) };
   string up = name[0];
   string down = name[1];
-  return NEWP(VizHeroPowerButton, y, x + 24, up, down, card->ability->cost);
+  PVizHero me = CONSTCAST(hero(),Hero)->viz_hero();
+  assert(me.get() == this);
+  return NEWP(VizHeroPowerButton, me, y, x + 24, up, down, card->ability->cost);
 }
 
 //### Minion -----------
 
+const pos_t VizMinion::size = {5, 11};
+
 PVizMinion Minion::viz_minion() { return CASTP(viz, VizMinion); }
 
-VizMinion::VizMinion(const Minion* minion, VizSlot pos) :
-  VizThing(minion, 5, 11, pos.get_screen_pos().y, pos.get_screen_pos().x-6) {}
+VizMinion::VizMinion(const PMinion minion, VizSlot pos) :
+  VizThing(minion, size.y, size.x, pos.get_screen_pos().y, pos.get_screen_pos().x-6) {}
 
 WINDOW* VizMinion::draw(const ArgMap& args) {
-  DEFARG(int, x, minion()->engine->board.viz->get_minion_pos(minion()).x);
-  WINDOW* win = VizThing::draw(args);
-  if (!win) return win;
+  VizThing::draw(args);
+  DEFARG(int, x, getbegx(win));
   DEFARG(int, highlight, 0);
+  LOCKP;
+  if (!win) { UNLOCKP;  return win; }
   get_win_size(win, ty, tx);
-  string name = minion()->card->get_name_fr();
   print_longtext(win, 1, 1, ty - 1, tx - 1, name, YELLOW_on_BLACK);
-  mvwaddstr_ex(win, ty - 1, 1, string_format(" %d ", state.atq).c_str(), highlight | buff_color(&state.atq));
+  mvwaddstr_ex(win, ty - 1, 1, string_format(" %d ", state.atq).c_str(), 
+               get_hgh(&hgh_atq) | buff_color(&state.atq));
   if (is_death_rattle())
     mvwaddstr_ex(win, ty - 1, tx / 2, "D", highlight);
   else if (is_trigger())
@@ -527,24 +630,26 @@ WINDOW* VizMinion::draw(const ArgMap& args) {
     mvwchgat_ex(line, 0, 1, tx - 2, 0, BLACK_on_RED);
     delwin(line);
   }
+  UNLOCKP;
   return win;
 }
 
 PVizWeapon Weapon::viz_weapon() { return issubclassP(viz, VizWeapon); }
 
-VizWeapon::VizWeapon(const Weapon* weapon) :
+VizWeapon::VizWeapon(const PWeapon weapon) :
 VizThing(weapon, 4, 11, getbegy(weapon->hero()->viz->win), 
                         getbegx(weapon->hero()->viz->win) - 18) {}
 
 WINDOW* VizWeapon::draw(const ArgMap & args) {
-  WINDOW* win = VizThing::draw(args);
-  if (!win) return win;
+  VizThing::draw(args);
   DEFARG(int, highlight, 0);
+  LOCKP;
+  if (!win) { UNLOCKP;  return win; }
   get_win_size(win, ty, tx);
-  string name = weapon()->card->get_name_fr();
   print_longtext(win, 1, 1, ty - 1, tx - 1, name, GREEN_on_BLACK);
-  NI;//  int ref_atq = min(weapon()->card_weapon()->weapon->state.atq, max_atq);
-  mvwaddstr_ex(win, ty - 1, 1, string_format(" %d ", state.atq).c_str(), highlight | buff_color(&state.atq));
+  mvwaddstr_ex(win, ty - 1, 1, string_format(" %d ", state.atq).c_str(), 
+               get_hgh(&hgh_atq) | buff_color(&state.atq));
+  UNLOCKP; 
   return win;
 }
 
@@ -557,26 +662,26 @@ void VizWeapon::update_state(const Thing::State& from) {
 VizPlayer::VizPlayer(Player* player) :
   player(player), state(player->state) {}
 
-bool VizPlayer::check() const {
-  const Player::State& pl_state = player->state;
-  assert(state.mana == pl_state.mana);
-  assert(state.max_mana == pl_state.max_mana);
-  assert(state.cards == pl_state.cards);
-  assert(state.hero == pl_state.hero);
-  if (pl_state.weapon || state.weapon) {
-    assert(pl_state.weapon == state.weapon);
-    state.weapon->viz_weapon()->check();
-  }
-  assert(state.secrets == pl_state.secrets);
-  assert(state.minions == pl_state.minions);
-  for (auto& m: pl_state.minions)
-    m->viz_minion()->check();
-  return true;
-}
+//bool VizPlayer::check() const {
+//  const Player::State& pl_state = player->state;
+//  assert(state.mana == pl_state.mana);
+//  assert(state.max_mana == pl_state.max_mana);
+//  assert(state.cards == pl_state.cards);
+//  assert(state.hero == pl_state.hero);
+//  if (pl_state.weapon || state.weapon) {
+//    assert(pl_state.weapon == state.weapon);
+//    state.weapon->viz_weapon()->check();
+//  }
+//  assert(state.secrets == pl_state.secrets);
+//  assert(state.minions == pl_state.minions);
+//  for (auto& m: pl_state.minions)
+//    m->viz_minion()->check();
+//  return true;
+//}
 
 void VizPlayer::update_state(const Player::State& from) {
   state = from; // copy
-  player->engine->board.viz->draw(0xFF,player);
+  player->engine->board.viz->draw(VizBoard::all,player);
 }
 
 
@@ -603,6 +708,7 @@ WINDOW* VizButton::draw(const ArgMap& args) {
   DEFARG(int, ytext, 0);
   DEFARG(int, y, 0);
   DEFARG(int, coltext, 0);
+  LOCKP;
   get_win_pos(win, py, px);
   if (y && y != py) move_panel(panel, y, px);
   wbkgd(win, bkgd);
@@ -613,59 +719,61 @@ WINDOW* VizButton::draw(const ArgMap& args) {
   }
   get_win_size(win, ty, tx);
   print_middle(win, ytext ? ytext : ty / 2, 1, tx - 2, text, coltext);
+  UNLOCKP;
   return win;
 }
 
-VizHeroPowerButton::VizHeroPowerButton(int y, int x, string text, string subtext, int cost ) :
-  VizButton(y, x, text, VizButton::center, 4, 9), subtext(subtext), cost(cost), used(false) {}
+VizHeroPowerButton::VizHeroPowerButton(PVizHero viz_hero, int y, int x, string text, string subtext, int cost) :
+  VizButton(y, x, text, VizButton::center, 4, 9), 
+  viz_hero(viz_hero), subtext(subtext), cost(cost) {}
 
 WINDOW* VizHeroPowerButton::draw(const ArgMap& args) {
-  DEFARG(bool, blink, false);
+  DEFARG(float, blink, 0);
   int coltext = YELLOW_on_BLACK;
   ArgMap kwargs = args;
-  if (used) kwargs["bkgd"]._int = BLACK_on_YELLOW;
+  if (viz_hero->state.n_remaining_power==0) // used
+    kwargs["bkgd"]._int = BLACK_on_YELLOW;
   kwargs["ytext"]._int = 1;
   kwargs["coltext"]._int = coltext;
   VizButton::draw(kwargs);
   if (blink) {
-    for (int i = 0; i < 10 * blink; ++i) {
+    const double until = VizBoard::now() + blink;
+    for (int i = 0; VizBoard::now() < until; ++i) {
       kwargs["bkgd"]._int = (i % 2) ? YELLOW_on_BLACK : BLACK_on_YELLOW;
       VizButton::draw(kwargs);
       show_panels();
-      my_sleep(0.1);
+      VizBoard::sleep(0.1);
     }
   }
+  LOCKP;
   get_win_size(win, ty, tx);
   mvwaddstr_ex(win, 0, tx / 2 - 1, string_format("(%d)", cost).c_str(), CYAN_on_BLACK);
   print_longtext(win, 2, 1, ty - 1, tx - 1, subtext, coltext);
+  UNLOCKP;
   return win;
 }
 
-void wait_delete(float duration, PVizButton button, VizThing* viz) {
-  double t = 0;
-  while (t < duration) {
-    lock_panels();
-    touchwin(button->win);
-    top_panel(button->panel); // # remains at top
-    release_panels();
+DECLARE_THREAD(wait_delete, float duration; PVizButton button)
+  const double until = VizBoard::now() + args->duration;
+  while (VizBoard::now() < until) {
+    LOCKP;
+    touchwin(args->button->win);
+    top_panel(args->button->panel); // # remains at top
+    UNLOCKP;
     show_panels();
-    my_sleep(0.1);
-    t += 0.1;
+    VizBoard::sleep(0.1);
   }
-  lock_panels();
-  button.reset();
-  release_panels();
+  args->button.reset();
   show_panels();
-  viz->wait -= 1;
-}
+  ungetch(1); // refresh actions if needed
+CLOSE_THREAD(0);
+
 void temp_panel(VizThing* viz, string text, int color, float duration) {
-  viz->wait += 1;
   get_win_pos(viz->win, y, x);
   get_win_size(viz->win, ty, tx);
   PVizButton button = NEWP(VizButton, y + ty / 2 - 1, x + tx / 2, text);
   button->draw({ KEYBOOL("box", false), KEYINT("bkgd", color) });
-  wait_delete(duration, button, viz);
-  //Thread(target = wait_delete, args = (duration, button, viz)).start();
+  START_THREAD(wait_delete, duration, button);
 }
 
 
@@ -681,6 +789,10 @@ pos_t VizSlot::get_screen_pos() const {
   res.y = slot.player == slot.player->engine->board.viz->get_top_bottom_player(true) ? 6 : 14;
   return res;
 }
+pos_t VizSlot::get_center() const {
+  pos_t pos = get_screen_pos();
+  return pos_t(pos.y + VizMinion::size.y / 2, pos.x + 1);
+}
 int VizSlot::get_screen_space() const {
   int n = len(slot.player->viz->state.minions);
   return min(3, 7 - n); // spacement between minions
@@ -689,6 +801,7 @@ int VizSlot::get_screen_space() const {
 WINDOW* VizSlot::draw(const ArgMap& args) {
   DEFARG(int, highlight, 0);
   DEFARG(int, bkgd, 0);
+  LOCKP;
   if (!win) {
     pos_t pos = get_screen_pos();
     int sp = get_screen_space();
@@ -701,9 +814,12 @@ WINDOW* VizSlot::draw(const ArgMap& args) {
   if (bkgd || highlight) {
     top_panel(panel);
     wbkgd(win, bkgd ? bkgd : highlight);
+    UNLOCKP;
   }
-  else
+  else {
+    UNLOCKP;
     VizPanel::~VizPanel();
+  }
   return win;
 }
 
@@ -718,18 +834,21 @@ VizCard::VizCard(PCard card) :
 }
 
 WINDOW* VizCard::draw(const ArgMap& args) {
-  DEFARG(bool, hide, false);
-  if (hide) {
-    if (panel) hide_panel(panel);
-    if (small_panel) hide_panel(small_panel);
-    return win;
-  }
   DEFARG(pos_t, pos, nullpos);
   DEFARG(int, highlight, 0);
   DEFARG(int, cost, -1);
   DEFARG(bool, petit, true);  // show small_panel
   DEFARG(int, petit_size, 0); // height of small_panel
   DEFARG(int, bkgd, 0);
+  DEFARG(bool, hide, false);
+  
+  LOCKP;
+  if (hide) {
+    if (panel) hide_panel(panel);
+    if (small_panel) hide_panel(small_panel);
+    UNLOCKP;
+    return win;
+  }
 
   get_win_size(stdscr, NR, NC);
   string name = card->get_name_fr();
@@ -744,6 +863,7 @@ WINDOW* VizCard::draw(const ArgMap& args) {
       get_win_pos(this->small_win, y, x);
       if (pos.y < 0) pos.y = NR - ty, pos.x = x;
       if (pos.y > y)  pos.y = y; // cannot be below petit panel
+      hide_panel(this->small_panel);
     }
     // create big win
     if (!this->win) {
@@ -769,16 +889,15 @@ WINDOW* VizCard::draw(const ArgMap& args) {
       this->small_panel = new_panel(this->small_win);
       set_panel_userptr(this->small_panel, this);
     }
-    else if (panel_hidden(this->small_panel))
+    else if (panel_hidden(this->small_panel)==OK)  // return 0 if true...
       top_panel(this->small_panel);
     win = this->small_win;
     panel = this->small_panel;
 
     get_win_size(win, ty, tx);
     if (petit_size>0 && petit_size != ty) {
-      delete_panel(panel);
-      this->small_win = nullptr;
-      this->small_panel = nullptr;
+      UNLOCKP;
+      DELETE_PANEL(this->small_win, this->small_panel);
       ArgMap kwargs = args;
       kwargs["petit"]._bool = true;
       kwargs["petit_size"]._int = petit_size;
@@ -789,6 +908,7 @@ WINDOW* VizCard::draw(const ArgMap& args) {
   }
 
   get_win_size(win, ty, tx);
+  assert(ty < 20);
   get_win_pos(win, y, x);
   assert(ty > 1);
   if (pos != nullpos && pos != pos_t(y, x))
@@ -816,23 +936,20 @@ WINDOW* VizCard::draw(const ArgMap& args) {
     print_longtext(win, mid, 2, ty - 1, tx - 2, desc);
   }
   else {
-    NI; /*
     int r = issubclassP(card, Card_Weapon) ? 4 : 3;
     mvwaddch_ex(win, r, 0, ACS_LTEE, highlight);
     mvwhline(win, r, 1, ACS_HLINE, tx - 2);
     mvwaddch_ex(win, r, tx - 1, ACS_RTEE, highlight);
-    if (issubclassP(type(self), Card_Weapon)) {
-      PWeapon weapon = issubclassP(type(self), Card_Weapon)->weapon;
-      int name_color = GREEN_on_BLACK;
-      mvwaddstr(win, r, 2, string_format(" %d ", weapon->state.atq));
+    int name_color = MAGENTA_on_BLACK;
+    if (issubclassP(card, Card_Weapon)) {
+      PConstWeapon weapon = issubclassP(card, Card_Weapon)->weapon();
+      name_color = GREEN_on_BLACK;
+      mvwaddstr(win, r, 2, string_format(" %d ", weapon->state.atq).c_str());
       string hpt = string_format(" %d ", weapon->state.hp);
       mvwaddstr(win, r, tx - 2 - len(hpt), hpt.c_str());
     }
-    else {
-      int name_color = MAGENTA_on_BLACK;
-      print_longtext(win, 1, 1, r, tx - 1, name, name_color);
-      print_longtext(win, r + 1, 2, ty, tx - 2, desc.c_str());
-    }*/
+    print_longtext(win, 1, 1, r, tx - 1, name, name_color);
+    print_longtext(win, r + 1, 2, ty, tx - 2, desc.c_str());
   }
 
   // print cost
@@ -844,15 +961,13 @@ WINDOW* VizCard::draw(const ArgMap& args) {
     mvwaddstr_ex(win, 0, 0, tcost.c_str(), WHITE_on_GREEN);
   else
     mvwaddstr_ex(win, 0, 0, tcost.c_str(), WHITE_on_RED);
+  UNLOCKP; 
   return win;
 }
 
 VizCard::~VizCard() {
-  if (small_panel) {
-    delete_panel(small_panel);
-    small_win = nullptr;
-    small_panel = nullptr;
-  }
+  if (small_panel)
+     DELETE_PANEL(small_win, small_panel);
 }
 
 
@@ -864,20 +979,24 @@ static inline int interp(int i, int Max, int start, int end) {
   return int(0.5+ start + (end - start)*i / float(Max - 1));
 }
 
-void Msg_PlayerUpdate::draw(Engine* engine) {
+bool Msg_PlayerUpdate::draw(Engine* engine) {
   caster->player->viz->update_state(state);
+  return true;
 }
 
-void Msg_NewCard::draw(Engine* engine) {
+bool Msg_NewCard::draw(Engine* engine) {
   if (!card->viz)
     card->viz = NEWP(VizCard, card);
+  return true;
 }
 
-void Msg_ReceiveCard::draw(Engine* engine) {
+bool Msg_ReceiveCard::draw(Engine* engine) {
   assert(card->viz);  // card must already have been created !
+  //if (caster && !caster->viz) return false; // wait caster to appear
+  //if(!in(card,player->viz->state.cards))
   player->viz->state.cards.push_back(card);
   const Player* bottom_player = engine->board.viz->get_top_bottom_player(false);
-  if (engine->board.viz->animated && bottom_player == player) {
+  if (bottom_player == player && engine->board.viz->animated && turn>=0) {
     engine->board.viz->draw(VizBoard::cards, player, false);
     get_win_size(stdscr, NR, NC);
     int ty = VizCard::card_size.y, tx = VizCard::card_size.x;
@@ -889,203 +1008,291 @@ void Msg_ReceiveCard::draw(Engine* engine) {
       card->viz->draw({ KEYINT("highlight", BLACK_on_YELLOW), KEYPOS2("pos", y, x), 
                         KEYBOOL("petit", h<ty), KEYINT("petit_size", h >= ty ? 0 : h) });
       show_panels();
-      my_sleep(0.05 + 0.6*(y == sy));
+      VizBoard::sleep(0.05 + 0.6*(y == sy));
     }
   }
   engine->board.viz->draw(VizBoard::cards, player);
+  return true;
 }
 
-void Msg_BurnCard::draw(Engine* engine) {
+bool Msg_BurnCard::draw(Engine* engine) {
   NI;
+  return true;
 }
 
-void Msg_ThrowCard::draw(Engine* engine) {
+bool Msg_ThrowCard::draw(Engine* engine) {
   Player* player = caster->player;
   const Player* top = engine->board.viz->get_top_bottom_player(true);
   if (player == top) {
     int sx = (getmaxx(stdscr) - VizCard::card_size.x) / 2;
-    ArgMap kwargs = { KEYBOOL("small", false), KEYPOS2("pos", 0, sx), KEYINT("highlight", BLACK_on_YELLOW) };
+    ArgMap kwargs = { KEYBOOL("petit", false), KEYPOS2("pos", 0, sx), KEYINT("highlight", BLACK_on_YELLOW) };
     card->viz->draw(kwargs);
     show_panels();
-    my_sleep(1);
+    VizBoard::sleep(1);
     if (engine->board.viz->animated) {
       for (int i = sx - 1; i >= 0; i -= 2) {
         kwargs["pos"]._pos_t.x = i;
         card->viz->draw(kwargs);
         show_panels();
-        my_sleep(0.05*(i) / sx);
+        VizBoard::sleep(0.05*(i) / sx);
       }
-      my_sleep(0.2);
+      VizBoard::sleep(0.2);
     }
   }
   card->viz.reset();
   show_panels();
+  return true;
 }
 
-void Msg_StartTurn::draw(Engine* engine) {
+bool Msg_StartTurn::draw(Engine* engine) {
   Player* player = caster->player;
-  player->viz->check();
   PVizButton button = NEWP(VizButton, 10, getmaxx(stdscr) / 2 - 3,
     string_format(" %s's turn! ", player->name.c_str()), 
     VizButton::center, 5, 20);
   button->draw({ KEYINT("highlight", BLACK_on_YELLOW) });
   show_panels();
-  my_sleep(engine->board.viz->animated ? 1 : 0.1);
+  VizBoard::sleep(engine->board.viz->animated ? 1 : 0.1);
   button.reset();
-  engine->board.viz->hero_power_buttons[player]->used = false;
   engine->board.viz->draw();
+  return true;
 }
 
-void Msg_EndTurn::draw(Engine* engine) {
+bool Msg_EndTurn::draw(Engine* engine) {
+  return true;
 }
 
-void Msg_AddMinion::draw(Engine* engine) {
-  minion()->viz = NEWP(VizMinion, minion(), VizSlot(pos));
+typedef unordered_map<Minion*, pos_t> minion_pos_t;
+minion_pos_t Anim_MinionsPos(ListPMinion& minions, Player* player) {
+  minion_pos_t pos;
+  for (int i = 0; i < len(minions); i++)
+    pos[minions[i].get()] = VizSlot(Slot(player, i)).get_screen_pos();
+  return pos;
+}
+void Anim_MoveMinions(const minion_pos_t& old_pos, const minion_pos_t& new_pos) {
+  const int r = VizMinion::size.x / 2 + 1;
+  for (int i = 1; i<r; i++) {
+    for (auto& item : new_pos) {
+      pos_t n = item.second;
+      if (in(item.first, old_pos)) {
+        pos_t o = old_pos.at(item.first);
+        item.first->viz->draw({ KEYPOS2("pos", interp(i, r, o.y, n.y), interp(i, r, o.x, n.x)) });
+      }
+    }
+    show_panels();
+    VizBoard::sleep(0.1);
+  }
 }
 
-void Msg_ThingUpdate::draw(Engine* engine) {
-  CAST(caster, Thing)->viz_thing()->update_state(state);
+bool Msg_AddMinion::draw(Engine* engine) {
+  PMinion new_minion = minion();
+  Player* owner = new_minion->player;
+  ListPMinion& minions = owner->viz->state.minions;
+
+  if (engine->board.viz->animated && !minions.empty()) {
+    auto old_pos = Anim_MinionsPos(minions, owner);
+    // insert dummy, but it will be corrected just after by Msg_PlayerUpdate
+    minions.insert(minions.begin() + pos.pos, PMinion());
+    auto new_pos = Anim_MinionsPos(minions, owner);
+
+    Anim_MoveMinions(old_pos, new_pos);
+    minions.erase(minions.begin() + pos.pos); // remove fake stuff
+  }
+
+  // do this lastly otherwise weird black rectangle appears
+  new_minion->viz = NEWP(VizMinion, new_minion, VizSlot(pos));
+  minions.insert(minions.begin() + pos.pos, new_minion);  // add it in case of battlecry
+  engine->board.viz->draw(VizBoard::minions, owner);
+  return true;
 }
 
-void Msg_Damage::draw(Engine* engine) {
+bool Msg_AddWeapon::draw(Engine* engine) {
+  PWeapon new_weapon = weapon();
+  new_weapon->viz = NEWP(VizWeapon, new_weapon);
+  CASTP(new_weapon->hero()->viz, VizHero)->w_max_atq = new_weapon->state.max_atq;
+  return true;
 }
 
-void Msg_Heal::draw(Engine* engine) {
+bool Msg_ThingUpdate::draw(Engine* engine) {
+  //if( caster->viz)  // if not dead
+    CASTP(caster, Thing)->viz_thing()->update_state(state);
+  return true;
 }
 
-//void Msg_MinionPopup::draw(Engine* engine) {
-  //def draw_Msg_MinionPopup(self) :
-  //new_minion = self.caster
-  //owner = new_minion.owner
-  //if self.engine.board.viz.animated :
-  //old_pos = {}
-  //for i, m in enumerate(owner.viz.minions) :
-  //old_pos[m] = Slot(owner, i).get_screen_pos()[0]
-  //owner.viz.minions.insert(self.pos, new_minion)
-  //new_minion.viz = VizMinion(new_minion)
-  //if self.engine.board.viz.animated and old_pos :
-  //new_pos = {}
-  //for i, m in enumerate(owner.viz.minions) :
-  //new_pos[m] = Slot(owner, i).get_screen_pos()[0]
-  //r = VizMinion.size[1] / 2 + 1
-  //hide_panel(new_minion.viz.panel)
-  //for i in range(1, r) :
-  //for m, (oy, ox) in old_pos.items() :
-  //ny, nx = new_pos[m]
-  //m.draw(pos = (interp(i, r, oy, ny), interp(i, r, ox, nx)))
-  //show_panels()
-  //my_sleep(0.1)
-  //show_panel(new_minion.viz.panel)
-  //self.engine.board.draw('minions', which = owner)
-//}
+bool Msg_Damage::draw(Engine* engine) {
+  return true;
+}
 
-//def draw_Msg_WeaponPopup(self) :
-//weapon = self.caster
-//weapon.owner.viz.set_weapon(weapon)
-//self.engine.board.draw('heroes', which = weapon.owner)
-//
+bool Msg_Heal::draw(Engine* engine) {
+  return true;
+}
+
+bool Msg_ZoneBlink::draw(Engine* engine) {
+  assert(zone.tags | TGT::minions);
+  int what = VizBoard::all;
+  Player* which = nullptr;
+  if (zone.tags & TGT::friendly) {
+    which = caster->player;
+    what ^= VizBoard::bkgd_midline;
+  }
+  if (zone.tags & TGT::enemy) {
+    which = engine->board.get_other_player(caster->player);
+    what ^= VizBoard::bkgd_midline;
+  }
+  if (!(zone.tags & TGT::heroes)) {
+    what ^= VizBoard::bkgd_hero;
+  }
+
+  const float wait = blink_wait;
+  for (int i = 0; i < 2* amount; i++) {
+    engine->board.viz->draw(what, which, true, str_to_color[color]);
+    VizBoard::sleep(wait);
+    engine->board.viz->draw(what, which);
+    TRACE("last_blink\n");
+    VizBoard::sleep(wait);
+  }
+
+  return true;
+}
+
 //def draw_Msg_SecretPopup(self) :
 //secret = self.caster
 //weapon.owner.viz.secrets.append(secret)
 //self.engine.board.draw('secrets', which = secret.owner)
-//
-//def draw_Msg_DeadMinion(self) :
-//dead_minion = self.caster
-//if dead_minion not in dead_minion.owner.viz.minions :
-//return # sometimes, it is already dead
-//dead_minion.viz.delete()
-//if self.engine.board.viz.animated:
-//pl = dead_minion.owner
-//old_pos = {}
-//for i, m in enumerate(pl.viz.minions) :
-//old_pos[m] = Slot(pl, i).get_screen_pos()[0]
-//dead_minion.owner.viz.minions.remove(dead_minion)
-//if self.engine.board.viz.animated :
-//new_pos = {}
-//for i, m in enumerate(pl.viz.minions) :
-//new_pos[m] = Slot(pl, i).get_screen_pos()[0]
-//r = VizMinion.size[1] / 2 + 1
-//for i in range(1, r) :
-//for m, (ny, nx) in new_pos.items() :
-//oy, ox = old_pos[m]
-//m.draw(pos = (interp(i, r, oy, ny), interp(i, r, ox, nx)))
-//show_panels()
-//my_sleep(0.1)
-//self.engine.board.draw('minions', which = dead_minion.owner)
-//
-//def draw_Msg_DeadWeapon(self) :
-//dead_weapon = self.caster
-//dead_weapon.owner.viz.unset_weapon(dead_weapon)
-//dead_weapon.viz.delete()
-//self.engine.board.draw('heroes', which = dead_weapon.owner)
-//
-//def draw_Msg_Status(self) :
-//if hasattr(self.caster, 'viz') :
-//if not self.caster.viz.update_state(self) :
-//return False
-//show_panels()
-//
-//def draw_Msg_StartAttack(self) :
-//if self.engine.board.viz.animated :
-//if issubclass(type(self.caster), Weapon) :
-//caster = self.caster.hero
-//else :
-//caster = self.caster
-//oy, ox = getbegyx(caster.viz.win)
-//oty, otx = getmaxyx(caster.viz.win)
-//top_panel(caster.viz.panel) # set assailant as top panel
-//ny, nx = getbegyx(self.target.viz.win)
-//nty, ntx = getmaxyx(self.target.viz.win)
-//nx += (ntx - otx) / 2
-//m = abs(oy - ny)
-//t = 0.5 / (m + 2)
-//for i in range(1, m - (nty + 1) / 2) + range(m - (nty + 1) / 2, -1, -1) :
-//caster.draw(pos = (interp(i, m, oy, ny), interp(i, m, ox, nx)))
-//show_panels()
-//my_sleep(t)
-//
-//def draw_Msg_StartHeroPower(self) :
-//player = self.caster
-//button = self.engine.board.viz.hero_power_buttons[player]
-//button.used = True
-//button.draw(blink = 0.5)
-//
-//
-//def get_center(viz) :
-//pos = getbegyx(viz.win)
-//size = getmaxyx(viz.win)
-//return pos[0] + size[0] / 2, pos[1] + size[1] / 2
-//
-//def anim_magic_burst(engine, start, end, ch, color, tstep = 0.03, erase = False) :
-//dis = int(sum([(start[i] - end[i])**2 for i in range(2)])**0.5)
-//pos = []
-//for t in range(int(0.5 + dis)) :
-//y, x = [int(0.5 + start[i] + (end[i] - start[i])*t / dis) for i in range(2)]
-//pos.append((y, x))
-//oldch = mvinch(y, x)
-//mvaddch(y, x, ch, color)
-//show_panels()
-//my_sleep(tstep)
-//if erase and len(pos) >= 3:
-//y, x = pos.pop(-3)
-//mvaddch(y, x, oldch & 0xFF, oldch)
-//engine.board.viz.draw()
-//
-//
-//def draw_Msg_HeroHeal(self) :
-//if self.engine.board.viz.animated :
-//player = self.caster
-//button = self.engine.board.viz.hero_power_buttons[player]
-//anim_magic_burst(self.engine, get_center(button), get_center(self.target.viz), ord('+'), black_on_green, erase = True)
-//
-//def draw_Msg_HeroDamage(self) :
-//if self.engine.board.viz.animated :
-//player = self.caster
-//button = self.engine.board.viz.hero_power_buttons[player]
-//anim_magic_burst(self.engine, get_center(button), get_center(self.target.viz), ord('*'), BLACK_on_RED, erase = True)
-//
-//
-//
+
+bool Msg_RemoveMinion::draw(Engine* engine) {
+  PMinion dead_minion = minion();
+  dead_minion->viz->hide();
+  engine->board.viz->deads.push_back(dead_minion);
+  Player* pl = dead_minion->player;
+  ListPMinion& minions = pl->viz->state.minions;
+  int i = index(minions, dead_minion);
+  assert(pos.pos == i); // check consistency with true game state
+  
+  // store current minion screen positions
+  if (engine->board.viz->animated) {
+    auto old_pos = Anim_MinionsPos(minions, pl);
+    remove(minions, dead_minion);  // delete from board.viz
+    auto new_pos = Anim_MinionsPos(minions, pl);
+
+    Anim_MoveMinions(old_pos, new_pos);
+  }
+  return true;
+}
+
+bool Msg_RemoveWeapon::draw(Engine* engine) {
+  PWeapon dead_weapon = weapon();
+  Player* pl = dead_weapon->player; // save before deletion
+  assert(pl->viz->state.weapon == dead_weapon);
+  dead_weapon->viz.reset(); // do this first (before object is deleted)
+  dead_weapon->player->viz->state.weapon.reset(); // dead_weapon is NULL now
+  engine->board.viz->draw(VizBoard::weapon, pl);
+  return true;
+}
+
+bool Msg_Attack::draw(Engine* engine) {
+  if (engine->board.viz->animated) {
+    LOCKP;
+    int ox, oy; getbegyx(caster()->viz->win, oy, ox);
+    int oty, otx; getmaxyx(caster()->viz->win, oty, otx);
+    top_panel(caster()->viz->panel); // set assailant as top panel
+    int ny, nx; getbegyx(target()->viz->win, ny, nx);
+    int nty, ntx;  getmaxyx(target()->viz->win, nty, ntx);
+    UNLOCKP;
+    nx += (ntx - otx) / 2;
+    const int m = abs(oy - ny);
+    const float t = 0.5f / (m + 2);
+    const int M = m - (nty + 1) / 2;
+    for (int _i = 1; _i <= 2 * M; _i++) {
+      const int i = _i < M ? _i : 2 * M - _i; // increase then decrease
+      caster()->viz->draw({ KEYPOS2("pos", interp(i, m, oy, ny), interp(i, m, ox, nx)) });
+      show_panels();
+      VizBoard::sleep(t);
+    }
+  }
+  return true;
+}
+
+bool Msg_HeroPower::draw(Engine* engine) {
+  PHero hero = CASTP(caster, Hero);
+  PVizHeroPowerButton button = engine->board.viz->hero_power_buttons[hero->player];
+  button->draw({ KEYFLOAT("blink", 0.5) });
+  return true;
+}
+
+static pos_t get_center(VizPanel* viz) {
+  int py, px; getbegyx(viz->win,py,px);
+  int sy, sx; getmaxyx(viz->win,sy,sx);
+  return pos_t(py + sy / 2, px + sx / 2);
+}
+
+static bool mouse_in_win(WINDOW* win, int y, int x) {
+  get_win_pos(win, wy, wx);
+  get_win_size(win, height, width);
+  return wx <= x && x < wx + width && wy <= y && y < wy + height;
+}
+
+WINDOW* get_window_at(int y, int x) {
+  PANEL* cur = my_top_panel();
+  while (cur) {
+    if (mouse_in_win(panel_window(cur), y, x))
+      return panel_window(cur);
+    cur = panel_below(cur);
+  }
+  return stdscr;
+}
+
+void anim_magic_burst(Engine* engine, pos_t start, pos_t end, chtype ch, int color, 
+                      float tstep = 0.025, int tail=4 ) {
+  tail++;
+  int dis = int(0.5 + sqrt(pow2(start.y - end.y) + pow2(start.x - end.x)));
+  vector<pair<pos_t,chtype> > pos;
+  for (int t = 0; t<dis; t++) {
+    int y = interp(t, dis, start.y, end.y);
+    int x = interp(t, dis, start.x, end.x);
+    LOCKP;
+    WINDOW* win = get_window_at(y, x);
+    int wy, wx; getbegyx(win, wy, wx);
+    pos.emplace_back(pos_t(y, x), mvwinch(win, y - wy, x - wx));
+    mvwaddch_ex(stdscr, y, x, ch, color);
+    UNLOCKP;
+    VizBoard::sleep(tstep);
+    if (len(pos) >= tail) {
+      chtype oldch = pos[0].second;
+      LOCKP;
+      mvwaddch_ex(stdscr, pos[0].first.y, pos[0].first.x, oldch);
+      UNLOCKP;
+      pos.erase(pos.begin());
+    }
+    show_panels();
+  }
+  while (!pos.empty()) {
+    VizBoard::sleep(tstep);
+    chtype oldch = pos[0].second;
+    LOCKP;
+    mvwaddch_ex(stdscr, pos[0].first.y, pos[0].first.x, oldch);
+    show_panels(false);
+    UNLOCKP;
+    pos.erase(pos.begin());
+  }
+  engine->board.viz->draw();
+}
+
+bool Msg_Arrow::draw(Engine* engine) {
+  if (engine->board.viz->animated) {
+    if (!caster->viz) return false;
+    anim_magic_burst(engine, get_center(caster->viz.get()), get_center(target->viz.get()), ch, str_to_color.at(color));
+  }
+  return true;
+}
+bool Msg_Arrow_HeroPower::draw(Engine* engine) {
+  if (engine->board.viz->animated) {
+    assert(issubclassP(caster, Hero));
+    PVizHeroPowerButton button = engine->board.viz->hero_power_buttons[caster->player];
+    anim_magic_burst(engine, get_center(button.get()), get_center(target->viz.get()), ch, str_to_color.at(color));
+  }
+  return true;
+}
+
 
 //### Board --------
 
@@ -1094,17 +1301,35 @@ VizBoard::VizBoard(Board* board, bool switch_heroes, bool animated) :
   end_turn(NEWP(VizButton,11, getmaxx(stdscr), "End turn", VizButton::right)) {
   VizPanel::set_engine(board->engine);
   for (int i = 0; i < 2; i++) {
-    Player* pl = board->engine->players[i];
-    pl->viz = NEWP(VizPlayer, board->engine->players[i]);
-    pl->state.hero->viz = NEWP(VizHero, pl->state.hero.get(), get_hero_pos(pl));
+    Player* pl = board->engine->board.players[i];
+    pl->viz = NEWP(VizPlayer, board->engine->board.players[i]);
+    pl->state.hero->viz = NEWP(VizHero, pl->state.hero, get_hero_pos(pl));
     hero_power_buttons[pl] = pl->state.hero->viz_hero()->create_hero_power_button();
   }
 }
 
+double VizBoard::accel = 1.0;
+
+void VizBoard::sleep(double seconds) {
+#ifdef _WIN32
+  Sleep(int(1000 * seconds/accel));
+#else
+  NI;
+#endif
+}
+
+double VizBoard::now() {
+#ifdef _WIN32
+  return accel*GetTickCount() / 1000.0;
+#else
+  NI;
+#endif
+}
+
 Player* VizBoard::get_top_bottom_player(bool top) {
-  Player* player = board->engine->get_current_player();
-  Player* adv = board->engine->get_enemy_player();
-  if (switch_heroes == false && board->engine->turn % 2)
+  Player* player = board->engine->board.get_current_player();
+  Player* adv = board->engine->board.get_enemy_player();
+  if (switch_heroes == false && board->engine->board.state.turn % 2)
     return top ? player : adv; // prevent top / down switching
   else
     return top ? adv : player;
@@ -1135,7 +1360,7 @@ pos_t VizBoard::get_hero_pos(Player* player) {
     return{ 20, (NC - 18) / 2 };
 }
 
-void VizBoard::draw(int what, Player* which_, bool last_card) {
+void VizBoard::draw(int what, Player* which_, bool last_card, chtype bkgd_colr) {
   get_win_size(stdscr, NR, NC);
 
   // clear screen
@@ -1149,12 +1374,31 @@ void VizBoard::draw(int what, Player* which_, bool last_card) {
 
   if (bkgd & what) {
     // background
-    erase();
-    mvhline(2, 0, ACS_CKBOARD, NC);
-    mvhline(3, 0, ACS_CKBOARD, NC);
-    mvhline(12, 0, '-', NC);
-    mvhline(21, 0, ACS_CKBOARD, NC);
-    mvhline(22, 0, ACS_CKBOARD, NC);
+    //erase();  // useless, just make boring screen blinks
+    LOCKP;
+    if(bkgd_colr) attron(bkgd_colr);
+    if (in(adv, which)) {
+      if (what & bkgd_hero) {
+        mvhline(1, 0, ' ', NC - 3);
+        mvhline(2, 0, ACS_CKBOARD, NC - 3);
+        mvhline(3, 0, ACS_CKBOARD, NC - 3);
+        mvhline(4, 0, ' ', NC - 3);
+      }
+      clear_rect(stdscr, 5, 0, 12 - 5, getmaxx(stdscr) - 3);
+    }
+    if (what & bkgd_midline) 
+      mvhline(12, 0, '-', NC);
+    if (in(player, which)) {
+      clear_rect(stdscr, 13, 0, 20 - 13, getmaxx(stdscr) - 3);
+      if (what & bkgd_hero) {
+        mvhline(20, 0, ' ', NC - 3);
+        mvhline(21, 0, ACS_CKBOARD, NC - 3);
+        mvhline(22, 0, ACS_CKBOARD, NC - 3);
+        mvhline(23, 0, ' ', NC - 3);
+      }
+    }
+    if (bkgd_colr) attroff(bkgd_colr);
+    UNLOCKP;
     end_turn->draw({});
     // draw hero power
     for (auto pl : which)
@@ -1163,8 +1407,9 @@ void VizBoard::draw(int what, Player* which_, bool last_card) {
 
   // draw decks on the right side
   if (decks & what) {
+    LOCKP;
     for (int i = 0; i < 3; i++)
-      mvvline(2, NC - 1 - i, ACS_CKBOARD, 20);
+      mvvline(2, NC - 1 - i, ACS_CKBOARD, 21);
     for (int i = 5; i <= 15; i += 10) {
       mvaddch(i, NC - 2, ACS_HLINE);
       addwch_ex(9558);
@@ -1177,10 +1422,11 @@ void VizBoard::draw(int what, Player* which_, bool last_card) {
         addwch_ex(9564);
       }
     }
+    UNLOCKP;
   }
 
   //draw heroes
-  if (hero & what) {
+  if ((hero|weapon) & what) {
     for (auto pl : which) {
       ArgMap args = { KEYINT("y", get_hero_pos(pl).y) };
       pl->state.hero->viz->draw(args);
@@ -1196,9 +1442,15 @@ void VizBoard::draw(int what, Player* which_, bool last_card) {
       if (!last_card) cards.pop_back();
       for (auto card : cards)
         card->viz->draw({ KEYBOOL("hide", true) }); // hide adversary cards
+      LOCKP;
+      clear_rect(stdscr, 0, 0, 1, getmaxx(stdscr));
       print_middle(stdscr, 0, 0, NC, string_format(" Adversary has %d cards. ", len(adv->viz->state.cards)));
+      UNLOCKP;
     }
     if (in(player, which)) {
+      LOCKP;
+      clear_rect(stdscr, 24, 0, getmaxy(stdscr) - 24, getmaxx(stdscr));
+      UNLOCKP;
       ListPCard cards = player->viz->state.cards;
       if (!last_card) cards.pop_back();
       for (auto card : cards)
@@ -1214,17 +1466,20 @@ void VizBoard::draw(int what, Player* which_, bool last_card) {
       if (!in(who, which)) continue;
       Player* p = i < 12 ? adv : player;
       string text = string_format("%2d/%d ", p->viz->state.mana, p->viz->state.max_mana);
+      LOCKP;
       mvwaddstr_ex(stdscr, i, NC - 11 - len(text), text.c_str(), BLACK_on_CYAN);
       addwch_ex(9830, CYAN_on_BLACK, p->state.mana);
       addwch_ex(9826, CYAN_on_BLACK, p->state.max_mana - p->state.mana);
+      UNLOCKP;
     }
   }
 
   // draw minions
   if (minions & what) {
-    for (Player* pl : which)
+    for (Player* pl : which) {
       for (auto m : pl->viz->state.minions)
         m->viz->draw({ KEYPOS1("pos", get_minion_pos(m.get())) });
+    }
   }
 
   show_panels();
@@ -1232,12 +1487,6 @@ void VizBoard::draw(int what, Player* which_, bool last_card) {
 
 
 // ----- Human player interface -------
-
-bool HumanPlayer::mouse_in_win(WINDOW* win, int y, int x) {
-  get_win_pos(win, wy, wx);
-  get_win_size(win, height, width);
-  return wx <= x && x < wx + width && wy <= y && y < wy + height;
-}
 
 ListPCard HumanPlayer::mulligan(ListPCard & cards) const {
   engine->wait_for_display();
@@ -1268,7 +1517,8 @@ ListPCard HumanPlayer::mulligan(ListPCard & cards) const {
     show_panels();
 
     // wait for mouse click
-    int ch = getch();
+    int ch = my_getch();
+
     if (ch == KEY_MOUSE) {
       MEVENT event;
       unsigned long mouse_state = getmouse_ex(&event);
@@ -1310,8 +1560,10 @@ ListPCard HumanPlayer::mulligan(ListPCard & cards) const {
   }
   
   //clean up
+  LOCKP;
   for (auto& card : cards ) 
     hide_panel(card->viz->panel);
+  UNLOCKP;
   end_button.~VizButton();
   show_panels();
   
@@ -1344,7 +1596,7 @@ const Action* HumanPlayer::choose_actions(ListAction actions, Instance*& choice,
     }
     else if (issubclass(a, const Act_Attack)) {
       const Act_Attack* act = CAST(a, const Act_Attack);
-      showlist.push_back({ a, act->thing->viz, {} });
+      showlist.push_back({ a, act->creature->viz, {} });
     }/*
     else if (issubclass(a, Act_WeaponAttack)){
       showlist.push_back({a, this->state.hero->viz, {}});
@@ -1392,14 +1644,16 @@ const Action* HumanPlayer::choose_actions(ListAction actions, Instance*& choice,
     if (active)
       active->draw({ KEYINT("bkgd", BLACK_on_WHITE) });
     show_panels();
+    TRACE("showlist\n");
 
-    int ch = getch();
+    int ch = my_getch();
 
     if (ch == KEY_MOUSE) {
       MEVENT event;
       unsigned long mouse_state = getmouse_ex(&event);
       if (mouse_state == ERR) continue;
 
+      LOCKP;
       VizPanel* sel = nullptr;
       PANEL* cur = my_top_panel();
       while (cur) {
@@ -1412,6 +1666,7 @@ const Action* HumanPlayer::choose_actions(ListAction actions, Instance*& choice,
         }
         cur = panel_below(cur);
       }
+      UNLOCKP;
 
       // reset everybody
       for (auto elem : mapping) {
@@ -1439,7 +1694,7 @@ const Action* HumanPlayer::choose_actions(ListAction actions, Instance*& choice,
         if (act == fake_act_slot) 
           slot = CAST(sel, VizSlot)->slot;
         else if (act == fake_act_target) 
-          choice = const_cast<Instance*>(CAST(sel, VizThing)->obj);
+          choice = CONSTCAST(CAST(sel, VizThing)->obj.get(), Instance);
         else {
           action = act;
           active = sel;
@@ -1451,12 +1706,16 @@ const Action* HumanPlayer::choose_actions(ListAction actions, Instance*& choice,
         erase_elems(showlist);
         if (action->need_slot && slot.pos < 0) {
           showlist.clear();
-          for (auto& sl : engine->board.get_free_slots(const_cast<HumanPlayer*>(this)))
+          ListSlot slots = engine->board.get_free_slots(const_cast<HumanPlayer*>(this));
+          assert(!slots.empty());
+          for (auto& sl : slots)
             showlist.push_back({ fake_act_slot, NEWP(VizSlot, sl), {} });
         } 
         else if (action->need_target() && !choice) {
           showlist.clear();
-          for (auto obj : action->target.resolve(const_cast<HumanPlayer*>(this)))
+          ListPInstance& choices = action->target.resolve(const_cast<HumanPlayer*>(this));
+          if (choices.empty())  return action;  // nothing to do then
+          for (auto& obj : choices)
             showlist.push_back({ fake_act_target, obj->viz, {} });
         }
         else
@@ -1468,16 +1727,19 @@ const Action* HumanPlayer::choose_actions(ListAction actions, Instance*& choice,
         active = nullptr;
       }
     }
-    else if (ch == '\n') {  // enter
+    elif (ch == '\n') {  // enter
       if (!active)
         return end_turn_action;
     }
-    else if (ch == 27) { // escape
+    elif (ch == 27) { // escape
       erase_elems(showlist);
       showlist = init_showlist;
       active = nullptr;
     }
-    else {  // bad key = quit
+    elif(ch == 1) {
+      TRACE("getch(1)\n");
+    }
+    elif (ch == 'q') {  // quit
       endwin();
       //printf(engine->log.c_str());
       exit(-1);
@@ -1486,8 +1748,8 @@ const Action* HumanPlayer::choose_actions(ListAction actions, Instance*& choice,
 }
 
 //# overloaded HS engine
-CursesEngine::CursesEngine(Player* player1, Player* player2) :
-  Engine(player1, player2) {
+CursesEngine::CursesEngine() :
+  Engine() {
   logfile = fopen("log.txt", "w");
 }
 
@@ -1497,18 +1759,32 @@ void CursesEngine::wait_for_display() {
     PMessage msg = display.front();
     display.pop_front();
 
-    msg->draw(this);
-    string line = string_format("%s $ %s\n", msg->cls_name(), msg->tostr().c_str());
-    fwrite(line.c_str(), line.size(), 1, logfile);
-    TRACE(line.c_str());
-    fflush(logfile);
-    log += line;
+    bool ok = msg->draw(this);
+    if (ok) {
+      string line = string_format("%s $ %s\n", msg->cls_name(), msg->tostr().c_str());
+      fwrite(line.c_str(), line.size(), 1, logfile);
+      TRACE(line.c_str());
+      fflush(logfile);
+      log += line;
+    }
+    else {
+      assert(len(display) >= 1);
+      auto it = display.begin();
+      display.insert(++it, msg);
+    }
+  }
+
+  // delete dead stuff
+  ListPInstance& deads = this->board.viz->deads;
+  while (!deads.empty()) {
+    deads.back()->viz.reset();  // delete its viz
+    deads.pop_back();
   }
 }
 
-void CursesEngine::dbg_add_minion(Player* player, PCardMinion card) {
-  NI;
-  //card = deepcopy(card)
-  //card.owner = player
-  //engine.send_message(Msg_AddMinion(player, Minion(card), pos = engine.board.get_free_slots(player)[0]))
-}
+//void CursesEngine::dbg_add_minion(Player* player, PCardMinion card) {
+//  NI;
+//  //card = deepcopy(card)
+//  //card.owner = player
+//  //engine.send_message(Msg_AddMinion(player, Minion(card), pos = engine.board.get_free_slots(player)[0]))
+//}

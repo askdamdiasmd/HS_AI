@@ -52,18 +52,18 @@ void Deck::print() const {
   printf("\n");
 }
 
-PDeck fake_deck(const Collection& cardbook, bool debug, ArrayString fake_cards) {
+PDeck fake_deck(const Collection& cardbook, bool debug, ArrayString fake_cards, int nb) {
   ListPCard cards;
   if (debug) {
     assert(fake_cards.size());
-    int mul = 30 / len(fake_cards);
+    int mul = 1 + (nb - 1) / len(fake_cards);
     for (auto c : fake_cards)
-      for (int i = 0; i < mul && len(cards) < 30; i++)
+      for (int i = 0; i < mul && len(cards) < nb; i++)
         cards.push_back(cardbook.get_by_name(c)->copy());
   }
   else {
     const ListPConstCard& coll = cardbook.get_collectibles();
-    for (int i = 0; i < 30; i++)
+    for (int i = 0; i < nb; i++)
       cards.push_back(coll[randint(0, coll.size() - 1)]->copy());
   }
   return NEWP(Deck, cards);

@@ -31,21 +31,17 @@ struct Card {
     cost(cost), id(-1), name(name), name_fr(name),
     collectible(true), cls(HeroClass::None) {}
   
+  virtual PCard copy() const = 0; // copy itself
+
   NAMED_PARAM(Card, HeroClass, cls);
   NAMED_PARAM(Card, bool, collectible);
   NAMED_PARAM(Card, string, desc);
   NAMED_PARAM(Card, string, name_fr);
   NAMED_PARAM(Card, string, desc_fr);
 
-  virtual PCard copy() const = 0; // copy itself
-
   string get_name_fr() const { return name_fr.size() ? name_fr : name; }
   string get_desc_fr() const { return desc_fr.size() ? desc_fr : desc; }
-
   virtual string tostr() const = 0;
-
-  // helper function to resovle a target at runtime
-  ListPCreature list_targets(const string& Target);
 
   // what the player can do with this card ?
   virtual void list_actions(ListAction& list) const = 0;
@@ -61,27 +57,14 @@ struct Card_Instance : public Card {
 
 struct Card_Thing : public Card_Instance {
   const PConstThing thing() const { return issubclassP(instance, const Thing); }
+  PAct_Battlecry battlecry;
 
   Card_Thing(int cost, string name, PThing minion) :
     Card_Instance(cost, name, dynamic_pointer_cast<Instance>(minion)) {}
-};
 
-struct Card_Minion : public Card_Thing {
-  const Act_PlayMinionCard act_play;
-  const PConstMinion minion() const { return issubclassP(instance, const Minion); }
-
-  Card_Minion(int cost, string name, PMinion minion) :
-    Card_Thing(cost, name, dynamic_pointer_cast<Thing>(minion)), act_play(this) {}
-
-  Card_Minion(const Card_Minion& m) :
-    Card_Thing(m), act_play(this) {}
-
-  virtual string tostr() const;
-
-  virtual PCard copy() const { return NEWP(Card_Minion, *this); }
-
-  // what the player can do with this card ?
-  virtual void list_actions(ListAction& list) const;
+  Card_Thing* add_battlecry(PAct_Battlecry eff);
+  Card_Thing* add_effect(PEffect eff);
+  Card_Thing* add_spell_powert(int power);
 };
 
 struct Card_HeroAbility : public Card {
@@ -102,35 +85,39 @@ struct Card_HeroAbility : public Card {
 
 struct Card_Hero : public Card_Thing {
   PCardHeroAbility ability;
-
   PConstHero hero() const { return issubclassP(instance, const Hero); }
 
   Card_Hero(string name, HeroClass cls, PHero hero, PCardHeroAbility ability);
+  virtual PCard copy() const { return NEWP(Card_Hero, *this); }
 
   virtual string tostr() const;
-
-  virtual PCard copy() const {
-    return NEWP(Card_Hero, *this);
-  }
 
   virtual void list_actions(ListAction& list) const;
 };
 
+
+// ### --------------- Minion cards ----------------------
+
+struct Card_Minion : public Card_Thing {
+  const Act_PlayMinionCard act_play;
+  const PConstMinion minion() const { return issubclassP(instance, const Minion); }
+
+  Card_Minion(int cost, string name, PMinion minion) :
+    Card_Thing(cost, name, dynamic_pointer_cast<Thing>(minion)), act_play(this) {}
+  Card_Minion(const Card_Minion& m) :
+    Card_Thing(m), act_play(this) {}
+
+  virtual PCard copy() const { return NEWP(Card_Minion, *this); }
+  virtual string tostr() const;
+  
+  PMinion instanciate(Player* owner) const;
+
+  // what the player can do with this card ?
+  virtual void list_actions(ListAction& list) const;
+};
+
+
 /*
-//  effects = tolist(effects) # list of effects : {'taunt', 'stealth', or buffs that can be silenced}
-//score = 0 # estimated real mana cost, dependent on a specific deck it's in
-//  if desc == '':
-//#assert all([type(e) == str for e in effects]), "error: description is missing"
-//desc = '. '.join(['%s%s' % (e[0].upper(), e[1:]) for e in effects if type(e) == str])
-//  if desc_fr == '':
-//fr = [eff_trad_fr[e] for e in effects if type(e) == str]
-//  fr = '. '.join([e for e in fr if e])
-//  if len(desc) < len(fr) + 2 : desc_fr = fr # only if description is basic
-
-
-### --------------- Minion cards ----------------------
-
-
 struct Card_Minion_BC(Card_Minion) :
   """ Minion with a battle cry """
   def __init__(cost, atq, hp, name, battlecry, Target = None, hidden_target = None, **kwargs) :
@@ -142,23 +129,28 @@ struct Card_Minion_BC(Card_Minion) :
   Target = list_targets(Target) if Target else None
   hidden_target = hidden_target #list_targets(hidden_target) if hidden_target else None
   return Act_PlayMinionCard_BC(battlecry, Target, hidden_target)
-
-
-### --------------- Weapon cards ----------------------
-
-struct Card_Weapon(Card) :
-  def __init__(cost, atq, hp, name, **kwargs) :
-  Card.__init__(cost, name, **kwargs)
-  hp = hp    # health point = weapon durability
-  atq = atq  # attack
-
-  virtual string tostr() const
-  return "Weapon %s (%d): %d/%d %s" % (name_fr, cost, atq, hp, desc)
-
-  def list_actions() :
-  return Act_PlayWeaponCard()
 */
 
+// ### --------------- Weapon cards ----------------------
+
+struct Card_Weapon : public Card_Thing {
+  const Act_PlayWeaponCard act_play;
+  const PConstWeapon weapon() const { return issubclassP(instance, const Weapon); }
+
+  Card_Weapon(int cost, string name, PWeapon weapon) :
+    Card_Thing(cost, name, dynamic_pointer_cast<Thing>(weapon)), act_play(this) {}
+
+  Card_Weapon(const Card_Weapon& m) :
+    Card_Thing(m), act_play(this) {}
+
+  virtual PCard copy() const { return NEWP(Card_Weapon, *this); }
+  virtual string tostr() const;
+
+  PWeapon Card_Weapon::instanciate(Player* owner) const;
+
+  // what the player can do with this card ?
+  virtual void list_actions(ListAction& list) const;
+};
 
 
 // ### ----------------- Spell cards -------------------------

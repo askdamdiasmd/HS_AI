@@ -7,32 +7,29 @@
 struct Engine {
 public:
   Board board;
-  union {
-    struct{
-      Player* const player1;
-      Player* const player2;
-    };
-    Player* const players[2];
-  };
-  int turn;
   bool is_simulation;
 
 public:
-  Engine(Player* player1, Player* player2);
-
+  Engine() :
+    is_simulation(false) {}
   void set_default();
 
-  Player* get_current_player() { return players[turn % 2]; }
-  Player* get_enemy_player(){ return players[(turn+1) % 2]; }
-  Player* get_other_player(Player* p) { return p==players[0] ? players[1] : players[0]; }
-
   // general game functions
-  void start_game();
+  void init_players(Player* player1, Player* player2) {
+    set_default();
+    is_simulation = false;
+    board = Board(player1, player2);
+    // now you can initialize board.viz if necessary
+  }
+  void deal_init_cards() {
+    board.deal_init_cards();
+  }
+
   ListAction list_player_actions(Player* player);
   void play_turn();
 
   bool is_game_ended() const;
-  Player* get_winner();
+  const Player* get_winner() const;
 
   // game actions
   Player* start_turn();
@@ -40,6 +37,8 @@ public:
 
   // politic: signal are send at the deepest stack level, 
   // i.e. right when action is accomplished 
+  void register_trigger(Effect* eff, int events);
+  void unregister_trigger(Effect* eff, int events);
   void signal(Instance* from, Event event);
 
   bool draw_card(Instance* caster, Player* player, int nb = 1);
@@ -49,8 +48,17 @@ public:
 
   bool heal(Instance* from, int hp, Instance* to);
   bool damage(Instance* from, int hp, Instance* to);
+  bool SpellHeal(Instance* from, int hp, Instance* to);
+  bool SpellDamage(Instance* from, int hp, Instance* to);
+  bool HeroHeal(Instance* from, int hp, Instance* to);
+  bool HeroDamage(Instance* from, int hp, Instance* to);
 
-  bool attack(Thing* from, Thing* target);
+  bool heal_zone(Instance* from, int hp, Target zone);
+  bool damage_zone(Instance* from, int hp, Target zone);
+  bool SpellHeal_zone(Instance* from, int hp, Target zone);
+  bool SpellDamage_zone(Instance* from, int hp, Target zone);
+
+  bool attack(Creature* from, Creature* target);
 
 private:
   //unordered_map<htype, int> saved_turn;
@@ -86,6 +94,7 @@ public:
       display.push_back(msg);
   }
   virtual void wait_for_display() = 0;
+  virtual PInstance random(ListPInstance& instances);
 };
 
 

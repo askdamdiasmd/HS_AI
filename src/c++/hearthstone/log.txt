@@ -1,127 +1,130 @@
-Msg_NewCard $ card 4C24AC [Yeti Noroit (4): 4/5] is created by the deck.
-Msg_NewCard $ card 4C2EEC [Yeti Noroit (4): 4/5] is created by the deck.
-Msg_NewCard $ card 4C210C [Yeti Noroit (4): 4/5] is created by the deck.
-Msg_NewCard $ card 4C0D54 [Ecuyere d'argent (1): 1/1] is created by the deck.
-Msg_NewCard $ card 4C03CC [Ecuyere d'argent (1): 1/1] is created by the deck.
-Msg_NewCard $ card 4C1284 [Ecuyere d'argent (1): 1/1] is created by the deck.
-Msg_ReceiveCard $ jerome receives card [Ecuyere d'argent (1): 1/1] obtained from the deck
-Msg_PlayerUpdate $ Change of cards for player jerome
-Msg_ReceiveCard $ jerome receives card [Ecuyere d'argent (1): 1/1] obtained from the deck
-Msg_PlayerUpdate $ Change of cards for player jerome
-Msg_ReceiveCard $ jerome receives card [Ecuyere d'argent (1): 1/1] obtained from the deck
-Msg_PlayerUpdate $ Change of cards for player jerome
-Msg_NewCard $ card 4C61C4 [Yeti Noroit (4): 4/5] is created by the deck.
-Msg_NewCard $ card 4C6394 [Yeti Noroit (4): 4/5] is created by the deck.
-Msg_NewCard $ card 4C49CC [Yeti Noroit (4): 4/5] is created by the deck.
-Msg_NewCard $ card 4C835C [Yeti Noroit (4): 4/5] is created by the deck.
-Msg_NewCard $ card 4CC74C [[SpellCard] La piece (0): Gain one mana crystal this turn only] is created by the deck.
-Msg_PlayerUpdate $ Change of cards for player IA
-Msg_ReceiveCard $ IA receives card [Yeti Noroit (4): 4/5] obtained from the deck
-Msg_PlayerUpdate $ Change of cards for player IA
-Msg_ReceiveCard $ IA receives card [Yeti Noroit (4): 4/5] obtained from the deck
-Msg_PlayerUpdate $ Change of cards for player IA
-Msg_ReceiveCard $ IA receives card [Yeti Noroit (4): 4/5] obtained from the deck
-Msg_PlayerUpdate $ Change of cards for player IA
-Msg_ReceiveCard $ IA receives card [Yeti Noroit (4): 4/5] obtained from the deck
-Msg_PlayerUpdate $ Change of cards for player IA
+Msg_NewCard $ card 3DB6B4 [Croq'zombie (1): 2/3] is created by the deck.
+Msg_NewCard $ card 3DE3A4 [Pretresse auchenai (4): 3/5] is created by the deck.
+Msg_NewCard $ card 3DA644 [Goule instable (2): 1/3] is created by the deck.
+Msg_ReceiveCard $ jerome receives card [Croq'zombie (1): 2/3] obtained from the deck
+Msg_PlayerUpdate $ Change of draw_init_cards for player jerome
+Msg_ReceiveCard $ jerome receives card [Pretresse auchenai (4): 3/5] obtained from the deck
+Msg_PlayerUpdate $ Change of draw_init_cards for player jerome
+Msg_ReceiveCard $ jerome receives card [Goule instable (2): 1/3] obtained from the deck
+Msg_PlayerUpdate $ Change of draw_init_cards for player jerome
+Msg_NewCard $ card 3E226C [Croq'zombie (1): 2/3] is created by the deck.
+Msg_NewCard $ card 3E0104 [Goule instable (2): 1/3] is created by the deck.
+Msg_NewCard $ card 3E3AEC [Croq'zombie (1): 2/3] is created by the deck.
+Msg_NewCard $ card 3E0E84 [Goule instable (2): 1/3] is created by the deck.
+Msg_NewCard $ card 3F52BC [[SpellCard] La piece (0): Gain one mana crystal this turn only] is created by the deck.
+Msg_PlayerUpdate $ Change of draw_init_cards coin for player IA
+Msg_ReceiveCard $ IA receives card [Croq'zombie (1): 2/3] obtained from the deck
+Msg_PlayerUpdate $ Change of draw_init_cards for player IA
+Msg_ReceiveCard $ IA receives card [Goule instable (2): 1/3] obtained from the deck
+Msg_PlayerUpdate $ Change of draw_init_cards for player IA
+Msg_ReceiveCard $ IA receives card [Croq'zombie (1): 2/3] obtained from the deck
+Msg_PlayerUpdate $ Change of draw_init_cards for player IA
+Msg_ReceiveCard $ IA receives card [Goule instable (2): 1/3] obtained from the deck
+Msg_PlayerUpdate $ Change of draw_init_cards for player IA
 Msg_ReceiveCard $ IA receives card [[SpellCard] La piece (0): Gain one mana crystal this turn only] obtained from the deck
-Msg_PlayerUpdate $ Change of cards for player IA
-Msg_PlayerUpdate $ Change of mana max_mana for player jerome
-Msg_NewCard $ card 4C2B54 [Ecuyere d'argent (1): 1/1] is created by the deck.
-Msg_ReceiveCard $ jerome receives card [Ecuyere d'argent (1): 1/1] obtained from the deck
-Msg_PlayerUpdate $ Change of cards for player jerome
-Msg_PlayerUpdate $ Change of cards for player jerome
+Msg_PlayerUpdate $ Change of draw_init_cards for player IA
+Msg_PlayerUpdate $ Change of add_mana_crystal for player jerome
+Msg_PlayerUpdate $ Change of add_mana_crystal for player IA
+Msg_ThingUpdate $ Change of remove_static_effect for [[jerome (Anduin Wrynn) 30/30]]
+Msg_PlayerUpdate $ Change of add_mana_crystal for player jerome
+Msg_NewCard $ card 3DB3EC [Croq'zombie (1): 2/3] is created by the deck.
+Msg_ReceiveCard $ jerome receives card [Croq'zombie (1): 2/3] obtained from the deck
+Msg_PlayerUpdate $ Change of give_card for player jerome
+Msg_PlayerUpdate $ Change of give_card for player jerome
 Msg_StartTurn $ Start of turn for jerome 
-Msg_PlayerUpdate $ Change of all for player jerome
-Msg_PlayerUpdate $ Change of mana for player jerome
-Msg_ThrowCard $ Player [jerome] plays card [Ecuyere d'argent (1): 1/1]
-Msg_PlayerUpdate $ Change of cards for player jerome
-Msg_AddMinion $ New Ecuyere d'argent (4CC3C4): 1/1 on the board for jerome at [Slot 0 (500.000000)]
+Msg_PlayerUpdate $ Change of start_turn for player jerome
+Msg_PlayerUpdate $ Change of use_mana for player jerome
+Msg_ThrowCard $ Player [jerome] plays card [Pretresse auchenai (4): 3/5]
+Msg_PlayerUpdate $ Change of throw_card for player jerome
+Msg_AddMinion $ New Pretresse auchenai (3F8DA4): 3:5 on the board for jerome at [Slot 0 (500.000000)]
+Msg_PlayerUpdate $ Change of minions for player jerome
+Msg_PlayerUpdate $ Change of use_mana for player jerome
+Msg_ThrowCard $ Player [jerome] plays card [Croq'zombie (1): 2/3]
+Msg_PlayerUpdate $ Change of throw_card for player jerome
+Msg_AddMinion $ New Croq'zombie (3DE4CC): 2:3 on the board for jerome at [Slot 1 (750.000000)]
 Msg_PlayerUpdate $ Change of minions for player jerome
 Msg_EndTurn $ End of turn for jerome 
-Msg_PlayerUpdate $ Change of all for player jerome
-Msg_PlayerUpdate $ Change of mana max_mana for player IA
-Msg_NewCard $ card 4C734C [Yeti Noroit (4): 4/5] is created by the deck.
-Msg_ReceiveCard $ IA receives card [Yeti Noroit (4): 4/5] obtained from the deck
-Msg_PlayerUpdate $ Change of cards for player IA
-Msg_PlayerUpdate $ Change of cards for player IA
+Msg_PlayerUpdate $ Change of end_turn for player jerome
+Msg_ThingUpdate $ Change of remove_static_effect for [[IA (Jaina Proudmoore) 30/30]]
+Msg_PlayerUpdate $ Change of add_mana_crystal for player IA
+Msg_NewCard $ card 3E047C [Goule instable (2): 1/3] is created by the deck.
+Msg_ReceiveCard $ IA receives card [Goule instable (2): 1/3] obtained from the deck
+Msg_PlayerUpdate $ Change of give_card for player IA
+Msg_PlayerUpdate $ Change of give_card for player IA
 Msg_StartTurn $ Start of turn for IA 
-Msg_PlayerUpdate $ Change of all for player IA
+Msg_PlayerUpdate $ Change of start_turn for player IA
 Msg_EndTurn $ End of turn for IA 
-Msg_PlayerUpdate $ Change of all for player IA
-Msg_ThingUpdate $ Change of static_effects for [Ecuyere d'argent (4CC3C4): 1/1]
-Msg_PlayerUpdate $ Change of mana max_mana for player jerome
-Msg_NewCard $ card 4C40B4 [Ecuyere d'argent (1): 1/1] is created by the deck.
-Msg_ReceiveCard $ jerome receives card [Ecuyere d'argent (1): 1/1] obtained from the deck
-Msg_PlayerUpdate $ Change of cards for player jerome
-Msg_PlayerUpdate $ Change of cards for player jerome
+Msg_PlayerUpdate $ Change of end_turn for player IA
+Msg_ThingUpdate $ Change of remove_static_effect for [[jerome (Anduin Wrynn) 30/30]]
+Msg_PlayerUpdate $ Change of add_mana_crystal for player jerome
+Msg_NewCard $ card 3DC0BC [Croq'zombie (1): 2/3] is created by the deck.
+Msg_ReceiveCard $ jerome receives card [Croq'zombie (1): 2/3] obtained from the deck
+Msg_PlayerUpdate $ Change of give_card for player jerome
+Msg_PlayerUpdate $ Change of give_card for player jerome
 Msg_StartTurn $ Start of turn for jerome 
-Msg_PlayerUpdate $ Change of all for player jerome
-Msg_ThingUpdate $ Change of static_effects for [Ecuyere d'argent (4CC3C4): 1/1]
-Msg_Damage $ [Ecuyere d'argent (4CC3C4): 1/1] inflicts 1 damages to [[IA (Jaina Proudmoore) 0/29]] 
-Msg_ThingUpdate $ Change of hp armor for [[IA (Jaina Proudmoore) 0/29]]
-Msg_PlayerUpdate $ Change of mana for player jerome
-Msg_ThrowCard $ Player [jerome] plays card [Ecuyere d'argent (1): 1/1]
-Msg_PlayerUpdate $ Change of cards for player jerome
-Msg_AddMinion $ New Ecuyere d'argent (4CA85C): 1/1 on the board for jerome at [Slot 1 (750.000000)]
-Msg_PlayerUpdate $ Change of minions for player jerome
-Msg_PlayerUpdate $ Change of mana for player jerome
-Msg_ThrowCard $ Player [jerome] plays card [Ecuyere d'argent (1): 1/1]
-Msg_PlayerUpdate $ Change of cards for player jerome
-Msg_AddMinion $ New Ecuyere d'argent (4CC19C): 1/1 on the board for jerome at [Slot 2 (875.000000)]
-Msg_PlayerUpdate $ Change of minions for player jerome
+Msg_PlayerUpdate $ Change of start_turn for player jerome
 Msg_EndTurn $ End of turn for jerome 
-Msg_PlayerUpdate $ Change of all for player jerome
-Msg_PlayerUpdate $ Change of mana max_mana for player IA
-Msg_NewCard $ card 4C8144 [Yeti Noroit (4): 4/5] is created by the deck.
-Msg_ReceiveCard $ IA receives card [Yeti Noroit (4): 4/5] obtained from the deck
-Msg_PlayerUpdate $ Change of cards for player IA
-Msg_PlayerUpdate $ Change of cards for player IA
+Msg_PlayerUpdate $ Change of end_turn for player jerome
+Msg_ThingUpdate $ Change of remove_static_effect for [[IA (Jaina Proudmoore) 30/30]]
+Msg_PlayerUpdate $ Change of add_mana_crystal for player IA
+Msg_NewCard $ card 3E5634 [Pretresse auchenai (4): 3/5] is created by the deck.
+Msg_ReceiveCard $ IA receives card [Pretresse auchenai (4): 3/5] obtained from the deck
+Msg_PlayerUpdate $ Change of give_card for player IA
+Msg_PlayerUpdate $ Change of give_card for player IA
 Msg_StartTurn $ Start of turn for IA 
-Msg_PlayerUpdate $ Change of all for player IA
+Msg_PlayerUpdate $ Change of start_turn for player IA
+Msg_PlayerUpdate $ Change of use_mana for player IA
+Msg_ThrowCard $ Player [IA] plays card [Goule instable (2): 1/3]
+Msg_PlayerUpdate $ Change of throw_card for player IA
+Msg_AddMinion $ New Goule instable (3DB3D4): 1:3 on the board for IA at [Slot 0 (500.000000)]
+Msg_PlayerUpdate $ Change of minions for player IA
+Msg_PlayerUpdate $ Change of use_mana for player IA
+Msg_HeroPower $ [[IA (Jaina Proudmoore) 30/30]] uses its hero power
+Msg_ThingUpdate $ Change of use_hero_power for [[IA (Jaina Proudmoore) 30/30]]
+Msg_Arrow_HeroPower $ [[IA (Jaina Proudmoore) 30/30]]'s hero power sends an arrow [*, RED_on_BLACK] to [Pretresse auchenai (3F8DA4): 3:4]
+Msg_Damage $ [[IA (Jaina Proudmoore) 30/30]] inflicts 1 damages to [Pretresse auchenai (3F8DA4): 3:4]
+Msg_ThingUpdate $ Change of hurt hp armor for [Pretresse auchenai (3F8DA4): 3:4]
+Msg_PlayerUpdate $ Change of use_mana for player IA
+Msg_ThrowCard $ Player [IA] plays card [Pretresse auchenai (4): 3/5]
+Msg_PlayerUpdate $ Change of throw_card for player IA
+Msg_AddMinion $ New Pretresse auchenai (3F8FB4): 3:5 on the board for IA at [Slot 0 (250.000000)]
+Msg_PlayerUpdate $ Change of minions for player IA
+Msg_PlayerUpdate $ Change of use_mana for player IA
+Msg_ThrowCard $ Player [IA] plays card [Croq'zombie (1): 2/3]
+Msg_PlayerUpdate $ Change of throw_card for player IA
+Msg_AddMinion $ New Croq'zombie (3E58CC): 2:3 on the board for IA at [Slot 0 (125.000000)]
+Msg_PlayerUpdate $ Change of minions for player IA
 Msg_EndTurn $ End of turn for IA 
-Msg_PlayerUpdate $ Change of all for player IA
-Msg_ThingUpdate $ Change of static_effects for [Ecuyere d'argent (4CC3C4): 1/1]
-Msg_ThingUpdate $ Change of static_effects for [Ecuyere d'argent (4CA85C): 1/1]
-Msg_ThingUpdate $ Change of static_effects for [Ecuyere d'argent (4CC19C): 1/1]
-Msg_PlayerUpdate $ Change of mana max_mana for player jerome
-Msg_NewCard $ card 4C14FC [Ecuyere d'argent (1): 1/1] is created by the deck.
-Msg_ReceiveCard $ jerome receives card [Ecuyere d'argent (1): 1/1] obtained from the deck
-Msg_PlayerUpdate $ Change of cards for player jerome
-Msg_PlayerUpdate $ Change of cards for player jerome
+Msg_PlayerUpdate $ Change of end_turn for player IA
+Msg_ThingUpdate $ Change of remove_static_effect for [[jerome (Anduin Wrynn) 30/30]]
+Msg_PlayerUpdate $ Change of add_mana_crystal for player jerome
+Msg_NewCard $ card 3DA004 [Goule instable (2): 1/3] is created by the deck.
+Msg_ReceiveCard $ jerome receives card [Goule instable (2): 1/3] obtained from the deck
+Msg_PlayerUpdate $ Change of give_card for player jerome
+Msg_PlayerUpdate $ Change of give_card for player jerome
 Msg_StartTurn $ Start of turn for jerome 
-Msg_PlayerUpdate $ Change of all for player jerome
-Msg_ThingUpdate $ Change of static_effects for [Ecuyere d'argent (4CC19C): 1/1]
-Msg_Damage $ [Ecuyere d'argent (4CC19C): 1/1] inflicts 1 damages to [[IA (Jaina Proudmoore) 0/28]] 
-Msg_ThingUpdate $ Change of hp armor for [[IA (Jaina Proudmoore) 0/28]]
-Msg_ThingUpdate $ Change of static_effects for [Ecuyere d'argent (4CA85C): 1/1]
-Msg_Damage $ [Ecuyere d'argent (4CA85C): 1/1] inflicts 1 damages to [[IA (Jaina Proudmoore) 0/27]] 
-Msg_ThingUpdate $ Change of hp armor for [[IA (Jaina Proudmoore) 0/27]]
-Msg_ThingUpdate $ Change of static_effects for [Ecuyere d'argent (4CC3C4): 1/1]
-Msg_Damage $ [Ecuyere d'argent (4CC3C4): 1/1] inflicts 1 damages to [[IA (Jaina Proudmoore) 0/26]] 
-Msg_ThingUpdate $ Change of hp armor for [[IA (Jaina Proudmoore) 0/26]]
-Msg_PlayerUpdate $ Change of mana for player jerome
-Msg_ThrowCard $ Player [jerome] plays card [Ecuyere d'argent (1): 1/1]
-Msg_PlayerUpdate $ Change of cards for player jerome
-Msg_AddMinion $ New Ecuyere d'argent (4CA78C): 1/1 on the board for jerome at [Slot 0 (250.000000)]
-Msg_PlayerUpdate $ Change of minions for player jerome
-Msg_PlayerUpdate $ Change of mana for player jerome
-Msg_ThrowCard $ Player [jerome] plays card [Ecuyere d'argent (1): 1/1]
-Msg_PlayerUpdate $ Change of cards for player jerome
-Msg_AddMinion $ New Ecuyere d'argent (4CBB84): 1/1 on the board for jerome at [Slot 4 (937.500000)]
-Msg_PlayerUpdate $ Change of minions for player jerome
-Msg_PlayerUpdate $ Change of mana for player jerome
-Msg_ThrowCard $ Player [jerome] plays card [Ecuyere d'argent (1): 1/1]
-Msg_PlayerUpdate $ Change of cards for player jerome
-Msg_AddMinion $ New Ecuyere d'argent (4C0EFC): 1/1 on the board for jerome at [Slot 5 (968.750000)]
-Msg_PlayerUpdate $ Change of minions for player jerome
-Msg_EndTurn $ End of turn for jerome 
-Msg_PlayerUpdate $ Change of all for player jerome
-Msg_PlayerUpdate $ Change of mana max_mana for player IA
-Msg_NewCard $ card 4C878C [Yeti Noroit (4): 4/5] is created by the deck.
-Msg_ReceiveCard $ IA receives card [Yeti Noroit (4): 4/5] obtained from the deck
-Msg_PlayerUpdate $ Change of cards for player IA
-Msg_PlayerUpdate $ Change of cards for player IA
-Msg_StartTurn $ Start of turn for IA 
-Msg_PlayerUpdate $ Change of all for player IA
-Msg_PlayerUpdate $ Change of mana for player IA
+Msg_PlayerUpdate $ Change of start_turn for player jerome
+Msg_PlayerUpdate $ Change of use_mana for player jerome
+Msg_HeroPower $ [[jerome (Anduin Wrynn) 30/30]] uses its hero power
+Msg_ThingUpdate $ Change of use_hero_power for [[jerome (Anduin Wrynn) 30/30]]
+Msg_Arrow_HeroPower $ [[jerome (Anduin Wrynn) 30/30]]'s hero power sends an arrow [+, GREEN_on_BLACK] to [Goule instable (3DB3D4): 1:1]
+Msg_Damage $ [[jerome (Anduin Wrynn) 30/30]] inflicts 2 damages to [Goule instable (3DB3D4): 1:1]
+Msg_ThingUpdate $ Change of hurt hp armor for [Goule instable (3DB3D4): 1:1]
+Msg_ThingUpdate $ Change of remove_static_effect for [Croq'zombie (3DE4CC): 2:1]
+Msg_Attack $ [Croq'zombie (3DE4CC): 2:1] attacks [Goule instable (3DB3D4): 1:0]
+Msg_Damage $ [Croq'zombie (3DE4CC): 2:1] inflicts 1 damages to [Goule instable (3DB3D4): 1:0]
+Msg_ThingUpdate $ Change of hurt hp armor for [Goule instable (3DB3D4): 1:0]
+Msg_ThingUpdate $ Change of add_static_effect for [Goule instable (3DB3D4): 1:0]
+Msg_Damage $ [Goule instable (3DB3D4): 1:0] inflicts 1 damages to [Croq'zombie (3DE4CC): 2:1]
+Msg_ThingUpdate $ Change of hurt hp armor for [Croq'zombie (3DE4CC): 2:1]
+Msg_RemoveMinion $ [Goule instable (3DB3D4): 1:0] dies for player [IA]
+Msg_PlayerUpdate $ Change of remove minions for player IA
+Msg_ZoneDamage $ [Goule instable (3DB3D4): 1:0] deals 1 damages to zone ` minion`
+Msg_Damage $ [Goule instable (3DB3D4): 1:0] inflicts 1 damages to [Croq'zombie (3E58CC): 2:2]
+Msg_ThingUpdate $ Change of hurt hp armor for [Croq'zombie (3E58CC): 2:2]
+Msg_Damage $ [Goule instable (3DB3D4): 1:0] inflicts 1 damages to [Pretresse auchenai (3F8FB4): 3:4]
+Msg_ThingUpdate $ Change of hurt hp armor for [Pretresse auchenai (3F8FB4): 3:4]
+Msg_Damage $ [Goule instable (3DB3D4): 1:0] inflicts 1 damages to [Pretresse auchenai (3F8DA4): 3:3]
+Msg_ThingUpdate $ Change of hurt hp armor for [Pretresse auchenai (3F8DA4): 3:3]
+Msg_Damage $ [Goule instable (3DB3D4): 1:0] inflicts 1 damages to [Croq'zombie (3DE4CC): 2:1]
+Msg_ThingUpdate $ Change of hurt hp armor for [Croq'zombie (3DE4CC): 2:1]

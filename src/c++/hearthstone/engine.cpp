@@ -9,13 +9,8 @@
 #include "events.h"
 #include "messages.h"
 #include "players.h"
+#include "effects.h"
 
-
-Engine::Engine(Player* player1, Player* player2) :
-  board(),
-  turn(0), is_simulation(false), player1(player1), player2(player2) {
-  set_default();
-}
 
 void Engine::set_default()  {
   // init global variables: everyone  can  access  board  or  send  messages
@@ -23,18 +18,19 @@ void Engine::set_default()  {
   Target::set_engine(this);
   Instance::set_engine(this);
   Action::set_engine(this);
-  //Effect::set_engine(this);
+  Effect::set_engine(this);
   Card::set_engine(this);
   Deck::set_engine(this);
   //Message::set_engine(this);
   Player::set_engine(this);
 }
 
-void Engine::start_game() {
-  players[0]->draw_init_cards(3, false);
-  turn = 1;
-  players[1]->draw_init_cards(4, true);
-  turn = 0;
+PInstance Engine::random(ListPInstance& instances) {
+  // default implementation
+  if (len(instances))
+    return instances[randint(0, len(instances) - 1)];
+  else
+    return PInstance();
 }
 
 ListAction Engine::list_player_actions(Player* player) {
@@ -49,6 +45,7 @@ ListAction Engine::list_player_actions(Player* player) {
 
 void Engine::play_turn() {
   Player* player = start_turn();
+  board.clean_deads();
   wait_for_display();
 
   bool exit = false;
@@ -57,37 +54,34 @@ void Engine::play_turn() {
     Instance* choice = nullptr;
     Slot slot;
     const Action* action = player->choose_actions(actions, choice, slot); // can be Act_EndTurn
+    exit = issubclass(action, const Act_EndTurn) != nullptr; // do it before action is destroyed
     action->execute(player->state.hero.get(), choice, slot);
-    exit = issubclass(action, const Act_EndTurn)!=nullptr; // do it before action is destroyed
+    board.clean_deads();  // just in case
     wait_for_display();
   }
-  turn += 1;
+  board.state.turn += 1;
 }
 
 bool Engine::is_game_ended() const {
-  return players[0]->state.hero->is_dead() || players[1]->state.hero->is_dead();
+  return board.is_game_ended();
 }
 
-Player* Engine::get_winner() {
-  bool dead0 = players[0]->state.hero->is_dead();
-  bool dead1 = players[1]->state.hero->is_dead();
-  if (dead0 && !dead1)  return players[1];
-  if (!dead0 && dead1)  return players[0];
-  return nullptr; // match nul
+const Player* Engine::get_winner() const {
+  return board.get_winner();
 }
 
 
 // Game actions ----------------------------
 
 Player* Engine::start_turn() {
-  Player* player = get_current_player();
-  board.start_turn(player);
+  Player* player = board.get_current_player();
+  board.start_turn(player); // exec first to remove insensible
   signal(player->state.hero.get(), Event::StartTurn);
   player->start_turn();
   return player;
 }
 bool Engine::end_turn() {
-  Player* player = get_current_player();
+  Player* player = board.get_current_player();
   board.end_turn(player);
   signal(player->state.hero.get(), Event::EndTurn);
   player->end_turn();
@@ -96,48 +90,145 @@ bool Engine::end_turn() {
 
 bool Engine::draw_card(Instance* caster, Player* player, int nb ) {
   while (nb-->0)
-    player->draw_card();
+    player->draw_card(caster);
   return true;
 }
 
 bool Engine::play_card(Instance* caster, const Card* _card, int cost) {
   Player* player = caster->player;
   PCard card = findP(player->state.cards, _card);  
-  player->use_mana(cost);
   player->throw_card(card);
   return true;
 }
 
 bool Engine::add_thing(Instance* caster, PThing thing, const Slot& slot) {
-  return board.add_thing(thing, slot);
+  bool res = board.add_thing(thing, slot);
+  return res;
 }
-bool add_secret(Instance* caster, PSecret secret){
+bool Engine::add_secret(Instance* caster, PSecret secret) {
   NI;
   return true;
 }
 
+inline static bool is_power_of_2(const long v) {
+  return  v && !(v & (v - 1));
+}
+void Engine::register_trigger(Effect* eff, int ev) {
+  if (is_power_of_2(ev))
+    board.state.triggers[Event(ev)].push_back(eff);
+  else {  // multiple bits are active
+    for (int i = 1; ev; i <<= 1, ev >>= 1)
+      if (ev & 1) // bit i is active
+        board.state.triggers[Event(i)].push_back(eff);
+  }
+}
+void Engine::unregister_trigger(Effect* eff, int ev) {
+  if (is_power_of_2(ev))
+    remove(board.state.triggers[Event(ev)], eff);
+  else {  // multiple bits are active
+    for (int i = 1; ev; i <<= 1, ev >>= 1)
+      if (ev & 1) // bit i is active
+        remove(board.state.triggers[Event(i)], eff);
+  }
+}
 void Engine::signal(Instance* caster, Event event) {
-  board.clean_deads();
+  assert(is_power_of_2(event));
+  for (auto& e : board.state.triggers[event])
+    if (e->is_triggered(e, event, caster)) {
+      // check that trigger is not dead
+      assert(!issubclass(e->owner, Thing) || !issubclass(e->owner, Thing)->is_dead());
+      e->trigger(event, caster);
+    }
 }
 
-bool Engine::heal(Instance* _from, int hp, Instance* _to) {
-  Thing* from = CAST(_from, Thing);
+bool Engine::heal(Instance* from, int hp, Instance* _to) {
+  if (from && from->player->state.auchenai)
+    return damage(from, hp, _to);
   Thing* to = CAST(_to, Thing);
   int n = to->heal(hp, from);
   return n>0;
 }
-
-bool Engine::damage(Instance* _from, int hp, Instance* _to) {
-  Thing* from = CAST(_from, Thing);
+bool Engine::damage(Instance* from, int hp, Instance* _to) {
   Thing* to = CAST(_to, Thing);
   int n = to->hurt(hp, from);
   return n>0;
 }
 
-bool Engine::attack(Thing* from, Thing* target) {
-  assert(from && target);
-  from->attack(target);
+bool Engine::HeroHeal(Instance* from, int hp, Instance* to) {
+  if (from && from->player->state.auchenai) 
+    return HeroDamage(from, hp, to);
+  if (from) // velen mutliplier
+    hp *= (1 << from->player->state.velen);
+  return heal(from, hp, to);
+}
+bool Engine::HeroDamage(Instance* from, int hp, Instance* to) {
+  if (from) // velen mutliplier
+    hp *= 1 << from->player->state.velen;
+  return damage(from, hp, to);
+}
+
+bool Engine::SpellHeal(Instance* from, int hp, Instance* to) {
+  if (from && from->player->state.auchenai)
+    return SpellDamage(from, hp, to);
+  if (from) // velen mutliplier
+    hp *= 1 << from->player->state.velen;
+  return heal(from, hp, to);
+}
+bool Engine::SpellDamage(Instance* from, int hp, Instance* to) {
+  if (from) {
+    hp += from->player->state.spell_power; // spell power
+    hp *= 1 << from->player->state.velen; // velen mutliplier
+  }
+  return damage(from, hp, to);
+}
+
+bool Engine::heal_zone(Instance* from, int hp, Target zone) {
+  ListPInstance creatures = zone.resolve(from->player, from);
+  Engine* engine = this;
+  SEND_DISPLAY_MSG(Msg_ZoneHeal, GETP(from), zone, hp);
+  for (auto& i : creatures) {
+    Creature* creature = CAST(i.get(), Creature);
+    if (!creature->is_dead())
+      creature->heal(hp, from);
+  }
   return true;
+}
+bool Engine::damage_zone(Instance* from, int hp, Target zone) {
+  ListPInstance creatures = zone.resolve(from->player, from);
+  Engine* engine = this; 
+  SEND_DISPLAY_MSG(Msg_ZoneDamage, GETP(from), zone, hp);
+  for (auto& i : creatures) {
+    Creature* creature = CAST(i.get(), Creature);
+    if (!creature->is_dead())
+      creature->hurt(hp, from);
+  }
+  return true;
+}
+bool Engine::SpellHeal_zone(Instance* from, int hp, Target zone) {
+  if (from && from->player->state.auchenai)
+    return SpellDamage_zone(from, hp, zone);
+  if (from) // velen mutliplier
+    hp *= 1 << from->player->state.velen;
+  return heal_zone(from, hp, zone);
+}
+bool Engine::SpellDamage_zone(Instance* from, int hp, Target zone) {
+  if (from) {
+    hp += from->player->state.spell_power; // spell power
+    hp *= 1 << from->player->state.velen; // velen mutliplier
+  }
+  return damage_zone(from, hp, zone);
+}
+
+
+bool Engine::attack(Creature* from, Creature* target) {
+  assert(from && target);
+  signal(from, Event::StartAttack);
+  if(from->attack(target)) {
+    signal(from, Event::EndAttack);
+    return true;
+  }
+  else
+    return false;
 }
 
 //void Engine::send_display_message(PMessage msg) {
@@ -150,7 +241,7 @@ bool Engine::attack(Thing* from, Thing* target) {
 //void SimulationEngine::save_state(int num = 0) {
 //  /*to  run  a  simulation  based  on  current  state,
 //  and  see  what  happens  if  we  take  some  action*/
-//  saved_turn[num] = turn;
+//  saved_turn[num] = state.turn;
 //  board.save_state(num);
 //}
 

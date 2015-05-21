@@ -13,7 +13,8 @@ private:
 
   Collection(); // add all possible cards to cardbook
 
-  PCard add(PCard card);
+  template <typename TCard>
+  TCard add(TCard card);
 
   static Collection only_instance;
 
@@ -23,13 +24,20 @@ public:
   }
 
   PConstCard get_by_name(const string& name) const {
-    assert(in(name, by_name));
+    if (!in(name, by_name))
+      error("Error: card '%s' is not in the collection", name.c_str());
     return by_name.at(name);
   }
   PConstCard get_by_id(int id) const {
     assert(0 <= id && id < len(by_id));
     return by_id[id];
   }
+
+  PConstCardHero get_hero(const string& name) const;
+  PConstCardMinion get_minion(const string& name) const;
+  PConstCardWeapon get_weapon(const string& name) const;
+  PConstCardSecret get_secret(const string& name) const;
+
   const ListPConstCard& get_collectibles() const {
     return collectibles;
   }

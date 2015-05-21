@@ -12,13 +12,14 @@ struct Player {
   Deck* const deck;
   struct State {
     int mana, max_mana;
-    int n_dead;
     ListPCard cards;
     PHero hero;
     PWeapon weapon;
     ListPMinion minions;
     vector<float> minions_pos;
     ListPSecret secrets;
+    int spell_power;
+    char auchenai, velen; // how many are present on my side ?
   } state;
   PVizPlayer viz;
 
@@ -47,33 +48,24 @@ struct Player {
   state.saved = dict()*/
 
   string tostr() const;
+  ListAction list_actions();
 
   bool add_thing(PInstance thing, Slot pos);
-
-  void remove_thing(PInstance thing);
+  Slot remove_thing(PInstance thing);
 
   void add_mana_crystal(int nb, bool useit = false);
-
   void use_mana(int nb);
-
   void gain_mana(int nb);
 
   void start_turn();
-
   void end_turn();
 
-  ListAction list_actions();
-
-  void draw_card();
-
+  void draw_card(Instance* origin);
   void give_card(PCard card, Instance* origin);
-
   void throw_card(PCard card);
 
   virtual ListPCard mulligan(ListPCard & cards) const = 0;
-
   void draw_init_cards(int nb, bool coin = false);
-
   virtual const Action* choose_actions(ListAction actions, Instance*& choice, Slot& slot) const = 0;
 
   float score_situation();
@@ -107,6 +99,8 @@ struct RandomPlayer : public Player {
 
   virtual const Action* choose_actions(ListAction actions, Instance*& choice, Slot& slot) const;
 };
+
+
 
 
 

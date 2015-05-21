@@ -39,10 +39,6 @@ struct Instance {
 
   virtual void popup() { NI; }
 
-  //virtual void start_turn(Player* current) { NI; }
-
-  //virtual void end_turn(Player* current) { NI; }
-
   virtual string tostr() const = 0;
 
   //virtual PInstance copy() const = 0;
@@ -55,41 +51,52 @@ struct Instance {
 
 struct Thing : public Instance {
   enum StaticEffect {
-    taunt         = 0x00000001,
-    windfury      = 0x00000002,
-    divine_shield = 0x00000004,
-    frozen        = 0x00000008,
-    freezer       = 0x00000010,
-    stealth       = 0x00000020,
-    untargetable  = 0x00000040,
-    fresh         = 0x00000080,
-    dead          = 0x00000100,
-    enraged       = 0x00000200,
-    charge        = 0x00000400,
-    insensible    = 0x00000800,
-    death_rattle  = 0x00001000, // minion has a death_rattle
-    trigger       = 0x00002000, // minion contains some triggers
-    silenced      = 0x00004000,
+    #define ENUM(i)  (1<<i)
+    dead          = ENUM(0),
+    taunt         = ENUM(1),
+    windfury      = ENUM(2),
+    divine_shield = ENUM(3),
+    frozen        = ENUM(4),
+    freezer       = ENUM(5),
+    stealth       = ENUM(6),
+    untargetable  = ENUM(7),
+    fresh         = ENUM(8),
+    enraged       = ENUM(9),
+    charge        = ENUM(10),
+    insensible    = ENUM(11),
+    death_rattle  = ENUM(12), // minion has a death_rattle
+    trigger       = ENUM(13), // minion contains some triggers
+    silenced      = ENUM(14),
+    aura          = ENUM(15),
+    #undef ENUM
   };
 
   struct State {
-    int hp, max_hp, armor;  // BY CONVENTION: hp always reprensent current actual hp
-    int atq, max_atq;       // BY CONVENTION: atq always represent current actual atq
-    int tmp_hp, tmp_atq;    // get canceled at the end of the turn
-    //int aura_hp, aura_atq;  // get canceled when aura creature dies. Should not be taken into account sometimes.
+    int hp, max_hp, armor;  // always reprensent current actual (total) hp
+    int atq, max_atq;       // always represent current actual (total) atq
+    int tmp_atq;            // get canceled at the end of each turn
+    int aura_hp, aura_atq;  // get canceled when aura creature dies. 
+                            // Should be ignored sometimes, eg. when x2 the atq or hp
     
     int n_atq, n_max_atq;   // number of remaining attacks
     int n_remaining_power;  // number of remaining hero power (for hero)
 
     int static_effects; // bit-OR combination of StaticEffect
     int spell_power;
+
+    // IMPORTANT: when adding dynamic stuff here, don't forget to modify copy constructor
+    ListPEffect effects;  // all effects which are not in lists below (NO DUPLICATES)
+    ListPEff_Presence presence_effects;  // triggered on popup and canceled on depop
+    ListPEff_DeathRattle death_rattles; // executed when thing dies
   } state;
 
   PVizThing viz_thing();
-
   PConstCardThing card_thing() const;
 
   Thing(int atq, int hp, int static_effects = 0);
+  Thing(const Thing& copy);
+
+  virtual void list_actions(ListAction& actions) const = 0;
 
 #define IS_EFFECT(eff)  bool is_##eff() const {return (state.static_effects & StaticEffect::##eff)!=0;}
   IS_EFFECT(taunt);
@@ -106,6 +113,7 @@ struct Thing : public Instance {
   IS_EFFECT(insensible);
   IS_EFFECT(death_rattle);
   IS_EFFECT(trigger);
+  IS_EFFECT(aura);
 #undef IS_EFFECT
   bool is_targetable(Player* by_who) const {
     if (player != by_who && is_stealth())  return false;
@@ -115,88 +123,70 @@ struct Thing : public Instance {
     if (is_untargetable()) return false;
     return is_targetable(by_who);
   }
-
   void add_static_effect(StaticEffect eff, bool inform=true);
   void remove_static_effect(StaticEffect eff, bool inform=true);
 
-  virtual void list_actions(ListAction& actions) const = 0;
-
   virtual void popup(); // init when created
 
-  void start_turn(Player* current);  // auto trigger at start of MY turn
-
-  void end_turn(Player* current);  // auto trigger at end of MY turn
+  virtual void start_turn(Player* current);
+  virtual void end_turn(Player* current);
 
   bool is_damaged() const { return state.hp < state.max_hp; }
 
-  virtual void attack(Thing* target) = 0;
+  int hurt(int damage, Instance* caster = nullptr);
+  int heal(int hp, Instance* caster = nullptr);
 
-  int hurt(int damage, Thing* caster = nullptr);
+  void change_hp(int hp, char type='n');
+  void change_atq(int atq, char type='n');
 
-  int heal(int hp, Thing* caster = nullptr);
+  void silence(bool die=false);
 
-  void change_hp(int hp);
-
-  void change_atq(int atq);
-
-  void silence();
-
-  void check_dead();
-
-  void kill_me();
+  void check_dead();  // am I dead ?
+  void destroy(bool clean_now = true);  // order of self-destruction
+  virtual void signal_death();  // i am dead (called by Board::clean_deads)
 };
 
 
 ////// ------------ Creature (hero or minion) ----------
 
 struct Creature : public Thing {
+  enum Breed {
+    None = 0,
+    Beast,
+    Demon,
+  };
+  const Breed breed;
   const Act_Attack act_attack;
 
-  Creature(int atq, int hp, int static_effects = 0) :
-    Thing(atq, hp, static_effects), act_attack(nullptr) {}
-
+  Creature(int atq, int hp, int static_effects = 0, Breed breed = Breed::None) :
+    Thing(atq, hp, static_effects), breed(breed), act_attack(nullptr) {}
   Creature(const Creature& copy) :
-    Thing(copy), act_attack(this) {}
+    Thing(copy), breed(copy.breed), act_attack(this) {}
 
-  virtual void attack(Thing* target);
+  bool can_attack() const {
+    return !(state.atq==0 || state.n_atq >= state.n_max_atq ||
+            (is_fresh() && !is_charge()) || is_frozen());
+  }
+
+  virtual bool attack(Creature* target);
 };
 
 
 ////// ------------ Minion ----------
 
 struct Minion : public Creature {
-  enum Category {
-    None = 0,
-    Beast,
-    Demon,
-  } category;
-
   PVizMinion viz_minion();
-
   PConstCardMinion card_minion() const;
-
-  Minion(int atq, int hp, int static_effects = 0, Category cat = Category::None) :
-    Creature(atq, hp,static_effects), category(cat) {}
   
+  Minion(int atq, int hp, int static_effects = 0, Breed breed = Breed::None) :
+    Creature(atq, hp, static_effects, breed) {}
   Minion(const Minion& copy, Player* player);
 
-  //virtual PInstance copy() const;
-
   virtual string tostr() const;
-
-  virtual void popup();
-
   virtual void list_actions(ListAction& actions) const;
 
-  //void hurt(int damage, Thing* caster = nullptr) {
-  //  assert(damage > 0);
-  //  if(is_divine_shield()) {
-  //    remove_static_effect(StaticEffect::divine_shield);
-  //    UPDATE_STATUS("static_effects");
-  //  }
-  //  else
-  //    Creature::hurt(damage, caster);
-  //}
+  virtual void popup();
+  virtual void signal_death();
 
   //void ask_for_death() {
   //  add_static_effect(StaticEffect::dead);
@@ -222,9 +212,7 @@ struct Minion : public Creature {
   //      Heal	0.34
   //      Self hero - heal	0.34
   //      Charge	0.33
-
   //      intrisic ? ? -0.17
-
   //      Opponent draw card - 1.98
   //      Discard cards - 1.25
   //      Overload - 0.83
@@ -251,9 +239,9 @@ struct Minion : public Creature {
 ////// ------------ Hero ----------
 
 struct Hero : public Creature {
-  PVizHero viz_hero();
-
   PConstCardHero card_hero() const;
+  PConstWeapon weapon() const;
+  PVizHero viz_hero();
 
   Hero(int hp); // creator for collection
   Hero(PConstCardHero hero); 
@@ -264,11 +252,17 @@ struct Hero : public Creature {
 
   virtual void list_actions(ListAction& actions) const;
 
-  //virtual void start_turn();  // done in Thing::
+  virtual void start_turn(Player* current);
+  virtual void end_turn(Player* current);
+
+  void equip_weapon();
+  void unequip_weapon();
 
   void use_hero_power();
 
   void add_armor(int n);
+
+  virtual bool attack(Creature* target);
 
   virtual float score_situation();
 };
@@ -277,17 +271,20 @@ struct Hero : public Creature {
 ////// ------------ Weapon ----------
 
 struct Weapon : public Thing {
-  //const Act_WeaponAttack act_attack;
   PVizWeapon viz_weapon();
+  PConstCardWeapon card_weapon() const;
 
-  //Weapon(const PCardWeapon card, Player* player) :
-  //  Thing(card, controller) {}
+  Weapon(int atq, int hp, int static_effects = 0) :
+    Thing(atq, hp, static_effects) {}
 
-  //virtual PInstance copy() const { return ; }
+  Weapon(const Weapon& copy, Player* controller);
 
-  virtual void list_actions(ListAction& actions) const{ NI; }
+  virtual string tostr() const;
 
-  virtual void attack(Thing* target);
+  virtual void popup();
+  virtual void signal_death();
+
+  virtual void list_actions(ListAction& actions) const {} // no action
 
   virtual float score_situation();
 };

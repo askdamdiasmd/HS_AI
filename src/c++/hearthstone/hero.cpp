@@ -8,9 +8,12 @@
 PConstCardHero Hero::card_hero() const { 
   return issubclassP(card, const Card_Hero); 
 }
+PConstWeapon Hero::weapon() const { 
+  return player->state.weapon; 
+}
 
 Hero::Hero(int hp):
-  Creature(0, hp) {
+  Creature(0, hp, StaticEffect::charge) {
 }
 
 Hero::Hero(PConstCardHero hero) :
@@ -20,25 +23,67 @@ Hero::Hero(PConstCardHero hero) :
 }
 
 string Hero::tostr() const {
-  return string_format("[%s (%s) %d/%d]", player->name.c_str(), card->name.c_str(), state.atq, state.hp);
+  return string_format("[%s (%s) %s%s%d/%d]", player->name.c_str(), card->name.c_str(), 
+         state.atq ? string_format("%dW : ",state.atq).c_str() : "", 
+         state.armor ? string_format("%dA+", state.armor).c_str() : "", state.hp, state.max_hp);
 }
 
 void Hero::list_actions(ListAction& actions) const {
   if (state.n_remaining_power)
     card_hero()->ability->list_actions(actions);
 
-  if (state.n_atq < state.n_max_atq && state.atq>0 && !is_frozen())
+  if (can_attack())
     actions.push_back(&act_attack);
+}
+
+void Hero::start_turn(Player* current) {
+  if (player == current) {
+    // for heroes
+    state.n_remaining_power = 1;
+    remove_static_effect(StaticEffect::insensible);
+
+    // equip weapon
+    equip_weapon();
+  }
+  Creature::start_turn(current);
+}
+void Hero::end_turn(Player* current) {
+  Creature::end_turn(current);
+  if (player == current) {
+    // unequip weapon at the end of turn
+    unequip_weapon();
+  }
+}
+
+void Hero::equip_weapon() {
+  const PWeapon& w = player->state.weapon;
+  if (w) change_atq(w->state.atq);
+}
+void Hero::unequip_weapon() {
+  const PWeapon& w = player->state.weapon;
+  if (w)  change_atq(-w->state.atq);
 }
 
 void Hero::use_hero_power() {
   state.n_remaining_power -= 1;
   assert(state.n_remaining_power >= 0);
+  UPDATE_THING("use_hero_power", Msg_HeroPower, GETP(this));
 }
 
 void Hero::add_armor(int n) {
   state.armor += n;
   UPDATE_THING_STATE("armor");
+}
+
+bool Hero::attack(Creature* target) {
+  if (Creature::attack(target)) {
+    // lose durability on the weapon if any equipped
+    if (player->state.weapon)
+      player->state.weapon->change_hp(-1);
+    return true;
+  }
+  else
+    return false;
 }
 
 float Hero::score_situation() {
@@ -48,6 +93,7 @@ float Hero::score_situation() {
   return ((19767 - 233 * life)*life) / 20000.f;
 }
 
+// Hero power -----------
 
 Card_HeroAbility::Card_HeroAbility(int cost, string name, FuncAction actions, Target target) :
   Card(cost, name), action(this, cost, actions, target | Target::targetable ) {}

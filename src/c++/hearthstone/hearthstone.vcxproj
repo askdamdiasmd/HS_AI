@@ -49,7 +49,7 @@
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(ProjectDir)lib\pdcurses.lib</AdditionalDependencies>
+      <AdditionalDependencies>$(ProjectDir)lib\jerome_win32_pdcurses34d.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -74,12 +74,14 @@
     <ClCompile Include="creatures.cpp" />
     <ClCompile Include="curses_interface.cpp" />
     <ClCompile Include="decks.cpp" />
+    <ClCompile Include="effects.cpp" />
     <ClCompile Include="engine.cpp" />
     <ClCompile Include="hero.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="messages.cpp" />
     <ClCompile Include="players.cpp" />
     <ClCompile Include="targets.cpp" />
+    <ClCompile Include="validation.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="actions.h" />
@@ -96,6 +98,7 @@
     <ClInclude Include="messages.h" />
     <ClInclude Include="players.h" />
     <ClInclude Include="targets.h" />
+    <ClInclude Include="validation.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

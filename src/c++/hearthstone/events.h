@@ -2,30 +2,43 @@
 #define __EVENTS_H__
 /* List of codes for each possible event/trigger */
 
+#define ENUM(i) (1<<(i))
+
 enum Event {
-  StartTurn,
-  EndTurn,
+  StartTurn       = ENUM(0),
+  EndTurn         = ENUM(1),
 
-  StartHeroPower,
-  EndHeroPower,
+  StartHeroPower  = ENUM(2),
+  EndHeroPower    = ENUM(3),
   
-  StartSpell,
-  EndSpell,
+  StartSpell      = ENUM(4),
+  EndSpell        = ENUM(5),
   
-  StartAttack,
-  EndAttack,
+  StartAttack     = ENUM(6),
+  Attack          = ENUM(7),
+  EndAttack       = ENUM(8),
   
-  AddMinion,
-  AddWeapon,
-  AddSecret,
-  AddHero,
+  AddMinion       = ENUM(9),
+  AddWeapon       = ENUM(10),
+  AddSecret       = ENUM(11),
+  AddHero         = ENUM(12),
 
-  MinionPopup,
-  WeaponPopup,
-  SecretPopup,
-  HeroPopup,
+  MinionPopup     = ENUM(13),
+  WeaponPopup     = ENUM(14),
+  SecretPopup     = ENUM(15),
+  HeroPopup       = ENUM(16),
+  ThingPopup      = MinionPopup | WeaponPopup,
+
+  RemoveMinion    = ENUM(17),
+  RemoveWeapon    = ENUM(18),
+  RemoveSecret    = ENUM(19),
+  RemoveThing     = RemoveMinion | RemoveWeapon,
+
+  MinionDead      = ENUM(20),
+  WeaponDead      = ENUM(21),
+  ThingDead       = MinionDead | WeaponDead,
 };
 
-
+#undef ENUM
 
 #endif

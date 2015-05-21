@@ -13,17 +13,32 @@
 
 Engine* Board::engine = nullptr;
 
-bool Board::add_thing(PThing thing, const Slot& pos) {
-  if (thing->player->add_thing(thing, pos)) { // will send signal
-    state.everybody.push_back(thing);
-    thing->popup(); // will send signal
-    return true;
-  }
-  return false;
+Board::Board(Player* player1, Player* player2) :
+  player1(player1), player2(player2) {
+  state.turn = 0;
+  state.n_dead = 0;
+  state.everybody.push_back(player1->state.hero);
+  state.everybody.push_back(player2->state.hero);
 }
-void Board::remove_thing(PThing m) {
-  remove(state.everybody, m);
-  m->player->remove_thing(m);
+
+bool Board::is_game_ended() const {
+  return players[0]->state.hero->is_dead() || players[1]->state.hero->is_dead();
+}
+const Player* Board::get_winner() const {
+  bool dead0 = players[0]->state.hero->is_dead();
+  bool dead1 = players[1]->state.hero->is_dead();
+  if (dead0 && !dead1)  return players[1];
+  if (!dead0 && dead1)  return players[0];
+  return nullptr; // match nul
+}
+
+void Board::deal_init_cards() {
+  assert(state.turn == 0);
+  state.turn = -2; 
+  players[0]->draw_init_cards(3, false);
+  state.turn = -1;
+  players[1]->draw_init_cards(4, true);
+  state.turn = 0;
 }
 
 void Board::start_turn(Player* current) {
@@ -35,8 +50,55 @@ void Board::end_turn(Player* current) {
     i->end_turn(current);
 }
 
+void Board::create_thing(PThing thing) {
+  state.everybody.push_back(thing); // do this FIRST
+}
+bool Board::add_thing(PThing thing, const Slot& pos) {
+  assert(in(thing, state.everybody)); // create_thing MUST be called before
+  if (thing->player->add_thing(thing, pos)) { // will send signal
+    thing->popup(); // will send signal
+    return true;
+  }
+  else {
+    state.everybody.pop_back(); // oops cancel
+    return false;
+  }
+}
+
 void Board::clean_deads() {
-  assert(state.n_dead == 0);
+  ListPThing all_deads;
+
+  while (state.n_dead) {
+    if (engine->is_game_ended())  
+      return; // don't care about the rest
+    ListPThing deads;
+    
+    // search deads
+    for (auto& i : state.everybody)
+      if (i->is_dead()) {
+        deads.push_back(i);
+        state.n_dead--;
+      }
+    assert(state.n_dead == 0);
+
+    // remove deads from board
+    assert(state.dead_pos.empty());
+    for (auto& i : deads) 
+      // signal Event::RemoveThing
+      state.dead_pos[i.get()] = i->player->remove_thing(i);
+
+    // trigger death-rattles once cleaning is done
+    for (auto& i : deads) {
+      all_deads.push_back(i);
+      i->signal_death();  // signal Event::ThingDead, then trigger death_rattles
+      remove(state.everybody, i);  // remove from everybody
+    }
+    state.dead_pos.clear(); // was temporary
+  }
+
+  // finally 
+  for (auto& i : all_deads) 
+    i->silence(true); // remove auras
 }
 
 ListSlot Board::get_free_slots(Player* player) const {
@@ -54,21 +116,26 @@ int Board::get_nb_free_slots(const Player* player) const {
 }
 
 
-Slot Board::get_minion_pos(PInstance i) {
-  PMinion m = issubclassP(i, Minion);
+Slot Board::get_minion_pos(Instance* i) {
+  Minion* m = issubclass(i, Minion);
   if (m) {
     Player* pl = m->player;
-    int pos = index(pl->state.minions, m);
-    assert(pos >= 0);
-    float rel_index = pl->state.minions_pos[pos + 1];
-    return Slot(pl, pos, rel_index);
+    int pos = indexP(pl->state.minions, m);
+    if (pos < 0) {
+      Slot slot = state.dead_pos.at(m);
+      slot.pos = -1;  // signal that it's not here anymore
+      return slot;
+    } else {
+      float rel_index = pl->state.minions_pos[pos + 1];
+      return Slot(pl, pos, rel_index);
+    }
   }
   else
     return Slot(m->player);
 }
 
 float Board::score_situation(Player* player) {
-  Player* adv = engine->get_other_player(player);
+  Player* adv = engine->board.get_other_player(player);
   if (player->state.hero->is_dead())
     return -INF;
   else if (adv->state.hero->is_dead())
