@@ -1,0 +1,15 @@
+Setup:
+ Heroes:
+  P1 Hero Jaina Proudmoore name=Jerome
+  P2 Hero Anduin Wrynn name=IA
+ Decks:
+  P1 The Coin
+ Board:
+  P1 Minion Haunted Creeper hp=1
+  P2 Minion Unstable Ghoul hp=1
+
+Action:
+  P1 Attack HC -> UG
+
+Result:
+ Board:

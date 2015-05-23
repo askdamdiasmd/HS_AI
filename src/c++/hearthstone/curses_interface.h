@@ -109,11 +109,12 @@ struct VizSlot : public VizPanel {
 //### General thing (minion, weapon, hero...)------
 
 struct VizInstance : public VizPanel {
-  const PInstance obj;
+  PConstInstance obj;
   PConstCardInstance card;
   string name;
 
   VizInstance(const PInstance obj);
+  virtual ~VizInstance(){}
 };
 
 struct VizThing : public VizInstance {
@@ -204,6 +205,7 @@ struct VizPlayer {
   Player::State state;
 
   VizPlayer(Player* player);
+  virtual ~VizPlayer();
 
   //bool check() const;
   void update_state(const Player::State& from);
@@ -214,12 +216,12 @@ struct VizPlayer {
 
 struct VizCard : public VizPanel {
   static const pos_t card_size;
-  PCard card;
+  PConstCard card;
   WINDOW* small_win;
   PANEL* small_panel;
   int cost;
 
-  VizCard(PCard card);
+  VizCard(PConstCard card);
   virtual ~VizCard();
 
   virtual WINDOW* draw(const ArgMap& args);
@@ -228,15 +230,16 @@ struct VizCard : public VizPanel {
 //### Board --------
 
 struct VizBoard {
-  Board* board;
-  const bool switch_heroes;
-  const bool animated;
-  static double accel;
+  static bool switch_heroes, animated;
+  static double accel; // time acceleration
+
+  Board* const board;
   PVizButton end_turn;
   unordered_map<const Player*, PVizHeroPowerButton> hero_power_buttons;
   ListPInstance deads;  // deleted at the end of each wait_display
 
-  VizBoard(Board* board, bool switch_heroes = false, bool animated = true);
+  VizBoard(Board* board);
+  ~VizBoard();
 
   static void sleep(double seconds);
   static double now();
@@ -270,9 +273,9 @@ struct HumanPlayer : public Player {
   HumanPlayer(PHero hero, string name, Deck* deck) :
     Player(hero, name, deck) {}
 
-  virtual ListPCard mulligan(ListPCard & cards) const;
+  virtual ListPConstCard mulligan(ListPConstCard & cards);
 
-  virtual const Action* choose_actions(ListAction actions, Instance*& choice, Slot& slot) const;
+  virtual const Action* choose_actions(ListAction actions, Instance*& choice, Slot& slot);
 };
 
 
@@ -282,6 +285,8 @@ struct CursesEngine : public Engine {
   FILE* logfile;
 
   CursesEngine();
+
+  virtual void init_players(Player* player1, Player* player2);
 
   virtual void wait_for_display();
 };

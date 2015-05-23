@@ -39,11 +39,15 @@ string Msg_ThrowCard::tostr() const {
   return string_format("Player [%s] plays card [%s]", caster->player->name.c_str(), cstr(card));
 }
 
-string Msg_Arrow::tostr() const {
-  return string_format("[%s] sends an arrow [%c, %s] to [%s]", cstr(caster), ch, color, cstr(target));
+string Msg_Fatigue::tostr() const {
+  return string_format("Player [%s] takes %d damages of fatigue", caster->player->name.c_str(), damage);
 }
 
 // hero power message
+
+string Msg_Arrow::tostr() const {
+  return string_format("[%s] sends an arrow [%c, %s] to [%s]", cstr(caster), ch, color, cstr(target));
+}
 
 string Msg_HeroPower::tostr() const {
   return string_format("[%s] uses its hero power", cstr(caster));

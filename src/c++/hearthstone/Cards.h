@@ -30,7 +30,10 @@ struct Card {
   Card(int cost, const string& name) :
     cost(cost), id(-1), name(name), name_fr(name),
     collectible(true), cls(HeroClass::None) {}
-  
+  virtual ~Card() {
+    viz.reset();
+  }
+
   virtual PCard copy() const = 0; // copy itself
 
   NAMED_PARAM(Card, HeroClass, cls);

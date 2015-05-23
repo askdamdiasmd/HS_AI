@@ -210,7 +210,7 @@ bool Creature::attack(Creature* target) {
   remove_static_effect(StaticEffect::stealth);
 
   // signal attack
-  engine->signal(this, Event::Attack);
+  engine->board.signal(this, Event::Attack);
   SEND_DISPLAY_MSG(Msg_Attack, GETP(this), GETP(target));
 
   target->hurt(state.atq, this);
@@ -243,11 +243,11 @@ void Minion::list_actions(ListAction& actions) const {
 
 void Minion::popup() { // executed when created
   Thing::popup();
-  engine->signal(this, Event::MinionPopup);
+  engine->board.signal(this, Event::MinionPopup);
 }
 
 void Minion::signal_death() {
-  engine->signal(this, Event::MinionDead);
+  engine->board.signal(this, Event::MinionDead);
   Thing::signal_death();
 }
 
@@ -269,12 +269,12 @@ string Weapon::tostr() const {
 void Weapon::popup() {
   Thing::popup();
   player->state.hero->equip_weapon();
-  engine->signal(this, Event::WeaponPopup);
+  engine->board.signal(this, Event::WeaponPopup);
 }
 
 void Weapon::signal_death() {
   player->state.hero->unequip_weapon();
-  engine->signal(this, Event::WeaponDead);
+  engine->board.signal(this, Event::WeaponDead);
   Thing::signal_death();
 }
 

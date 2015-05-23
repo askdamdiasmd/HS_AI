@@ -21,19 +21,9 @@ Player::Player(PHero hero, string name, Deck* deck) :
   deck->set_owner(this);
 }
 
-/*def save_state(num = 0) :
-state.deck.save_state(num)
-state.saved[num] = dict(cards = list(state.cards), minions = list(state.minions), minions_pos = list(state.minions_pos),
-mana = state.mana, max_mana = state.max_mana, weapon = state.weapon, secrets = list(state.secrets))
-def restore_state(num = 0) :
-state.deck.restore_state(num)
-state.__dict__.update(state.saved[num])
-state.cards = list(state.cards)
-state.minions = list(state.minions)
-state.minions_pos = list(state.minions_pos)
-state.secrets = list(state.secrets)
-def end_simulation() :
-state.saved = dict()*/
+Player::~Player() {
+  state.cards.clear();
+}
 
 string Player::tostr() const {
   return state.hero->tostr();
@@ -50,7 +40,7 @@ bool Player::add_thing(PInstance thing, Slot pos) {
       state.weapon->destroy();
     state.weapon = w;
     UPDATE_PLAYER("weapon", Msg_AddWeapon, w);
-    engine->signal(w.get(), Event::AddWeapon);
+    engine->board.signal(w.get(), Event::AddWeapon);
   }
   else if (issubclassP(thing, Secret)) {
     NI;
@@ -68,7 +58,7 @@ bool Player::add_thing(PInstance thing, Slot pos) {
     state.minions_pos.insert(state.minions_pos.begin()+i, pos.fpos);
     state.minions.insert(state.minions.begin() + (i - 1), m);
     UPDATE_PLAYER("minions", Msg_AddMinion, m, pos);
-    engine->signal(m.get(), Event::AddMinion);
+    engine->board.signal(m.get(), Event::AddMinion);
   }
   else
     return false;
@@ -84,20 +74,20 @@ Slot Player::remove_thing(PInstance thing) {
     state.hero->unequip_weapon();
     state.weapon = nullptr;
     UPDATE_PLAYER("remove weapon", Msg_RemoveWeapon, weapon);
-    engine->signal(weapon.get(), Event::RemoveWeapon);
+    engine->board.signal(weapon.get(), Event::RemoveWeapon);
   }
   else if (minion = issubclassP(thing, Minion)) {
     Slot pos = engine->board.get_minion_pos(minion.get());
     state.minions_pos.erase(state.minions_pos.begin() + pos.pos + 1);
     state.minions.erase(state.minions.begin() + pos.pos);
     UPDATE_PLAYER("remove minions", Msg_RemoveMinion, minion, pos);
-    engine->signal(minion.get(), Event::RemoveMinion);
+    engine->board.signal(minion.get(), Event::RemoveMinion);
     return pos;
   }
   else if (secret = issubclassP(thing, Secret)) {
     NI;
     remove(state.secrets, secret);
-    engine->signal(secret.get(), Event::RemoveSecret);
+    engine->board.signal(secret.get(), Event::RemoveSecret);
   }
   return Slot();
 }
@@ -156,7 +146,7 @@ void Player::start_turn() {
   // then add mana crystal and draw a card
   add_mana_crystal(1);
   state.mana = state.max_mana;
-  engine->draw_card(nullptr, this);
+  engine->board.draw_card(nullptr, this);
   // inform interface = last thing !
   UPDATE_PLAYER("start_turn",Msg_StartTurn, state.hero);
 }
@@ -196,7 +186,7 @@ float Player::score_situation() {
   assert(0); return 0;
 }
 
-const Action* RandomPlayer::choose_actions(ListAction actions, Instance*& choice, Slot& slot) const {
+const Action* RandomPlayer::choose_actions(ListAction actions, Instance*& choice, Slot& slot) {
   // select one action in the list
   int r = randint(0, len(actions) - 1);
   const Action* action = actions[r];

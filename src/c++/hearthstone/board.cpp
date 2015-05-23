@@ -1,14 +1,14 @@
-//#include "actions.h"
+#include "actions.h"
 #include "board.h"
 //#include "cards.h"
 //#include "collection.h"
 #include "creatures.h"
 //#include "decks.h"
-//#include "effects.h"
+#include "effects.h"
 #include "engine.h"
 //#include "events.h"
 //#include "heroes.h"
-//#include "messages.h"
+#include "messages.h"
 #include "players.h"
 
 Engine* Board::engine = nullptr;
@@ -41,20 +41,43 @@ void Board::deal_init_cards() {
   state.turn = 0;
 }
 
-void Board::start_turn(Player* current) {
-  for (auto& i : state.everybody)
-    i->start_turn(current);
+ListAction Board::list_player_actions(Player* player) {
+  ListAction actions = player->list_actions();
+  //actions = filter_actions(actions);  //  filter  actions
+  ListAction res;
+  for (auto a : actions)
+    if (a->is_valid(player) && a->get_cost() <= player->state.mana)
+      res.push_back(a);
+  return res;
 }
-void Board::end_turn(Player* current) {
-  for (auto& i : state.everybody)
-    i->end_turn(current);
+
+bool Board::play_turn() {
+  Player* player = start_turn();
+  clean_deads();
+  engine->wait_for_display();
+
+  bool exit = false;
+  while (!is_game_ended() && !exit) {
+    ListAction actions = list_player_actions(player);
+    Instance* choice = nullptr;
+    Slot slot;
+    const Action* action = player->choose_actions(actions, choice, slot); // can be Act_EndTurn
+    if (!action)  return false; // nullptr, means that we want to break here
+    exit = issubclass(action, const Act_EndTurn) != nullptr; // do it before action is destroyed
+    action->execute(player->state.hero.get(), choice, slot);
+    clean_deads();  // just in case
+    engine->wait_for_display();
+  }
+  state.turn += 1;
+  return !is_game_ended();
 }
 
 void Board::create_thing(PThing thing) {
   state.everybody.push_back(thing); // do this FIRST
 }
-bool Board::add_thing(PThing thing, const Slot& pos) {
+bool Board::add_thing(Instance* caster, PThing thing, const Slot& pos) {
   assert(in(thing, state.everybody)); // create_thing MUST be called before
+
   if (thing->player->add_thing(thing, pos)) { // will send signal
     thing->popup(); // will send signal
     return true;
@@ -69,7 +92,7 @@ void Board::clean_deads() {
   ListPThing all_deads;
 
   while (state.n_dead) {
-    if (engine->is_game_ended())  
+    if (is_game_ended())  
       return; // don't care about the rest
     ListPThing deads;
     
@@ -135,7 +158,7 @@ Slot Board::get_minion_pos(Instance* i) {
 }
 
 float Board::score_situation(Player* player) {
-  Player* adv = engine->board.get_other_player(player);
+  Player* adv = get_other_player(player);
   if (player->state.hero->is_dead())
     return -INF;
   else if (adv->state.hero->is_dead())
@@ -143,6 +166,161 @@ float Board::score_situation(Player* player) {
   else
     return player->score_situation() - adv->score_situation();
 }
+
+// Game actions ----------------------------
+
+Player* Board::start_turn() {
+  Player* player = get_current_player();
+  for (auto& i : state.everybody)
+    i->start_turn(player);
+  signal(player->state.hero.get(), Event::StartTurn);
+  player->start_turn();
+  return player;
+}
+bool Board::end_turn() {
+  Player* player = get_current_player();
+  for (auto& i : state.everybody)
+    i->end_turn(player);
+  signal(player->state.hero.get(), Event::EndTurn);
+  player->end_turn();
+  return true;
+}
+
+bool Board::draw_card(Instance* caster, Player* player, int nb) {
+  while (nb-->0)
+    player->draw_card(caster);
+  return true;
+}
+
+bool Board::play_card(Instance* caster, const Card* _card, int cost) {
+  Player* player = caster->player;
+  PCard card = findP(player->state.cards, _card);
+  player->throw_card(card);
+  return true;
+}
+
+inline static bool is_power_of_2(const long v) {
+  return  v && !(v & (v - 1));
+}
+void Board::register_trigger(Effect* eff, int ev) {
+  if (is_power_of_2(ev))
+    state.triggers[Event(ev)].push_back(eff);
+  else {  // multiple bits are active
+    for (int i = 1; ev; i <<= 1, ev >>= 1)
+      if (ev & 1) // bit i is active
+        state.triggers[Event(i)].push_back(eff);
+  }
+}
+void Board::unregister_trigger(Effect* eff, int ev) {
+  if (is_power_of_2(ev))
+    remove(state.triggers[Event(ev)], eff);
+  else {  // multiple bits are active
+    for (int i = 1; ev; i <<= 1, ev >>= 1)
+      if (ev & 1) // bit i is active
+        remove(state.triggers[Event(i)], eff);
+  }
+}
+void Board::signal(Instance* caster, Event event) {
+  assert(is_power_of_2(event));
+  for (auto& e : state.triggers[event])
+    if (e->is_triggered(e, event, caster)) {
+      // check that trigger is not dead
+      assert(!issubclass(e->owner, Thing) || !issubclass(e->owner, Thing)->is_dead());
+      e->trigger(event, caster);
+    }
+}
+
+bool Board::heal(Instance* from, int hp, Instance* _to) {
+  if (from && from->player->state.auchenai)
+    return damage(from, hp, _to);
+  Thing* to = CAST(_to, Thing);
+  int n = to->heal(hp, from);
+  return n>0;
+}
+bool Board::damage(Instance* from, int hp, Instance* _to) {
+  Thing* to = CAST(_to, Thing);
+  int n = to->hurt(hp, from);
+  return n>0;
+}
+
+bool Board::HeroHeal(Instance* from, int hp, Instance* to) {
+  if (from && from->player->state.auchenai)
+    return HeroDamage(from, hp, to);
+  if (from) // velen mutliplier
+    hp *= (1 << from->player->state.velen);
+  return heal(from, hp, to);
+}
+bool Board::HeroDamage(Instance* from, int hp, Instance* to) {
+  if (from) // velen mutliplier
+    hp *= 1 << from->player->state.velen;
+  return damage(from, hp, to);
+}
+
+bool Board::SpellHeal(Instance* from, int hp, Instance* to) {
+  if (from && from->player->state.auchenai)
+    return SpellDamage(from, hp, to);
+  if (from) // velen mutliplier
+    hp *= 1 << from->player->state.velen;
+  return heal(from, hp, to);
+}
+bool Board::SpellDamage(Instance* from, int hp, Instance* to) {
+  if (from) {
+    hp += from->player->state.spell_power; // spell power
+    hp *= 1 << from->player->state.velen; // velen mutliplier
+  }
+  return damage(from, hp, to);
+}
+
+bool Board::heal_zone(Instance* from, int hp, Target zone) {
+  ListPInstance creatures = zone.resolve(from->player, from);
+  SEND_DISPLAY_MSG(Msg_ZoneHeal, GETP(from), zone, hp);
+  for (auto& i : creatures) {
+    Creature* creature = CAST(i.get(), Creature);
+    if (!creature->is_dead())
+      creature->heal(hp, from);
+  }
+  return true;
+}
+bool Board::damage_zone(Instance* from, int hp, Target zone) {
+  ListPInstance creatures = zone.resolve(from->player, from);
+  SEND_DISPLAY_MSG(Msg_ZoneDamage, GETP(from), zone, hp);
+  for (auto& i : creatures) {
+    Creature* creature = CAST(i.get(), Creature);
+    if (!creature->is_dead())
+      creature->hurt(hp, from);
+  }
+  return true;
+}
+bool Board::SpellHeal_zone(Instance* from, int hp, Target zone) {
+  if (from && from->player->state.auchenai)
+    return SpellDamage_zone(from, hp, zone);
+  if (from) // velen mutliplier
+    hp *= 1 << from->player->state.velen;
+  return heal_zone(from, hp, zone);
+}
+bool Board::SpellDamage_zone(Instance* from, int hp, Target zone) {
+  if (from) {
+    hp += from->player->state.spell_power; // spell power
+    hp *= 1 << from->player->state.velen; // velen mutliplier
+  }
+  return damage_zone(from, hp, zone);
+}
+
+
+bool Board::attack(Creature* from, Creature* target) {
+  assert(from && target);
+  signal(from, Event::StartAttack);
+  if (from->attack(target)) {
+    signal(from, Event::EndAttack);
+    return true;
+  }
+  else
+    return false;
+}
+
+
+
+
 
 //def save_state(num = 0)) {
 //self.saved[num] = dict(minions = list(self.minions), state.everybody = list(self.state.everybody))

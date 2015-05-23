@@ -21,17 +21,18 @@ PCard Deck::draw_one_card() {
   }
   else {
     fatigue++;
-    engine->damage(nullptr, fatigue, player->state.hero.get());
+    SEND_DISPLAY_MSG(Msg_Fatigue, player->state.hero, fatigue);
+    engine->board.damage(nullptr, fatigue, player->state.hero.get());
   }
   return card;
 }
 
 // draw initial cards in starting hands and do mulligan
 ListPCard Deck::draw_init_cards(int nb, FuncMulligan mulligan) {
-  ListPCard keep;
+  ListPConstCard keep;
   while (len(keep) < nb)
     keep.push_back(draw_one_card());
-  ListPCard discarded = player->mulligan(keep);
+  ListPConstCard discarded = player->mulligan(keep);
   assert(len(discarded) + len(keep) == nb);
 
   // draw replacement cards
@@ -40,9 +41,9 @@ ListPCard Deck::draw_init_cards(int nb, FuncMulligan mulligan) {
 
   // put back discarded cards in deck
   for (auto c : discarded)
-    cards.push_back(c);
+    cards.push_back(CONSTCASTP(c,Card));
 
-  return keep;
+  return *(ListPCard*)(&keep);  // whatever...
 }
 
 void Deck::print() const {

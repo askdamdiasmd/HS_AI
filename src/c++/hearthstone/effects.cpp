@@ -34,7 +34,7 @@ Eff_DR_Invoke_Minion::Eff_DR_Invoke_Minion(PConstCardMinion popup)
   Minion* dead = CAST(eff->owner, Minion);
   Slot pos = eff->engine->board.get_minion_pos(eff->owner);
   PMinion born = CAST(eff, const Eff_DR_Invoke_Minion)->card->instanciate(pos.player);
-  return eff->engine->add_thing(caster, born, pos);
+  return eff->engine->board.add_thing(caster, born, pos);
   }), card(popup) {}
 
 Eff_DR_Damage::Eff_DR_Damage(Target target, int damage)
@@ -45,11 +45,11 @@ Eff_DR_Damage::Eff_DR_Damage(Target target, int damage)
   for (auto& i : targets)
     if (me->damage > 0) {
       SEND_DISPLAY_MSG(Msg_Arrow, GETP((Thing*)caster), CASTP(i,Thing), '*', "RED_on_BLACK");
-      me->engine->damage(caster, me->damage, i.get());
+      me->engine->board.damage(caster, me->damage, i.get());
     }
     else {
       SEND_DISPLAY_MSG(Msg_Arrow, GETP((Thing*)caster), CASTP(i, Thing), '+', "GREEN_on_BLACK");
-      me->engine->heal(caster, -me->damage, i.get());
+      me->engine->board.heal(caster, -me->damage, i.get());
     }
   return true;
   }), target(target), damage(damage){}
@@ -58,9 +58,9 @@ Eff_DR_ZoneDamage::Eff_DR_ZoneDamage(Target target, int damage)
   :Eff_DeathRattle(FUNCEFFECT{
     const Eff_DR_ZoneDamage* me = CAST(eff, const Eff_DR_ZoneDamage);
     if (me->damage>0)
-      engine->damage_zone(caster, me->damage, me->target);
+      engine->board.damage_zone(caster, me->damage, me->target);
     else
-      engine->heal_zone(caster, me->damage, me->target);
+      engine->board.heal_zone(caster, me->damage, me->target);
     return true;
   }), target(target), damage(damage){}
 
@@ -76,11 +76,11 @@ void Eff_Aura::bind_to(PEffect me, Instance* owner) {
   CAST(owner, Thing)->state.effects.push_back(me);
   CAST(owner, Thing)->add_static_effect(Thing::StaticEffect::aura, false);
   if (engine) 
-    engine->register_trigger(this, get_triggers());
+    engine->board.register_trigger(this, get_triggers());
 }
 
 void Eff_Aura::undo(bool die) {
-   engine->unregister_trigger(this, get_triggers());
+  engine->board.unregister_trigger(this, get_triggers());
 }
 
 PMinion Eff_Aura_Ngh::get_neighbor(const char way) {

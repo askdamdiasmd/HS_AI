@@ -209,7 +209,9 @@ void congratulate_winner(const Player* winner, int turn) {
   VizButton button(10, NC / 2 - 3, string_format("  %s wins after %d turns!  ", winner->name.c_str(), (turn + 1) / 2), VizButton::center, 5);
   button.draw({ KEYINT("highlight", BLACK_on_YELLOW) });
   show_panels();
-  my_getch();
+  double t = VizBoard::now();
+  while (VizBoard::now() - t < 1)
+    my_getch();
 }
 
 void end_screen() {
@@ -662,6 +664,19 @@ void VizWeapon::update_state(const Thing::State& from) {
 VizPlayer::VizPlayer(Player* player) :
   player(player), state(player->state) {}
 
+VizPlayer::~VizPlayer() {
+  for (auto& c : state.cards)
+    c->viz.reset();
+  for (auto& c : state.minions)
+    c->viz.reset();
+  for (auto& c : state.secrets)
+    c->viz.reset();
+  if (state.weapon)
+    state.weapon->viz.reset();
+  if (state.hero)
+    state.hero->viz.reset();
+}
+
 //bool VizPlayer::check() const {
 //  const Player::State& pl_state = player->state;
 //  assert(state.mana == pl_state.mana);
@@ -828,7 +843,7 @@ WINDOW* VizSlot::draw(const ArgMap& args) {
 
 const pos_t VizCard::card_size = { 14, 15 };
 
-VizCard::VizCard(PCard card) :
+VizCard::VizCard(PConstCard card) :
   VizPanel(), card(card), small_win(nullptr), small_panel(nullptr) {
   cost = card->cost;
 }
@@ -925,24 +940,24 @@ WINDOW* VizCard::draw(const ArgMap& args) {
   if (0 < petit_size && petit_size < card_size.y)
     mvwaddstr(win, ty - 1, 1, string(tx - 2, ' ').c_str());
 
-  if (issubclassP(card, Card_Minion)) {
+  if (issubclassP(card, const Card_Minion)) {
     int mid = card_size.y / 2;
     int y = 1, x = 2, h = mid - 2, w = tx - 4;
     manual_box(win, y, x, h, w);
     print_longtext(win, y + 1, x + 1, y + h - 1, x + w - 1, name, YELLOW_on_BLACK);
-    PConstMinion m = issubclassP(card, Card_Minion)->minion();
+    PConstMinion m = issubclassP(card, const Card_Minion)->minion();
     mvwaddstr(win, y + h - 1, x + 1, string_format("%2d ", m->state.atq).c_str());
     mvwaddstr(win, y + h - 1, x + w - 4, string_format("%2d ", m->state.hp).c_str());
     print_longtext(win, mid, 2, ty - 1, tx - 2, desc);
   }
   else {
-    int r = issubclassP(card, Card_Weapon) ? 4 : 3;
+    int r = issubclassP(card, const Card_Weapon) ? 4 : 3;
     mvwaddch_ex(win, r, 0, ACS_LTEE, highlight);
     mvwhline(win, r, 1, ACS_HLINE, tx - 2);
     mvwaddch_ex(win, r, tx - 1, ACS_RTEE, highlight);
     int name_color = MAGENTA_on_BLACK;
-    if (issubclassP(card, Card_Weapon)) {
-      PConstWeapon weapon = issubclassP(card, Card_Weapon)->weapon();
+    if (issubclassP(card, const Card_Weapon)) {
+      PConstWeapon weapon = issubclassP(card, const Card_Weapon)->weapon();
       name_color = GREEN_on_BLACK;
       mvwaddstr(win, r, 2, string_format(" %d ", weapon->state.atq).c_str());
       string hpt = string_format(" %d ", weapon->state.hp);
@@ -1041,6 +1056,10 @@ bool Msg_ThrowCard::draw(Engine* engine) {
   }
   card->viz.reset();
   show_panels();
+  return true;
+}
+
+bool Msg_Fatigue::draw(Engine* engine) {
   return true;
 }
 
@@ -1147,7 +1166,6 @@ bool Msg_ZoneBlink::draw(Engine* engine) {
     engine->board.viz->draw(what, which, true, str_to_color[color]);
     VizBoard::sleep(wait);
     engine->board.viz->draw(what, which);
-    TRACE("last_blink\n");
     VizBoard::sleep(wait);
   }
 
@@ -1296,9 +1314,8 @@ bool Msg_Arrow_HeroPower::draw(Engine* engine) {
 
 //### Board --------
 
-VizBoard::VizBoard(Board* board, bool switch_heroes, bool animated) :
-  board(board), switch_heroes(switch_heroes), animated(animated),
-  end_turn(NEWP(VizButton,11, getmaxx(stdscr), "End turn", VizButton::right)) {
+VizBoard::VizBoard(Board* board) :
+  board(board), end_turn(NEWP(VizButton,11, getmaxx(stdscr), "End turn", VizButton::right)) {
   VizPanel::set_engine(board->engine);
   for (int i = 0; i < 2; i++) {
     Player* pl = board->engine->board.players[i];
@@ -1308,7 +1325,14 @@ VizBoard::VizBoard(Board* board, bool switch_heroes, bool animated) :
   }
 }
 
+VizBoard::~VizBoard() {
+  board->player1->viz.reset();
+  board->player2->viz.reset();
+}
+
 double VizBoard::accel = 1.0;
+bool VizBoard::animated = true;
+bool VizBoard::switch_heroes = false;
 
 void VizBoard::sleep(double seconds) {
 #ifdef _WIN32
@@ -1488,7 +1512,7 @@ void VizBoard::draw(int what, Player* which_, bool last_card, chtype bkgd_colr) 
 
 // ----- Human player interface -------
 
-ListPCard HumanPlayer::mulligan(ListPCard & cards) const {
+ListPConstCard HumanPlayer::mulligan(ListPConstCard & cards) {
   engine->wait_for_display();
   engine->board.viz->draw();
 
@@ -1509,7 +1533,7 @@ ListPCard HumanPlayer::mulligan(ListPCard & cards) const {
                                  KEYINT("highlight", BLACK_on_GREEN) } });
   }
   
-  ListPCard discarded;
+  ListPConstCard discarded;
   while (true) {
     // draw elements in show list
     for (auto sl : showlist) 
@@ -1573,7 +1597,7 @@ ListPCard HumanPlayer::mulligan(ListPCard & cards) const {
   return discarded;
 }
 
-const Action* HumanPlayer::choose_actions(ListAction actions, Instance*& choice, Slot& slot) const {
+const Action* HumanPlayer::choose_actions(ListAction actions, Instance*& choice, Slot& slot) {
   // split actions
   struct ShowElem {
     const Action* action;
@@ -1644,7 +1668,6 @@ const Action* HumanPlayer::choose_actions(ListAction actions, Instance*& choice,
     if (active)
       active->draw({ KEYINT("bkgd", BLACK_on_WHITE) });
     show_panels();
-    TRACE("showlist\n");
 
     int ch = my_getch();
 
@@ -1706,14 +1729,14 @@ const Action* HumanPlayer::choose_actions(ListAction actions, Instance*& choice,
         erase_elems(showlist);
         if (action->need_slot && slot.pos < 0) {
           showlist.clear();
-          ListSlot slots = engine->board.get_free_slots(const_cast<HumanPlayer*>(this));
+          ListSlot slots = engine->board.get_free_slots(this);
           assert(!slots.empty());
           for (auto& sl : slots)
             showlist.push_back({ fake_act_slot, NEWP(VizSlot, sl), {} });
         } 
         else if (action->need_target() && !choice) {
           showlist.clear();
-          ListPInstance& choices = action->target.resolve(const_cast<HumanPlayer*>(this));
+          ListPInstance& choices = action->target.resolve(this);
           if (choices.empty())  return action;  // nothing to do then
           for (auto& obj : choices)
             showlist.push_back({ fake_act_target, obj->viz, {} });
@@ -1736,9 +1759,6 @@ const Action* HumanPlayer::choose_actions(ListAction actions, Instance*& choice,
       showlist = init_showlist;
       active = nullptr;
     }
-    elif(ch == 1) {
-      TRACE("getch(1)\n");
-    }
     elif (ch == 'q') {  // quit
       endwin();
       //printf(engine->log.c_str());
@@ -1751,6 +1771,11 @@ const Action* HumanPlayer::choose_actions(ListAction actions, Instance*& choice,
 CursesEngine::CursesEngine() :
   Engine() {
   logfile = fopen("log.txt", "w");
+}
+
+void CursesEngine::init_players(Player* player1, Player* player2) {
+  Engine::init_players(player1, player2);
+  board.viz = NEWP(VizBoard, &board);
 }
 
 void CursesEngine::wait_for_display() {

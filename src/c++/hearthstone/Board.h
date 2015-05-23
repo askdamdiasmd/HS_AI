@@ -10,10 +10,10 @@ struct Board {
   SET_ENGINE();
   union {
     struct {
-      Player* player1;
-      Player*  player2;
+      Player* const player1;
+      Player* const player2;
     };
-    Player* players[2];
+    Player* const players[2];
   };
 
   struct State {
@@ -35,7 +35,11 @@ public:
 
   Board(Player* player1, Player* player2);
 
-  Board& operator = (const Board&) = default;
+  Board& operator = (const Board& copy) {
+    memcpy((void*)players, copy.players, sizeof(players));
+    state = copy.state;
+    return *this;
+  }
 
   bool is_game_ended() const;
   const Player* get_winner() const;
@@ -62,18 +66,46 @@ public:
     return state.secrets[indexP(state.secrets, i)];
   }
 
-  void start_turn(Player* current);
-  void end_turn(Player* current);
-
   void create_thing(PThing thing); // add to everybody
-  bool add_thing(PThing thing, const Slot& pos = Slot());
+  bool add_thing(Instance* caster, PThing thing, const Slot& slot);
+  bool add_secret(Instance* caster, PSecret secret);
   void clean_deads();
 
   ListSlot get_free_slots(Player* player) const;
-
   int get_nb_free_slots(const Player* player) const;
-
   Slot get_minion_pos(Instance* m);
+
+  ListAction list_player_actions(Player* player);
+  bool play_turn(); // return true when can't continue
+
+  // game actions
+
+  Player* start_turn();
+  bool end_turn();
+
+  // politic: signal are send at the deepest stack level, 
+  // i.e. right when action is accomplished 
+  void register_trigger(Effect* eff, int events);
+  void unregister_trigger(Effect* eff, int events);
+  void signal(Instance* from, Event event);
+
+  bool draw_card(Instance* caster, Player* player, int nb = 1);
+  bool play_card(Instance* caster, const Card* card, const int cost);
+
+  bool heal(Instance* from, int hp, Instance* to);
+  bool damage(Instance* from, int hp, Instance* to);
+  bool SpellHeal(Instance* from, int hp, Instance* to);
+  bool SpellDamage(Instance* from, int hp, Instance* to);
+  bool HeroHeal(Instance* from, int hp, Instance* to);
+  bool HeroDamage(Instance* from, int hp, Instance* to);
+
+  bool heal_zone(Instance* from, int hp, Target zone);
+  bool damage_zone(Instance* from, int hp, Target zone);
+  bool SpellHeal_zone(Instance* from, int hp, Target zone);
+  bool SpellDamage_zone(Instance* from, int hp, Target zone);
+
+  bool attack(Creature* from, Creature* target);
+
 
   float score_situation(Player* player);
 };

@@ -12,7 +12,8 @@ struct ScriptedEngine : public CursesEngine {
 
   virtual PInstance random(ListPInstance& instances);
 
-  void validate_script(const string& script, bool viz=false);
+  bool validate_script(const string& script, bool viz = true);
+  bool validate_script_file(const string& file_name, bool viz = true);
 };
 
 // for validation tests setups
@@ -21,9 +22,17 @@ struct ScriptedPlayer : public Player {
   ScriptedPlayer(PHero hero, string name, Deck* deck) :
     Player(hero, name, deck) {}
 
-  virtual ListPCard mulligan(ListPCard & cards) const;
+  virtual ListPConstCard mulligan(ListPConstCard & cards);
+  virtual const Action* choose_actions(ListAction actions, Instance*& choice, Slot& slot);
 
-  virtual const Action* choose_actions(ListAction actions, Instance*& choice, Slot& slot) const;
+  typedef pair<int, string> line_t;
+  vector<line_t> script;
+  void add_action(int num, const string& action) {
+    script.emplace_back(num, action);
+  }
+
+  PInstance read_thing(int num, ListString& words);
+  PCard read_card(int num, ListString& words);
 };
 
 

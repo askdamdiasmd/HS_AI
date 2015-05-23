@@ -33,6 +33,9 @@ public:
     return by_id[id];
   }
 
+  bool exist(const string& name) const {
+    return by_name.find(name) != by_name.end();
+  }
   PConstCardHero get_hero(const string& name) const;
   PConstCardMinion get_minion(const string& name) const;
   PConstCardWeapon get_weapon(const string& name) const;

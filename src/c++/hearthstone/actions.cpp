@@ -14,7 +14,7 @@ bool Action::execute(Instance* caster, Instance* choice, const Slot& slot) const
 }
 
 bool Act_EndTurn::execute(Instance* caster, Instance* choice, const Slot& slot) const {
-  return engine->end_turn();
+  return engine->board.end_turn();
 }
 
 Act_PlayCard::Act_PlayCard(const Card* card, const bool need_slot, FuncAction actions, Target targets ) :
@@ -22,7 +22,7 @@ Act_PlayCard::Act_PlayCard(const Card* card, const bool need_slot, FuncAction ac
 
 bool Act_PlayCard::execute(Instance* caster, Instance* choice, const Slot& slot) const {
   return Action::execute(caster, choice, slot) &&
-         engine->play_card(caster, card, get_cost());
+    engine->board.play_card(caster, card, get_cost());
 }
 
 const Card_Minion* Act_PlayMinionCard::card_minion() const { 
@@ -51,7 +51,7 @@ bool Act_PlayMinionCard::execute(Instance* caster, Instance* choice, const Slot&
   if (Act_PlayCard::execute(caster, choice, slot)) {
     PMinion m = card_minion()->instanciate(slot.player);
     if (actions)  actions(this, m.get(), choice, slot);
-    return engine->add_thing(caster, m, slot);
+    return engine->board.add_thing(caster, m, slot);
   }
   return false;
 }
@@ -74,7 +74,7 @@ Act_BC_Damage::Act_BC_Damage(Target target, int damage) :
   Act_Battlecry(FUNCACTION{ 
   Engine* engine = a->engine;
   SEND_DISPLAY_MSG(Msg_Arrow, GETP((Thing*)from), GETP((Thing*)target), '|', "WHITE_on_BLACK");
-  return a->engine->damage(from, CAST(a, const Act_BC_Damage)->damage, target); 
+  return a->engine->board.damage(from, CAST(a, const Act_BC_Damage)->damage, target); 
   }, target), damage(damage) {}
 
 string Act_BC_Damage::tostr() const  {
@@ -101,7 +101,7 @@ Act_BC_DrawCard::Act_BC_DrawCard(Target target, int nb)
   :Act_Battlecry(FUNCACTION{
   const Act_BC_DrawCard* me = CAST(a, const Act_BC_DrawCard);
   for (auto& i : resolve_targets(a, from, target, slot))
-    a->engine->draw_card(from, i->player, me->nb_card);
+    a->engine->board.draw_card(from, i->player, me->nb_card);
   return true;
 }, target), nb_card(nb) {}
 
@@ -119,7 +119,7 @@ string Act_Attack::tostr() const {
 
 bool Act_Attack::execute(Instance* caster, Instance* choice, const Slot& slot) const {
   assert(choice);
-  return engine->attack(creature, CAST(choice, Creature));
+  return engine->board.attack(creature, CAST(choice, Creature));
 }
 
 
@@ -140,7 +140,7 @@ bool Act_PlayWeaponCard::execute(Instance* caster, Instance* choice, const Slot&
   if (Act_PlayCard::execute(caster, choice, slot)) {
     if (actions)  actions(this, caster, choice, slot);
     PWeapon m = card_weapon()->instanciate(caster->player);
-    return engine->add_thing(caster, m, slot);
+    return engine->board.add_thing(caster, m, slot);
   }
   return false;
 }
@@ -153,9 +153,9 @@ Act_SpellCard::Act_SpellCard(const Card_Spell* card, FuncAction actions, Target 
 
 bool Act_SpellCard::execute(Instance* caster, Instance* choice, const Slot& slot) const {
   if (Act_PlayCard::execute(caster, choice, slot)) {
-    engine->signal(caster, Event::StartSpell);
+    engine->board.signal(caster, Event::StartSpell);
     bool res = actions(this, caster, choice, slot);
-    engine->signal(caster, Event::EndSpell);
+    engine->board.signal(caster, Event::EndSpell);
     return res;
   }
   return false;
@@ -188,9 +188,9 @@ string Act_HeroPower::tostr() const {
 
 bool Act_HeroPower::execute(Instance* caster, Instance* choice, const Slot& slot) const {
   Action::execute(caster, choice, slot);
-  engine->signal(caster, Event::StartHeroPower);
+  engine->board.signal(caster, Event::StartHeroPower);
   CAST(caster, Hero)->use_hero_power();
   bool res = action(this, caster, choice, slot);
-  engine->signal(caster, Event::EndHeroPower);
+  engine->board.signal(caster, Event::EndHeroPower);
   return res;
 }

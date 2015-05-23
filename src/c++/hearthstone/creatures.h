@@ -95,6 +95,7 @@ struct Thing : public Instance {
 
   Thing(int atq, int hp, int static_effects = 0);
   Thing(const Thing& copy);
+  virtual ~Thing() {}
 
   virtual void list_actions(ListAction& actions) const = 0;
 

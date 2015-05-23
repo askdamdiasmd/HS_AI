@@ -100,6 +100,9 @@
     <ClInclude Include="targets.h" />
     <ClInclude Include="validation.h" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="test1.txt" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

@@ -14,14 +14,14 @@ Collection::Collection() {
   PCard Lesser_Heal = add(NEWP(Card_HeroAbility, 2, "Lesser heal", 
     FUNCACTION{ Engine* engine = a->engine;
                 SEND_DISPLAY_MSG(Msg_Arrow_HeroPower, GETP((Hero*)from), GETP((Thing*)target), '+', "GREEN_on_BLACK");
-                return a->engine->HeroHeal(from, 2, target); }, TGT::characters));
+                return a->engine->board.HeroHeal(from, 2, target); }, TGT::characters));
   Lesser_Heal->set_desc("Restore 2 Health")
              ->set_collectible(false);
 
   PCard Fireblast = add(NEWP(Card_HeroAbility, 2, "Fireblast",
     FUNCACTION{ Engine* engine = a->engine;
                 SEND_DISPLAY_MSG(Msg_Arrow_HeroPower, GETP((Hero*)from), GETP((Thing*)target), '*', "RED_on_BLACK");
-                return a->engine->HeroDamage(from, 1, target); }, TGT::characters));
+                return a->engine->board.HeroDamage(from, 1, target); }, TGT::characters));
   Fireblast->set_desc("Deal 1 damage")
            ->set_collectible(false);
 
@@ -108,8 +108,6 @@ Collection::Collection() {
   ADDM(4, "Windchill Yeti", 4, 5)
     ->set_name_fr("Yeti Noroit");
 
-  //add(NEWP(Card_Minion, 4, "Windchill Yeti", NEWP(Minion, 4, 5)));
-
   #undef MINION
   #undef ADDM
 
@@ -125,6 +123,9 @@ Collection::Collection() {
 
   #undef WEAPON
   #undef ADDW
+
+  add(NEWP(Card_Coin))
+    ->set_collectible(false);
 
   // create collectible card list
   for (auto c : by_id)

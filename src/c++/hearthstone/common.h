@@ -52,14 +52,16 @@ inline string string_format(const char* format, ...) {
 
 #define elif else if
 #define NI  assert(!"not implemented!")
-#define error(msg, ...)  {fprintf(stderr, string_format(msg, ##__VA_ARGS__).c_str()); assert(0);}
 
 #ifdef _WIN32
 #ifdef _DEBUG
 #include <windows.h>
 #define TRACE(fmt,...) OutputDebugString(string_format(fmt,##__VA_ARGS__).c_str());
+#define error(msg, ...)  {string errmsg=string_format(msg, ##__VA_ARGS__)+"\n"; \
+                          TRACE(errmsg.c_str()); fprintf(stderr, errmsg.c_str()); assert(0);}
 #else
 #define TRACE false && _trace
+#define error(msg, ...)  {fprintf(stderr, (string_format(msg, ##__VA_ARGS__)+"\n").c_str()); assert(0);}
 #endif
 #endif
 
@@ -122,6 +124,21 @@ inline string join(string chr, const ListString& words) {
     if (i + 1 < len(words)) res += chr;
   }
   return res;
+}
+template <typename T>
+inline T convert_str_to(const string& str) {
+  std::istringstream iss(str);
+  T obj;
+  iss >> std::ws >> obj >> std::ws;
+  if (!iss.eof())
+    throw "dammit!";
+  return obj;
+}
+inline string trim(const string& str) {
+  int beg = 0, end = len(str);
+  while (isspace(str[beg])) beg++;
+  while (end>beg && isspace(str[end-1])) end--;
+  return str.substr(beg, end - beg);
 }
 
 template<typename Type>
@@ -303,7 +320,7 @@ typedef shared_ptr<Msg_Status> PMsgStatus;
 
 #define FUNCACTION    [] (const Action* a, Instance* from, Instance* target, const Slot& slot)
 typedef bool(*FuncAction)(const Action* a, Instance* from, Instance* target, const Slot& slot);
-typedef ListPCard(Player::*FuncMulligan)(ListPCard&) const;
+typedef ListPConstCard(Player::*FuncMulligan)(ListPConstCard&);
 
 #include "targets.h"
 #define TGT Target

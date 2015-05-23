@@ -26,6 +26,7 @@ struct Player {
   const Act_EndTurn act_end_turn;
 
   Player(PHero hero, string name, Deck* deck);
+  virtual ~Player();
 
   // shortcuts
   /*PHero hero() { return state.hero; }
@@ -64,9 +65,9 @@ struct Player {
   void give_card(PCard card, Instance* origin);
   void throw_card(PCard card);
 
-  virtual ListPCard mulligan(ListPCard & cards) const = 0;
+  virtual ListPConstCard mulligan(ListPConstCard & cards) = 0;
   void draw_init_cards(int nb, bool coin = false);
-  virtual const Action* choose_actions(ListAction actions, Instance*& choice, Slot& slot) const = 0;
+  virtual const Action* choose_actions(ListAction actions, Instance*& choice, Slot& slot) = 0;
 
   float score_situation();
 };
@@ -92,12 +93,12 @@ struct RandomPlayer : public Player {
   RandomPlayer(PHero hero, string name, Deck* deck) :
     Player(hero, name, deck) {}
 
-  virtual ListPCard mulligan(ListPCard & cards) const {
+  virtual ListPConstCard mulligan(ListPConstCard & cards) {
     // keep everything without changing
     return{};
   }
 
-  virtual const Action* choose_actions(ListAction actions, Instance*& choice, Slot& slot) const;
+  virtual const Action* choose_actions(ListAction actions, Instance*& choice, Slot& slot);
 };
 
 

@@ -4,13 +4,13 @@
 #include "players.h"
 #include "creatures.h"
 #include "curses_interface.h"
+#include "validation.h"
 
 
 
 int main(int argc, char** argv) {
-  bool anim, dbg, setup;
-  int mana = 0;
-  anim = dbg = setup = false;
+  bool anim = true, dbg = true, setup = false;
+  int mana = 10;
   for (int i = 0; i < argc; i++) {
     const char * a = argv[i];
     if (a == string("anim"))  anim = true;
@@ -19,13 +19,14 @@ int main(int argc, char** argv) {
     if (a == string("setup")) setup = true;
   }
   
+  init_screen();
+
   // generate collection = all possible cards
   const Collection& cardbook = Collection::CardBook();  
+
+  /*ScriptedEngine testbed(cardbook);
+  assert(testbed.validate_script_file("test1.txt"));*/
   
-  dbg = true;
-  mana = 10;
-  //setup = true;
-  VizBoard::accel = 1;
   //ArrayString cards { "Heavy Axe", "Fiery War Axe" };
   //ArrayString cards{ "Haunted Creeper", "Dire Wolf Alpha", "Argent Squire" };
   ArrayString cards{  "Unstable Ghoul", "Zombie chow", "Auchenai Soulpriest" };
@@ -50,22 +51,22 @@ int main(int argc, char** argv) {
   //deck1->print();
   //deck2->print();
 
-  init_screen();
   //show_ACS()
   //show_unicode();
 
+  VizBoard::accel = 1;
+  VizBoard::animated = anim;
+  VizBoard::switch_heroes = bool(issubclassP(player2, HumanPlayer));
+
   CursesEngine engine;
   engine.init_players(player1.get(), player2.get());
-  engine.board.viz = NEWP(VizBoard, &engine.board, bool(issubclassP(player2, HumanPlayer)), anim); 
-  engine.deal_init_cards();
   if (mana) {
     player1->add_mana_crystal(mana);
     player2->add_mana_crystal(mana);
   }
   
   //start playing
-  while (!engine.is_game_ended())
-    engine.play_turn();
+  engine.play_game();
     
   // end of game
   congratulate_winner(engine.get_winner(), engine.board.state.turn);

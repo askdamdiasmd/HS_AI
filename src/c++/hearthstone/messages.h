@@ -115,17 +115,6 @@ struct Msg_BurnCard : public Msg_ReceiveCard {
   virtual bool draw(Engine* engine);
 };
 
-//struct Msg_DrawBurnCard(CardMessage) :
-//  '''a card was burned because hand is too full'''
-//  virtual string tostr() const
-//  return '%s draw %s from the deck' % (caster, card)
-//
-//struct Msg_ThrowCard(CardMessage) :
-//  virtual string tostr() const
-//  return "Player %s loses %s" % (caster, card)
-//  def draw(Engine* engine) :
-//  caster.throw_card(card)
-
 struct Msg_ThrowCard : public CardMessage {
   Msg_ThrowCard(PInstance caster, PCard card) :
     CardMessage(caster, card) {}
@@ -134,14 +123,14 @@ struct Msg_ThrowCard : public CardMessage {
   virtual bool draw(Engine* engine);
 };
 
-//struct Msg_Fatigue(Message) :
-//  """ fatigue damage points (no more cards) """
-//  def __init__(caster, damage) :
-//  Message.__init__(caster)
-//  damage = damage
-//  virtual string tostr() const
-//  return "%s takes %d points of fatigue" % (caster, damage)
-
+struct Msg_Fatigue : public Message {
+  const int damage;
+  Msg_Fatigue(PHero hero, int damage) :
+    Message(hero), damage(damage) {}
+  virtual const char* cls_name() const { return "Msg_Fatigue"; }
+  virtual string tostr() const;
+  virtual bool draw(Engine* engine);
+};
 
 // spell messages
 
