@@ -183,7 +183,7 @@ string Act_AreaSpellCard::tostr() const {
 /// Hero power --------------
 
 string Act_HeroPower::tostr() const {
-  return string_format("Action Hero-Power (%d): [%s]", cost, card->name);
+  return string_format("Action Hero-Power (%d): [%s]", cost, card->name.c_str());
 }
 
 bool Act_HeroPower::execute(Instance* caster, Instance* choice, const Slot& slot) const {
@@ -194,3 +194,33 @@ bool Act_HeroPower::execute(Instance* caster, Instance* choice, const Slot& slot
   engine->board.signal(caster, Event::EndHeroPower);
   return res;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

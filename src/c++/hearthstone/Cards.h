@@ -29,7 +29,7 @@ struct Card {
 
   Card(int cost, const string& name) :
     cost(cost), id(-1), name(name), name_fr(name),
-    collectible(true), cls(HeroClass::None) {}
+    cls(HeroClass::None), collectible(true) {}
   virtual ~Card() {
     viz.reset();
   }
@@ -149,7 +149,7 @@ struct Card_Weapon : public Card_Thing {
   virtual PCard copy() const { return NEWP(Card_Weapon, *this); }
   virtual string tostr() const;
 
-  PWeapon Card_Weapon::instanciate(Player* owner) const;
+  PWeapon instanciate(Player* owner) const;
 
   // what the player can do with this card ?
   virtual void list_actions(ListAction& list) const;
@@ -176,7 +176,7 @@ struct Card_TargetedSpell : public Card_Spell {
     Card_Spell(cost, name), action(this, actions, targets) {}
 
   virtual void list_actions(ListAction& list) const {
-    list.push_back(&action);
+    list.emplace_back(&action);
   }
 };
 
@@ -187,7 +187,7 @@ struct Card_AreaSpell : public Card_Spell {
     Card_Spell(cost, name), action(this, actions, targets) {}
 
   virtual void list_actions(ListAction& list) const {
-    list.push_back(&action);
+    list.emplace_back(&action);
   }
 };
 
