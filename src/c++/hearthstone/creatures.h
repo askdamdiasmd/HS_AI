@@ -101,7 +101,7 @@ struct Thing : public Instance {
 
   virtual void list_actions(ListAction& actions) const = 0;
 
-#define IS_EFFECT(eff)  bool is_##eff() const {return (state.static_effects & StaticEffect::##eff)!=0;}
+#define IS_EFFECT(eff)  bool is_##eff() const {return (state.static_effects & StaticEffect::eff)!=0;}
   IS_EFFECT(taunt);
   IS_EFFECT(windfury);
   IS_EFFECT(frozen);

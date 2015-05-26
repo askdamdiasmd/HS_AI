@@ -9,11 +9,10 @@
 
 #include <sstream>
 #include <string>
+#include <cstring>  // strlen(.)
 #include <iterator>
 #include <vector>
 #include <list>
-//#include <deque>
-//#include <set>
 #include <queue>
 #include <unordered_map>
 
@@ -22,7 +21,7 @@ using namespace std;
 //typedef long htype;
 typedef vector<string> ArrayString;
 
-#define NEWP(type, ...) make_shared<type>(##__VA_ARGS__)
+#define NEWP(type, ...) make_shared<type>(__VA_ARGS__)
 
 #define issubclass( obj, cls)   dynamic_cast<cls*>(obj)
 #define issubclassP( obj, cls)   dynamic_pointer_cast<cls>(obj)
@@ -43,12 +42,27 @@ inline T check_ptr(T ptr) {
 #define CONSTCASTP(obj,cls)  const_pointer_cast<cls>(obj)
 #endif
 
+#ifndef _WIN32
+inline int _vscprintf (const char * format, va_list pargs) { 
+  int retval; 
+  va_list argcopy; 
+  va_copy(argcopy, pargs); 
+  retval = vsnprintf(NULL, 0, format, argcopy); 
+  va_end(argcopy); 
+  return retval; 
+}
+#endif
+
 inline string string_format(const char* format, ...) {
   va_list args;
   va_start(args, format);
   int len = _vscprintf(format, args) + 1; // terminating '\0'
   unique_ptr<char[]>  buffer(new char[len]);
+  #ifdef _WIN32
   vsprintf_s(buffer.get(), len, format, args);
+  #else
+  vsprintf(buffer.get(), format, args);
+  #endif
   return string(buffer.get());
 }
 #define cstr(s) ((s) ? (s)->tostr().c_str() : "nullptr")
@@ -59,8 +73,8 @@ inline string string_format(const char* format, ...) {
 #ifdef _WIN32
 #ifdef _DEBUG
 #include <windows.h>
-#define TRACE(fmt,...) OutputDebugString(string_format(fmt,##__VA_ARGS__).c_str());
-#define error(msg, ...)  {string errmsg=string_format(msg, ##__VA_ARGS__)+"\n"; \
+#define TRACE(fmt,...) OutputDebugString(string_format(fmt,__VA_ARGS__).c_str());
+#define error(msg, ...)  {string errmsg=string_format(msg, __VA_ARGS__)+"\n"; \
                           TRACE(errmsg.c_str()); fprintf(stderr, errmsg.c_str()); assert(0);}
 #else
 #define TRACE(fmt,...)  false
@@ -82,10 +96,10 @@ inline string string_format(const char* format, ...) {
 #define UPDATE_THING_STATE(what)  SEND_DISPLAY_MSG(Msg_ThingUpdate, GETPTHING(this), this->state, what)
 #define UPDATE_PLAYER_STATE(what) SEND_DISPLAY_MSG(Msg_PlayerUpdate, this->state.hero, this->state, what)
 #define UPDATE_THING(what, type, ...) \
-  SEND_DISPLAY_MSG(type, ##__VA_ARGS__); \
+  SEND_DISPLAY_MSG(type, __VA_ARGS__); \
   UPDATE_THING_STATE(what)
 #define UPDATE_PLAYER(what, type, ...) \
-  SEND_DISPLAY_MSG(type, ##__VA_ARGS__); \
+  SEND_DISPLAY_MSG(type, __VA_ARGS__); \
   UPDATE_PLAYER_STATE(what)
 
 inline bool startswith(string s, const char* comp) {
@@ -278,7 +292,7 @@ typedef shared_ptr<Deck> PDeck;
 
 struct Action;
 //typedef shared_ptr<Action> PAction;
-typedef vector<const Action* const> ListAction;
+typedef vector<const Action*> ListAction;
 struct Act_Battlecry;
 typedef shared_ptr<Act_Battlecry> PAct_Battlecry;
 typedef vector<PAct_Battlecry> ListPAct_Battlecry;

@@ -22,7 +22,7 @@ struct Board {
     ListPSecret secrets;
     int n_dead;
     unordered_map<Thing*, Slot> dead_pos;
-    unordered_map<Event, ListConstEffect> triggers;
+    unordered_map<Event, ListEffect, std::hash<int> > triggers;
   } state;
   PVizBoard viz;
 
