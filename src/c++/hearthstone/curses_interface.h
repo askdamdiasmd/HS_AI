@@ -263,6 +263,12 @@ struct VizBoard {
     all = 0xFFFFFFFF,
   };
   void draw(int what = all, Player* which_ = nullptr, bool last_card = true, chtype bkg_color=0);
+
+  void show_panels(bool lock = true, bool capture = true);
+
+  typedef vector<chtype> screen_copy_t;
+  vector<screen_copy_t> history;
+  void show_history();
 };
 
 

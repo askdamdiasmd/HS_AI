@@ -21,12 +21,13 @@ Engine* Target::engine = nullptr;
 
 ListPInstance Target::resolve(Player* by_who, Instance* me, Slot slot) const {
   #define DEFINED(prop)  ((tags&prop)==prop)
+#define BREED(th)  ((breed<0? th->breed | breed : th->breed & breed)==breed)
   assert(!(DEFINED(friendly) && DEFINED(enemy)));  // cannot be both
   Player* other_pl = engine->board.get_other_player(by_who);
   ListPInstance res;
 
   if (DEFINED(neighbors)) {
-    assert(tags == neighbors);  // nothing else can be defined
+    assert(tags == neighbors && breed==0);  // nothing else can be defined
     if (slot.empty())
       slot = engine->board.get_minion_pos(me);
     assert(slot.fpos > 0);
@@ -48,8 +49,11 @@ ListPInstance Target::resolve(Player* by_who, Instance* me, Slot slot) const {
   }
   else {
     if (DEFINED(minions)) {
+      unsigned int breed = this->breed;
       if (DEFINED(spell_targetable)) {
-        const auto if_spell_targetable = [by_who](const PThing& i){ return i->is_spell_targetable(by_who); };
+        const auto if_spell_targetable = [breed, by_who](const PMinion& i){ 
+          return BREED(i) && !i->is_dead() && i->is_spell_targetable(by_who);
+        };
         assert(!DEFINED(weapon)); // cannot be both
         if (!DEFINED(enemy))  // not enemy
           append_if(res, by_who->state.minions, if_spell_targetable);
@@ -58,7 +62,9 @@ ListPInstance Target::resolve(Player* by_who, Instance* me, Slot slot) const {
       }
       else
         if (DEFINED(targetable)) {
-          const auto if_targetable = [by_who](const PThing& i){ return i->is_targetable(by_who); };
+          const auto if_targetable = [breed, by_who](const PMinion& i){
+            return BREED(i) && !i->is_dead() && i->is_targetable(by_who);
+          };
           assert(!DEFINED(weapon)); // cannot be both
           if (!DEFINED(enemy))  // not enemy
             append_if(res, by_who->state.minions, if_targetable);
@@ -66,17 +72,20 @@ ListPInstance Target::resolve(Player* by_who, Instance* me, Slot slot) const {
             append_if(res, other_pl->state.minions, if_targetable);
         }
         else {
+          const auto if_breed = [breed, by_who](const PMinion& i){
+            return BREED(i) && !i->is_dead();
+          };
           if (!DEFINED(enemy))  // not enemy
-            append(res, by_who->state.minions);
+            append_if(res, by_who->state.minions, if_breed);
           if (!DEFINED(friendly)) // not friendly
-            append(res, other_pl->state.minions);
+            append_if(res, other_pl->state.minions, if_breed);
         }
     }
 
     if (DEFINED(heroes)) {
-      if (!DEFINED(enemy))  // not enemy
+      if (!DEFINED(enemy) && BREED(by_who->state.hero))  // not enemy
         res.push_back(by_who->state.hero);
-      if (!DEFINED(friendly)) // not friendly
+      if (!DEFINED(friendly) && BREED(other_pl->state.hero)) // not friendly
         res.push_back(other_pl->state.hero);
     }
 
@@ -100,10 +109,10 @@ ListPInstance Target::resolve(Player* by_who, Instance* me, Slot slot) const {
         if (other_pl->state.weapon) res.push_back(other_pl->state.hero);
     }
 
-    // remove dead instances
-    for (int i = 0; i < len(res); ++i)
-      if (CAST(res[i].get(), Thing)->is_dead())
-        fast_remove(res, i);
+    // remove dead instances : already done above
+    //for (int i = 0; i < len(res); ++i)
+    //  if (CAST(res[i].get(), Thing)->is_dead())
+    //    fast_remove(res, i);
 
     assert(!DEFINED(secret)); // NI
   }

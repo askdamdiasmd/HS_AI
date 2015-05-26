@@ -8,6 +8,15 @@
 
 Engine* Instance::engine = nullptr;
 
+
+void Instance::init(PConstCardInstance card, Player* p) {
+  this->card = card;
+#ifdef _DEBUG
+  tag = card->name;
+#endif
+  set_controller(p);
+}
+
 PHero Instance::hero() { 
   return player->state.hero; // shortcut
 }
@@ -20,23 +29,25 @@ PConstHero Instance::hero() const {
 
 Thing::Thing(int atq, int hp, int static_effects) :
   Instance() {
-  const int static_part_size = ((char*)(&state.effects)) - ((char*)(&state));
+  const int static_part_size = ((char*)(&state.aura_st_eff)) - ((char*)(&state));
   memset(&state, 0, static_part_size);
   state.hp = state.max_hp = hp;
   state.atq = state.max_atq = atq;
   state.n_remaining_power = 1;
   state.static_effects = static_effects;
-  add_static_effect(StaticEffect::fresh, false);
 }
 
 Thing::Thing(const Thing& copy) :
   Instance(copy) {
   // fast copy of static params
-  const int static_part_size = ((char*)(&state.effects)) - ((char*)(&state));
+  const int static_part_size = ((char*)(&state.aura_st_eff)) - ((char*)(&state));
   memcpy(&state, &copy.state, static_part_size);
+  assert(state.aura_atq==0 && state.aura_hp==0 && len(copy.state.aura_st_eff) == 0); // not implemented !
 
   // deep-copy the special effects
   for (auto& eff : copy.state.effects)
+    eff->bind_copy_to(this);
+  for (auto& eff : copy.state.eff_auras)
     eff->bind_copy_to(this);
   for (auto& eff : copy.state.presence_effects)
     eff->bind_copy_to(this);
@@ -48,23 +59,54 @@ PConstCardThing Thing::card_thing() const {
   return issubclassP(card, const Card_Thing); 
 }
 
-void Thing::add_static_effect(StaticEffect eff, bool inform) {
-  inform &= (state.static_effects & eff)!=eff; // don't inform if no change
-  state.static_effects |= eff;
-  if (engine && inform) {
-    if (eff & (StaticEffect::charge | StaticEffect::windfury))
-      state.n_max_atq = is_windfury() ? 2 : 1;
-    UPDATE_THING_STATE("add_static_effect");
-  }
+int Thing::get_aura_effect() const {
+  int res = 0;
+  for (int eff : state.aura_st_eff)
+    res |= eff;
+  return res;
 }
 
-void Thing::remove_static_effect(StaticEffect eff, bool inform) {
-  inform &= (state.static_effects | eff)!=0; // don't inform if no change
-  state.static_effects &= ~eff;
-  if (inform) UPDATE_THING_STATE("remove_static_effect");
+void Thing::add_static_effect(StaticEffect eff, char type, bool inform) {
+  assert(type == 'n' || type == 'a');
+  unsigned int old = state.static_effects;
+  state.static_effects |= eff;  // add it in all cases
+  if (type == 'a') {  // it's an aura !
+    // only add it if it doesn't already exist originally
+    assert(is_single_bit(eff)); // should be a single bit to 1 !
+    int aura = get_aura_effect();
+    assert((aura & state.static_effects) == aura); 
+    if ((state.static_effects - aura) & eff)
+      state.aura_st_eff.push_back(eff);
+  }
+
+  state.n_max_atq = is_windfury() ? 2 : 1;
+  if (engine && (old != state.static_effects)) 
+    UPDATE_THING_STATE("add_static_effect");
+}
+
+void Thing::remove_static_effect(StaticEffect eff, char type, bool inform) {
+  assert(type == 'n' || type == 'a');
+  unsigned int old = state.static_effects;
+  if (type == 'n')
+    state.static_effects &= ~eff;
+  elif(type == 'a') {
+    int i = index(state.aura_st_eff, int(eff));
+    if (i >= 0) { // it was indeed applied exists
+      state.static_effects &= ~get_aura_effect(); // remove all auras
+      state.aura_st_eff.erase(state.aura_st_eff.begin() + i);
+      state.static_effects |= get_aura_effect(); // re-apply auras
+    }
+  }
+  else
+    error("unexpected update type in remove_static_effect");
+  
+  state.n_max_atq = is_windfury() ? 2 : 1;
+  if (engine && (old != state.static_effects))
+    UPDATE_THING_STATE("remove_static_effect");
 }
 
 void Thing::popup() { // executed when it reaches the board
+  add_static_effect(StaticEffect::fresh, 'n', false);
   state.n_max_atq = is_windfury() ? 2 : 1;
   if (state.spell_power)
     player->state.spell_power += state.spell_power;
@@ -108,6 +150,7 @@ int Thing::hurt(int damage, Instance* caster) {
   damage -= absorbed;
   damage -= max(0, damage - state.hp);
   state.hp -= damage;
+  if (damage) engine->board.signal(this, Event::Damage);
   //if( state.enraged_trigger ) state.enraged_trigger.trigger()
   Thing* caster_thing = issubclass(caster, Thing);
   if (damage && caster_thing && caster_thing->is_freezer())
@@ -121,6 +164,7 @@ int Thing::heal(int hp, Instance* caster) {
   assert(hp>0);
   hp -= max(0, state.hp + hp - state.max_hp);
   state.hp += hp;
+  if (hp) engine->board.signal(this, Event::Heal);
   //if( state.enraged_trigger ) state.enraged_trigger.trigger()
   UPDATE_THING("heal hp", Msg_Heal, GETP(caster), GETPTHING(this), hp);
   return hp;
@@ -171,6 +215,7 @@ void Thing::silence(bool die) {
       list.back()->undo(die); \
       list.pop_back(); }
   remove_effects(state.effects, die);
+  remove_effects(state.eff_auras, die);
   remove_effects(state.presence_effects, true);
   if (!die) remove_effects(state.death_rattles, die);
   
@@ -211,7 +256,7 @@ bool Creature::attack(Creature* target) {
 
   // signal attack
   engine->board.signal(this, Event::Attack);
-  SEND_DISPLAY_MSG(Msg_Attack, GETP(this), GETP(target));
+  SEND_DISPLAY_MSG(Msg_Attack, GETPT(this, Creature), GETPT(target, Creature));
 
   target->hurt(state.atq, this);
   int target_atq = target->state.atq;

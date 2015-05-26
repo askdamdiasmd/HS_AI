@@ -37,8 +37,25 @@ enum Event {
   MinionDead      = ENUM(20),
   WeaponDead      = ENUM(21),
   ThingDead       = MinionDead | WeaponDead,
+
+  RemoveAura      = ENUM(22),
+
+  Heal            = ENUM(23),
+  Damage          = ENUM(24),
 };
 
 #undef ENUM
+
+
+struct Signal {
+  const Event event;
+  const Instance *caster;
+  Creature **target;
+  const int nb;
+
+  Signal(Event ev, Instance* caster, Creature** target = nullptr, int nb = 0) :
+    event(ev), caster(caster), target(target), nb(nb) {}
+};
+
 
 #endif

@@ -49,7 +49,7 @@ bool Player::add_thing(PInstance thing, Slot pos) {
   }
   else if (state.minions.size() < 7 && (m = issubclassP(thing, Minion))) {
     const int n = state.minions_pos.size();
-    if (pos.fpos >= 1000)  // helper
+    if (pos.fpos<=0 || pos.fpos >= 1000)  // helper to insert at right by default
       pos.fpos = (state.minions_pos[n - 2] + state.minions_pos[n - 1]) / 2;
     const int i = pos.insert_after_pos(state.minions_pos);
     if (state.minions_pos[i - 1] == pos.fpos) // already exist, so create new number

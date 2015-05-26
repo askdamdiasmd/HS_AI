@@ -22,6 +22,9 @@ struct Instance {
   SET_ENGINE();
   PConstCardInstance card; // card from which it was instanciated
   Player* player; // owner
+#ifdef _DEBUG
+  string tag; // used only by validation stuff
+#endif
   PVizInstance viz; // vizualization object
 
   PHero hero(); // helper function
@@ -32,10 +35,7 @@ struct Instance {
   void set_controller(Player* p) {
     player = p;
   }
-  void init(PConstCardInstance card, Player* p) {
-    this->card = card;
-    set_controller(p);
-  }
+  void init(PConstCardInstance card, Player* p);
 
   virtual void popup() { NI; }
 
@@ -67,7 +67,7 @@ struct Thing : public Instance {
     death_rattle  = ENUM(12), // minion has a death_rattle
     trigger       = ENUM(13), // minion contains some triggers
     silenced      = ENUM(14),
-    aura          = ENUM(15),
+    aura          = ENUM(15), // minion generates an aura
     #undef ENUM
   };
 
@@ -81,11 +81,13 @@ struct Thing : public Instance {
     int n_atq, n_max_atq;   // number of remaining attacks
     int n_remaining_power;  // number of remaining hero power (for hero)
 
-    int static_effects; // bit-OR combination of StaticEffect
     int spell_power;
+    int static_effects;     // bit-OR combination of StaticEffect
+    vector<int> aura_st_eff;// all static effects from aura
 
     // IMPORTANT: when adding dynamic stuff here, don't forget to modify copy constructor
     ListPEffect effects;  // all effects which are not in lists below (NO DUPLICATES)
+    ListPEffect eff_auras; // effects that have internal variables
     ListPEff_Presence presence_effects;  // triggered on popup and canceled on depop
     ListPEff_DeathRattle death_rattles; // executed when thing dies
   } state;
@@ -124,8 +126,9 @@ struct Thing : public Instance {
     if (is_untargetable()) return false;
     return is_targetable(by_who);
   }
-  void add_static_effect(StaticEffect eff, bool inform=true);
-  void remove_static_effect(StaticEffect eff, bool inform=true);
+  int get_aura_effect() const;
+  void add_static_effect(StaticEffect eff, char type='n', bool inform = true);
+  void remove_static_effect(StaticEffect eff, char type='n', bool inform = true);
 
   virtual void popup(); // init when created
 
@@ -152,9 +155,10 @@ struct Thing : public Instance {
 
 struct Creature : public Thing {
   enum Breed {
-    None = 0,
-    Beast,
-    Demon,
+    None      = 0,
+    Beast     = 0x0001,
+    Demon     = 0x0002,
+    Meca      = 0x0004,
   };
   const Breed breed;
   const Act_Attack act_attack;

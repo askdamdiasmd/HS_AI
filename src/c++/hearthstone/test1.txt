@@ -1,15 +1,19 @@
 Setup:
  Heroes:
-  P1 Hero Jaina Proudmoore name=Jerome
-  P2 Hero Anduin Wrynn name=IA
+  P1 Hero Jaina name=Jerome mana=5
+  P2 Hero Anduin name=IA
  Decks:
   P1 The Coin
  Board:
   P1 Minion Haunted Creeper hp=1
-  P2 Minion Unstable Ghoul hp=1
+  P2 Minion Unstable Ghoul hp=2
+  P1 Minion Dire Wolf Alpha tag=wolf
 
 Action:
-  P1 Attack HC -> UG
+  P1 Attack H.C. -> U.G.
 
 Result:
  Board:
+#  P1 S.S. atq=1	# dead because haunted creeper appeared before unstable ghoul
+#  P1 S.S. atq=2
+  P1 wolf hp=1

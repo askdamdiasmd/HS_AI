@@ -1,0 +1,22 @@
+Setup:
+ Heroes:
+  P1 Hero Jaina
+  P2 Hero Anduin
+ Decks:
+  P1 The Coin
+ Board:
+  P1 Minion Stormwind Champion hp=1
+  P1 Minion Haunted Creeper hp=1
+  P2 Minion Unstable Ghoul hp=1
+  P1 Minion Wisp
+
+Action:
+  P1 Attack H.C. -> U.G.
+  # champion dies, so that it doesn't buff the 2 repop from H.C.
+  # (even though its aura continues preserving wisp from dying)
+
+Result:
+ Board:
+  P1 S.S. hp=1
+  P1 S.S. hp=1
+  P1 Wisp hp=1

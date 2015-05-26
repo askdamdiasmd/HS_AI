@@ -1,0 +1,20 @@
+Setup:
+ Heroes:
+  P1 Hero Jaina
+  P2 Hero Anduin
+ Decks:
+  P1 The Coin
+ Board:
+  P1 Minion Stormwind Champion hp=1
+  P2 Minion Unstable Ghoul hp=1
+  P2 Minion Unstable Ghoul hp=1
+  P1 Minion Haunted Creeper
+
+Action:
+  P1 Attack S.C. -> U.G.
+  # champion dies, but his buff protect the H.C. from dying from 2x U.G. zone-damage
+
+Result:
+ Board:
+  P1 H.C.
+

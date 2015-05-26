@@ -112,5 +112,11 @@
     <Text Include="test1.txt">
       <Filter>Fichiers de ressources</Filter>
     </Text>
+    <Text Include="test_aura1.txt">
+      <Filter>Fichiers de ressources</Filter>
+    </Text>
+    <Text Include="test_aura2.txt">
+      <Filter>Fichiers de ressources</Filter>
+    </Text>
   </ItemGroup>
 </Project>

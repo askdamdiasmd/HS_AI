@@ -22,7 +22,7 @@ struct Board {
     ListPSecret secrets;
     int n_dead;
     unordered_map<Thing*, Slot> dead_pos;
-    unordered_map<Event, ListEffect> triggers;
+    unordered_map<Event, ListConstEffect> triggers;
   } state;
   PVizBoard viz;
 
@@ -52,18 +52,9 @@ public:
 
   // retrieve shared_ptr from ptr
   template <typename T>
-  shared_ptr<T> getP(T* i) {
-    if (!i) return shared_ptr<T>(); // nullptr
-    Thing* th = issubclass(i, Thing);
-    return th ? CASTP(getPThing(th), T) : CASTP(getPSecret((Secret*)i), T);
-  }
-  PThing getPThing(Thing* i) {
-    if (!i) return PThing(); // nullptr
-    return state.everybody[indexP(state.everybody, i)];
-  }
-  PSecret getPSecret(Secret* i) {
-    if (!i) return PSecret(); // nullptr
-    return state.secrets[indexP(state.secrets, i)];
+  shared_ptr<T> getP(Instance* i) {
+    NI; // call should always ends up in a template specialization
+    return nullptr;
   }
 
   void create_thing(PThing thing); // add to everybody
@@ -83,11 +74,15 @@ public:
   Player* start_turn();
   bool end_turn();
 
-  // politic: signal are send at the deepest stack level, 
-  // i.e. right when action is accomplished 
-  void register_trigger(Effect* eff, int events);
-  void unregister_trigger(Effect* eff, int events);
-  void signal(Instance* from, Event event);
+  // Signals are send at the deepest stack level, 
+  // i.e. right when action is accomplished, but are not necessarily
+  // processed immediately (wait for current phase to end).
+  void register_trigger(const Effect* eff, int events);
+  void unregister_trigger(const Effect* eff, int events);
+  QueueSignal waiting_signals;
+  void signal(Instance* from, Event event, Creature** target=nullptr, int nb=0);
+  void signal_now(Instance* caster, Event event, Creature** target=nullptr, int nb=0);
+  void process_signals();
 
   bool draw_card(Instance* caster, Player* player, int nb = 1);
   bool play_card(Instance* caster, const Card* card, const int cost);
@@ -110,5 +105,19 @@ public:
   float score_situation(Player* player);
 };
 
+template <>
+shared_ptr<Instance> Board::getP<Instance>(Instance* i);
+template <>
+shared_ptr<Thing> Board::getP<Thing>(Instance* i);
+template <>
+shared_ptr<Minion> Board::getP<Minion>(Instance* i);
+template <>
+shared_ptr<Weapon> Board::getP<Weapon>(Instance* i);
+template <>
+shared_ptr<Creature> Board::getP<Creature>(Instance* i);
+template <>
+shared_ptr<Hero> Board::getP<Hero>(Instance* i);
+template <>
+shared_ptr<Secret> Board::getP<Secret>(Instance* i);
 
 #endif

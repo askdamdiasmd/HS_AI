@@ -1,5 +1,5 @@
 Msg_PlayerUpdate $ Change of add_mana_crystal for player jerome
 Msg_PlayerUpdate $ Change of add_mana_crystal for player IA
-Msg_NewCard $ card 49679C [Croq'zombie (1): 2/3] is created by the deck.
-Msg_NewCard $ card 49948C [Pretresse auchenai (4): 3/5] is created by the deck.
-Msg_NewCard $ card 48F0BC [Goule instable (2): 1/3] is created by the deck.
+Msg_NewCard $ card 69946C [Jongleur de couteau (2): 3/2] is created by the deck.
+Msg_NewCard $ card 69BAFC [Boxeur de l'ombre (2): 2/3] is created by the deck.
+Msg_NewCard $ card 69204C [Rampante Hantee (2): 1/2] is created by the deck.

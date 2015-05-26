@@ -21,6 +21,43 @@ Board::Board(Player* player1, Player* player2) :
   state.everybody.push_back(player2->state.hero);
 }
 
+template <>
+shared_ptr<Instance> Board::getP<Instance>(Instance* i) {
+  if (!i) return nullptr;
+  Thing* th = issubclass(i, Thing);
+  return th ? CASTP(getP<Thing>(th),Instance) : CASTP(getP<Secret>(CAST(i, Secret)),Instance);
+}
+template <>
+shared_ptr<Thing> Board::getP<Thing>(Instance* i) {
+  if (!i) return nullptr;
+  return state.everybody[indexP(state.everybody, CAST(i, Thing))];
+}
+template <>
+shared_ptr<Minion> Board::getP<Minion>(Instance* i) {
+  if (!i) return nullptr;
+  return CASTP(getP<Thing>(i), Minion);
+}
+template <>
+shared_ptr<Weapon> Board::getP<Weapon>(Instance* i) {
+  if (!i) return nullptr;
+  return CASTP(getP<Thing>(i), Weapon);
+}
+template <>
+shared_ptr<Creature> Board::getP<Creature>(Instance* i) {
+  if (!i) return nullptr;
+  return CASTP(getP<Thing>(i), Creature);
+}
+template <>
+shared_ptr<Hero> Board::getP<Hero>(Instance* i) {
+  if (!i) return nullptr;
+  return CASTP(getP<Thing>(i), Hero);
+}
+template <>
+shared_ptr<Secret> Board::getP<Secret>(Instance* i) {
+  if (!i) return nullptr;
+  return state.secrets[indexP(state.secrets, CAST(i, Secret))];
+}
+
 bool Board::is_game_ended() const {
   return players[0]->state.hero->is_dead() || players[1]->state.hero->is_dead();
 }
@@ -91,11 +128,16 @@ bool Board::add_thing(Instance* caster, PThing thing, const Slot& pos) {
 void Board::clean_deads() {
   ListPThing all_deads;
 
-  while (state.n_dead) {
+  while (true) {
+    // process all signals
+    process_signals();
+
     if (is_game_ended())  
       return; // don't care about the rest
+    if (!state.n_dead)
+      break;  // no need continue
     ListPThing deads;
-    
+
     // search deads
     for (auto& i : state.everybody)
       if (i->is_dead()) {
@@ -121,7 +163,7 @@ void Board::clean_deads() {
 
   // finally 
   for (auto& i : all_deads) 
-    i->silence(true); // remove auras
+    i->silence(true); // remove auras, through Eff_Aura::undo(die=true)
 }
 
 ListSlot Board::get_free_slots(Player* player) const {
@@ -199,10 +241,7 @@ bool Board::play_card(Instance* caster, const Card* _card, int cost) {
   return true;
 }
 
-inline static bool is_power_of_2(const long v) {
-  return  v && !(v & (v - 1));
-}
-void Board::register_trigger(Effect* eff, int ev) {
+void Board::register_trigger(const Effect* eff, int ev) {
   if (is_power_of_2(ev))
     state.triggers[Event(ev)].push_back(eff);
   else {  // multiple bits are active
@@ -211,7 +250,7 @@ void Board::register_trigger(Effect* eff, int ev) {
         state.triggers[Event(i)].push_back(eff);
   }
 }
-void Board::unregister_trigger(Effect* eff, int ev) {
+void Board::unregister_trigger(const Effect* eff, int ev) {
   if (is_power_of_2(ev))
     remove(state.triggers[Event(ev)], eff);
   else {  // multiple bits are active
@@ -220,14 +259,31 @@ void Board::unregister_trigger(Effect* eff, int ev) {
         remove(state.triggers[Event(i)], eff);
   }
 }
-void Board::signal(Instance* caster, Event event) {
-  assert(is_power_of_2(event));
-  for (auto& e : state.triggers[event])
-    if (e->is_triggered(e, event, caster)) {
-      // check that trigger is not dead
-      assert(!issubclass(e->owner, Thing) || !issubclass(e->owner, Thing)->is_dead());
-      e->trigger(event, caster);
-    }
+
+void Board::signal(Instance* caster, Event event, Creature** target, int nb) {
+  if (event & (Event::EndSpell | Event::EndHeroPower | Event::EndAttack))
+    // after completion of a game phase, we clean up everything
+    clean_deads();
+
+  waiting_signals.emplace(event, caster, target, nb);
+}
+void Board::signal_now(Instance* caster, Event event, Creature** target, int nb) {
+  signal(caster, event, target, nb);
+  process_signals();
+}
+void Board::process_signals() {
+  while(!waiting_signals.empty()) {
+    Signal s = waiting_signals.front();
+    waiting_signals.pop();
+
+    assert(is_power_of_2(s.event));
+    for (auto& e : state.triggers[s.event])
+      if (e->is_triggered(e, s)) {
+        // check that trigger is not dead
+        assert(!issubclass(e->owner, Thing) || !issubclass(e->owner, Thing)->is_dead());
+        e->trigger(s);
+      }
+  }
 }
 
 bool Board::heal(Instance* from, int hp, Instance* _to) {
@@ -309,7 +365,7 @@ bool Board::SpellDamage_zone(Instance* from, int hp, Target zone) {
 
 bool Board::attack(Creature* from, Creature* target) {
   assert(from && target);
-  signal(from, Event::StartAttack);
+  signal(from, Event::StartAttack, &target);
   if (from->attack(target)) {
     signal(from, Event::EndAttack);
     return true;

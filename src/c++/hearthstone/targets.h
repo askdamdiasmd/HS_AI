@@ -58,10 +58,12 @@ struct Target {
     other =           0x0400, // not the caster
     random =          0x0800, // select a random result in the list
   }; 
-  unsigned int tags;
+  const unsigned int tags;
+  const int breed;
 
   Target() : Target(0) {}
-  Target(unsigned int tags) : tags(tags) {}
+  Target(unsigned int tags, int breed = 0) : 
+    tags(tags), breed(breed) {}
 
   Target operator | (unsigned int tag) {
     return Target(tags | tag);

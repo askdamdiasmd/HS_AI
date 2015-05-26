@@ -73,7 +73,7 @@ static ListInstance resolve_targets(const Action* a, Instance* from, Instance* t
 Act_BC_Damage::Act_BC_Damage(Target target, int damage) :
   Act_Battlecry(FUNCACTION{ 
   Engine* engine = a->engine;
-  SEND_DISPLAY_MSG(Msg_Arrow, GETP((Thing*)from), GETP((Thing*)target), '|', "WHITE_on_BLACK");
+  SEND_DISPLAY_MSG(Msg_Arrow, GETPT(from,Thing), GETPT(target,Thing), '|', "WHITE_on_BLACK");
   return a->engine->board.damage(from, CAST(a, const Act_BC_Damage)->damage, target); 
   }, target), damage(damage) {}
 

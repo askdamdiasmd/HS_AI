@@ -22,18 +22,24 @@ int main(int argc, char** argv) {
   init_screen();
 
   // generate collection = all possible cards
-  const Collection& cardbook = Collection::CardBook();  
+  const Collection& cardbook = Collection::CardBook();
 
-  /*ScriptedEngine testbed(cardbook);
-  assert(testbed.validate_script_file("test1.txt"));*/
+  if (false) {
+    ScriptedEngine testbed(cardbook);
+    //assert(testbed.validate_script_file("test1.txt"));
+    //assert(testbed.validate_script_file("test_aura1.txt"));
+    //assert(testbed.validate_script_file("test_aura2.txt"));
+  }
   
   //ArrayString cards { "Heavy Axe", "Fiery War Axe" };
   //ArrayString cards{ "Haunted Creeper", "Dire Wolf Alpha", "Argent Squire" };
-  ArrayString cards{  "Unstable Ghoul", "Zombie chow", "Auchenai Soulpriest" };
+  //ArrayString cards{  "Unstable Ghoul", "Zombie chow", "Auchenai Soulpriest" };
+  //ArrayString cards{ "Haunted Creeper", "Dire Wolf Alpha", "Argent Squire", "stormwind champion" };
+  ArrayString cards{ "Haunted Creeper", "Knife Juggler", "Argent Squire", "Shadowboxer" };
 
   const int nb_cards = 30;
   PDeck deck1 = fake_deck(cardbook, dbg, cards, nb_cards);
-  PHero hero1 = NEWP(Hero, issubclassP(cardbook.get_by_name("Anduin Wrynn"), const Card_Hero));
+  PHero hero1 = NEWP(Hero, issubclassP(cardbook.get_by_name("Anduin"), const Card_Hero));
   PPlayer player1;
   if (true)
     player1 = NEWP(HumanPlayer, hero1, "jerome", deck1.get());
@@ -41,7 +47,7 @@ int main(int argc, char** argv) {
     player1 = NEWP(RandomPlayer, hero1, "jerome", deck1.get());
 
   PDeck deck2 = fake_deck(cardbook, dbg, cards, nb_cards);
-  PHero hero2 = NEWP(Hero, issubclassP(cardbook.get_by_name("Jaina Proudmoore"), const Card_Hero));
+  PHero hero2 = NEWP(Hero, issubclassP(cardbook.get_by_name("Jaina"), const Card_Hero));
   PPlayer player2;
   if (false)
     player2 = NEWP(HumanPlayer, hero2, "mattis", deck2.get());

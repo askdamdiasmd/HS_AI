@@ -16,6 +16,7 @@ void Effect::bind_to(PEffect me, Instance* owner) {
 }
 
 
+
 // death rattles ----------
 
 void Eff_DeathRattle::bind_to(PEffect me, Instance* owner) {
@@ -24,9 +25,9 @@ void Eff_DeathRattle::bind_to(PEffect me, Instance* owner) {
   CAST(owner, Thing)->state.death_rattles.push_back(CASTP(me, Eff_DeathRattle));
 }
 
-bool Eff_DeathRattle::trigger(Event ev, Instance* caster) {
+void Eff_DeathRattle::trigger(Signal s) const {
   assert((ev&Event::ThingDead) && caster == owner && CAST(caster, Thing)->is_dead());
-  return action(this, ev, caster);
+  action(this, ev, caster);
 }
 
 Eff_DR_Invoke_Minion::Eff_DR_Invoke_Minion(PConstCardMinion popup)
@@ -44,11 +45,11 @@ Eff_DR_Damage::Eff_DR_Damage(Target target, int damage)
   assert(len(targets) <= 1);  // use zone damage/heal if more targets
   for (auto& i : targets)
     if (me->damage > 0) {
-      SEND_DISPLAY_MSG(Msg_Arrow, GETP((Thing*)caster), CASTP(i,Thing), '*', "RED_on_BLACK");
+      SEND_DISPLAY_MSG(Msg_Arrow, GETPT(caster,Thing), CASTP(i, Thing), '*', "RED_on_BLACK");
       me->engine->board.damage(caster, me->damage, i.get());
     }
     else {
-      SEND_DISPLAY_MSG(Msg_Arrow, GETP((Thing*)caster), CASTP(i, Thing), '+', "GREEN_on_BLACK");
+      SEND_DISPLAY_MSG(Msg_Arrow, GETPT(caster,Thing), CASTP(i, Thing), '+', "GREEN_on_BLACK");
       me->engine->board.heal(caster, -me->damage, i.get());
     }
   return true;
@@ -67,61 +68,102 @@ Eff_DR_ZoneDamage::Eff_DR_ZoneDamage(Target target, int damage)
 
 // auras ----------
 
-Eff_Aura::Eff_Aura(int atq, int hp) :
-  Effect(FUNCEFFECT{ return !CAST(eff->owner,Thing)->is_dead() && caster->player == eff->owner->player; }),
-  atq(atq), hp(hp) {}
+Eff_Aura::Eff_Aura(int atq, int hp, int st_eff) :
+  Effect(FUNCEFFECT{ return caster->player == eff->owner->player && !CAST(eff->owner, Thing)->is_dead(); }),
+  atq(atq), hp(hp), st_eff(st_eff) {}
 
 void Eff_Aura::bind_to(PEffect me, Instance* owner) {
   Effect::bind_to(me, owner);
-  CAST(owner, Thing)->state.effects.push_back(me);
+  CAST(owner, Thing)->state.eff_auras.push_back(me);
   CAST(owner, Thing)->add_static_effect(Thing::StaticEffect::aura, false);
   if (engine) 
     engine->board.register_trigger(this, get_triggers());
 }
 
-void Eff_Aura::undo(bool die) {
+void Eff_Aura::undo(bool die) const {
   engine->board.unregister_trigger(this, get_triggers());
 }
 
-PMinion Eff_Aura_Ngh::get_neighbor(const char way) {
+void Eff_Aura::update_minion(Minion* m, const char way) const {
   assert(abs(way) == 1);
-  Minion* owner = CAST(this->owner, Minion);
-  Player* player = owner->player;
-  Slot pos = engine->board.get_minion_pos(owner);
-  const int i = pos.pos + way;
-  if (0 <= i && i < len(player->state.minions))
-    return player->state.minions[i];
-  else
-    return PMinion();
-}
-
-void Eff_Aura_Ngh::update_ngh(PMinion ngh, const char way) {
-  assert(abs(way) == 1);
-  #define update(who,what,c)  \
-    if (who && !who->is_dead())  \
-      who->change_##what(c*what, 'a')
-  if (hp)   update(ngh, hp, way);
-  if (atq)  update(ngh, atq, way);
+  if (m && !m->is_dead()) {
+    if (hp)   m->change_hp(way*hp, 'a');
+    if (atq)  m->change_atq(way*atq, 'a');
+    if (st_eff) {
+      if (way > 0)
+        m->add_static_effect(Thing::StaticEffect(st_eff), 'a');
+      else
+        m->remove_static_effect(Thing::StaticEffect(st_eff), 'a');
+    }
+  }
   #undef update
 }
-bool Eff_Aura_Ngh::trigger(Event ev, Instance* caster) {
-  PMinion left = get_neighbor(-1);
-  if (left_m != left) {
-    update_ngh(left_m, -1);
-    left_m = left;
-    update_ngh(left_m, 1);
+
+void Eff_Aura_Friends::trigger(Signal s) const {
+  // we know that owner is not dead and that caster has same player than owner
+  // because of is_triggered(.)
+  if (caster == owner) {
+    // aura-maker just appeared
+    // simulate addition/removal of other minions
+    assert(ev == Event::AddMinion);
+    for (auto& pm : owner->player->state.minions) {
+      Minion* m = pm.get();
+      if (m != owner)  trigger(ev, m, nullptr, 0);
+    }
   }
-  PMinion right = get_neighbor(1);
-  if (right_m != right) {
-    update_ngh(right_m, -1);
-    right_m = right;
-    update_ngh(right_m, 1);
+  else {
+    Minion* m = CAST(caster, Minion);
+    if ((m->breed & breed) == breed) {
+      if (ev == Event::AddMinion) {
+        CONSTCAST(this, Eff_Aura_Friends)->minions.push_back(m);
+        update_minion(m, 1);
+      }
+      else {
+        remove(CONSTCAST(this, Eff_Aura_Friends)->minions, m);
+        update_minion(m, -1);
+      }
+    }
   }
-  return true;
 }
-void Eff_Aura_Ngh::undo(bool die) {
-  update_ngh(left_m,-1);
-  update_ngh(right_m,-1);
+
+void Eff_Aura_Friends::undo(bool die) const {
+  // remember aura-ed minions even after death
+  for (auto& m : minions)
+    update_minion(m, -1);
+  Eff_Aura::undo(die);
+}
+
+Minion* Eff_Aura_Ngh::get_neighbor(const char way) const {
+  assert(abs(way) == 1);
+  Minion* owner = CAST(this->owner, Minion);
+  Slot pos = engine->board.get_minion_pos(owner);
+  ListPMinion& minions = owner->player->state.minions;
+  assert(minions[pos.pos].get() == owner);
+  const int i = pos.pos + way;
+  return 0 <= i && i < len(minions) ? minions[i].get() :  nullptr;
+}
+
+void Eff_Aura_Ngh::trigger(Signal s) const {
+  // we know that owner is not dead and that caster has same player than owner
+  // because of is_triggered(...)
+  // so the call is valid, and we don't care whether it's an addition or 
+  // a removal, since we just update the neighbors in any case.
+  Minion* left = get_neighbor(-1);
+  if (left_m != left) {
+    update_minion(left_m, -1);
+    CONSTCAST(this, Eff_Aura_Ngh)->left_m = left;
+    update_minion(left_m, 1);
+  }
+  Minion* right = get_neighbor(1);
+  if (right_m != right) {
+    update_minion(right_m, -1);
+    CONSTCAST(this, Eff_Aura_Ngh)->right_m = right;
+    update_minion(right_m, 1);
+  }
+}
+void Eff_Aura_Ngh::undo(bool die) const {
+  update_minion(left_m, -1);  // we know that they still exist in memory somewhere
+  update_minion(right_m, -1);
   Eff_Aura::undo(die);
 }
 
@@ -132,3 +174,31 @@ void Eff_Presence::bind_to(PEffect me, Instance* owner) {
   Effect::bind_to(me, owner);
   CAST(owner, Thing)->state.presence_effects.push_back(CASTP(me,Eff_Presence));
 }
+
+
+// trigger effect ----------
+
+void Eff_Trigger::bind_to(PEffect me, Instance* owner) {
+  Effect::bind_to(me, owner);
+  CAST(owner, Thing)->add_static_effect(Thing::StaticEffect::trigger, false);
+  CAST(owner, Thing)->state.effects.push_back(me);
+  if (engine) engine->board.register_trigger(this, triggers);
+}
+
+void Eff_Trigger::undo(bool die) const {
+  engine->board.unregister_trigger(this, triggers);
+}
+
+Eff_Knife::Eff_Knife(Event triggers, int damage, Target targets, int nb, FuncEffect is_triggered) :
+  Eff_Trigger(triggers, is_triggered,
+  FUNCEFFECT{
+    const Eff_Knife* me = CAST(eff, const Eff_Knife);
+    for (int n = 0; n < me->nb; n++) {
+      ListPInstance to = me->targets.resolve(me->owner->player, me->owner);
+      if (to.empty()) break;
+      Engine* engine = eff->engine;
+      me->engine->board.damage(me->owner, me->damage, to[0].get());
+      SEND_DISPLAY_MSG(Msg_Arrow, GETPT(me->owner, Thing), CASTP(to[0], Thing), '|', "WHITE_on_BLACK");
+    }
+    return true;
+  }), damage(damage), nb(nb), targets(targets) {}

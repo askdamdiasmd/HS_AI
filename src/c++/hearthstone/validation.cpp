@@ -48,6 +48,10 @@ inline float read_float(const int num, const KwArgs& args, const string& key, fl
 };
 
 bool ScriptedEngine::validate_script(const string& script, bool viz) {
+#ifndef _DEBUG
+  error("not implemented in Release mode");
+  return false;
+#else
   vector<string> lines = split(lower(script), "\n");
   lines.push_back("finished:"); // last state
   enum Step {
@@ -110,16 +114,22 @@ bool ScriptedEngine::validate_script(const string& script, bool viz) {
       assert_error(false, "bad card type '%s': should be Hero, Minion, Spell or Weapon", type.c_str());
     return card;
   };
-  auto add_minion = [this](Player* pl, PConstCard card, float pos) {
+  auto add_minion = [this](Player* pl, PConstCard card, float pos, KwArgs& args) {
     PConstCardMinion card_minion = CASTP(card, const Card_Minion);
     PMinion minion = card_minion->instanciate(pl);
+    for (auto& keyval : args) {
+      if (keyval.first == "hp")
+        minion->state.hp = convert_str_to<int>(keyval.second);
+      if (keyval.first == "tag")
+        minion->tag = keyval.second;
+    }
     board.add_thing(pl->state.hero.get(), minion, Slot(pl, -1, pos));
     return minion;
   };
   int checked_results = 0;
   for (num = 0; num < len(lines); num++) {
     string& line = trim(lines[num]);
-    if (line.empty()) continue;
+    if (line.empty() || line[0]=='#') continue;
 
     if(line.find(':') != string::npos) {
       if (line == "setup:") {
@@ -151,6 +161,8 @@ bool ScriptedEngine::validate_script(const string& script, bool viz) {
           assert_error(player1->state.secrets.empty(), "remaining non-expected secrets for Player1");
           assert_error(player2->state.secrets.empty(), "remaining non-expected secrets for Player2");
         }
+        wait_for_display();
+        VizBoard::sleep(2);
         reset();
         return true;  // everything is alright
       }
@@ -182,11 +194,15 @@ bool ScriptedEngine::validate_script(const string& script, bool viz) {
           assert_error(!player1, "player1 was already defined");
           hero1 = NEWP(Hero, cardbook.get_hero(name));
           player1 = NEWP(ScriptedPlayer, hero1, getdefault<string>(args, "name", words[0]), &deck1);
+          if (in(string("mana"), args))
+            player1->add_mana_crystal(read_int(num, args, "mana", 1)-1, false);
         }
         elif(pl == "p2") {
           assert_error(!player2, "player2 was already defined");
           hero2 = NEWP(Hero, cardbook.get_hero(name));
           player2 = NEWP(ScriptedPlayer, hero2, getdefault<string>(args, "name", words[0]), &deck2);
+          if (in(string("mana"), args))
+            player2->add_mana_crystal(read_int(num, args, "mana", 1)-1, false);
         }
         else
           assert_error(false, "bad player tag '%s' (should be P1 or P2)", pl.c_str());
@@ -209,12 +225,8 @@ bool ScriptedEngine::validate_script(const string& script, bool viz) {
         if (type == "minion") {
           string name = join(" ", words);
           PConstCard card = cardbook.get_by_name(name);
-          float pos = read_float(num, args, "fpos", 500.0);
-          PMinion minion = add_minion(pl, card, pos);
-          for (auto& keyval : args) {
-            if (keyval.first == "hp")
-              minion->change_hp(convert_str_to<int>(keyval.second) - minion->state.hp);
-          }
+          float pos = read_float(num, args, "fpos", -1);
+          PMinion minion = add_minion(pl, card, pos, args);
         }
         else
           assert_error("unexpected board type '%s' (should be minion or weapon)", type.c_str());
@@ -238,15 +250,19 @@ bool ScriptedEngine::validate_script(const string& script, bool viz) {
               "unexpected atq for minion '%s' (%d instead of %s)",
               cstr(minion), minion->state.atq, keyval.second);
           }
-          pl->remove_thing(minion);  // this one is validated
+          assert_error(pl->state.minions[0] == minion, "minion '%s' is not at expected position", cstr(minion));
+          pop_at(pl->state.minions,0);  // this one is validated
         }
       }
       else
-        assert_error(false, "chouldn't be here");
+        assert_error(false, "shouldn't be here");
     }
   }
+  wait_for_display();
+  VizBoard::sleep(2);
   reset();
   return false;
+#endif
 }
 
 bool ScriptedEngine::validate_script_file(const string& file_name, bool viz) {
@@ -269,12 +285,14 @@ inline bool match_name(string name, const string& dim) {
   if (name == dim)  return true;
   if (startswith(name, dim.c_str())) return true;
   string accronym;
-  for (string sub : split(name))  accronym += sub[0];
+  for (string sub : split(name))  
+    (accronym += sub[0]) += '.';
   if (accronym == dim)  return true;
   return false;
 };
 
 PInstance ScriptedPlayer::read_thing(int num, ListString& words) {
+#ifdef _DEBUG
   assert_error(len(words), "missing thing type");
   const string& type = pop_at(words, 0);
   string name = join(" ", words);
@@ -290,10 +308,11 @@ PInstance ScriptedPlayer::read_thing(int num, ListString& words) {
       name = type + (name.empty() ? "" : " " + name);
 
     for (auto& m : state.minions)
-      if (match_name(m->card->name, name))
+      if (match_name(m->card->name, name) || match_name(m->tag, name))
         return m;
   }
-  assert_error(false, "%s '%s' was not found.", type.c_str(), name.c_str());
+  assert_error(false, "minion '%s' was not found.", name.c_str());
+#endif
   return PInstance();
 }
 

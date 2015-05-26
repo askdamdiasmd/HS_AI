@@ -67,7 +67,7 @@ void Hero::unequip_weapon() {
 void Hero::use_hero_power() {
   state.n_remaining_power -= 1;
   assert(state.n_remaining_power >= 0);
-  UPDATE_THING("use_hero_power", Msg_HeroPower, GETP(this));
+  UPDATE_THING("use_hero_power", Msg_HeroPower, GETPT(this, Hero));
 }
 
 void Hero::add_armor(int n) {

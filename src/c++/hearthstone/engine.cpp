@@ -27,6 +27,10 @@ void Engine::reset()  {
   is_simulation = false;
 }
 
+const Player* Engine::get_winner() const {
+  return board.get_winner();
+}
+
 PInstance Engine::random(ListPInstance& instances) {
   // default implementation
   if (len(instances))
@@ -35,9 +39,12 @@ PInstance Engine::random(ListPInstance& instances) {
     return PInstance();
 }
 
-const Player* Engine::get_winner() const {
-  return board.get_winner();
+PCard Engine::random(ListPCard& cards) {
+  // default implementation
+  if (len(cards))
+    return cards[randint(0, len(cards) - 1)];
+  else
+    return PCard();
 }
-
 
 

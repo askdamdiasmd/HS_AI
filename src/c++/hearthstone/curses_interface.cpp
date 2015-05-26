@@ -96,13 +96,6 @@ todo...
 #define LOCKD LOCKP //{LOCKP; lock_panels(del_panel_lock);}
 #define UNLOCKD UNLOCKP //{unlock_panels(del_panel_lock); UNLOCKP;}
 
-void show_panels(bool lock=true) {
-  if(lock)  LOCKP;
-  update_panels();
-  doupdate();
-  if (lock)  UNLOCKP;
-}
-
 #define DELETE_PANEL(win, panel) { \
   LOCKD;  \
   del_panel(panel); \
@@ -208,7 +201,7 @@ void congratulate_winner(const Player* winner, int turn) {
   int NC = getmaxx(stdscr);
   VizButton button(10, NC / 2 - 3, string_format("  %s wins after %d turns!  ", winner->name.c_str(), (turn + 1) / 2), VizButton::center, 5);
   button.draw({ KEYINT("highlight", BLACK_on_YELLOW) });
-  show_panels();
+  winner->engine->board.viz->show_panels();
   double t = VizBoard::now();
   while (VizBoard::now() - t < 1)
     my_getch();
@@ -515,7 +508,7 @@ void VizThing::update_state(const Thing::State& copy, bool show_diff) {
   }
   if (anim && changed) {
     draw({}); // highlight some stuffs
-    show_panels();  // show them
+    this->engine->board.viz->show_panels();  // show them
     START_THREAD(wait_and_draw, obj->viz, duration+0.1f); // and wait a bit
   }
   else
@@ -756,7 +749,7 @@ WINDOW* VizHeroPowerButton::draw(const ArgMap& args) {
     for (int i = 0; VizBoard::now() < until; ++i) {
       kwargs["bkgd"]._int = (i % 2) ? YELLOW_on_BLACK : BLACK_on_YELLOW;
       VizButton::draw(kwargs);
-      show_panels();
+      engine->board.viz->show_panels();
       VizBoard::sleep(0.1);
     }
   }
@@ -775,11 +768,11 @@ DECLARE_THREAD(wait_delete, float duration; PVizButton button)
     touchwin(args->button->win);
     top_panel(args->button->panel); // # remains at top
     UNLOCKP;
-    show_panels();
+    args->button->engine->board.viz->show_panels();
     VizBoard::sleep(0.1);
   }
   args->button.reset();
-  show_panels();
+  args->button->engine->board.viz->show_panels();
   ungetch(1); // refresh actions if needed
 CLOSE_THREAD(0);
 
@@ -1022,7 +1015,7 @@ bool Msg_ReceiveCard::draw(Engine* engine) {
       int h = max(0, NR - y);
       card->viz->draw({ KEYINT("highlight", BLACK_on_YELLOW), KEYPOS2("pos", y, x), 
                         KEYBOOL("petit", h<ty), KEYINT("petit_size", h >= ty ? 0 : h) });
-      show_panels();
+      engine->board.viz->show_panels();
       VizBoard::sleep(0.05 + 0.6*(y == sy));
     }
   }
@@ -1042,20 +1035,20 @@ bool Msg_ThrowCard::draw(Engine* engine) {
     int sx = (getmaxx(stdscr) - VizCard::card_size.x) / 2;
     ArgMap kwargs = { KEYBOOL("petit", false), KEYPOS2("pos", 0, sx), KEYINT("highlight", BLACK_on_YELLOW) };
     card->viz->draw(kwargs);
-    show_panels();
+    engine->board.viz->show_panels();
     VizBoard::sleep(1);
     if (engine->board.viz->animated) {
       for (int i = sx - 1; i >= 0; i -= 2) {
         kwargs["pos"]._pos_t.x = i;
         card->viz->draw(kwargs);
-        show_panels();
+        engine->board.viz->show_panels();
         VizBoard::sleep(0.05*(i) / sx);
       }
       VizBoard::sleep(0.2);
     }
   }
   card->viz.reset();
-  show_panels();
+  engine->board.viz->show_panels();
   return true;
 }
 
@@ -1069,7 +1062,7 @@ bool Msg_StartTurn::draw(Engine* engine) {
     string_format(" %s's turn! ", player->name.c_str()), 
     VizButton::center, 5, 20);
   button->draw({ KEYINT("highlight", BLACK_on_YELLOW) });
-  show_panels();
+  engine->board.viz->show_panels();
   VizBoard::sleep(engine->board.viz->animated ? 1 : 0.1);
   button.reset();
   engine->board.viz->draw();
@@ -1087,7 +1080,7 @@ minion_pos_t Anim_MinionsPos(ListPMinion& minions, Player* player) {
     pos[minions[i].get()] = VizSlot(Slot(player, i)).get_screen_pos();
   return pos;
 }
-void Anim_MoveMinions(const minion_pos_t& old_pos, const minion_pos_t& new_pos) {
+void Anim_MoveMinions(Engine* engine, const minion_pos_t& old_pos, const minion_pos_t& new_pos) {
   const int r = VizMinion::size.x / 2 + 1;
   for (int i = 1; i<r; i++) {
     for (auto& item : new_pos) {
@@ -1097,7 +1090,7 @@ void Anim_MoveMinions(const minion_pos_t& old_pos, const minion_pos_t& new_pos) 
         item.first->viz->draw({ KEYPOS2("pos", interp(i, r, o.y, n.y), interp(i, r, o.x, n.x)) });
       }
     }
-    show_panels();
+    engine->board.viz->show_panels();
     VizBoard::sleep(0.1);
   }
 }
@@ -1113,7 +1106,7 @@ bool Msg_AddMinion::draw(Engine* engine) {
     minions.insert(minions.begin() + pos.pos, PMinion());
     auto new_pos = Anim_MinionsPos(minions, owner);
 
-    Anim_MoveMinions(old_pos, new_pos);
+    Anim_MoveMinions(engine, old_pos, new_pos);
     minions.erase(minions.begin() + pos.pos); // remove fake stuff
   }
 
@@ -1192,7 +1185,7 @@ bool Msg_RemoveMinion::draw(Engine* engine) {
     remove(minions, dead_minion);  // delete from board.viz
     auto new_pos = Anim_MinionsPos(minions, pl);
 
-    Anim_MoveMinions(old_pos, new_pos);
+    Anim_MoveMinions(engine, old_pos, new_pos);
   }
   return true;
 }
@@ -1223,7 +1216,7 @@ bool Msg_Attack::draw(Engine* engine) {
     for (int _i = 1; _i <= 2 * M; _i++) {
       const int i = _i < M ? _i : 2 * M - _i; // increase then decrease
       caster()->viz->draw({ KEYPOS2("pos", interp(i, m, oy, ny), interp(i, m, ox, nx)) });
-      show_panels();
+      engine->board.viz->show_panels();
       VizBoard::sleep(t);
     }
   }
@@ -1281,14 +1274,14 @@ void anim_magic_burst(Engine* engine, pos_t start, pos_t end, chtype ch, int col
       UNLOCKP;
       pos.erase(pos.begin());
     }
-    show_panels();
+    engine->board.viz->show_panels(true,(t%tail)==(tail/2));
   }
   while (!pos.empty()) {
     VizBoard::sleep(tstep);
     chtype oldch = pos[0].second;
     LOCKP;
     mvwaddch_ex(stdscr, pos[0].first.y, pos[0].first.x, oldch);
-    show_panels(false);
+    engine->board.viz->show_panels(false);
     UNLOCKP;
     pos.erase(pos.begin());
   }
@@ -1326,8 +1319,6 @@ VizBoard::VizBoard(Board* board) :
 }
 
 VizBoard::~VizBoard() {
-  board->player1->viz.reset();
-  board->player2->viz.reset();
 }
 
 double VizBoard::accel = 1.0;
@@ -1509,6 +1500,56 @@ void VizBoard::draw(int what, Player* which_, bool last_card, chtype bkgd_colr) 
   show_panels();
 }
 
+void VizBoard::show_panels(bool lock, bool capture) {
+  if (lock)  LOCKP;
+  update_panels();
+  doupdate();
+  if (capture)  {
+    int NR, NC; getmaxyx(stdscr, NR, NC);
+    screen_copy_t screen;
+    screen.reserve(NR*NC);
+    for (int y = 0; y < NR; y++)
+      for (int x = 0; x < NC; x++) {
+        WINDOW* win = get_window_at(y, x);
+        int wy, wx; getbegyx(win, wy, wx);
+        screen.push_back(mvwinch(win, y - wy, x - wx));
+      }
+    // only add if different from previous one
+    if (history.empty() || memcmp(screen.data(), history.back().data(), NR*NC*sizeof(chtype)))
+      history.push_back(screen);
+  }
+  if (lock)  UNLOCKP;
+}
+
+void VizBoard::show_history() {
+  LOCKP;
+  // hide all panels ?
+  int NR, NC; getmaxyx(stdscr, NR, NC);
+  int cur = len(history) - 1;
+  while (0<=cur && cur<len(history)) {
+    // print screen
+    move(0, 0);
+    auto& screen = history[cur];
+    for (int i = 0; i < len(screen); i++)
+      addch(screen[i]);
+    mvaddstr(NR - 1, 0, string_format("history %d/%d", cur + 1, len(history)).c_str());
+    refresh();
+
+    int ch = my_getch();
+    if (ch == KEY_LEFT || ch==KEY_UP)
+      cur = max(0, cur-1);
+    elif(ch == KEY_RIGHT || ch==KEY_DOWN)
+      cur++;
+    else
+      break;
+  }
+  UNLOCKP;
+  int n = len(history);
+  draw();
+  if (len(history)>n) // remove it if captured
+    history.pop_back();
+}
+
 
 // ----- Human player interface -------
 
@@ -1538,7 +1579,7 @@ ListPConstCard HumanPlayer::mulligan(ListPConstCard & cards) {
     // draw elements in show list
     for (auto sl : showlist) 
       sl.viz->draw(sl.args);
-    show_panels();
+    engine->board.viz->show_panels(true,false);
 
     // wait for mouse click
     int ch = my_getch();
@@ -1589,7 +1630,7 @@ ListPConstCard HumanPlayer::mulligan(ListPConstCard & cards) {
     hide_panel(card->viz->panel);
   UNLOCKP;
   end_button.~VizButton();
-  show_panels();
+  engine->board.viz->show_panels(true, false);
   
   // remove cards
   for (auto& card : discarded)
@@ -1667,7 +1708,7 @@ const Action* HumanPlayer::choose_actions(ListAction actions, Instance*& choice,
     }
     if (active)
       active->draw({ KEYINT("bkgd", BLACK_on_WHITE) });
-    show_panels();
+    engine->board.viz->show_panels(true, false);
 
     int ch = my_getch();
 
@@ -1749,6 +1790,9 @@ const Action* HumanPlayer::choose_actions(ListAction actions, Instance*& choice,
         showlist = init_showlist;
         active = nullptr;
       }
+    }
+    elif(ch == KEY_LEFT || ch==KEY_UP) {
+      engine->board.viz->show_history();
     }
     elif (ch == '\n') {  // enter
       if (!active)

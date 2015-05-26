@@ -14,6 +14,7 @@
 #include <list>
 //#include <deque>
 //#include <set>
+#include <queue>
 #include <unordered_map>
 
 using namespace std;
@@ -36,8 +37,10 @@ inline T check_ptr(T ptr) {
 #define CONSTCAST(obj, cls)  const_cast<cls*>(obj)
 #define CONSTCASTP(obj,cls)  const_pointer_cast<cls>(obj)
 #else
-#define CAST(obj, cls)  static_cast<cls>(obj)
+#define CAST(obj, cls)  static_cast<cls*>(obj)
 #define CASTP(obj, cls)  static_pointer_cast<cls>(obj)
+#define CONSTCAST(obj, cls)  const_cast<cls*>(obj)
+#define CONSTCASTP(obj,cls)  const_pointer_cast<cls>(obj)
 #endif
 
 inline string string_format(const char* format, ...) {
@@ -60,7 +63,7 @@ inline string string_format(const char* format, ...) {
 #define error(msg, ...)  {string errmsg=string_format(msg, ##__VA_ARGS__)+"\n"; \
                           TRACE(errmsg.c_str()); fprintf(stderr, errmsg.c_str()); assert(0);}
 #else
-#define TRACE false && _trace
+#define TRACE(fmt,...)  false
 #define error(msg, ...)  {fprintf(stderr, (string_format(msg, ##__VA_ARGS__)+"\n").c_str()); assert(0);}
 #endif
 #endif
@@ -72,8 +75,9 @@ inline string string_format(const char* format, ...) {
 #define NAMED_PARAM(cls, type, param)  cls* set_##param(type v) { param = v; return this; }
 
 //#define ENGINE Engine* engine = this;
-#define GETP(ptr) engine->board.getP(ptr)
-#define GETPTHING(ptr)  engine->board.getPThing(ptr)
+#define GETPT(ptr, cls) engine->board.getP<cls>(ptr)
+#define GETP(ptr)       GETPT(ptr,Instance)
+#define GETPTHING(ptr)  GETPT(ptr,Thing)
 #define SEND_DISPLAY_MSG(type, ...)  if(!engine->is_simulation) engine->send_display_message(NEWP(type,##__VA_ARGS__))
 #define UPDATE_THING_STATE(what)  SEND_DISPLAY_MSG(Msg_ThingUpdate, GETPTHING(this), this->state, what)
 #define UPDATE_PLAYER_STATE(what) SEND_DISPLAY_MSG(Msg_PlayerUpdate, this->state.hero, this->state, what)
@@ -92,6 +96,12 @@ const float INF = 9e9f; // 1.f / 0.f;
 
 inline double pow2(double x) {
   return x*x;
+}
+inline static bool is_power_of_2(const long v) {
+  return  v && !(v & (v - 1));
+}
+inline static bool is_single_bit(const long v) {
+  return !(v & (v - 1));
 }
 
 template<typename T>
@@ -276,7 +286,8 @@ typedef vector<PAct_Battlecry> ListPAct_Battlecry;
 struct Effect;
 typedef shared_ptr<Effect> PEffect;
 typedef vector<PEffect> ListPEffect;
-typedef vector<Effect*> ListEffect;
+//typedef vector<Effect*> ListEffect;
+typedef vector<const Effect*> ListConstEffect;
 struct Eff_Presence;
 typedef shared_ptr<Eff_Presence> PEff_Presence;
 typedef vector<PEff_Presence> ListPEff_Presence;
@@ -292,6 +303,7 @@ typedef vector<PInstance> ListPInstance;
 struct Thing;
 typedef shared_ptr<Thing> PThing;
 typedef shared_ptr<const Thing> PConstThing;
+typedef vector<Thing*> ListThing;
 typedef vector<PThing> ListPThing;
 #define EFF Thing::StaticEffect
 struct Secret;
@@ -306,6 +318,7 @@ typedef vector<PCreature> ListPCreature;
 struct Minion;
 typedef shared_ptr<Minion> PMinion;
 typedef shared_ptr<const Minion> PConstMinion;
+typedef vector<Minion*> ListMinion;
 typedef vector<PMinion> ListPMinion;
 struct Hero;
 typedef shared_ptr<Hero> PHero;
@@ -326,7 +339,9 @@ typedef ListPConstCard(Player::*FuncMulligan)(ListPConstCard&);
 #define TGT Target
 
 #include "events.h"
-#define FUNCEFFECT    [] (const Effect* eff, Event ev, Instance* caster)
-typedef bool(*FuncEffect)(const Effect* eff, Event ev, Instance* caster);
+typedef queue<Signal> QueueSignal;
+#define FUNCEFFECT    [] (const Effect* eff, Signal& s)
+typedef bool(*FuncEffect)(const Effect* eff, Signal& s);
+
 
 #endif

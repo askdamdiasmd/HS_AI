@@ -39,6 +39,7 @@ public:
   }
   virtual void wait_for_display() = 0;
   virtual PInstance random(ListPInstance& instances);
+  virtual PCard random(ListPCard& cards);
 };
 
 

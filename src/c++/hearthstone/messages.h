@@ -159,7 +159,7 @@ struct Msg_HeroPower : public Message {
 };
 
 struct Msg_Arrow_HeroPower : public Msg_Arrow {
-  Msg_Arrow_HeroPower(PHero caster, PThing target, char ch, const char* color) :
+  Msg_Arrow_HeroPower(PHero caster, PCreature target, char ch, const char* color) :
     Msg_Arrow(caster, target, ch, color) {}
 
   virtual const char* cls_name() const { return "Msg_Arrow_HeroPower"; }

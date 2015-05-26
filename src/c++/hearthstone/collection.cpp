@@ -13,14 +13,14 @@ Collection::Collection() {
 
   PCard Lesser_Heal = add(NEWP(Card_HeroAbility, 2, "Lesser heal", 
     FUNCACTION{ Engine* engine = a->engine;
-                SEND_DISPLAY_MSG(Msg_Arrow_HeroPower, GETP((Hero*)from), GETP((Thing*)target), '+', "GREEN_on_BLACK");
+                SEND_DISPLAY_MSG(Msg_Arrow_HeroPower, GETPT(from,Hero), GETPT(target,Creature), '+', "GREEN_on_BLACK");
                 return a->engine->board.HeroHeal(from, 2, target); }, TGT::characters));
   Lesser_Heal->set_desc("Restore 2 Health")
              ->set_collectible(false);
 
   PCard Fireblast = add(NEWP(Card_HeroAbility, 2, "Fireblast",
     FUNCACTION{ Engine* engine = a->engine;
-                SEND_DISPLAY_MSG(Msg_Arrow_HeroPower, GETP((Hero*)from), GETP((Thing*)target), '*', "RED_on_BLACK");
+                SEND_DISPLAY_MSG(Msg_Arrow_HeroPower, GETPT(from, Hero), GETPT(target, Creature), '*', "RED_on_BLACK");
                 return a->engine->board.HeroDamage(from, 1, target); }, TGT::characters));
   Fireblast->set_desc("Deal 1 damage")
            ->set_collectible(false);
@@ -64,6 +64,9 @@ Collection::Collection() {
     ->add_battlecry(NEWP(Act_BC_Damage, Target(TGT::targetable | TGT::characters), 1))
     ->set_name_fr("Archere elfe");
 
+  ADDM(1, "Wisp", 1, 1)
+    ->set_name_fr("feu follet");
+
   ADDM(1, "Zombie chow", 2, 3)
     ->add_effect(NEWP(Eff_DR_Heal, TGT::enemy | TGT::heroes, 5))
     ->set_name_fr("Croq'zombie")
@@ -75,6 +78,17 @@ Collection::Collection() {
     ->set_name_fr("Loup Alpha redoutable")
     ->set_desc("Adjacent minions have + 1 Attack.")
     ->set_desc_fr("Les serviteurs adjacents ont + 1 ATQ");
+
+  ADDM(2, "Knife Juggler", 3, 2)
+    ->add_effect(NEWP(Eff_Knife, Event::MinionPopup, 1))
+    ->set_name_fr("Jongleur de couteau")
+    ->set_desc("After you summon a minion, eal 1 damage to a random enemy");
+  
+  ADDM(2, "Shadowboxer", 2, 3)
+    ->add_effect(NEWP(Eff_Knife, Event::Heal, 1, Target::random | Target::enemy | Target::characters, 1, 
+                      FUNCEFFECT{ return !CAST(eff->owner,Thing)->is_dead(); }))
+    ->set_name_fr("Boxeur de l'ombre")
+    ->set_desc("Whenever a character is healed, deal 1 damage to a random enemy.");
 
   ADDM(2, "Unstable Ghoul", 1, 3, EFF::taunt)
     ->add_effect(NEWP(Eff_DR_ZoneDamage, TGT::minions, 1))
@@ -107,6 +121,12 @@ Collection::Collection() {
 
   ADDM(4, "Windchill Yeti", 4, 5)
     ->set_name_fr("Yeti Noroit");
+
+  ADDM(7, "Stormwind Champion", 6, 6)
+    ->add_effect(NEWP(Eff_Aura_Friends, 1, 1))
+    ->set_name_fr("Champion de Hurlevent")
+    ->set_desc("Your other minions have +1/+1.")
+    ->set_desc_fr("Vos autres serviteurs ont +1/+1.");
 
   #undef MINION
   #undef ADDM
@@ -174,13 +194,22 @@ TCard Collection::add(TCard card) {
   card->id = card_count;
   by_id.push_back(card);
 
-  assert(!in(name, by_name));
-  by_name[name] = by_name[lower(name)] = card;
+  auto register_name = [this, card](const string& name) {
+    assert(!in(name, by_name));
+    assert(!in(lower(name), by_name));
+    by_name[name] = card;
+    by_name[lower(name)] = card;
+  };
 
+  register_name(name);
   const string& name_fr = card->name_fr;
-  if (!name_fr.empty() && name_fr != name) {
-    assert(!in(name_fr, by_name));
-    by_name[name_fr] = by_name[lower(name_fr)] = card;
+  if (!name_fr.empty() && name_fr != name) 
+    register_name(name_fr);
+  if (issubclassP(card, Card_Hero)) {
+    // special case: hero can be nicknamed
+    string first_name = split(name)[0];
+    if (first_name != name) 
+      register_name(first_name);
   }
 
   return card;
